@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react'
-import { NavLink, Link } from 'react-router-dom'
+import { NavLink, Link, useLocation } from 'react-router-dom'
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const { pathname } = useLocation()
+  // Pages dont le haut est sombre (hero foncé) : la nav passe en texte clair.
+  // Les autres pages affichent une barre claire en permanence (lisible partout).
+  const overDark = pathname === '/' || pathname === '/build'
+  const solid = !overDark
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -12,7 +17,7 @@ export default function Nav() {
   }, [])
 
   return (
-    <nav className={scrolled ? 'nav scrolled' : 'nav'}>
+    <nav className={`nav${scrolled ? ' scrolled' : ''}${overDark ? ' over-dark' : ''}${solid ? ' solid' : ''}`}>
       <Link to="/" className="nav-logo" onClick={() => setOpen(false)}>
         Practice
       </Link>

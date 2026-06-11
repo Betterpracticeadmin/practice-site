@@ -95,6 +95,7 @@ img { display: block; max-width: 100%; }
   transition: background .35s, border-color .35s, backdrop-filter .35s;
 }
 .nav.scrolled { background: rgba(255,255,255,.82); backdrop-filter: blur(16px); border-bottom-color: var(--line-soft); }
+.nav.solid { background: rgba(255,255,255,.82); backdrop-filter: blur(16px); border-bottom-color: var(--line-soft); }
 .nav-logo { font-family: var(--display); font-size: 15px; letter-spacing: .34em; font-weight: 500; color: var(--ink); text-decoration: none; text-transform: uppercase; }
 .nav-links { display: flex; gap: 2.4rem; list-style: none; }
 .nav-links a { font-family: var(--display); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color .2s; }
@@ -441,6 +442,44 @@ img { display: block; max-width: 100%; }
 .success-screen h2 { font-family: var(--display); font-size: 30px; font-weight: 300; color: var(--ink); letter-spacing: .02em; margin-bottom: .75rem; }
 .success-screen p { font-size: 15px; color: var(--muted); line-height: 1.75; font-weight: 300; }
 .success-ref { display: inline-block; margin-top: 1.5rem; font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--bg-soft); padding: 7px 14px; border-radius: 8px; }
+
+/* ══════════ CONTRASTE ÉTENDU (autres onglets) ══════════ */
+/* Practice AI — section démo en noir */
+.demo-section { background: #0b0b0c; }
+.demo-section .eyebrow { color: rgba(255,255,255,.42); }
+.demo-section .sh2 { color: #fff; }
+.demo-section .sh2 em { color: rgba(255,255,255,.4); }
+.demo-section .slead { color: rgba(255,255,255,.62); }
+.demo-notes { border: 1px solid rgba(255,255,255,.12); }
+
+/* The Build — hero noir */
+.build-hero { background: #0b0b0c; }
+.build-hero .eyebrow { color: rgba(255,255,255,.42); }
+.build-hero h1 { color: #fff; }
+.build-hero h1 em { color: rgba(255,255,255,.4); }
+.build-hero p { color: rgba(255,255,255,.62); }
+
+/* Contact — panneau gauche noir (sidebar premium) */
+.left-panel { background: #0b0b0c; border-right-color: rgba(255,255,255,.08); }
+.left-eyebrow { color: rgba(255,255,255,.42); }
+.left-h1 { color: #fff; }
+.left-h1 em { color: rgba(255,255,255,.4); }
+.left-sub { color: rgba(255,255,255,.6); }
+.slot-counter { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.04); }
+.slot-bar-wrap { background: rgba(255,255,255,.12); }
+.slot-label { color: rgba(255,255,255,.5); }
+.info-card { border-color: rgba(255,255,255,.08); background: rgba(255,255,255,.03); }
+.info-icon { background: rgba(255,255,255,.07); }
+.info-card-label { color: rgba(255,255,255,.45); }
+.info-card-val { color: #f0f0f2; }
+.left-footer { color: rgba(255,255,255,.35); border-top-color: rgba(255,255,255,.08); }
+
+/* Navigation claire au-dessus d'un hero sombre */
+.nav.over-dark:not(.scrolled) .nav-logo { color: #fff; }
+.nav.over-dark:not(.scrolled) .nav-links:not(.open) a { color: rgba(255,255,255,.75); }
+.nav.over-dark:not(.scrolled) .nav-links:not(.open) a:hover,
+.nav.over-dark:not(.scrolled) .nav-links:not(.open) a.active { color: #fff; }
+.nav.over-dark:not(.scrolled) .nav-burger span { background: #fff; }
 
 /* ══════════ CHAT WIDGET (clair) ══════════ */
 .chat-fab { position: fixed; bottom: 24px; right: 24px; z-index: 500; display: flex; align-items: center; gap: 8px; font-family: var(--display); text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 500; color: #f2f2f5; background: var(--chrome); border: 1px solid rgba(255,255,255,.16); border-radius: 100px; padding: 13px 20px; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 10px 28px rgba(0,0,0,.3); transition: transform .25s; }
