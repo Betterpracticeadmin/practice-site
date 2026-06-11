@@ -31,8 +31,12 @@ const chassis = [
 export default function Home() {
   return (
     <>
-      {/* HERO */}
+      {/* HERO — vidéo plein écran */}
       <section className="hero">
+        <video className="hero-bg" autoPlay muted loop playsInline poster={carFront}>
+          <source src={heroVideo} type="video/mp4" />
+        </video>
+        <div className="hero-scrim" />
         <div className="hero-content">
           <p className="hero-eyebrow">/// Project 2026</p>
           <h1>PRACTICE</h1>
@@ -42,13 +46,6 @@ export default function Home() {
             <a href="#concept" className="btn-gh">Découvrir le projet</a>
           </div>
 
-          <div className="hero-media">
-            <video autoPlay muted loop playsInline poster={carFront}>
-              <source src={heroVideo} type="video/mp4" />
-            </video>
-            <span className="hero-media-tag">/// Practice — prototype</span>
-          </div>
-
           <div className="hero-specs">
             <div className="spec-cell"><span className="spec-label">Puissance combinée</span><span className="spec-val">2 320<span className="spec-unit"> hp</span></span></div>
             <div className="spec-cell"><span className="spec-label">0 — 100 km/h</span><span className="spec-val">&lt; 2<span className="spec-unit"> s</span></span></div>
@@ -56,6 +53,7 @@ export default function Home() {
             <div className="spec-cell"><span className="spec-label">Base donor</span><span className="spec-val">911<span className="spec-unit"> 997/991</span></span></div>
           </div>
         </div>
+        <span className="scroll-cue">Scroll ↓</span>
       </section>
 
       {/* CONCEPT */}

@@ -7,6 +7,7 @@ import Home from './pages/Home.jsx'
 import PracticeAI from './pages/PracticeAI.jsx'
 import Build from './pages/Build.jsx'
 import Contact from './pages/Contact.jsx'
+import Privacy from './pages/Privacy.jsx'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/practice-ai" element={<PracticeAI />} />
             <Route path="/build" element={<Build />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/confidentialite" element={<Privacy />} />
           </Routes>
         </div>
       </main>
