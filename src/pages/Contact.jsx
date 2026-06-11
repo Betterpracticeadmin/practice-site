@@ -117,7 +117,7 @@ export default function Contact() {
           <div className="info-cards">
             <InfoCard label="Réponse" val="Sous 48 heures" />
             <InfoCard label="Contact" val="Better-practice-@outlook.fr" />
-            <InfoCard label="Studio" val="Alessandro Pascal — Betterstate" />
+            <InfoCard label="Studio" val="Better-practice" />
           </div>
         </div>
         <div className="left-footer">PRACTICE /// 2026 — Build it. Drive it. Master it.</div>
