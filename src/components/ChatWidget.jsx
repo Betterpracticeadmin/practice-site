@@ -3,14 +3,14 @@ import { useState, useRef, useEffect } from 'react'
 const WELCOME = {
   role: 'assistant',
   content:
-    "Salut 👋 Je suis Practice AI. Pose-moi tes questions sur le kit, le V10, les moteurs Rimac, le châssis Porsche, le budget ou la réservation d'un build slot.",
+    "Hi 👋 I'm Practice AI. Ask me anything about the kit, the V10, the Rimac motors, the Porsche chassis, the budget or booking a build slot.",
 }
 
 const SUGGESTIONS = [
-  'C\'est quoi Practice exactement ?',
-  'Quelle base Porsche choisir ?',
-  'Combien coûte le kit ?',
-  'Comment réserver un slot ?',
+  'What exactly is Practice?',
+  'Which Porsche base should I choose?',
+  'How much does the kit cost?',
+  'How do I book a slot?',
 ]
 
 export default function ChatWidget() {
@@ -94,8 +94,8 @@ export default function ChatWidget() {
         copy[copy.length - 1] = {
           role: 'assistant',
           content:
-            '⚠️ ' + (err.message || 'Une erreur est survenue.') +
-            (err.message?.includes('clé') ? '' : ' Réessaie dans un instant.'),
+            '⚠️ ' + (err.message || 'Something went wrong.') +
+            (err.message?.includes('key') ? '' : ' Please try again in a moment.'),
         }
         return copy
       })
@@ -116,7 +116,7 @@ export default function ChatWidget() {
       <button
         className={open ? 'chat-fab open' : 'chat-fab'}
         onClick={() => setOpen((v) => !v)}
-        aria-label="Ouvrir Practice AI"
+        aria-label="Open Practice AI"
       >
         {open ? '✕' : <><span className="chat-fab-dot" /> Practice AI</>}
       </button>
@@ -128,9 +128,9 @@ export default function ChatWidget() {
               <div className="chat-head-title">
                 <span className="chat-fab-dot" /> Practice AI
               </div>
-              <div className="chat-head-sub">Assistant embarqué — propulsé par Claude</div>
+              <div className="chat-head-sub">Embedded assistant — powered by Claude</div>
             </div>
-            <button className="chat-close" onClick={() => setOpen(false)} aria-label="Fermer">✕</button>
+            <button className="chat-close" onClick={() => setOpen(false)} aria-label="Close">✕</button>
           </div>
 
           <div className="chat-body" ref={scrollRef}>
@@ -153,7 +153,7 @@ export default function ChatWidget() {
             <textarea
               ref={inputRef}
               className="chat-input"
-              placeholder="Écris ton message…"
+              placeholder="Write your message…"
               rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}

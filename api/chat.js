@@ -9,20 +9,20 @@ const client = apiKey ? new Anthropic() : null
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Méthode non autorisée' })
+    res.status(405).json({ error: 'Method not allowed' })
     return
   }
   if (!client) {
     res.status(503).json({
       error:
-        "Le chatbot n'est pas encore activé : ajoute la variable ANTHROPIC_API_KEY dans les réglages de l'hébergeur pour l'allumer.",
+        "The chatbot isn't enabled yet: add your ANTHROPIC_API_KEY (Anthropic key) in your host settings to switch it on.",
     })
     return
   }
 
   const { messages } = req.body || {}
   if (!Array.isArray(messages) || messages.length === 0) {
-    res.status(400).json({ error: 'messages manquants' })
+    res.status(400).json({ error: 'missing messages' })
     return
   }
 
@@ -48,9 +48,9 @@ export default async function handler(req, res) {
     res.end()
   } catch (err) {
     console.error('Erreur Claude:', err?.message || err)
-    if (!res.headersSent) res.status(500).json({ error: 'Erreur du modèle' })
+    if (!res.headersSent) res.status(500).json({ error: 'Model error' })
     else {
-      res.write(`data: ${JSON.stringify({ error: 'Erreur du modèle. Réessaie.' })}\n\n`)
+      res.write(`data: ${JSON.stringify({ error: 'Model error. Please try again.' })}\n\n`)
       res.end()
     }
   }

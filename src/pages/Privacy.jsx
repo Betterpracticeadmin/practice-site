@@ -1,73 +1,65 @@
 export default function Privacy() {
   return (
     <div className="legal">
-      <h1>Confidentialité</h1>
-      <p className="legal-sub">Politique de confidentialité — dernière mise à jour : 11 juin 2026</p>
+      <h1>Privacy</h1>
+      <p className="legal-sub">Privacy Policy — last updated: June 11, 2026</p>
 
       <p>
-        Chez <strong>Better-practice</strong>, nous attachons une grande importance au respect
-        de votre vie privée. Cette politique explique quelles données nous collectons via le site
-        Practice, pourquoi, et quels sont vos droits.
+        At <strong>Better-practice</strong>, we care about your privacy. This policy explains what
+        data we collect through the Practice website, why, and what your rights are.
       </p>
 
-      <h2>1. Responsable du traitement</h2>
+      <h2>1. Data controller</h2>
       <p>
-        Le responsable du traitement des données est <strong>Better-practice</strong>.
-        Pour toute question relative à vos données, vous pouvez nous écrire à{' '}
+        The data controller is <strong>Better-practice</strong>. For any question about your data,
+        you can write to us at{' '}
         <a href="mailto:Better-practice-@outlook.fr">Better-practice-@outlook.fr</a>.
       </p>
 
-      <h2>2. Données que nous collectons</h2>
-      <p>Nous ne collectons que les données que vous nous transmettez volontairement :</p>
+      <h2>2. Data we collect</h2>
+      <p>We only collect the data you choose to share with us:</p>
       <ul>
-        <li><strong>Formulaire de contact</strong> : prénom, nom, adresse email, téléphone (facultatif), ainsi que les informations relatives à votre projet (châssis, usage, budget, message).</li>
-        <li><strong>Assistant Practice AI</strong> : le contenu des messages que vous envoyez au chatbot, le temps de générer une réponse.</li>
+        <li><strong>Contact form</strong>: first name, last name, email address, phone (optional), and your project details (chassis, usage, budget, message).</li>
+        <li><strong>Practice AI assistant</strong>: the content of the messages you send to the chatbot, for the time needed to generate a reply.</li>
       </ul>
-      <p>
-        Nous ne collectons aucune donnée de navigation à des fins publicitaires et n'utilisons
-        pas de cookies de pistage.
-      </p>
+      <p>We do not collect browsing data for advertising purposes and we do not use tracking cookies.</p>
 
-      <h2>3. Pourquoi nous utilisons ces données</h2>
+      <h2>3. Why we use this data</h2>
       <ul>
-        <li>Répondre à votre demande de build slot et vous recontacter.</li>
-        <li>Vous fournir des informations sur le projet Practice.</li>
-        <li>Faire fonctionner l'assistant Practice AI (répondre à vos questions).</li>
+        <li>To respond to your build slot request and get back to you.</li>
+        <li>To provide you with information about the Practice project.</li>
+        <li>To run the Practice AI assistant (answering your questions).</li>
       </ul>
-      <p>La base légale est votre consentement et notre intérêt légitime à traiter vos demandes.</p>
+      <p>The legal basis is your consent and our legitimate interest in handling your requests.</p>
 
-      <h2>4. Prestataires et partage</h2>
-      <p>Vos données ne sont jamais vendues. Elles peuvent transiter par des prestataires techniques strictement nécessaires au fonctionnement du site :</p>
+      <h2>4. Providers and sharing</h2>
+      <p>Your data is never sold. It may pass through technical providers strictly necessary to run the site:</p>
       <ul>
-        <li><strong>Formspree</strong> — acheminement des messages du formulaire de contact vers notre boîte mail.</li>
-        <li><strong>Anthropic (Claude)</strong> — traitement des messages envoyés à l'assistant Practice AI.</li>
-        <li><strong>Vercel</strong> — hébergement du site.</li>
+        <li><strong>Formspree</strong> — routing contact form messages to our mailbox.</li>
+        <li><strong>Anthropic (Claude)</strong> — processing messages sent to the Practice AI assistant.</li>
+        <li><strong>Vercel</strong> — website hosting.</li>
       </ul>
 
-      <h2>5. Durée de conservation</h2>
+      <h2>5. Retention</h2>
       <p>
-        Les demandes de contact sont conservées le temps nécessaire au traitement de votre
-        demande, puis archivées ou supprimées. Les échanges avec le chatbot ne sont pas conservés
-        de manière durable sur le site.
+        Contact requests are kept for as long as needed to handle your request, then archived or
+        deleted. Conversations with the chatbot are not durably stored on the site.
       </p>
 
-      <h2>6. Vos droits</h2>
+      <h2>6. Your rights</h2>
       <p>
-        Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement,
-        de limitation et d'opposition au traitement de vos données. Pour exercer ces droits,
-        écrivez-nous à <a href="mailto:Better-practice-@outlook.fr">Better-practice-@outlook.fr</a>.
+        Under the GDPR, you have the right to access, rectify, erase, restrict and object to the
+        processing of your data. To exercise these rights, email us at{' '}
+        <a href="mailto:Better-practice-@outlook.fr">Better-practice-@outlook.fr</a>.
       </p>
 
-      <h2>7. Modifications</h2>
-      <p>
-        Cette politique peut être mise à jour. La date de dernière mise à jour figure en haut de
-        cette page.
-      </p>
+      <h2>7. Changes</h2>
+      <p>This policy may be updated. The last-updated date appears at the top of this page.</p>
 
       <div className="legal-note">
-        ℹ️ Ce document est un modèle de base fourni à titre informatif. Pour une activité
-        commerciale, il est recommandé de le faire valider par un professionnel du droit afin de
-        l'adapter précisément à votre situation.
+        ℹ️ This document is a basic template provided for information only. For a commercial
+        activity, we recommend having it reviewed by a legal professional to tailor it precisely to
+        your situation.
       </div>
     </div>
   )

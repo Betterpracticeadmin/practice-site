@@ -1,22 +1,22 @@
 import { Link } from 'react-router-dom'
 
 const steps = [
-  ['01', 'Configurer', "Choisissez la spec, les options et la finition en ligne : châssis donor, motorisation (V10 signature ou flat-six d'origine), niveau Practice AI, options carbone."],
-  ['02', 'Châssis', 'Porsche 911 fourni par vos soins ou sourcé via Practice. Contrôle technique et validation de la base avant la livraison du kit.'],
-  ['03', 'Livraison du kit', "Kit complet, chaque pièce numérotée, accompagné d'un plan d'assemblage détaillé : carrosserie carbone, groupe motopropulseur, électronique."],
-  ['04', 'Assemblage', 'Manuel d\'ingénierie étape par étape, support technique disponible. Vous construisez à votre rythme, dans votre garage.'],
-  ['05', 'Mise en service', 'Chaque système est vérifié aux spécifications. Première mise en route assistée par Practice.'],
-  ['06', 'Practice AI', "Installation et calibration de l'IA embarquée sur votre véhicule. Profil chargé, co-pilote activé."],
-  ['07', 'Premier démarrage', 'Votre voiture. Construite de vos mains. Guidée par votre intelligence.'],
+  ['01', 'Configure', 'Choose the spec, options and finish online: donor chassis, powertrain (signature V10 or original flat-six), Practice AI level, carbon options.'],
+  ['02', 'Chassis', 'Porsche 911 supplied by you or sourced via Practice. Technical inspection and validation of the base before the kit ships.'],
+  ['03', 'Kit delivery', 'Complete kit, every part numbered, with a detailed assembly plan: carbon body, powertrain, electronics.'],
+  ['04', 'Assembly', 'Step-by-step engineering manual, technical support available. You build at your own pace, in your garage.'],
+  ['05', 'Commissioning', 'Every system checked to spec. First start-up assisted by Practice.'],
+  ['06', 'Practice AI', 'Install and calibrate the embedded AI on your vehicle. Profile loaded, co-pilot activated.'],
+  ['07', 'First start', 'Your car. Built by your hands. Guided by your intelligence.'],
 ]
 
 export default function Build() {
   return (
     <>
       <section className="build-hero">
-        <p className="eyebrow">/// Le processus de build</p>
-        <h1>Sept étapes vers<br /><em>votre machine.</em></h1>
-        <p>Un parcours clair, du premier clic de configuration jusqu'au premier démarrage. À votre rythme, accompagné à chaque étape.</p>
+        <p className="eyebrow">/// The build process</p>
+        <h1>Seven steps to<br /><em>your machine.</em></h1>
+        <p>A clear journey, from the first config click to the first start. At your own pace, guided every step.</p>
       </section>
 
       <section className="build-section">
@@ -25,7 +25,7 @@ export default function Build() {
             <div className="build-step" key={num}>
               <div className="build-step-num">{num}</div>
               <div>
-                <div className="build-step-k">Étape {num}</div>
+                <div className="build-step-k">Step {num}</div>
                 <div className="build-step-t">{title}</div>
                 <div className="build-step-d">{desc}</div>
               </div>
@@ -36,11 +36,11 @@ export default function Build() {
 
       <section className="cta-final">
         <div className="cta-inner">
-          <h2>Prêt à <em>construire ?</em></h2>
-          <p>Les slots de la cohorte 1 sont limités. Réservez le vôtre et démarrez l'étape 01.</p>
+          <h2>Ready to <em>build?</em></h2>
+          <p>Cohort 1 slots are limited. Reserve yours and start step 01.</p>
           <div className="cta-btns">
-            <Link to="/contact" className="btn-wh">Demander un build slot</Link>
-            <Link to="/practice-ai" className="btn-gh">Découvrir Practice AI</Link>
+            <Link to="/contact" className="btn-wh">Request a build slot</Link>
+            <Link to="/practice-ai" className="btn-gh">Discover Practice AI</Link>
           </div>
         </div>
       </section>

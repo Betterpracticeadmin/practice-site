@@ -20,13 +20,13 @@ app.post('/api/chat', async (req, res) => {
   if (!client) {
     return res.status(503).json({
       error:
-        "Le chatbot n'est pas configuré : ajoute ta clé ANTHROPIC_API_KEY dans le fichier .env puis relance le serveur.",
+        "The chatbot isn't configured: add your ANTHROPIC_API_KEY (Anthropic key) to the .env file, then restart the server.",
     })
   }
 
   const { messages } = req.body || {}
   if (!Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: 'messages manquants' })
+    return res.status(400).json({ error: 'missing messages' })
   }
 
   const history = messages
@@ -52,8 +52,8 @@ app.post('/api/chat', async (req, res) => {
     res.end()
   } catch (err) {
     console.error('Erreur Claude:', err?.message || err)
-    if (!res.headersSent) res.status(500).json({ error: 'Erreur du modèle' })
-    else { res.write(`data: ${JSON.stringify({ error: 'Erreur du modèle. Réessaie.' })}\n\n`); res.end() }
+    if (!res.headersSent) res.status(500).json({ error: 'Model error' })
+    else { res.write(`data: ${JSON.stringify({ error: 'Model error. Please try again.' })}\n\n`); res.end() }
   }
 })
 

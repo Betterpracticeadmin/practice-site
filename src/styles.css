@@ -104,8 +104,24 @@ img { display: block; max-width: 100%; }
 .nav-burger span { width: 22px; height: 1.5px; background: var(--ink); display: block; }
 
 /* ── SECTIONS ── */
-.s-dark, .s-mid { background: var(--bg-soft); padding: 8rem 2rem; }
+.s-dark, .s-mid { background: #0b0b0c; padding: 8rem 2rem; }
 .s-light { background: var(--bg); padding: 8rem 2rem; }
+/* texte sur sections noires */
+.s-dark .eyebrow, .s-mid .eyebrow, .s-dark .eyebrow.light { color: rgba(255,255,255,.42); }
+.s-dark .sh2, .s-dark .sh2.dark, .s-mid .sh2 { color: #fff; }
+.s-dark .sh2 em, .s-dark .sh2 .light-em, .s-mid .sh2 em { color: rgba(255,255,255,.4); }
+.s-dark .slead, .s-dark .slead.dark, .s-mid .slead { color: rgba(255,255,255,.62); }
+.s-dark .chassis-row { border-color: rgba(255,255,255,.12); }
+.s-dark .chassis-row:last-child { border-bottom-color: rgba(255,255,255,.12); }
+.s-dark .chassis-row .ref { color: #fff; }
+.s-dark .chassis-row.muted .ref { color: rgba(255,255,255,.38); }
+.s-dark .chassis-row .info .yr { color: rgba(255,255,255,.45); }
+.s-dark .chassis-row .info .ds { color: rgba(255,255,255,.6); }
+.s-dark .chassis-pill.best { background: #fff; color: #0b0b0c; }
+.s-dark .chassis-pill.good { background: rgba(255,255,255,.08); color: #fff; border-color: rgba(255,255,255,.2); }
+.s-dark .chassis-pill.no { color: rgba(255,255,255,.4); border-color: rgba(255,255,255,.14); }
+.s-dark .chassis-img { border-color: rgba(255,255,255,.12); background: #141416; }
+.s-dark .pt-card.highlight, .s-dark .budget-item.dark, .s-dark .budget-total { border: 1px solid rgba(255,255,255,.16); }
 .pt0 { padding-top: 0; }
 .container { max-width: 1080px; margin: 0 auto; }
 .container.narrow { max-width: 920px; }
