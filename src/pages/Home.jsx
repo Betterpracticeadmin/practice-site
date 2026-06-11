@@ -1,23 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import heroVideo from '/hero.mp4'
-import carTop from '../assets/car-top.jpg'
+import carFront from '../assets/car-front.jpg'
 import carRear from '../assets/car-rear.jpg'
+import carTop from '../assets/car-top.jpg'
+import heroAction from '../assets/hero-action.jpg'
+import interior from '../assets/interior.jpg'
 import engineV10 from '../assets/engine-v10.jpg'
+import enginePorsche from '../assets/engine-porsche.jpg'
 import rimacMotor from '../assets/rimac-motor.png'
-import porsche911 from '../assets/porsche-911.webp'
-import blueprint from '../assets/blueprint-gt1.jpg'
-import adaptation from '../assets/adaptation-996.jpg'
-
-const steps = [
-  ['01', 'Configurer', "Choisissez la spec, les options et la finition en ligne. Sélection du châssis donor, niveau Practice AI, options carbone."],
-  ['02', 'Châssis', 'Porsche 911 fourni par le client ou sourcé via Practice. Contrôle technique et validation de la base avant livraison du kit.'],
-  ['03', 'Livraison du kit', "Kit complet, chaque pièce numérotée, avec plan d'assemblage détaillé. Carrosserie carbone, groupe motopropulseur, électronique."],
-  ['04', 'Assemblage', "Manuel d'ingénierie étape par étape. Support technique disponible. Vous construisez à votre rythme, dans votre garage."],
-  ['05', 'Mise en service', 'Chaque système vérifié aux spécifications. Première mise en route assistée par Practice.'],
-  ['06', 'Practice AI', "Installation et calibration de l'IA embarquée. Profil véhicule chargé. Co-pilote activé."],
-  ['07', 'Premier démarrage', 'Votre voiture. Construite de vos mains. Guidée par votre intelligence.'],
-]
+import porscheWhite from '../assets/porsche-911-white.jpg'
 
 const budget = [
   ['×4 Rimac PMSM', '~€ 35k'],
@@ -29,72 +21,64 @@ const budget = [
   ['Fixations / divers', '~€ 5k'],
 ]
 
+const chassis = [
+  { ref: '997', yr: '2004 — 2012', ds: "Empattement 2 350 mm. Marché d'occasion dense, coût d'acquisition faible.", pill: 'Sweet spot', cls: 'best' },
+  { ref: '991', yr: '2011 — 2019', ds: 'Empattement 2 450 mm. Suspension arrière multi-bras, disponibilité maximale.', pill: 'Top technique', cls: 'good' },
+  { ref: '964 / 993', yr: 'Trop court, refroidi air, valeur collection trop élevée.', pill: 'À éviter', cls: 'no', muted: true },
+  { ref: '992', yr: 'Trop récent — prix marché encore trop haut.', pill: 'À éviter', cls: 'no', muted: true },
+]
+
 export default function Home() {
   return (
     <>
       {/* HERO */}
       <section className="hero">
-        <video className="hero-video" autoPlay muted loop playsInline poster={carRear}>
-          <source src={heroVideo} type="video/mp4" />
-        </video>
-        <div className="hero-overlay" />
-        <div className="hero-grid" />
-        <div className="hero-year">PRACTICE /// 2026</div>
-        <div className="hero-line-left">Alessandro Pascal — Betterstate</div>
-
         <div className="hero-content">
           <p className="hero-eyebrow">/// Project 2026</p>
           <h1>PRACTICE</h1>
           <p className="hero-tagline">Build it <span>///</span> Drive it <span>///</span> Master it</p>
           <div className="hero-actions">
             <Link to="/contact" className="btn-wh">Demander un build slot</Link>
-            <a href="#concept" className="btn-gh">Découvrir le projet ↓</a>
+            <a href="#concept" className="btn-gh">Découvrir le projet</a>
+          </div>
+
+          <div className="hero-media">
+            <video autoPlay muted loop playsInline poster={carFront}>
+              <source src={heroVideo} type="video/mp4" />
+            </video>
+            <span className="hero-media-tag">/// Practice — prototype</span>
           </div>
 
           <div className="hero-specs">
-            <div className="spec-cell">
-              <span className="spec-label">Puissance combinée</span>
-              <span className="spec-val">2 320<span className="spec-unit"> hp</span></span>
-            </div>
-            <div className="spec-cell">
-              <span className="spec-label">0 — 100 km/h</span>
-              <span className="spec-val">&lt; 2<span className="spec-unit"> s</span></span>
-            </div>
-            <div className="spec-cell">
-              <span className="spec-label">Prix kit cible</span>
-              <span className="spec-val">€ 80k</span>
-            </div>
-            <div className="spec-cell">
-              <span className="spec-label">Base donor</span>
-              <span className="spec-val">911<span className="spec-unit"> 997/991</span></span>
-            </div>
+            <div className="spec-cell"><span className="spec-label">Puissance combinée</span><span className="spec-val">2 320<span className="spec-unit"> hp</span></span></div>
+            <div className="spec-cell"><span className="spec-label">0 — 100 km/h</span><span className="spec-val">&lt; 2<span className="spec-unit"> s</span></span></div>
+            <div className="spec-cell"><span className="spec-label">Prix kit cible</span><span className="spec-val">€ 80k</span></div>
+            <div className="spec-cell"><span className="spec-label">Base donor</span><span className="spec-val">911<span className="spec-unit"> 997/991</span></span></div>
           </div>
         </div>
       </section>
 
       {/* CONCEPT */}
-      <section className="s-dark" id="concept">
+      <section className="s-light" id="concept">
         <div className="container">
           <p className="eyebrow">/// Le concept</p>
           <h2 className="sh2">La première supercar<br />que vous <em>assemblez.</em></h2>
           <p className="slead">Kit complet, mécanique hybride V10 + quad électrique, coaching IA embarqué — construit sur un châssis Porsche 911 donor. Pas d'usine. Pas d'intermédiaire.</p>
 
           <div className="concept-grid">
-            <div className="concept-img">
-              <img src={carTop} alt="Practice vue de dessus" loading="lazy" />
-            </div>
+            <div className="concept-img"><img src={carFront} alt="Practice — face avant" loading="lazy" /></div>
             <div className="concept-facts">
               <Fact k="Plateforme" v={<><strong>Porsche 911</strong> — 997 (2004–2012) ou 991 (2011–2019). Monocoque conservée, carrosserie remplacée par le kit Practice.</>} />
               <Fact k="Motorisation" v={<><strong>Audi V10 FSI</strong> 5.2L 620 ch + <strong>×4 Rimac PMSM</strong> 800V — couple vectoriel par roue. 2 320 ch combinés.</>} />
-              <Fact k="Intelligence" v={<><strong>Practice AI</strong> embarquée — coaching temps réel, pace notes, santé véhicule, mises à jour OTA.</>} />
-              <Fact k="Modèle" v={<>Kit numéroté, livré complet. Manuel d'assemblage pas à pas. <strong>Vous construisez. Vous conduisez.</strong></>} />
+              <Fact k="Intelligence" v={<><strong>Practice AI</strong> embarquée — coaching temps réel, pace notes, santé véhicule, OTA.</>} />
+              <Fact k="Modèle" v={<>Kit numéroté, livré complet, manuel pas à pas. <strong>Vous construisez. Vous conduisez.</strong></>} />
             </div>
           </div>
         </div>
       </section>
 
       {/* POWERTRAIN */}
-      <section className="s-light">
+      <section className="s-dark">
         <div className="container">
           <p className="eyebrow light">/// Groupe motopropulseur</p>
           <h2 className="sh2 dark">Une machine <em className="light-em">de guerre.</em></h2>
@@ -106,20 +90,20 @@ export default function Home() {
               <div className="pt-logo">Audi R8 FSI</div>
               <div className="pt-num">620<span>hp</span></div>
               <div className="pt-unit">5 204 cc — 560 Nm — 8 700 rpm</div>
-              <div className="pt-desc">Monté en central longitudinal. Atmosphérique, sans lag. La voix de la machine.</div>
+              <div className="pt-desc">Central longitudinal. Atmosphérique, sans lag. La voix de la machine.</div>
             </div>
             <div className="pt-card">
               <img src={rimacMotor} alt="Moteur Rimac PMSM" className="pt-img contain" loading="lazy" />
               <div className="pt-logo">×4 Rimac PMSM</div>
               <div className="pt-num">1 700<span>hp</span></div>
               <div className="pt-unit">800V — couple vectoriel par roue</div>
-              <div className="pt-desc">AR : 480 kW / 900 Nm × 2. AV : 220 kW / 280 Nm × 2. Refroidi liquide. Entraînement direct.</div>
+              <div className="pt-desc">AR : 480 kW / 900 Nm × 2. AV : 220 kW / 280 Nm × 2. Refroidi liquide.</div>
             </div>
             <div className="pt-card highlight">
               <div className="pt-logo">Système complet</div>
               <div className="pt-num big">&lt; 2<span>s</span></div>
               <div className="pt-unit">0 — 100 km/h — vectorisation AWD</div>
-              <div className="pt-desc">Couple électrique instantané + V10 en puissance. AWD torque vectoring. Single-speed direct drive.</div>
+              <div className="pt-desc">Couple électrique instantané + V10 en puissance. AWD torque vectoring, single-speed direct drive.</div>
             </div>
           </div>
 
@@ -137,78 +121,89 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CHASSIS */}
-      <section className="s-light pt0">
+      {/* ENGINE CHOICE */}
+      <section className="s-light">
+        <div className="container">
+          <p className="eyebrow">/// Choix moteur</p>
+          <h2 className="sh2">Deux philosophies,<br /><em>un seul châssis.</em></h2>
+          <p className="slead">La version signature embarque le V10. Mais vous pouvez conserver le flat-six d'origine de votre Porsche pour un kit plus léger et nettement plus accessible.</p>
+
+          <div className="options-2">
+            <div className="opt-card">
+              <div className="opt-media"><img src={engineV10} alt="V10 Audi FSI carbone" loading="lazy" /></div>
+              <div className="opt-body">
+                <span className="opt-flag signature">Version signature</span>
+                <h3 className="opt-title">Audi V10 FSI 5.2</h3>
+                <p className="opt-desc">620 ch atmosphériques en central longitudinal, couplés au quad électrique. L'expérience Practice complète, 2 320 ch combinés.</p>
+                <div className="opt-price">Coût moteur <span>~€ 15 000</span></div>
+              </div>
+            </div>
+            <div className="opt-card">
+              <div className="opt-media"><img src={enginePorsche} alt="Flat-six Porsche d'origine" loading="lazy" /></div>
+              <div className="opt-body">
+                <span className="opt-flag value">Kit plus accessible</span>
+                <h3 className="opt-title">Flat-six d'origine</h3>
+                <p className="opt-desc">Gardez le moteur Porsche de votre donor. Moins de pièces, montage simplifié, budget réduit — tout en profitant de la carrosserie et de la Practice AI.</p>
+                <div className="opt-price">Économie <span>jusqu'à ~€ 15 000</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CHASSIS (épuré) */}
+      <section className="s-dark">
         <div className="container">
           <p className="eyebrow light">/// Base donor</p>
           <h2 className="sh2 dark">Porsche 911 —<br /><em className="light-em">la bonne base.</em></h2>
 
           <div className="chassis-layout">
-            <div className="chassis-img">
-              <img src={porsche911} alt="Porsche 911 Targa" loading="lazy" />
-            </div>
-            <div className="chassis-grid">
-              <div className="chassis-card recommended">
-                <span className="chassis-tag tag-rec">Sweet spot</span>
-                <div className="chassis-ref">997</div>
-                <div className="chassis-years">2004 — 2012</div>
-                <div className="chassis-desc">Empattement 2 350 mm. Marché d'occasion dense, coût d'acquisition faible. Meilleur ratio valeur / performance.</div>
-              </div>
-              <div className="chassis-card secondary">
-                <span className="chassis-tag tag-good">Meilleure base technique</span>
-                <div className="chassis-ref">991</div>
-                <div className="chassis-years">2011 — 2019</div>
-                <div className="chassis-desc">Empattement 2 450 mm. Suspension arrière multi-bras. Disponibilité mondiale maximale.</div>
-              </div>
-              <div className="chassis-card avoid">
-                <span className="chassis-tag tag-avoid">À éviter</span>
-                <div className="chassis-ref">964 / 993</div>
-                <div className="chassis-years">Trop court, refroidi air, valeur collection trop élevée.</div>
-              </div>
-              <div className="chassis-card avoid">
-                <span className="chassis-tag tag-avoid">À éviter</span>
-                <div className="chassis-ref">992</div>
-                <div className="chassis-years">Trop récent — prix marché encore trop haut.</div>
-              </div>
+            <div className="chassis-img"><img src={porscheWhite} alt="Porsche 911" loading="lazy" /></div>
+            <div className="chassis-list">
+              {chassis.map((c) => (
+                <div className={c.muted ? 'chassis-row muted' : 'chassis-row'} key={c.ref}>
+                  <div className="ref">{c.ref}</div>
+                  <div className="info">
+                    <div className="yr">{c.yr}</div>
+                    {!c.muted && <div className="ds">{c.ds}</div>}
+                  </div>
+                  <span className={`chassis-pill ${c.cls}`}>{c.pill}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* BLUEPRINT */}
-      <section className="s-mid">
+      {/* GALLERY */}
+      <section className="s-light">
         <div className="container">
-          <p className="eyebrow">/// Ingénierie</p>
-          <h2 className="sh2">Conçu jusqu'au<br /><em>moindre boulon.</em></h2>
-          <p className="slead">Aucune modification de design sur le donor : le kit se superpose à la 911. Pièces composites numérotées, découpes documentées, fixations boulonnées.</p>
-          <div className="blueprint-grid">
-            <img src={blueprint} alt="Plan technique Practice GT1" loading="lazy" />
-            <img src={adaptation} alt="Adaptation sur Porsche 996" loading="lazy" />
+          <p className="eyebrow">/// Galerie</p>
+          <h2 className="sh2">Le détail,<br /><em>partout.</em></h2>
+          <div className="gallery-grid">
+            <div className="gallery-item"><img src={heroAction} alt="Practice en mouvement" loading="lazy" /><span className="gallery-cap">Sur route</span></div>
+            <div className="gallery-item"><img src={interior} alt="Intérieur cuir" loading="lazy" /><span className="gallery-cap">Habitacle</span></div>
+            <div className="gallery-item"><img src={carRear} alt="Arrière Practice" loading="lazy" /><span className="gallery-cap">Signature arrière</span></div>
           </div>
         </div>
       </section>
 
-      {/* STEPS */}
+      {/* BUILD TEASER */}
       <section className="s-dark">
         <div className="container">
-          <p className="eyebrow">/// Processus de build</p>
-          <h2 className="sh2">Sept étapes vers<br /><em>votre machine.</em></h2>
-          <div className="steps-list">
-            {steps.map(([num, title, desc]) => (
-              <div className="step-row" key={num}>
-                <div className="step-num">{num}</div>
-                <div>
-                  <div className="step-title">{title}</div>
-                  <div className="step-desc">{desc}</div>
-                </div>
-              </div>
-            ))}
+          <div className="teaser">
+            <div>
+              <p className="eyebrow">/// Le processus</p>
+              <h3>De la config au premier démarrage.</h3>
+              <p>Sept étapes claires, à votre rythme, dans votre garage — du choix de la spec jusqu'à l'activation de la Practice AI.</p>
+            </div>
+            <Link to="/build" className="btn-wh">Voir les 7 étapes</Link>
           </div>
         </div>
       </section>
 
-      {/* AI TEASER */}
-      <section className="s-mid">
+      {/* AI BANNER */}
+      <section className="s-light">
         <div className="container">
           <div className="ai-banner">
             <div className="ai-grid-bg" />
@@ -224,7 +219,7 @@ export default function Home() {
       </section>
 
       {/* BUDGET */}
-      <section className="s-light">
+      <section className="s-dark">
         <div className="container">
           <p className="eyebrow light">/// Investissement</p>
           <h2 className="sh2 dark">Construit pour un budget<br /><em className="light-em">qui tient.</em></h2>
@@ -253,10 +248,9 @@ export default function Home() {
 
       {/* CTA */}
       <section className="cta-final">
-        <div className="cta-grid-bg" />
         <div className="cta-inner">
           <h2>Conçu par vous.<br /><em>Perfectionné par l'IA.</em></h2>
-          <p>Project Practice — la première supercar kit avec intelligence embarquée.<br />Les slots de la cohorte 1 sont limités.</p>
+          <p>Project Practice — la première supercar kit avec intelligence embarquée. Les slots de la cohorte 1 sont limités.</p>
           <div className="cta-btns">
             <Link to="/contact" className="btn-wh">Demander un build slot</Link>
             <Link to="/practice-ai" className="btn-gh">Découvrir Practice AI</Link>
@@ -277,12 +271,7 @@ function Fact({ k, v }) {
 }
 
 function PaceBox() {
-  const lines = [
-    '› "Freinage 100m — 4ème"',
-    '› "50 gauche, se resserre"',
-    '› "Crête — demi-gaz"',
-    '› "Delta : -0.4s — bon tour"',
-  ]
+  const lines = ['› "Freinage 100m — 4ème"', '› "50 gauche, se resserre"', '› "Crête — demi-gaz"', '› "Delta : -0.4s — bon tour"']
   const [active, setActive] = useState(0)
   useEffect(() => {
     const id = setInterval(() => setActive((a) => (a + 1) % lines.length), 2200)
@@ -290,10 +279,7 @@ function PaceBox() {
   }, [])
   return (
     <div className="ai-pace">
-      <div className="ai-pace-head">
-        <span className="chat-fab-dot" />
-        <span>LIVE SESSION</span>
-      </div>
+      <div className="ai-pace-head"><span className="chat-fab-dot" /><span>LIVE SESSION</span></div>
       {lines.map((l, i) => (
         <div key={i} className={i === active ? 'ai-pace-line active' : 'ai-pace-line'}>{l}</div>
       ))}

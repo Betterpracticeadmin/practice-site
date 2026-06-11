@@ -5,6 +5,7 @@ import Footer from './components/Footer.jsx'
 import ChatWidget from './components/ChatWidget.jsx'
 import Home from './pages/Home.jsx'
 import PracticeAI from './pages/PracticeAI.jsx'
+import Build from './pages/Build.jsx'
 import Contact from './pages/Contact.jsx'
 
 function ScrollToTop() {
@@ -16,16 +17,21 @@ function ScrollToTop() {
 }
 
 export default function App() {
+  const location = useLocation()
   return (
     <>
       <ScrollToTop />
       <Nav />
       <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/practice-ai" element={<PracticeAI />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
+        {/* La clé sur le pathname relance l'animation d'entrée à chaque changement d'onglet */}
+        <div className="route" key={location.pathname}>
+          <Routes location={location}>
+            <Route path="/" element={<Home />} />
+            <Route path="/practice-ai" element={<PracticeAI />} />
+            <Route path="/build" element={<Build />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </div>
       </main>
       <Footer />
       <ChatWidget />
