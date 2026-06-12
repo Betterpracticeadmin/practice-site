@@ -485,15 +485,32 @@
   .fav{display:inline-flex;align-items:center;gap:6px;background:var(--card);backdrop-filter:blur(20px);border:.5px solid var(--border);border-radius:11px;padding:8px 12px;font-size:12px;color:var(--txt);cursor:pointer;}
   .fav svg{width:13px;height:13px;stroke:var(--acc);fill:none;stroke-width:1.6;}
 
-  /* responsive: stack on narrow (phone portrait) */
+  /* responsive: stack on narrow (phone / tablet portrait) */
   @media(max-width:900px){
-    .os{grid-template-columns:1fr;grid-template-rows:auto 46vh auto auto;overflow:auto;height:auto;min-height:100dvh;}
-    .center{grid-column:1;grid-row:2;}
+    .os{grid-template-columns:1fr;grid-template-rows:auto 44vh auto auto;overflow:auto;height:auto;min-height:100dvh;gap:10px;
+        padding:calc(10px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(78px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));}
+    .center{grid-column:1;grid-row:2;min-height:300px;}
     .col-l{grid-column:1;grid-row:3;overflow:visible;}
     .col-r{grid-column:1;grid-row:4;overflow:visible;order:-1;}
-    .bottombar{grid-row:5;}
-    .speed-ov .v{font-size:60px;}
+    .speed-ov .v{font-size:54px;}
     body{overflow:auto;}
+    .topbar{padding:0 2px;}
+    .topbar .status-ic{display:none;}
+    .wm{font-size:11px;}
+    /* fixed, full-width bottom tab bar (iOS-style) */
+    .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:45;grid-row:auto;justify-content:center;
+        padding:7px 10px calc(7px + env(safe-area-inset-bottom));background:linear-gradient(to top, var(--bg) 62%, transparent);}
+    .navtabs{width:100%;max-width:540px;justify-content:space-between;gap:2px;border-radius:18px;}
+    .navtabs button{flex:1;min-width:0;padding:8px 2px;font-size:8px;letter-spacing:.05em;gap:3px;}
+    .navtabs button .i{font-size:18px;}
+  }
+  /* phone: icon-only tab bar for a clean iOS look */
+  @media(max-width:480px){
+    .os{grid-template-rows:auto 42vh auto auto;}
+    .navtabs button{font-size:0;padding:10px 2px;}
+    .navtabs button .i{font-size:21px;}
+    .speed-ov .v{font-size:46px;}
+    .topright .clock{font-size:11px;}
   }
 </style>
 </head>
@@ -596,7 +613,7 @@
         <div class="agent" data-a="infotainment"><span class="ad"></span>Inf</div>
       </div>
       <button class="diag-open" id="twinBtn" style="margin-top:4px;padding:9px;font-size:12px;">◍ Jumeau du conducteur</button>
-      <button class="diag-open" id="hudOpenBtn" style="margin-top:6px;padding:10px;font-size:12px;background:var(--acc);color:#000;border-color:var(--acc);font-weight:600;">◈ HUD cognitif Tesla-like</button>
+      <button class="diag-open" id="hudOpenBtn" style="margin-top:6px;padding:10px;font-size:12px;background:var(--acc);color:#000;border-color:var(--acc);font-weight:600;">◈ HUD · Practice Vision</button>
       <div class="home-conn">
         <button class="diag-open" id="obdHomeBtn">🔌 OBD2</button>
         <button class="diag-open" id="carModeBtn">🚗 Mode Voiture</button>
