@@ -1,0 +1,15 @@
+{
+  "name": "Practice Co-pilote",
+  "short_name": "Practice",
+  "description": "Ta position en direct et un copilote vocal, sur de vraies routes.",
+  "start_url": "/drive.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef1f4",
+  "theme_color": "#1FA97E",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
