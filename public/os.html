@@ -224,6 +224,14 @@
   .nav-hud{position:absolute;top:12px;right:12px;z-index:30;display:none;align-items:center;gap:7px;background:var(--acc);color:#000;border:none;border-radius:30px;padding:10px 17px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.35);}
   body[data-navfocus] .nav-hud{display:flex;}
 
+  /* integrated cognitive HUD (embedded fullscreen) */
+  .hud-ov{position:fixed;inset:0;z-index:82;display:none;background:#050506;}
+  .hud-ov.show{display:block;}
+  .hud-ov iframe{width:100%;height:100%;border:0;display:block;}
+  .hud-close{position:fixed;top:calc(14px + env(safe-area-inset-top));left:14px;z-index:84;display:flex;align-items:center;gap:7px;background:rgba(14,15,18,.5);backdrop-filter:blur(14px);border:.5px solid rgba(255,255,255,.14);color:#F2F3F5;border-radius:30px;padding:9px 15px;font-size:12px;cursor:pointer;}
+  .hud-ov:not(.show) .hud-close{display:none;}
+  .hud-close svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;}
+
   /* media (mock) */
   .media-row{display:flex;align-items:center;gap:12px;}
   .media-art{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#333,#111);flex-shrink:0;border:.5px solid var(--border);}
@@ -586,6 +594,7 @@
         <div class="agent" data-a="infotainment"><span class="ad"></span>Inf</div>
       </div>
       <button class="diag-open" id="twinBtn" style="margin-top:4px;padding:9px;font-size:12px;">◍ Jumeau du conducteur</button>
+      <button class="diag-open" id="hudOpenBtn" style="margin-top:6px;padding:10px;font-size:12px;background:var(--acc);color:#000;border-color:var(--acc);font-weight:600;">◈ HUD cognitif Tesla-like</button>
       <div class="wave" id="wave"></div>
     </div>
     <div class="card w">
@@ -805,6 +814,12 @@
     <div class="twin-learn"><div class="dc-head"><span>Ce que j'ai appris de toi</span></div><div id="twinLearn"></div></div>
     <div class="diag-foot">Estimation logicielle à partir du GPS, de l'accélération et du cap — sans capteur biométrique. Plus tu roules, plus le modèle s'affine.</div>
   </div>
+</div>
+
+<!-- INTEGRATED COGNITIVE HUD (Tesla-like) -->
+<div class="hud-ov" id="hudOv">
+  <button class="hud-close" id="hudClose"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Cockpit</button>
+  <iframe id="hudFrame" allow="autoplay" title="Practice HUD"></iframe>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1253,7 +1268,11 @@
   $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();});
   /* TomTom live-traffic key + refresh loop */
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
-  if($('navHud')){ $('navHud').addEventListener('click',function(){ var q=''; if(currentDest)q='?to='+currentDest.lat+','+currentDest.lon; window.location.href='/hud.html'+q; }); }
+  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud.html?embed=1'); $('hudOv').classList.add('show'); }
+  function closeHud(){ $('hudOv').classList.remove('show'); var f=$('hudFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
+  if($('navHud'))$('navHud').addEventListener('click',openHud);
+  if($('hudOpenBtn'))$('hudOpenBtn').addEventListener('click',openHud);
+  if($('hudClose'))$('hudClose').addEventListener('click',closeHud);
   if($('trSrc')) $('trSrc').textContent = TT_KEY ? '● live' : 'estimation';
   if($('ttKey')){ $('ttKey').value=TT_KEY;
     $('ttKey').addEventListener('change',function(){ TT_KEY=this.value.trim(); try{localStorage.setItem('practiceTomTom',TT_KEY);}catch(e){} $('trSrc').textContent=TT_KEY?'● live':'estimation'; toast(TT_KEY?'Trafic live activé (TomTom).':'Trafic en estimation.'); updateTraffic(); }); }

@@ -125,6 +125,7 @@
 (function(){
   var $=function(id){return document.getElementById(id);};
   var cv=$('cv'), ctx=cv.getContext('2d'), W=0,H=0,DPR=Math.min(2,window.devicePixelRatio||1);
+  if(/[?&]embed=1/.test(location.search)){ var _b=document.querySelector('a.back'); if(_b)_b.style.display='none'; }
   function resize(){ W=cv.clientWidth;H=cv.clientHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0); }
   window.addEventListener('resize',resize); resize();
 
