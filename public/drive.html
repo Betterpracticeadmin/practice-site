@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0c">
+<title>Practice · Co-pilote</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{--teal:#5DCAA5;--amber:#EF9F27;--red:#E24B4A;--border:rgba(255,255,255,.12);--glass:rgba(16,18,21,.72);--dim:#8b9096;--faint:#5a6066;--mono:'JetBrains Mono',monospace;--accent:var(--teal);}
+  html,body{height:100%;}
+  body{font-family:'Inter',sans-serif;background:#0b0b0c;color:#eef0f2;-webkit-font-smoothing:antialiased;overflow:hidden;}
+  #map{position:fixed;inset:0;z-index:1;background:#11151a;}
+  .leaflet-container{background:#11151a;font-family:var(--mono);}
+  .leaflet-control-attribution{background:rgba(0,0,0,.5)!important;color:#777!important;font-size:9px!important;}
+  .leaflet-bar a{background:#1a1f25!important;color:#cfd3d7!important;border-color:#2a2f35!important;}
+  .leaflet-control-zoom{margin-top:78px!important;}
+
+  /* position marker */
+  .me-wrap{position:relative;width:20px;height:20px;}
+  .me-dot{width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 7px rgba(93,202,165,.22),0 0 16px var(--accent);}
+  .me-arrow{position:absolute;top:-15px;left:50%;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid var(--accent);transform-origin:50% 24px;transform:translateX(-50%);transition:transform .25s;}
+  .dest-pin{font-size:26px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));}
+
+  /* top bar */
+  .topbar{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;gap:8px;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;}
+  .search{flex:1;display:flex;gap:6px;background:var(--glass);backdrop-filter:blur(16px);border:.5px solid var(--border);border-radius:14px;padding:6px 6px 6px 14px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+  .search input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:15px;font-family:'Inter';}
+  .search input::placeholder{color:var(--faint);}
+  .search button{background:var(--accent);color:#04140e;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;font-family:var(--mono);cursor:pointer;white-space:nowrap;}
+  .icon-btn{background:var(--glass);backdrop-filter:blur(16px);border:.5px solid var(--border);border-radius:12px;width:44px;height:44px;display:grid;place-items:center;cursor:pointer;font-size:17px;color:#dfe2e5;flex-shrink:0;}
+  .icon-btn.on{color:var(--teal);border-color:rgba(93,202,165,.4);}
+
+  /* route banner */
+  .route-bar{position:fixed;left:12px;right:12px;top:calc(70px + env(safe-area-inset-top));z-index:9;display:none;align-items:center;justify-content:space-between;gap:10px;background:var(--glass);backdrop-filter:blur(16px);border:.5px solid var(--border);border-radius:13px;padding:10px 15px;box-shadow:0 8px 30px rgba(0,0,0,.4);}
+  .route-bar.show{display:flex;}
+  .route-bar .ri{font-family:var(--mono);font-size:13px;color:#fff;}
+  .route-bar .ri b{color:var(--teal);font-size:16px;}
+  .route-bar .rx{font-family:var(--mono);font-size:11px;color:var(--dim);cursor:pointer;border:.5px solid var(--border);border-radius:8px;padding:6px 10px;}
+
+  /* co-pilot card */
+  .copilot{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:10;display:flex;align-items:center;gap:14px;background:var(--glass);backdrop-filter:blur(20px);border:.5px solid var(--border);border-radius:20px;padding:14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.5);transition:border-color .5s;}
+  .copilot.attention{border-color:rgba(239,159,39,.5);}
+  .copilot.critical{border-color:rgba(226,75,74,.55);box-shadow:0 0 40px rgba(226,75,74,.2);}
+  .orb{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:radial-gradient(circle at 36% 34%,#fff,var(--accent) 55%,transparent 78%);box-shadow:0 0 18px rgba(93,202,165,.6);animation:breathe 3.6s ease-in-out infinite;transition:background .5s,box-shadow .5s;}
+  body.attention{--accent:var(--amber);} body.critical{--accent:var(--red);}
+  body.attention .orb{box-shadow:0 0 18px rgba(239,159,39,.6);animation-duration:1.8s;}
+  body.critical .orb{box-shadow:0 0 22px rgba(226,75,74,.7);animation-duration:.8s;}
+  @keyframes breathe{50%{transform:scale(.82);}}
+  .cp-main{flex:1;min-width:0;}
+  .cp-msg{font-size:16px;font-weight:400;line-height:1.25;}
+  .cp-sub{font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-top:3px;}
+  .cp-speed{text-align:right;flex-shrink:0;}
+  .cp-speed .v{font-size:26px;font-weight:300;font-family:var(--mono);letter-spacing:-1px;}
+  .cp-speed .u{font-size:10px;color:var(--faint);font-family:var(--mono);}
+
+  /* start gate */
+  .gate{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:radial-gradient(ellipse 70% 60% at 50% 40%,#15181d,#0a0a0b 75%);text-align:center;padding:24px;}
+  .gate h1{font-size:30px;font-weight:300;letter-spacing:-.5px;margin-bottom:10px;}
+  .gate h1 b{color:var(--teal);font-weight:600;}
+  .gate p{color:var(--dim);font-size:14px;max-width:340px;margin:0 auto 26px;line-height:1.6;}
+  .gate .go{background:var(--teal);color:#04140e;border:none;border-radius:14px;padding:16px 28px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--mono);}
+  .gate .demo{display:block;margin:16px auto 0;background:transparent;border:.5px solid var(--border);color:var(--dim);border-radius:12px;padding:11px 20px;font-size:13px;font-family:var(--mono);cursor:pointer;}
+  .gate .lang{display:flex;gap:6px;justify-content:center;margin-top:26px;}
+  .gate .lang button{background:rgba(255,255,255,.05);border:.5px solid var(--border);color:var(--dim);border-radius:9px;padding:7px 13px;font-family:var(--mono);font-size:12px;cursor:pointer;}
+  .gate .lang button.on{background:#fff;color:#000;font-weight:600;}
+  .gate small{display:block;margin-top:22px;color:var(--faint);font-size:11px;font-family:var(--mono);}
+  .toast{position:fixed;top:calc(74px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:20;background:rgba(226,75,74,.92);color:#fff;font-size:12.5px;font-family:var(--mono);padding:9px 15px;border-radius:10px;display:none;max-width:90%;text-align:center;}
+  .toast.show{display:block;}
+</style>
+</head>
+<body class="safe">
+<div id="map"></div>
+
+<div class="topbar">
+  <div class="search">
+    <input id="dest" type="text" placeholder="Où va-t-on ?" autocomplete="off"/>
+    <button id="goBtn">Y aller</button>
+  </div>
+  <div class="icon-btn on" id="voiceBtn" title="Voix">🔊</div>
+  <div class="icon-btn on" id="followBtn" title="Suivre">⊕</div>
+</div>
+
+<div class="route-bar" id="routeBar">
+  <div class="ri" id="routeInfo">—</div>
+  <div class="rx" id="routeCancel">Arrêter</div>
+</div>
+
+<div class="copilot" id="copilot">
+  <div class="orb" id="orb"></div>
+  <div class="cp-main">
+    <div class="cp-msg" id="cpMsg">Copilote prêt.</div>
+    <div class="cp-sub" id="cpSub">Active ta position pour commencer</div>
+  </div>
+  <div class="cp-speed"><div class="v" id="spd">0</div><div class="u">km/h</div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="gate" id="gate">
+  <div>
+    <h1>Practice <b>Co-pilote</b></h1>
+    <p>Ta position en direct sur la carte, et un copilote qui te guide à la voix — comme un vrai navigateur, sur de vraies routes.</p>
+    <button class="go" id="gateGo">📍 Activer ma position</button>
+    <button class="demo" id="gateDemo">▶ Voir une démo</button>
+    <div class="lang" id="langSeg">
+      <button data-lang="fr" class="on">Français</button>
+      <button data-lang="en">English</button>
+      <button data-lang="ja">日本語</button>
+    </div>
+    <small>🔒 Ta position reste sur ton appareil. Précis sur téléphone, en HTTPS.</small>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+"use strict";
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- i18n ---------- */
+  var LANG = 'fr';
+  var I18N = {
+    fr: {
+      code: 'fr-FR', ready: 'Copilote prêt.', go: 'C’est parti. Je te guide.',
+      cruising: ['Route dégagée.', 'Tout roule.', 'Je veille.'],
+      calc: function (km, min) { return 'Itinéraire calculé. ' + km + ' kilomètres, environ ' + min + ' minutes.'; },
+      inDist: function (d, instr) { return 'Dans ' + d + ' mètres, ' + instr + '.'; },
+      now: function (instr) { return instr + ' maintenant.'; },
+      arrived: 'Tu es arrivé. Bien joué.',
+      reroute: 'Recalcul de l’itinéraire…',
+      fast: 'Doucement, tu roules vite.', stop: 'On est à l’arrêt.', resume: 'C’est reparti.',
+      notFound: 'Adresse introuvable.', netErr: 'Réseau indisponible, réessaie.',
+      turns: { left: 'tourne à gauche', right: 'tourne à droite', sleft: 'serre à gauche', sright: 'serre à droite',
+        hleft: 'tourne franchement à gauche', hright: 'tourne franchement à droite', straight: 'continue tout droit',
+        uturn: 'fais demi-tour', merge: 'insère-toi', roundabout: function (n) { return 'au rond-point, prends la ' + n + 'e sortie'; },
+        keepleft: 'garde la gauche', keepright: 'garde la droite', arrive: 'tu es arrivé' }
+    },
+    en: {
+      code: 'en-US', ready: 'Co-pilot ready.', go: 'Let’s go. I’ll guide you.',
+      cruising: ['Road is clear.', 'All smooth.', 'I’m watching.'],
+      calc: function (km, min) { return 'Route ready. ' + km + ' kilometres, about ' + min + ' minutes.'; },
+      inDist: function (d, instr) { return 'In ' + d + ' metres, ' + instr + '.'; },
+      now: function (instr) { return instr + ' now.'; },
+      arrived: 'You’ve arrived. Well done.',
+      reroute: 'Recalculating route…',
+      fast: 'Easy, you’re going fast.', stop: 'We’ve stopped.', resume: 'And we’re moving.',
+      notFound: 'Address not found.', netErr: 'Network unavailable, try again.',
+      turns: { left: 'turn left', right: 'turn right', sleft: 'keep slightly left', sright: 'keep slightly right',
+        hleft: 'turn sharp left', hright: 'turn sharp right', straight: 'continue straight',
+        uturn: 'make a u-turn', merge: 'merge', roundabout: function (n) { return 'at the roundabout, take exit ' + n; },
+        keepleft: 'keep left', keepright: 'keep right', arrive: 'you have arrived' }
+    },
+    ja: {
+      code: 'ja-JP', ready: 'コ・パイロット準備完了。', go: '行きましょう。案内します。',
+      cruising: ['道はクリア。', '順調です。', '見ています。'],
+      calc: function (km, min) { return 'ルート完成。' + km + 'キロ、約' + min + '分。'; },
+      inDist: function (d, instr) { return d + 'メートル先、' + instr + '。'; },
+      now: function (instr) { return instr + '、今。'; },
+      arrived: '到着しました。お疲れさま。',
+      reroute: 'ルート再計算中…',
+      fast: '少しスピード出てます。', stop: '停車中。', resume: '再出発。',
+      notFound: '住所が見つかりません。', netErr: 'ネットワークエラー、再試行を。',
+      turns: { left: '左折', right: '右折', sleft: 'やや左', sright: 'やや右',
+        hleft: '鋭く左折', hright: '鋭く右折', straight: '直進',
+        uturn: 'Uターン', merge: '合流', roundabout: function (n) { return 'ラウンドアバウトで' + n + '番目の出口'; },
+        keepleft: '左へ', keepright: '右へ', arrive: '到着' }
+    }
+  };
+  function T() { return I18N[LANG]; }
+
+  /* ---------- voice ---------- */
+  var Voice = {
+    on: true, supported: ('speechSynthesis' in window), voice: null, busy: false, queue: [], safety: null,
+    pick: function () { if (!this.supported) return; var all = speechSynthesis.getVoices() || []; var base = T().code.slice(0, 2);
+      var m = all.filter(function (v) { return (v.lang || '').toLowerCase().indexOf(base) === 0; });
+      m.sort(function (a, b) { return score(b) - score(a); }); this.voice = m[0] || null;
+      function score(v) { var n = (v.name + '').toLowerCase(); var s = 0; if (/natural|neural/.test(n)) s += 60; if (/online/.test(n)) s += 30; if (v.localService === false) s += 15; if (/google/.test(n)) s += 25; return s; } },
+    say: function (text, prio) { if (!this.on || !this.supported || !text) return;
+      if (this.busy) { if (!this.queue.length) this.queue.push({ t: text, p: prio }); else if (prio > this.queue[0].p) this.queue[0] = { t: text, p: prio }; return; }
+      this._speak(text, prio); },
+    _speak: function (text, prio) { this.busy = true; var u = new SpeechSynthesisUtterance(text);
+      if (this.voice) { u.voice = this.voice; u.lang = this.voice.lang; } else u.lang = T().code;
+      u.rate = 0.98 + (Math.random() * 0.03 - 0.015); u.pitch = 1.0; var self = this;
+      var done = function () { clearTimeout(self.safety); self.busy = false; if (self.queue.length) { var n = self.queue.shift(); self._speak(n.t, n.p); } };
+      u.onend = done; u.onerror = done; clearTimeout(this.safety); this.safety = setTimeout(done, 1400 + text.length * 80);
+      try { speechSynthesis.speak(u); } catch (e) { done(); } },
+    flush: function () { this.queue = []; this.busy = false; clearTimeout(this.safety); if (this.supported) speechSynthesis.cancel(); }
+  };
+  if (Voice.supported) { speechSynthesis.onvoiceschanged = function () { Voice.pick(); }; }
+
+  /* ---------- map ---------- */
+  var map, meMarker, accCircle, routeLine, destMarker;
+  var follow = true, watchId = null, demoTimer = null;
+  var pts = [], totalDist = 0, route = null, stepIdx = 0, stepAnnounced = false, lastSpeedState = null, navActive = false;
+
+  function initMap() {
+    map = L.map('map', { zoomControl: true, attributionControl: true }).setView([46.6, 2.4], 5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 20, subdomains: 'abcd', attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(map);
+    routeLine = L.polyline([], { color: '#5DCAA5', weight: 6, opacity: .85, lineJoin: 'round' }).addTo(map);
+    accCircle = L.circle([46.6, 2.4], { radius: 0, color: '#5DCAA5', weight: 1, opacity: .35, fillColor: '#5DCAA5', fillOpacity: .07 }).addTo(map);
+    var icon = L.divIcon({ className: '', html: '<div class="me-wrap"><div class="me-arrow" id="meArrow"></div><div class="me-dot"></div></div>', iconSize: [20, 20], iconAnchor: [10, 10] });
+    meMarker = L.marker([46.6, 2.4], { icon: icon, interactive: false }).addTo(map); meMarker.setOpacity(0);
+    map.on('dragstart', function () { follow = false; $('followBtn').classList.remove('on'); });
+    setTimeout(function () { map.invalidateSize(); }, 200);
+    window.addEventListener('resize', function () { map.invalidateSize(); });
+  }
+
+  function haversine(a, b) { var R = 6371000, r = Math.PI / 180; var dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r; var s = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) * Math.sin(dLon / 2); return 2 * R * Math.asin(Math.min(1, Math.sqrt(s))); }
+
+  function setState(s) { document.body.className = s; $('copilot').className = 'copilot ' + (s === 'safe' ? '' : s); }
+  function setMsg(m, sub) { $('cpMsg').textContent = m; if (sub != null) $('cpSub').textContent = sub; }
+  function toast(m) { var t = $('toast'); if (!m) { t.className = 'toast'; return; } t.textContent = m; t.className = 'toast show'; setTimeout(function () { t.className = 'toast'; }, 3500); }
+
+  /* ---------- position handling ---------- */
+  function onPos(c, ts) {
+    var lat = c.latitude, lon = c.longitude;
+    var last = pts.length ? pts[pts.length - 1] : null;
+    var moved = last ? haversine(last, { lat: lat, lon: lon }) : 0;
+    if (!last || moved >= 1.0) { if (last) totalDist += moved; pts.push({ lat: lat, lon: lon, t: ts }); if (pts.length > 9000) pts.shift(); }
+    meMarker.setLatLng([lat, lon]).setOpacity(1);
+    accCircle.setLatLng([lat, lon]).setRadius(c.accuracy || 0);
+    if (follow) map.setView([lat, lon], Math.max(map.getZoom(), 16), { animate: true });
+
+    var spd = c.speed; if (spd == null || isNaN(spd)) { if (last) { var dt = (ts - last.t) / 1000; spd = dt > 0 ? moved / dt : 0; } else spd = 0; }
+    var spdK = Math.max(0, spd * 3.6);
+    var hdg = c.heading; if ((hdg == null || isNaN(hdg)) && last && moved > 0.5) { var dy = lat - last.lat, dx = (lon - last.lon) * Math.cos(lat * Math.PI / 180); hdg = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360; }
+    $('spd').textContent = spdK.toFixed(0);
+    var arrow = $('meArrow'); if (arrow && hdg != null && !isNaN(hdg)) arrow.style.transform = 'translateX(-50%) rotate(' + hdg + 'deg)';
+
+    if (navActive && route) navigate({ lat: lat, lon: lon }, spdK);
+    else reactive(spdK);
+  }
+
+  /* ---------- reactive co-pilot (no destination) ---------- */
+  var lastCruise = 0;
+  function reactive(spdK) {
+    if (spdK < 2) { if (lastSpeedState !== 'stop') { lastSpeedState = 'stop'; setState('safe'); setMsg(T().stop, ''); Voice.say(T().stop, 1); } return; }
+    if (lastSpeedState === 'stop') { Voice.say(T().resume, 1); }
+    lastSpeedState = 'move';
+    if (spdK > 110) { setState('critical'); setMsg(T().fast, Math.round(spdK) + ' km/h'); var now = Date.now(); if (now - lastCruise > 8000) { lastCruise = now; Voice.say(T().fast, 2); } return; }
+    setState('safe');
+    var nowt = Date.now();
+    if (nowt - lastCruise > 14000) { lastCruise = nowt; var c = T().cruising[Math.floor((nowt / 1000) % T().cruising.length)]; setMsg(c, Math.round(spdK) + ' km/h'); Voice.say(c, 1); }
+    else setMsg($('cpMsg').textContent || T().go, Math.round(spdK) + ' km/h');
+  }
+
+  /* ---------- turn-by-turn navigation ---------- */
+  function maneuverText(step) {
+    var m = step.maneuver || {}, mod = m.modifier || '', t = m.type || '', tr = T().turns;
+    if (t === 'arrive') return tr.arrive;
+    if (t === 'roundabout' || t === 'rotary') return tr.roundabout(m.exit || 1);
+    if (t === 'merge') return tr.merge;
+    if (t === 'fork') return mod.indexOf('left') >= 0 ? tr.keepleft : tr.keepright;
+    if (t === 'end of road' || t === 'turn' || t === 'continue' || t === 'new name' || t === 'on ramp' || t === 'off ramp') {
+      if (mod === 'left') return tr.left; if (mod === 'right') return tr.right;
+      if (mod === 'slight left') return tr.sleft; if (mod === 'slight right') return tr.sright;
+      if (mod === 'sharp left') return tr.hleft; if (mod === 'sharp right') return tr.hright;
+      if (mod === 'uturn') return tr.uturn; return tr.straight;
+    }
+    return tr.straight;
+  }
+  function navigate(pos, spdK) {
+    setMsg($('cpMsg').textContent, Math.round(spdK) + ' km/h');
+    if (!route.steps || stepIdx >= route.steps.length) return;
+    var step = route.steps[stepIdx];
+    var loc = step.maneuver.location; // [lon,lat]
+    var d = haversine(pos, { lat: loc[1], lon: loc[0] });
+    if (stepIdx === route.steps.length - 1 && d < 30) { // arrival
+      setState('safe'); setMsg(T().arrived, ''); Voice.say(T().arrived, 2); stopNav(); return;
+    }
+    var instr = maneuverText(step);
+    if (!stepAnnounced && d < 220) { stepAnnounced = true; setState('attention');
+      var rd = Math.max(20, Math.round(d / 20) * 20);
+      setMsg(instr.charAt(0).toUpperCase() + instr.slice(1), 'dans ' + rd + ' m'); Voice.say(T().inDist(rd, instr), 2); }
+    if (d < 32) { stepIdx++; stepAnnounced = false; setState('safe'); }
+  }
+
+  /* ---------- routing (OSRM) + geocoding (Nominatim) — free, no key ---------- */
+  // fetch with timeout + one retry (the free OSRM/Nominatim demo servers can be slow/flaky on a cold call)
+  function fetchJSON(url, opts, tries) {
+    tries = tries == null ? 2 : tries;
+    var ctrl = ('AbortController' in window) ? new AbortController() : null;
+    var to = setTimeout(function () { if (ctrl) ctrl.abort(); }, 8000);
+    var o = opts || {}; if (ctrl) o.signal = ctrl.signal;
+    return fetch(url, o).then(function (r) { clearTimeout(to); if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .catch(function (e) { clearTimeout(to); if (tries > 1) return new Promise(function (res) { setTimeout(res, 700); }).then(function () { return fetchJSON(url, opts, tries - 1); }); throw e; });
+  }
+  function geocode(q) {
+    return fetchJSON('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
+      .then(function (a) { return a && a[0] ? { lat: +a[0].lat, lon: +a[0].lon, name: a[0].display_name } : null; });
+  }
+  function getRoute(from, to) {
+    var u = 'https://router.project-osrm.org/route/v1/driving/' + from.lon + ',' + from.lat + ';' + to.lon + ',' + to.lat + '?overview=full&geometries=geojson&steps=true';
+    return fetchJSON(u).then(function (j) {
+      if (!j.routes || !j.routes.length) return null; var rt = j.routes[0];
+      var steps = []; (rt.legs || []).forEach(function (leg) { (leg.steps || []).forEach(function (s) { steps.push(s); }); });
+      return { coords: rt.geometry.coordinates, dist: rt.distance, dur: rt.duration, steps: steps };
+    });
+  }
+  function startRouteTo(to) {
+    var from = pts.length ? pts[pts.length - 1] : null;
+    if (!from) { toast('Active d’abord ta position.'); return; }
+    setMsg(T().reroute, '');
+    getRoute(from, to).then(function (rt) {
+      if (!rt) { toast(T().netErr); setMsg(T().ready, ''); return; }
+      route = rt; stepIdx = 0; stepAnnounced = false; navActive = true;
+      var latlngs = rt.coords.map(function (c) { return [c[1], c[0]]; });
+      routeLine.setLatLngs(latlngs);
+      if (destMarker) map.removeLayer(destMarker);
+      destMarker = L.marker([to.lat, to.lon], { icon: L.divIcon({ className: '', html: '<div class="dest-pin">📍</div>', iconSize: [26, 26], iconAnchor: [13, 26] }) }).addTo(map);
+      try { map.fitBounds(routeLine.getBounds().pad(0.2)); follow = false; $('followBtn').classList.remove('on'); } catch (e) {}
+      var km = (rt.dist / 1000).toFixed(1), min = Math.round(rt.dur / 60);
+      $('routeInfo').innerHTML = '<b>' + km + ' km</b> · ' + min + ' min';
+      $('routeBar').classList.add('show');
+      setState('safe'); setMsg(T().go, km + ' km · ' + min + ' min'); Voice.say(T().calc(km, min), 2);
+    }).catch(function () { toast(T().netErr); setMsg(T().ready, ''); });
+  }
+  function stopNav() { navActive = false; route = null; routeLine.setLatLngs([]); if (destMarker) { map.removeLayer(destMarker); destMarker = null; } $('routeBar').classList.remove('show'); }
+
+  /* ---------- geolocation ---------- */
+  function startGeo() {
+    if (!('geolocation' in navigator)) { toast('Géolocalisation non supportée.'); return; }
+    if (!window.isSecureContext) toast('⚠ Ouvre la page en HTTPS (téléphone) pour un GPS précis.');
+    hideGate(); follow = true; $('followBtn').classList.add('on');
+    setMsg(T().ready, ''); Voice.pick();
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(
+      function (p) { onPos(p.coords, Date.now()); },
+      function (err) { toast(err.code === 1 ? 'Localisation refusée.' : err.code === 2 ? 'Position indisponible (extérieur ?).' : 'Délai dépassé.'); },
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 12000 });
+  }
+
+  /* ---------- DEMO: real route + drive along it ---------- */
+  function startDemo() {
+    hideGate(); Voice.pick();
+    var from = { lat: 48.8584, lon: 2.2945 }, to = { lat: 48.8738, lon: 2.2950 }; // Eiffel -> Arc de Triomphe area
+    pts = [from]; meMarker.setLatLng([from.lat, from.lon]).setOpacity(1); map.setView([from.lat, from.lon], 15);
+    setMsg(T().reroute, 'démo');
+    getRoute(from, to).then(function (rt) {
+      if (!rt) { toast(T().netErr); setMsg(T().ready, ''); return; }
+      route = rt; stepIdx = 0; stepAnnounced = false; navActive = true;
+      var latlngs = rt.coords.map(function (c) { return [c[1], c[0]]; }); routeLine.setLatLngs(latlngs);
+      destMarker = L.marker([to.lat, to.lon], { icon: L.divIcon({ className: '', html: '<div class="dest-pin">📍</div>', iconSize: [26, 26], iconAnchor: [13, 26] }) }).addTo(map);
+      var km = (rt.dist / 1000).toFixed(1), min = Math.round(rt.dur / 60);
+      $('routeInfo').innerHTML = '<b>' + km + ' km</b> · ' + min + ' min (démo)'; $('routeBar').classList.add('show');
+      Voice.say(T().calc(km, min), 2); follow = true; $('followBtn').classList.add('on');
+      var coords = rt.coords, i = 0;
+      demoTimer = setInterval(function () {
+        if (i >= coords.length) { clearInterval(demoTimer); demoTimer = null; return; }
+        var c = coords[i], prev = coords[Math.max(0, i - 1)];
+        var hdg = null; if (i > 0) { var dy = c[1] - prev[1], dx = (c[0] - prev[0]) * Math.cos(c[1] * Math.PI / 180); hdg = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360; }
+        onPos({ latitude: c[1], longitude: c[0], accuracy: 5, speed: 13, heading: hdg }, Date.now());
+        i += 2;
+      }, 180);
+    }).catch(function () { toast(T().netErr); setMsg(T().ready, ''); });
+  }
+
+  function hideGate() { $('gate').style.display = 'none'; }
+
+  /* ---------- controls ---------- */
+  $('gateGo').addEventListener('click', startGeo);
+  $('gateDemo').addEventListener('click', startDemo);
+  $('langSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; [].forEach.call(this.children, function (x) { x.classList.toggle('on', x === b); }); LANG = b.dataset.lang; Voice.pick(); });
+  $('goBtn').addEventListener('click', function () { var q = $('dest').value.trim(); if (!q) return; setMsg(T().reroute, ''); geocode(q).then(function (d) { if (!d) { toast(T().notFound); return; } startRouteTo(d); }).catch(function () { toast(T().netErr); setMsg(T().ready, ''); }); });
+  $('dest').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('goBtn').click(); });
+  $('routeCancel').addEventListener('click', function () { if (demoTimer) { clearInterval(demoTimer); demoTimer = null; } stopNav(); setMsg(T().ready, ''); });
+  $('voiceBtn').addEventListener('click', function () { Voice.on = !Voice.on; this.classList.toggle('on', Voice.on); this.textContent = Voice.on ? '🔊' : '🔈'; if (!Voice.on) Voice.flush(); });
+  $('followBtn').addEventListener('click', function () { follow = !follow; this.classList.toggle('on', follow); });
+
+  if (window.L) initMap(); else toast('La carte n’a pas pu se charger.');
+})();
+</script>
+</body>
+</html>
