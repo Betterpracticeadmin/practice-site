@@ -506,11 +506,43 @@
   }
   /* phone: icon-only tab bar for a clean iOS look */
   @media(max-width:480px){
-    .os{grid-template-rows:auto 42vh auto auto;}
     .navtabs button{font-size:0;padding:10px 2px;}
     .navtabs button .i{font-size:21px;}
     .speed-ov .v{font-size:46px;}
     .topright .clock{font-size:11px;}
+  }
+
+  /* base: sheet handle only exists on mobile */
+  .sheet-handle{display:none;}
+
+  /* ===== MOBILE: map-first — everything rests on the map, info on demand (transparent roll-over sheet) ===== */
+  @media(max-width:760px){
+    .os{display:block;height:100dvh;min-height:0;padding:0;overflow:hidden;}
+    /* the map fills the whole screen */
+    .center{position:fixed;inset:0;border:0;border-radius:0;z-index:1;min-height:0;}
+    #map{height:100%;width:100%;}
+    /* topbar floats translucently over the map */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:48;
+        padding:calc(8px + env(safe-area-inset-top)) 14px 12px;
+        background:linear-gradient(to bottom, rgba(4,4,6,.6), rgba(4,4,6,0));}
+    body[data-theme="light"] .topbar{background:linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));}
+    .map-search{top:calc(52px + env(safe-area-inset-top));}
+    /* left column hidden — vehicle/telemetry reachable from the tabs & overlays */
+    .col-l{display:none;}
+    /* right column = draggable bottom sheet of glass cards floating over the map */
+    .col-r{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom));z-index:44;
+        display:flex;flex-direction:column;gap:10px;align-items:stretch;
+        max-height:72vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+        padding:0 12px 10px;background:none;
+        transform:translateY(calc(100% - 88px));transition:transform .4s cubic-bezier(.32,.72,0,1);}
+    body[data-sheet] .col-r{transform:translateY(0);}
+    .col-r .card{flex-shrink:0;}
+    /* pull handle / peek */
+    .sheet-handle{display:block;position:sticky;top:0;align-self:center;width:120px;height:26px;border:0;cursor:pointer;background:none;flex-shrink:0;z-index:3;}
+    .sheet-handle::before{content:'';position:absolute;left:50%;top:9px;transform:translateX(-50%);width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.5);box-shadow:0 1px 8px rgba(0,0,0,.5);}
+    body[data-theme="light"] .sheet-handle::before{background:rgba(0,0,0,.32);}
+    .bottombar{z-index:46;}
+    body[data-navfocus] .col-r{display:none;}
   }
 </style>
 </head>
@@ -597,6 +629,7 @@
 
   <!-- RIGHT WIDGETS -->
   <div class="col-r">
+    <button class="sheet-handle" id="sheetHandle" aria-label="Infos"></button>
     <div class="card w w-ai">
       <div class="w-head"><span class="w-title">AI Copilot</span><span class="lbl" id="modeLbl">Copilot</span></div>
       <div class="ai-top">
@@ -949,7 +982,8 @@
     poiLayer=L.layerGroup().addTo(map);
     var icon=L.divIcon({className:'',html:'<div class="me-wrap"><div class="me-arrow" id="meArrow"></div><div class="me-dot"></div></div>',iconSize:[20,20],iconAnchor:[10,10]});
     meMarker=L.marker([46.6,2.4],{icon:icon,interactive:false}).addTo(map); meMarker.setOpacity(0);
-    map.on('dragstart',function(){follow=false;$('followBtn').textContent='⊕';hideSuggest();});
+    map.on('dragstart',function(){follow=false;$('followBtn').textContent='⊕';hideSuggest();document.body.removeAttribute('data-sheet');});
+    map.on('click',function(){document.body.removeAttribute('data-sheet');});
     setTimeout(function(){map.invalidateSize();},250); window.addEventListener('resize',function(){map.invalidateSize();});
   }
 
@@ -1309,6 +1343,7 @@
   if($('navHud'))$('navHud').addEventListener('click',openHud);
   if($('hudOpenBtn'))$('hudOpenBtn').addEventListener('click',openHud);
   if($('hudClose'))$('hudClose').addEventListener('click',closeHud);
+  if($('sheetHandle'))$('sheetHandle').addEventListener('click',function(){ document.body.toggleAttribute('data-sheet'); });
   if($('obdHomeBtn'))$('obdHomeBtn').addEventListener('click',function(){ window.location.href='/obd.html'; });
   if($('carModeBtn'))$('carModeBtn').addEventListener('click',function(){ $('carOv').classList.add('show'); });
   if($('carX'))$('carX').addEventListener('click',function(){ $('carOv').classList.remove('show'); });
