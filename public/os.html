@@ -125,6 +125,8 @@
 
   /* diagnostics (Carly-style) */
   .diag-open{width:100%;margin-top:12px;background:var(--card);border:.5px solid var(--border);color:var(--txt);border-radius:14px;padding:13px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);transition:.2s;}
+  .home-conn{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
+  .home-conn .diag-open{margin-top:0;padding:9px;font-size:12px;}
   .diag-open:hover{border-color:var(--acc);}
   .diag-top{display:flex;align-items:center;gap:18px;margin:8px 0 14px;}
   .diag-ring{width:104px;height:104px;transform:rotate(-90deg);flex-shrink:0;}
@@ -595,6 +597,10 @@
       </div>
       <button class="diag-open" id="twinBtn" style="margin-top:4px;padding:9px;font-size:12px;">◍ Jumeau du conducteur</button>
       <button class="diag-open" id="hudOpenBtn" style="margin-top:6px;padding:10px;font-size:12px;background:var(--acc);color:#000;border-color:var(--acc);font-weight:600;">◈ HUD cognitif Tesla-like</button>
+      <div class="home-conn">
+        <button class="diag-open" id="obdHomeBtn">🔌 OBD2</button>
+        <button class="diag-open" id="carModeBtn">🚗 Mode Voiture</button>
+      </div>
       <div class="wave" id="wave"></div>
     </div>
     <div class="card w">
@@ -813,6 +819,18 @@
     </div>
     <div class="twin-learn"><div class="dc-head"><span>Ce que j'ai appris de toi</span></div><div id="twinLearn"></div></div>
     <div class="diag-foot">Estimation logicielle à partir du GPS, de l'accélération et du cap — sans capteur biométrique. Plus tu roules, plus le modèle s'affine.</div>
+  </div>
+</div>
+
+<!-- CAR MODE / CARPLAY -->
+<div class="ov" id="carOv">
+  <div class="ov-panel">
+    <button class="x" id="carX">✕</button>
+    <h3>Mode Voiture · CarPlay</h3>
+    <p style="font-size:13px;color:var(--dim);line-height:1.55;margin:2px 0 14px;">CarPlay & Android Auto n'affichent que des <b style="color:var(--txt)">apps natives validées</b> par Apple/Google — une page web ne peut pas apparaître toute seule sur l'écran de la voiture. En attendant l'app native, voici le <b style="color:var(--txt)">Mode Voiture</b> : le HUD plein écran optimisé conduite, avec ta vitesse GPS et tes données OBD réelles.</p>
+    <button class="diag-open" id="carGo" style="background:var(--acc);color:#000;border-color:var(--acc);font-weight:600;margin-top:0;">▶ Lancer le Mode Voiture (plein écran)</button>
+    <button class="diag-open" id="carObd">🔌 Connecter mon lecteur OBD2</button>
+    <div class="diag-foot">Astuce iPhone : ajoute Practice à l'écran d'accueil (Partager › Sur l'écran d'accueil) pour le plein écran, pose le téléphone sur un support, ou projette via Recopie de l'écran. Le vrai CarPlay natif est documenté dans practice-native/.</div>
   </div>
 </div>
 
@@ -1274,6 +1292,12 @@
   if($('navHud'))$('navHud').addEventListener('click',openHud);
   if($('hudOpenBtn'))$('hudOpenBtn').addEventListener('click',openHud);
   if($('hudClose'))$('hudClose').addEventListener('click',closeHud);
+  if($('obdHomeBtn'))$('obdHomeBtn').addEventListener('click',function(){ window.location.href='/obd.html'; });
+  if($('carModeBtn'))$('carModeBtn').addEventListener('click',function(){ $('carOv').classList.add('show'); });
+  if($('carX'))$('carX').addEventListener('click',function(){ $('carOv').classList.remove('show'); });
+  if($('carOv'))$('carOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+  if($('carGo'))$('carGo').addEventListener('click',function(){ $('carOv').classList.remove('show'); openHud(); });
+  if($('carObd'))$('carObd').addEventListener('click',function(){ window.location.href='/obd.html'; });
   if($('trSrc')) $('trSrc').textContent = TT_KEY ? '● live' : 'estimation';
   if($('ttKey')){ $('ttKey').value=TT_KEY;
     $('ttKey').addEventListener('change',function(){ TT_KEY=this.value.trim(); try{localStorage.setItem('practiceTomTom',TT_KEY);}catch(e){} $('trSrc').textContent=TT_KEY?'● live':'estimation'; toast(TT_KEY?'Trafic live activé (TomTom).':'Trafic en estimation.'); updateTraffic(); }); }
