@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
-<title>PRACTICE OS — Cognitive HUD</title>
+<title>Practice Vision HUD</title>
 <link rel="manifest" href="/practice.webmanifest"/>
 <meta name="theme-color" content="#050506"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
 <style>
@@ -49,6 +50,12 @@
   .spark{display:flex;align-items:flex-end;gap:3px;height:30px;flex:1;}
   .spark i{flex:1;background:#3a3d42;border-radius:2px 2px 0 0;min-height:2px;transition:height .3s,background .3s;}
 
+  /* GPS mini-map */
+  #mapPanel{bottom:16px;right:16px;width:230px;padding:12px 13px;}
+  #miniMap{width:100%;height:150px;border-radius:12px;margin-top:9px;background:#0a0c10;overflow:hidden;}
+  #miniMap .leaflet-control-attribution{display:none;}
+  .me-dot{width:14px;height:14px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px rgba(255,80,0,.25),0 0 12px var(--acc);}
+
   /* voice bubble */
   #voice{bottom:96px;left:50%;transform:translateX(-50%);z-index:6;max-width:70vw;display:none;align-items:center;gap:10px;padding:11px 18px;border-radius:30px;font-size:14px;}
   #voice.show{display:flex;}
@@ -68,7 +75,39 @@
   .brand{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:5;font-family:var(--mono);font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:#565b61;}
   .brand b{color:#F2F3F5;letter-spacing:.4em;}
   .note{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);z-index:5;font-family:var(--mono);font-size:8px;letter-spacing:.05em;color:#3a3d42;text-align:center;}
-  @media(max-width:760px){#tele,#twin,#risk{width:150px;padding:11px} .big{font-size:34px} #ctl{gap:5px;padding:7px} #ctl button{padding:7px 9px;font-size:11px}}
+  /* ---- tablet ---- */
+  @media(max-width:1024px){
+    #tele,#twin,#risk,#mapPanel{width:185px;}
+    #miniMap{height:118px;}
+    .big{font-size:40px;}
+  }
+  /* ---- phone ---- */
+  @media(max-width:760px){
+    .panel{padding:10px 11px;border-radius:14px;}
+    .brand{display:none;}
+    #tele{top:calc(10px + env(safe-area-inset-top));left:8px;width:42vw;max-width:185px;}
+    #mapPanel{top:calc(10px + env(safe-area-inset-top));right:8px;bottom:auto;width:42vw;max-width:185px;}
+    #miniMap{height:88px;margin-top:7px;}
+    #twin{display:none;}                         /* keep the road readable on small screens */
+    #risk{bottom:104px;left:8px;width:42vw;max-width:185px;}
+    .big{font-size:28px;}
+    #voice{bottom:104px;max-width:90vw;font-size:13px;padding:9px 14px;}
+    #ctl{left:0;right:0;bottom:8px;transform:none;max-width:none;border-radius:0;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;border-left:0;border-right:0;}
+    #ctl button,#hz{flex-shrink:0;}
+    .note{display:none;}
+  }
+  @media(max-width:430px){
+    #tele,#risk,#mapPanel{width:44vw;}
+    #miniMap{height:74px;}
+    .big{font-size:24px;}
+    .trow{font-size:11px;}
+  }
+  /* landscape phone: show twin again, compact */
+  @media(max-height:480px) and (orientation:landscape){
+    #twin{display:block;width:150px;}
+    #mapPanel{display:none;}
+    #risk{bottom:60px;}
+  }
 </style>
 </head>
 <body data-lvl="SAFE">
@@ -76,7 +115,7 @@
   <canvas id="cv"></canvas>
   <div id="vig"></div>
 
-  <div class="brand"><b>PRACTICE</b> OS · COGNITIVE HUD</div>
+  <div class="brand"><b>PRACTICE VISION</b> · HUD</div>
 
   <div class="panel" id="tele">
     <div class="ttl"><span><b>01</b> Véhicule · <i id="srcBadge" style="font-style:normal;color:var(--faint)">SIM</i></span><span class="state-chip" id="stateChip"><span class="dot" id="stateDot"></span><span id="stateTxt">SAFE</span></span></div>
@@ -84,8 +123,14 @@
     <div class="trow"><span class="lbl">Accél.</span><span class="v" id="acc">0.0 m/s²</span></div>
     <div class="trow" id="rowRpm" style="display:none"><span class="lbl">Régime</span><span class="v" id="teleRpm">—</span></div>
     <div class="trow" id="rowCool" style="display:none"><span class="lbl">Refroid.</span><span class="v" id="teleCool">—</span></div>
-    <div class="trow"><span class="lbl">Direction</span><span class="v" id="str">0.0°</span></div>
+    <div class="trow"><span class="lbl">Cap</span><span class="v" id="hdg">—</span></div>
+    <div class="trow"><span class="lbl">Position</span><span class="v" id="loc">—</span></div>
     <div class="trow"><span class="lbl">Adhérence</span><span class="v" id="grip">0.95</span></div>
+  </div>
+
+  <div class="panel" id="mapPanel">
+    <div class="ttl"><span><b>05</b> GPS live</span><span class="lbl" id="gpsAcc">—</span></div>
+    <div id="miniMap"></div>
   </div>
 
   <div class="panel" id="twin">
@@ -127,6 +172,7 @@
   <div class="note">📍 GPS = vitesse réelle · 🔌 OBD2 = données moteur live · ⛶ + AirPlay (Recopie d'écran iOS) pour l'écran voiture · le trafic reste simulé (pas de capteurs)</div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 "use strict";
 (function(){
@@ -296,7 +342,6 @@
     if(real.rpm!=null)$('teleRpm').textContent=Math.round(real.rpm)+' tr/min';
     if(real.cool!=null)$('teleCool').textContent=Math.round(real.cool)+' °C';
     $('acc').textContent=(egoAccel>=0?'+':'')+egoAccel.toFixed(1)+' m/s²';
-    $('str').textContent=((world.egoLane-1)*-2).toFixed(1)+'°';
     $('grip').textContent=S.grip.toFixed(2);
     document.body.setAttribute('data-lvl',S.level);
     $('vig').style.setProperty('--lvl', S.level==='SAFE'?'rgba(57,217,138,.25)':S.level==='ALERT'?'rgba(245,166,35,.4)':'rgba(255,59,70,.6)');
@@ -332,12 +377,33 @@
   $('hzR').addEventListener('input',function(){horizon=+this.value;$('hzV').textContent=horizon+'s';});
   /* ---- real speed: GPS + OBD + fullscreen + wake lock ---- */
   function wake(){ try{ if('wakeLock'in navigator) navigator.wakeLock.request('screen').catch(function(){}); }catch(e){} }
-  function startGPS(){ if(!navigator.geolocation){log('GPS indisponible');return;} $('bGps').classList.add('on'); wake();
-    gpsWatch=navigator.geolocation.watchPosition(function(p){ var s=p.coords.speed; if(s==null||isNaN(s))return; real.speed=Math.max(0,s); if(real.src!=='OBD')real.src='GPS'; real.at=Date.now(); },
-      function(e){ log('GPS: '+(e.message||'refusé')); $('bGps').classList.remove('on'); },{enableHighAccuracy:true,maximumAge:1000,timeout:15000}); }
+
+  /* ---- live GPS map (Leaflet) ---- */
+  var map=null, meMarker=null, geoAt=0, lastGeo=null;
+  function initMap(){ if(map||typeof L==='undefined'||!$('miniMap'))return;
+    map=L.map('miniMap',{zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,keyboard:false}).setView([48.8566,2.3522],15);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
+    meMarker=L.marker([48.8566,2.3522],{icon:L.divIcon({className:'',html:'<div class="me-dot"></div>',iconSize:[14,14],iconAnchor:[7,7]}),interactive:false}).addTo(map);
+    setTimeout(function(){map.invalidateSize();},300);
+  }
+  function onGeo(lat,lon,spd,hdg,acc){
+    real.at=Date.now();
+    if(spd!=null&&!isNaN(spd)){ real.speed=Math.max(0,spd); if(real.src!=='OBD')real.src='GPS'; }
+    if(hdg!=null&&!isNaN(hdg)) $('hdg').textContent=Math.round(hdg)+'°';
+    if(acc!=null) $('gpsAcc').textContent='±'+Math.round(acc)+' m';
+    $('bGps').classList.add('on');
+    if(map&&lat!=null){ meMarker.setLatLng([lat,lon]); map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true}); }
+    // reverse geocode locality (throttled, every 25s)
+    if(lat!=null && Date.now()-geoAt>25000){ geoAt=Date.now();
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=14&lat='+lat+'&lon='+lon).then(function(r){return r.json();}).then(function(j){ var a=j&&j.address; if(a){ $('loc').textContent=(a.road||a.suburb||a.city||a.town||a.village||a.county||'—').slice(0,20); } }).catch(function(){});
+    }
+  }
+  function startGPS(){ if(!navigator.geolocation){log('GPS indisponible sur ce navigateur');return;} $('bGps').classList.add('on'); wake();
+    gpsWatch=navigator.geolocation.watchPosition(function(p){ var c=p.coords; onGeo(c.latitude,c.longitude,c.speed,c.heading,c.accuracy); },
+      function(e){ log('GPS: '+(e.message||'refusé')); $('bGps').classList.remove('on'); },{enableHighAccuracy:true,maximumAge:1000,timeout:20000}); }
   function stopGPS(){ if(gpsWatch!=null){navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;} $('bGps').classList.remove('on'); if(real.src==='GPS'){real.speed=null;real.src=null;} }
-  // embedded in cockpit: accept GPS from parent (avoids a 2nd location prompt)
-  window.addEventListener('message',function(e){ var d=e.data; if(d&&d.type==='gps'&&typeof d.speed==='number'){ real.speed=Math.max(0,d.speed); if(real.src!=='OBD')real.src='GPS'; real.at=Date.now(); $('bGps').classList.add('on'); } });
+  // embedded in cockpit: accept full GPS (lat/lon/speed/heading) from parent (no 2nd prompt)
+  window.addEventListener('message',function(e){ var d=e.data; if(d&&d.type==='gps'){ onGeo(d.lat,d.lon,d.speed,d.heading,d.acc); } });
   function toggleFull(){ var el=document.documentElement; try{ if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el);$('bFull').classList.add('on'); } else { (document.exitFullscreen||function(){}).call(document);$('bFull').classList.remove('on'); } }catch(e){} }
 
   /* ---- OBD-II via Web Bluetooth (compact ELM327) ---- */
@@ -371,8 +437,14 @@
   $('bObd').addEventListener('click',function(){ if(obd.on&&obd.gatt){obd.gatt.disconnect();} else obdConnect(); });
   $('bFull').addEventListener('click',toggleFull);
 
-  // seed traffic
+  // seed cognitive traffic layer
   for(var i=0;i<3;i++)spawnCar();
+
+  /* ---- REAL MODE by default: live map + auto GPS ---- */
+  initMap();
+  var EMBED=/[?&]embed=1/.test(location.search);
+  if(!EMBED){ auto=false; $('bAuto').classList.remove('on'); $('bAuto').textContent='○ Réel'; setTimeout(startGPS,700); }
+  window.addEventListener('resize',function(){ if(map)setTimeout(function(){map.invalidateSize();},150); });
 })();
 </script>
 </body>

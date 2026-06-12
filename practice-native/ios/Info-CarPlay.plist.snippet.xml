@@ -1,0 +1,27 @@
+<!-- Add to the app's Info.plist to register the CarPlay scene.
+     Also add the entitlement com.apple.developer.carplay-maps (Navigation) in the .entitlements file
+     and request it from Apple Developer (Certificates, Identifiers & Profiles → CarPlay). -->
+<key>UIApplicationSceneManifest</key>
+<dict>
+  <key>UIApplicationSupportsMultipleScenes</key>
+  <true/>
+  <key>UISceneConfigurations</key>
+  <dict>
+    <!-- phone window: hosts the full web cockpit (os.html) in a WKWebView -->
+    <key>UIWindowSceneSessionRoleApplication</key>
+    <array>
+      <dict>
+        <key>UISceneConfigurationName</key><string>Phone</string>
+        <key>UISceneDelegateClassName</key><string>$(PRODUCT_MODULE_NAME).PhoneSceneDelegate</string>
+      </dict>
+    </array>
+    <!-- car screen: CarPlay navigation template -->
+    <key>CPTemplateApplicationSceneSessionRoleApplication</key>
+    <array>
+      <dict>
+        <key>UISceneConfigurationName</key><string>CarPlay</string>
+        <key>UISceneDelegateClassName</key><string>$(PRODUCT_MODULE_NAME).CarPlaySceneDelegate</string>
+      </dict>
+    </array>
+  </dict>
+</dict>

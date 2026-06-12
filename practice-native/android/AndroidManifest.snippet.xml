@@ -1,0 +1,30 @@
+<!-- Add inside <application> of the Android app's AndroidManifest.xml.
+     build.gradle: implementation "androidx.car.app:app:1.4.0"
+     The phone UI (MainActivity) hosts os.html in a WebView; this service is the car screen. -->
+
+<application>
+  <!-- Android Auto navigation service -->
+  <service
+      android:name="fm.betterstate.practice.car.PracticeCarAppService"
+      android:exported="true">
+    <intent-filter>
+      <action android:name="androidx.car.app.CarAppService"/>
+      <category android:name="androidx.car.app.category.NAVIGATION"/>
+    </intent-filter>
+  </service>
+
+  <meta-data
+      android:name="androidx.car.app.minCarApiLevel"
+      android:value="1"/>
+
+  <!-- required: declares the app for Android Auto -->
+  <meta-data
+      android:name="com.google.android.gms.car.application"
+      android:resource="@xml/automotive_app_desc"/>
+</application>
+
+<!-- res/xml/automotive_app_desc.xml:
+<automotiveApp>
+    <uses name="navigation"/>
+</automotiveApp>
+-->

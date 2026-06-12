@@ -932,7 +932,7 @@
     var arrow=$('meArrow'); if(arrow&&hdg!=null&&!isNaN(hdg))arrow.style.transform='translateX(-50%) rotate('+hdg+'deg)';
     $('trDist').textContent=totalDist<1000?Math.round(totalDist)+' m':(totalDist/1000).toFixed(1)+' km';
     updateGForce(spd,hdg,ts); updateTwin(spdK,ts); updateTwinUI();
-    var hf=$('hudFrame'); if(hf&&hf.contentWindow&&$('hudOv').classList.contains('show')){ try{hf.contentWindow.postMessage({type:'gps',speed:Math.max(0,spd||0),heading:hdg},'*');}catch(e){} }
+    var hf=$('hudFrame'); if(hf&&hf.contentWindow&&$('hudOv').classList.contains('show')){ try{hf.contentWindow.postMessage({type:'gps',speed:Math.max(0,spd||0),heading:hdg,lat:lat,lon:lon,acc:c.accuracy},'*');}catch(e){} }
     maybeWeather(lat,lon); loadPOI(lat,lon);
     if(navActive&&route){ navigate({lat:lat,lon:lon},spdK); setActiveAgents(spdK>118?['safety']:['driving','nav']); proactiveFatigue(); }
     else orchestrate(spdK);
