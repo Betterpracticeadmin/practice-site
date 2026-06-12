@@ -32,6 +32,14 @@
   }
   body[data-theme="dark"] .card{ background:linear-gradient(135deg, rgba(214,60,104,.11), rgba(120,28,62,.045) 58%, transparent), var(--card); }
   body[data-theme="dark"] .navtabs{ background-image:linear-gradient(135deg, rgba(214,60,104,.13), rgba(120,28,62,.05) 60%, transparent); }
+  /* warm veil over the map (mobile) — edges only, center stays legible for driving */
+  #mapVeil{display:none;}
+  @media(max-width:760px){
+    body[data-theme="dark"] #mapVeil{display:block;position:absolute;inset:0;pointer-events:none;
+      background:
+        radial-gradient(135% 95% at 50% 48%, transparent 40%, rgba(214,52,96,.13) 80%, rgba(120,28,72,.24) 100%),
+        linear-gradient(to bottom, rgba(214,52,96,.16), transparent 20%, transparent 78%, rgba(120,28,72,.20));}
+  }
   .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);}
   .card{background:var(--card);backdrop-filter:blur(22px);border:.5px solid var(--border);border-radius:18px;box-shadow:0 10px 34px rgba(0,0,0,.32);transition:background .5s,border-color .5s;}
 
@@ -709,6 +717,7 @@
   <!-- CENTER: MAP -->
   <div class="center">
     <div id="map"></div>
+    <div id="mapVeil"></div>
     <button class="nav-exit" id="navExit"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Cockpit</button>
     <button class="nav-hud" id="navHud">◈ HUD</button>
     <div class="speed-ov"><div class="lim">130</div><div class="v" id="spd">0</div><div class="u">km/h</div><div class="gear">D</div></div>
