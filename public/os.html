@@ -819,7 +819,7 @@
 <!-- INTEGRATED COGNITIVE HUD (Tesla-like) -->
 <div class="hud-ov" id="hudOv">
   <button class="hud-close" id="hudClose"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Cockpit</button>
-  <iframe id="hudFrame" allow="autoplay" title="Practice HUD"></iframe>
+  <iframe id="hudFrame" allow="autoplay; geolocation; bluetooth; fullscreen" title="Practice HUD"></iframe>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -932,6 +932,7 @@
     var arrow=$('meArrow'); if(arrow&&hdg!=null&&!isNaN(hdg))arrow.style.transform='translateX(-50%) rotate('+hdg+'deg)';
     $('trDist').textContent=totalDist<1000?Math.round(totalDist)+' m':(totalDist/1000).toFixed(1)+' km';
     updateGForce(spd,hdg,ts); updateTwin(spdK,ts); updateTwinUI();
+    var hf=$('hudFrame'); if(hf&&hf.contentWindow&&$('hudOv').classList.contains('show')){ try{hf.contentWindow.postMessage({type:'gps',speed:Math.max(0,spd||0),heading:hdg},'*');}catch(e){} }
     maybeWeather(lat,lon); loadPOI(lat,lon);
     if(navActive&&route){ navigate({lat:lat,lon:lon},spdK); setActiveAgents(spdK>118?['safety']:['driving','nav']); proactiveFatigue(); }
     else orchestrate(spdK);

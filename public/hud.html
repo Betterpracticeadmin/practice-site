@@ -79,9 +79,11 @@
   <div class="brand"><b>PRACTICE</b> OS · COGNITIVE HUD</div>
 
   <div class="panel" id="tele">
-    <div class="ttl"><span><b>01</b> Véhicule</span><span class="state-chip" id="stateChip"><span class="dot" id="stateDot"></span><span id="stateTxt">SAFE</span></span></div>
+    <div class="ttl"><span><b>01</b> Véhicule · <i id="srcBadge" style="font-style:normal;color:var(--faint)">SIM</i></span><span class="state-chip" id="stateChip"><span class="dot" id="stateDot"></span><span id="stateTxt">SAFE</span></span></div>
     <div class="big"><span id="spd">0</span><small>km/h</small></div>
     <div class="trow"><span class="lbl">Accél.</span><span class="v" id="acc">0.0 m/s²</span></div>
+    <div class="trow" id="rowRpm" style="display:none"><span class="lbl">Régime</span><span class="v" id="teleRpm">—</span></div>
+    <div class="trow" id="rowCool" style="display:none"><span class="lbl">Refroid.</span><span class="v" id="teleCool">—</span></div>
     <div class="trow"><span class="lbl">Direction</span><span class="v" id="str">0.0°</span></div>
     <div class="trow"><span class="lbl">Adhérence</span><span class="v" id="grip">0.95</span></div>
   </div>
@@ -114,10 +116,15 @@
     <button id="bNight">🌙 Nuit</button>
     <div class="sep"></div>
     <button id="bVoice" class="on">🔊 Voix</button>
+    <div class="sep"></div>
+    <button id="bGps">📍 GPS réel</button>
+    <button id="bObd">🔌 OBD2</button>
+    <button id="bFull">⛶ Plein écran</button>
+    <div class="sep"></div>
     <div id="hz"><span>Horizon</span><input id="hzR" type="range" min="1" max="5" step="1" value="3"/><span id="hzV">3s</span></div>
   </div>
 
-  <div class="note">Simulation web (truth layer façon Unreal) pilotant le graphe agent · démo — pas un véhicule réel</div>
+  <div class="note">📍 GPS = vitesse réelle · 🔌 OBD2 = données moteur live · ⛶ + AirPlay (Recopie d'écran iOS) pour l'écran voiture · le trafic reste simulé (pas de capteurs)</div>
 </div>
 
 <script>
@@ -132,6 +139,8 @@
   /* ---------- world (Unreal-lite truth layer) ---------- */
   var world={ egoV:14, egoLane:1, lanes:3, t:0, weather:'clear', night:false, cars:[], peds:[], spawnAt:0, pedAt:0 };
   var auto=true, voiceOn=true, horizon=3;
+  var real={speed:null,rpm:null,cool:null,src:null,at:0};   // real speed source (OBD/GPS)
+  var gpsWatch=null;
   var VIEW_M=95;            // metres of road shown ahead
   function laneX(lane){ var roadW=Math.min(W*0.52,360), x0=W/2-roadW/2, lw=roadW/world.lanes; return x0+lw*(lane+0.5); }
   function roadGeom(){ var roadW=Math.min(W*0.52,360); return {roadW:roadW, x0:W/2-roadW/2, lw:roadW/world.lanes, egoY:H-130, topY:60}; }
@@ -183,8 +192,10 @@
     risk=clamp(risk+Math.max(0,spdK-150)/200,0,1);
     var override=risk>=P0, level=override?'CRITICAL':risk>P1?'ALERT':'SAFE';
 
-    /* PLANNER + CONTROL (auto) */
-    if(auto){ var target=override?0:risk>P1?world.egoV*(1-risk*0.6):Math.min(world.egoV+2*dt*8,38);
+    /* SPEED SOURCE: real (OBD/GPS) > manual > auto sim. Real speed = advisory mode (no override of the car) */
+    if(real.speed!=null && real.src==='GPS' && Date.now()-real.at>4000) real.speed=null;
+    if(real.speed!=null){ egoAccel=clamp((real.speed-lastV)/Math.max(dt,0.001),-9,5); world.egoV=clamp(real.speed,0,90); }
+    else if(auto){ var target=override?0:risk>P1?world.egoV*(1-risk*0.6):Math.min(world.egoV+2*dt*8,38);
       var dv=target-world.egoV; egoAccel=clamp(dv/Math.max(dt,0.001),-9,4); world.egoV=clamp(world.egoV+egoAccel*dt,0,60); }
     else egoAccel=(world.egoV-lastV)/Math.max(dt,0.001);
     lastV=world.egoV;
@@ -281,6 +292,9 @@
   var TWcol={calm:['Calme','#46C28E'],focused:['Focalisé','#6AA1FF'],stressed:['Tendu','#E0A33A'],aggressive:['Agressif','#E2554F'],fatigued:['Fatigué','#B98BFF']};
   function paint(S){
     $('spd').textContent=Math.round(world.egoV*3.6);
+    $('srcBadge').textContent=real.src||'SIM'; $('srcBadge').style.color=real.src?'var(--safe)':'var(--faint)';
+    if(real.rpm!=null)$('teleRpm').textContent=Math.round(real.rpm)+' tr/min';
+    if(real.cool!=null)$('teleCool').textContent=Math.round(real.cool)+' °C';
     $('acc').textContent=(egoAccel>=0?'+':'')+egoAccel.toFixed(1)+' m/s²';
     $('str').textContent=((world.egoLane-1)*-2).toFixed(1)+'°';
     $('grip').textContent=S.grip.toFixed(2);
@@ -316,6 +330,47 @@
   $('bNight').addEventListener('click',function(){world.night=!world.night;this.classList.toggle('on',world.night);});
   $('bVoice').addEventListener('click',function(){voiceOn=!voiceOn;this.classList.toggle('on',voiceOn);if(!voiceOn&&'speechSynthesis'in window)speechSynthesis.cancel();});
   $('hzR').addEventListener('input',function(){horizon=+this.value;$('hzV').textContent=horizon+'s';});
+  /* ---- real speed: GPS + OBD + fullscreen + wake lock ---- */
+  function wake(){ try{ if('wakeLock'in navigator) navigator.wakeLock.request('screen').catch(function(){}); }catch(e){} }
+  function startGPS(){ if(!navigator.geolocation){log('GPS indisponible');return;} $('bGps').classList.add('on'); wake();
+    gpsWatch=navigator.geolocation.watchPosition(function(p){ var s=p.coords.speed; if(s==null||isNaN(s))return; real.speed=Math.max(0,s); if(real.src!=='OBD')real.src='GPS'; real.at=Date.now(); },
+      function(e){ log('GPS: '+(e.message||'refusé')); $('bGps').classList.remove('on'); },{enableHighAccuracy:true,maximumAge:1000,timeout:15000}); }
+  function stopGPS(){ if(gpsWatch!=null){navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;} $('bGps').classList.remove('on'); if(real.src==='GPS'){real.speed=null;real.src=null;} }
+  // embedded in cockpit: accept GPS from parent (avoids a 2nd location prompt)
+  window.addEventListener('message',function(e){ var d=e.data; if(d&&d.type==='gps'&&typeof d.speed==='number'){ real.speed=Math.max(0,d.speed); if(real.src!=='OBD')real.src='GPS'; real.at=Date.now(); $('bGps').classList.add('on'); } });
+  function toggleFull(){ var el=document.documentElement; try{ if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el);$('bFull').classList.add('on'); } else { (document.exitFullscreen||function(){}).call(document);$('bFull').classList.remove('on'); } }catch(e){} }
+
+  /* ---- OBD-II via Web Bluetooth (compact ELM327) ---- */
+  var obd={dev:null,gatt:null,w:null,n:null,buf:'',q:[],p:null,on:false};
+  var OSVC=[0xFFE0,0xFFF0,0xFFE5,'6e400001-b5a3-f393-e0a9-e50e24dcca9e','0000ffe0-0000-1000-8000-00805f9b34fb','0000fff0-0000-1000-8000-00805f9b34fb'];
+  function oWrite(cmd){ return new Promise(function(res){ obd.q.push({c:cmd,r:res}); oPump(); }); }
+  function oPump(){ if(obd.p||!obd.q.length||!obd.w)return; obd.p=obd.q.shift(); obd.buf='';
+    var data=new TextEncoder().encode(obd.p.c+'\r'); (obd.w.writeValueWithoutResponse?obd.w.writeValueWithoutResponse(data):obd.w.writeValue(data)).catch(function(){});
+    obd.p._to=setTimeout(function(){ if(obd.p){var p=obd.p;obd.p=null;p.r(obd.buf);oPump();} },1300); }
+  function oNotify(ev){ var v=ev.target.value,s=''; for(var i=0;i<v.byteLength;i++)s+=String.fromCharCode(v.getUint8(i)); obd.buf+=s;
+    if(obd.buf.indexOf('>')>=0&&obd.p){clearTimeout(obd.p._to);var p=obd.p;obd.p=null;p.r(obd.buf.replace('>','').trim());oPump();} }
+  function oBytes(resp,pid){ var flat=resp.replace(/[^0-9A-Fa-f]/g,'').toUpperCase(); var key='41'+pid.slice(2).toUpperCase(); var p=flat.indexOf(key); if(p<0)return null; var b=[]; for(var q=p+4;q+2<=flat.length;q+=2)b.push(parseInt(flat.substr(q,2),16)); return b; }
+  async function obdConnect(){ if(!navigator.bluetooth){log('Web Bluetooth indisponible (Android Chrome / Bluefy iOS)');return;}
+    try{ log('recherche adaptateur OBD…'); obd.dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:OSVC});
+      obd.dev.addEventListener('gattserverdisconnected',function(){ obd.on=false;$('bObd').classList.remove('on'); if(real.src==='OBD'){real.speed=null;real.src=null;} log('OBD déconnecté'); });
+      obd.gatt=await obd.dev.gatt.connect(); var svcs=await obd.gatt.getPrimaryServices();
+      for(var i=0;i<svcs.length&&(!obd.w||!obd.n);i++){ var chs=await svcs[i].getCharacteristics(); for(var j=0;j<chs.length;j++){ var c=chs[j],pr=c.properties; if((pr.notify||pr.indicate)&&!obd.n)obd.n=c; if((pr.write||pr.writeWithoutResponse)&&!obd.w)obd.w=c; } }
+      if(!obd.w||!obd.n){log('caractéristiques OBD introuvables');return;}
+      await obd.n.startNotifications(); obd.n.addEventListener('characteristicvaluechanged',oNotify);
+      var init=['ATZ','ATE0','ATL0','ATS0','ATSP0']; for(var k=0;k<init.length;k++){await oWrite(init[k]);await new Promise(function(r){setTimeout(r,110);});}
+      obd.on=true; $('bObd').classList.add('on'); $('rowRpm').style.display='flex'; $('rowCool').style.display='flex'; wake(); log('OBD connecté ✓ — données moteur live');
+      obdPoll();
+    }catch(e){ log('OBD: '+(e.message||e)); } }
+  async function obdPoll(){ if(!obd.on)return;
+    try{ var r=await oWrite('010D'); var b=oBytes(r,'010D'); if(b&&b.length){ real.speed=b[0]/3.6; real.src='OBD'; real.at=Date.now(); } }catch(e){}
+    try{ var r2=await oWrite('010C'); var b2=oBytes(r2,'010C'); if(b2&&b2.length>1){ real.rpm=((b2[0]*256)+b2[1])/4; } }catch(e){}
+    try{ var r3=await oWrite('0105'); var b3=oBytes(r3,'0105'); if(b3&&b3.length){ real.cool=b3[0]-40; } }catch(e){}
+    if(obd.on)setTimeout(obdPoll,300); }
+
+  $('bGps').addEventListener('click',function(){ if(this.classList.contains('on'))stopGPS(); else startGPS(); });
+  $('bObd').addEventListener('click',function(){ if(obd.on&&obd.gatt){obd.gatt.disconnect();} else obdConnect(); });
+  $('bFull').addEventListener('click',toggleFull);
+
   // seed traffic
   for(var i=0;i<3;i++)spawnCar();
 })();
