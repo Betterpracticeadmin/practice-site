@@ -65,6 +65,7 @@
   #miniMap{width:100%;height:150px;border-radius:12px;margin-top:9px;background:#0a0c10;overflow:hidden;}
   #miniMap .leaflet-control-attribution{display:none;}
   .me-dot{width:14px;height:14px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px rgba(255,80,0,.25),0 0 12px var(--acc);}
+  .hud-radar{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;background:rgba(255,59,70,.92);border:1px solid rgba(255,255,255,.6);box-shadow:0 0 10px rgba(255,59,70,.6);}
 
   /* voice bubble */
   #voice{bottom:96px;left:50%;transform:translateX(-50%);z-index:6;max-width:70vw;display:none;align-items:center;gap:10px;padding:11px 18px;border-radius:30px;font-size:14px;}
@@ -395,15 +396,29 @@
     map=L.map('miniMap',{zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,keyboard:false}).setView([48.8566,2.3522],15);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
     meMarker=L.marker([48.8566,2.3522],{icon:L.divIcon({className:'',html:'<div class="me-dot"></div>',iconSize:[14,14],iconAnchor:[7,7]}),interactive:false}).addTo(map);
+    radarLayer=L.layerGroup().addTo(map);
     setTimeout(function(){map.invalidateSize();},300);
   }
+  /* radars (real speed cameras from OSM) on the HUD map + proximity alert */
+  var radarLayer=null, radars=[], radarSaid={}, radarAt=0, radarLL=null;
+  function hvs(a,b){ var R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180,la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180; var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)*Math.sin(dLon/2); return 2*R*Math.asin(Math.sqrt(x)); }
+  function brg(a,b){ var y=Math.sin((b.lon-a.lon)*Math.PI/180)*Math.cos(b.lat*Math.PI/180); var x=Math.cos(a.lat*Math.PI/180)*Math.sin(b.lat*Math.PI/180)-Math.sin(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.cos((b.lon-a.lon)*Math.PI/180); return (Math.atan2(y,x)*180/Math.PI+360)%360; }
+  function loadHudRadars(lat,lon){ if(!radarLayer)return; var now=Date.now(); if(radarLL&&hvs(radarLL,{lat:lat,lon:lon})<2500&&now-radarAt<300000)return; radarAt=now; radarLL={lat:lat,lon:lon};
+    var q='[out:json][timeout:25];(node["highway"="speed_camera"](around:6000,'+lat+','+lon+'););out 120;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){ if(!radarLayer)return; radarLayer.clearLayers(); radars=[];
+      (j.elements||[]).forEach(function(e){ if(!e.lat||!e.lon)return; radars.push({lat:e.lat,lon:e.lon,id:e.id}); L.marker([e.lat,e.lon],{icon:L.divIcon({className:'',html:'<div class="hud-radar">📷</div>',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(radarLayer); }); }).catch(function(){}); }
+  function checkHudRadars(lat,lon,hdg){ if(!radars.length||world.egoV*3.6<15)return;
+    for(var i=0;i<radars.length;i++){ var r=radars[i], d=hvs({lat:lat,lon:lon},r); if(d<460){ if(hdg!=null&&!isNaN(hdg)){ var diff=Math.abs(((brg({lat:lat,lon:lon},r)-hdg+540)%360)-180); if(diff>70)continue; }
+      if(!radarSaid[r.id]||Date.now()-radarSaid[r.id]>120000){ radarSaid[r.id]=Date.now(); var dd=Math.max(50,Math.round(d/50)*50);
+        var v=$('voice'); $('voiceTxt').textContent='📷 Radar à '+dd+' m'; v.classList.add('show'); clearTimeout(v._t); v._t=setTimeout(function(){v.classList.remove('show');},3000);
+        if(voiceOn&&'speechSynthesis'in window){try{var u=new SpeechSynthesisUtterance('Radar dans '+dd+' mètres.');u.lang='fr-FR';u.rate=1.0;speechSynthesis.speak(u);}catch(e){}} return; } } } }
   function onGeo(lat,lon,spd,hdg,acc){
     real.at=Date.now();
     if(spd!=null&&!isNaN(spd)){ real.speed=Math.max(0,spd); if(real.src!=='OBD')real.src='GPS'; }
     if(hdg!=null&&!isNaN(hdg)) $('hdg').textContent=Math.round(hdg)+'°';
     if(acc!=null) $('gpsAcc').textContent='±'+Math.round(acc)+' m';
     $('bGps').classList.add('on');
-    if(map&&lat!=null){ meMarker.setLatLng([lat,lon]); map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true}); }
+    if(map&&lat!=null){ meMarker.setLatLng([lat,lon]); map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true}); loadHudRadars(lat,lon); checkHudRadars(lat,lon,hdg); }
     // reverse geocode locality (throttled, every 25s)
     if(lat!=null && Date.now()-geoAt>25000){ geoAt=Date.now();
       fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=14&lat='+lat+'&lon='+lon).then(function(r){return r.json();}).then(function(j){ var a=j&&j.address; if(a){ $('loc').textContent=(a.road||a.suburb||a.city||a.town||a.village||a.county||'—').slice(0,20); } }).catch(function(){});

@@ -547,8 +547,21 @@
     body[data-navfocus] .col-r{display:none;}
   }
 
-  /* ===== MEDIA — CarPlay/Deezer-style player ===== */
-  .media-ov{position:fixed;inset:0;z-index:70;display:none;background:rgba(6,6,8,.6);backdrop-filter:blur(34px) saturate(1.25);}
+  /* ===== MEDIA — CarPlay/Deezer-style player (warm Apple-CarPlay wash) ===== */
+  .media-ov{position:fixed;inset:0;z-index:70;display:none;background:
+      radial-gradient(120% 78% at 50% 16%, rgba(214,52,96,.30), transparent 56%),
+      radial-gradient(95% 70% at 88% 94%, rgba(120,30,92,.24), transparent 55%),
+      radial-gradient(80% 60% at 10% 90%, rgba(170,32,70,.18), transparent 52%),
+      rgba(7,5,8,.72);
+    backdrop-filter:blur(36px) saturate(1.4);-webkit-backdrop-filter:blur(36px) saturate(1.4);}
+  .media-seg{display:inline-flex;gap:3px;background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.14);border-radius:30px;padding:4px;}
+  .media-seg button{background:none;border:none;color:rgba(255,255,255,.6);font-size:11px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:8px 16px;border-radius:24px;cursor:pointer;transition:.15s;}
+  .media-seg button.on{background:var(--acc);color:#000;font-weight:600;}
+  .media-search{width:100%;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.16);border-radius:13px;padding:11px 15px;color:#fff;font-size:14px;margin-bottom:12px;outline:none;box-sizing:border-box;}
+  .media-search::placeholder{color:rgba(255,255,255,.5);}
+  .mq-live{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:#ff6a73;border:.5px solid rgba(255,90,95,.5);border-radius:5px;padding:1px 5px;flex-shrink:0;}
+  /* ===== MEDIA — CarPlay/Deezer-style player (base) ===== */
+  .media-ov_x{display:none;}
   .media-ov.show{display:block;}
   .media-screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(18px + env(safe-area-inset-top)) clamp(16px,5vw,52px) calc(20px + env(safe-area-inset-bottom));}
   .media-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:clamp(14px,3vh,26px);flex-shrink:0;}
@@ -759,6 +772,7 @@
         <button id="plNext" title="Suivant"><svg viewBox="0 0 24 24"><path d="M17 6v12M4 6l9 6-9 6z"/></svg></button>
       </div>
       <iframe id="scFrame" class="sc-hidden" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fbetterstatee%2Fsets%2Fpigeons-planes&auto_play=false&hide_related=true&show_comments=false&visual=false"></iframe>
+      <audio id="rpAudio" preload="none"></audio>
     </div>
   </div>
 
@@ -977,7 +991,11 @@
 <!-- MEDIA — CarPlay/Deezer-style full player -->
 <div class="media-ov" id="mediaOv">
   <div class="media-screen">
-    <div class="media-head"><span class="t">Lecture · SoundCloud · Betterstate</span><button class="media-x" id="mediaX">✕</button></div>
+    <div class="media-head">
+      <div class="media-seg" id="mediaSeg"><button class="on" data-s="sc">Playlist</button><button data-s="radio">Radio</button><button data-s="podcast">Podcasts</button></div>
+      <button class="media-x" id="mediaX">✕</button>
+    </div>
+    <input class="media-search" id="mediaSearch" type="text" placeholder="Rechercher une station…" autocomplete="off" style="display:none"/>
     <div class="media-main">
       <div class="media-now">
         <div class="media-cover" id="mCover"></div>
@@ -995,7 +1013,7 @@
         </div>
       </div>
       <div class="media-queue">
-        <h4>File d'attente</h4>
+        <h4 id="mqLabel">File d'attente</h4>
         <div class="mq-list" id="mQueue"></div>
       </div>
     </div>
@@ -1574,7 +1592,7 @@
   function initPlayer(){ if(typeof SC==='undefined'||!$('scFrame'))return; try{
     scWidget=SC.Widget($('scFrame'));
     scWidget.bind(SC.Widget.Events.READY,function(){ updateTrack(); buildQueue(); });
-    scWidget.bind(SC.Widget.Events.PLAY,function(){ setPlayIcon(true); updateTrack(); });
+    scWidget.bind(SC.Widget.Events.PLAY,function(){ mediaSource='sc'; try{var ra=$('rpAudio');if(ra)ra.pause();}catch(e){} setPlayIcon(true); updateTrack(); });
     scWidget.bind(SC.Widget.Events.PAUSE,function(){ setPlayIcon(false); });
     scWidget.bind(SC.Widget.Events.FINISH,function(){ scWidget.next(); });
     scWidget.bind(SC.Widget.Events.PLAY_PROGRESS,function(e){ var pct=Math.round((e.relativePosition||0)*100);
@@ -1583,20 +1601,65 @@
   }catch(e){} }
   function openMedia(){ $('mediaOv').classList.add('show'); updateTrack(); buildQueue(); }
   function closeMedia(){ $('mediaOv').classList.remove('show'); }
-  $('plPlay').addEventListener('click',function(){ if(scWidget)scWidget.toggle(); });
-  $('plPrev').addEventListener('click',function(){ if(scWidget){scWidget.prev();setTimeout(updateTrack,500);} });
-  $('plNext').addEventListener('click',function(){ if(scWidget){scWidget.next();setTimeout(updateTrack,500);} });
+  $('plPlay').addEventListener('click',mediaToggle);
+  $('plPrev').addEventListener('click',mediaPrev);
+  $('plNext').addEventListener('click',mediaNext);
   $('mediaCard').addEventListener('click',function(e){ if(e.target.closest('.pl-ctl'))return; openMedia(); });
   $('mediaX').addEventListener('click',closeMedia);
-  $('mPlay').addEventListener('click',function(){ if(scWidget)scWidget.toggle(); });
-  $('mPrev').addEventListener('click',function(){ if(scWidget){scWidget.prev();setTimeout(updateTrack,500);} });
-  $('mNext').addEventListener('click',function(){ if(scWidget){scWidget.next();setTimeout(updateTrack,500);} });
-  $('mShuffle').addEventListener('click',function(){ if(scWidget&&mQueue.length){ var r=Math.floor((Date.now()/97)%mQueue.length); scWidget.skip(r); setTimeout(updateTrack,400);} });
-  $('mTrack').addEventListener('click',function(e){ if(!scWidget||!mDur)return; var r=e.offsetX/this.clientWidth; scWidget.seekTo(Math.max(0,Math.min(1,r))*mDur); });
-  $('mLike').addEventListener('click',function(){ if(!scWidget)return; scWidget.getCurrentSound(function(s){ if(!s||!s.id)return; var i=mLikes.indexOf(s.id); if(i>=0)mLikes.splice(i,1); else mLikes.unshift(s.id); try{localStorage.setItem('practiceLikes',JSON.stringify(mLikes.slice(0,200)));}catch(e){} $('mLike').classList.toggle('on',mLikes.indexOf(s.id)>=0); }); });
-  $('mdPlay').addEventListener('click',function(e){ e.stopPropagation(); if(scWidget)scWidget.toggle(); });
-  $('mdNext').addEventListener('click',function(e){ e.stopPropagation(); if(scWidget){scWidget.next();setTimeout(updateTrack,500);} });
+  $('mPlay').addEventListener('click',mediaToggle);
+  $('mPrev').addEventListener('click',mediaPrev);
+  $('mNext').addEventListener('click',mediaNext);
+  $('mShuffle').addEventListener('click',function(){ if(mediaSource==='sc'&&scWidget&&mQueue.length){ var r=Math.floor((Date.now()/97)%mQueue.length); scWidget.skip(r); setTimeout(updateTrack,400);} else if(rpList.length){ playAudioItem(Math.floor((Date.now()/97)%rpList.length)); } });
+  $('mTrack').addEventListener('click',function(e){ var r=e.offsetX/this.clientWidth; r=Math.max(0,Math.min(1,r)); if(mediaSource==='sc'){ if(scWidget&&mDur)scWidget.seekTo(r*mDur); } else if(mediaSource==='podcast'&&rpAudio.duration){ rpAudio.currentTime=r*rpAudio.duration; } });
+  $('mLike').addEventListener('click',function(){ if(mediaSource!=='sc'||!scWidget)return; scWidget.getCurrentSound(function(s){ if(!s||!s.id)return; var i=mLikes.indexOf(s.id); if(i>=0)mLikes.splice(i,1); else mLikes.unshift(s.id); try{localStorage.setItem('practiceLikes',JSON.stringify(mLikes.slice(0,200)));}catch(e){} $('mLike').classList.toggle('on',mLikes.indexOf(s.id)>=0); }); });
+  $('mdPlay').addEventListener('click',function(e){ e.stopPropagation(); mediaToggle(); });
+  $('mdNext').addEventListener('click',function(e){ e.stopPropagation(); mediaNext(); });
   $('miniDock').addEventListener('click',openMedia);
+
+  /* ---- radio + podcasts (HTML5 audio, no key) ---- */
+  var mediaSource='sc'; var rpAudio=$('rpAudio'); var rpList=[], rpIdx=-1, rpTimer=null;
+  var RADIOS=[
+    {n:'FIP',d:'Éclectique',u:'https://icecast.radiofrance.fr/fip-hifi.aac'},
+    {n:'France Inter',d:'Généraliste',u:'https://icecast.radiofrance.fr/franceinter-hifi.aac'},
+    {n:'France Info',d:'Info continue',u:'https://icecast.radiofrance.fr/franceinfo-hifi.aac'},
+    {n:'France Culture',d:'Culture · idées',u:'https://icecast.radiofrance.fr/franceculture-hifi.aac'},
+    {n:'France Musique',d:'Classique · jazz',u:'https://icecast.radiofrance.fr/francemusique-hifi.aac'},
+    {n:'FIP Groove',d:'Groove · funk',u:'https://icecast.radiofrance.fr/fipgroove-hifi.aac'},
+    {n:'FIP Jazz',d:'Jazz',u:'https://icecast.radiofrance.fr/fipjazz-hifi.aac'},
+    {n:'FIP Rock',d:'Rock',u:'https://icecast.radiofrance.fr/fiprock-hifi.aac'},
+    {n:"Mouv'",d:'Hip-hop · urbain',u:'https://icecast.radiofrance.fr/mouv-hifi.aac'},
+    {n:'Radio Nova',d:'Le grand mix',u:'https://novazz.ice.infomaniak.ch/novazz-128.mp3'}
+  ];
+  function rowHTML(art,a,b,n,live){ return '<span class="n">'+(n||'')+'</span><span class="c" style="background-image:'+(art?'url('+art+')':'none')+'"></span><span class="x"><span class="a">'+a+'</span><span class="b">'+(b||'')+'</span></span>'+(live?'<span class="mq-live">LIVE</span>':''); }
+  function fillRows(list,live){ var L=$('mQueue'); L.innerHTML=''; list.forEach(function(s,i){ var row=document.createElement('div'); row.className='mq-row'; row.innerHTML=rowHTML(s.art,s.title,s.artist,'',live); row.addEventListener('click',function(){ playAudioItem(i); }); L.appendChild(row); }); }
+  function setMediaSource(src){ mediaSource=src; [].forEach.call($('mediaSeg').children,function(b){b.classList.toggle('on',b.dataset.s===src);}); var sr=$('mediaSearch');
+    if(src==='sc'){ sr.style.display='none'; $('mqLabel').textContent='File d\'attente'; buildQueue(); }
+    else if(src==='radio'){ sr.style.display='block'; sr.placeholder='Rechercher une station…'; sr.value=''; $('mqLabel').textContent='Stations'; rpList=RADIOS.map(function(s){return {title:s.n,artist:s.d,url:s.u,art:'',live:true};}); fillRows(rpList,true); }
+    else { sr.style.display='block'; sr.placeholder='Rechercher un podcast…'; sr.value=''; $('mqLabel').textContent='Épisodes'; $('mQueue').innerHTML='<div style="color:var(--dim);font-size:12px;padding:10px 4px">Tape le nom d\'un podcast ci-dessus.</div>'; } }
+  function searchRadio(q){ fetch('https://de1.api.radio-browser.info/json/stations/search?limit=40&hidebroken=true&order=clickcount&reverse=true&name='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(a){
+      rpList=(a||[]).filter(function(s){return /^https:/.test(s.url_resolved||s.url||'');}).slice(0,30).map(function(s){return {title:s.name,artist:(s.country||'')+(s.bitrate?' · '+s.bitrate+'k':''),url:s.url_resolved||s.url,art:s.favicon||'',live:true};});
+      if(!rpList.length){$('mQueue').innerHTML='<div style="color:var(--dim);font-size:12px;padding:10px 4px">Aucune station HTTPS trouvée.</div>';return;} fillRows(rpList,true); }).catch(function(){}); }
+  function searchPodcast(q){ fetch('https://itunes.apple.com/search?media=podcast&entity=podcastEpisode&limit=40&term='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+      rpList=(j.results||[]).filter(function(e){return e.episodeUrl;}).map(function(e){return {title:e.trackName,artist:e.collectionName,url:e.episodeUrl,art:(e.artworkUrl160||e.artworkUrl100||e.artworkUrl60||''),live:false};});
+      if(!rpList.length){$('mQueue').innerHTML='<div style="color:var(--dim);font-size:12px;padding:10px 4px">Aucun épisode trouvé.</div>';return;} fillRows(rpList,false); }).catch(function(){}); }
+  function playAudioItem(i){ var s=rpList[i]; if(!s)return; rpIdx=i; try{ if(scWidget)scWidget.pause(); }catch(e){}
+    rpAudio.src=s.url; rpAudio.play().catch(function(){});
+    var t=s.title, ar=s.artist||(mediaSource==='radio'?'Radio live':'Podcast'), a=s.art;
+    if($('mTitle'))$('mTitle').textContent=t; if($('mArtist'))$('mArtist').textContent=ar; if($('mCover'))$('mCover').style.backgroundImage=a?'url('+a+')':'';
+    if($('mdTitle'))$('mdTitle').textContent=t; if($('mdArtist'))$('mdArtist').textContent=ar; if($('mdCover'))$('mdCover').style.backgroundImage=a?'url('+a+')':'';
+    if($('plTitle'))$('plTitle').textContent=t; if($('plArtist'))$('plArtist').textContent=ar; if(a&&$('plArt'))$('plArt').src=a;
+    if($('mDur'))$('mDur').textContent=s.live?'LIVE':'—'; if($('mCur'))$('mCur').textContent=''; if($('mFill'))$('mFill').style.width=s.live?'100%':'0';
+    document.body.setAttribute('data-dock','1'); $('miniDock').classList.add('show');
+    [].forEach.call($('mQueue').children,function(r,k){ if(r.classList)r.classList.toggle('on',k===i); }); }
+  function mediaToggle(){ if(mediaSource==='sc'){ if(scWidget)scWidget.toggle(); } else { if(rpAudio.paused){ if(!rpAudio.src&&rpList.length)playAudioItem(0); else rpAudio.play().catch(function(){}); } else rpAudio.pause(); } }
+  function mediaNext(){ if(mediaSource==='sc'){ if(scWidget){scWidget.next();setTimeout(updateTrack,500);} } else if(rpList.length){ playAudioItem((rpIdx+1)%rpList.length); } }
+  function mediaPrev(){ if(mediaSource==='sc'){ if(scWidget){scWidget.prev();setTimeout(updateTrack,500);} } else if(rpList.length){ playAudioItem((rpIdx-1+rpList.length)%rpList.length); } }
+  rpAudio.addEventListener('play',function(){ setPlayIcon(true); });
+  rpAudio.addEventListener('pause',function(){ setPlayIcon(false); });
+  rpAudio.addEventListener('ended',function(){ if(mediaSource==='podcast')mediaNext(); });
+  rpAudio.addEventListener('timeupdate',function(){ if(mediaSource==='podcast'&&rpAudio.duration){ var pct=Math.round(rpAudio.currentTime/rpAudio.duration*100); ['mFill','mdFill','plFill'].forEach(function(id){var e=$(id);if(e)e.style.width=pct+'%';}); if($('mCur'))$('mCur').textContent=fmtT(rpAudio.currentTime*1000); if($('mDur'))$('mDur').textContent=fmtT(rpAudio.duration*1000); } });
+  $('mediaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b)setMediaSource(b.dataset.s); });
+  $('mediaSearch').addEventListener('input',function(){ var q=this.value.trim(); clearTimeout(rpTimer); if(q.length<2)return; rpTimer=setTimeout(function(){ if(mediaSource==='radio')searchRadio(q); else if(mediaSource==='podcast')searchPodcast(q); },420); });
 
   /* ---------- phone (call screen) ---------- */
   function openPhone(){ $('phoneOv').classList.add('show'); }
