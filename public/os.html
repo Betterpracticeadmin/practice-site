@@ -11,20 +11,20 @@
 <title>PRACTICE OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=DotGothic16&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  :root{--amber:#E0A33A;--red:#E2554F;--mono:'JetBrains Mono',monospace;}
-  body[data-theme="dark"]{--bg:#060607;--bg2:#0c0d10;--card:rgba(255,255,255,.05);--border:rgba(255,255,255,.10);--txt:#ECEEF0;--dim:#8b9298;--faint:#565b61;--mapbg:#08090b;}
-  body[data-theme="light"]{--bg:#e9edf1;--bg2:#f4f6f8;--card:rgba(255,255,255,.82);--border:rgba(0,0,0,.10);--txt:#121620;--dim:#5f6671;--faint:#9aa0a8;--mapbg:#e6eaee;}
+  :root{--amber:#E0A33A;--red:#E2554F;--acc:#FF5000;--mono:'JetBrains Mono',monospace;--dot:'DotGothic16',monospace;}
+  body[data-theme="dark"]{--bg:#070708;--bg2:#0c0d10;--card:rgba(255,255,255,.045);--border:rgba(255,255,255,.10);--txt:#F2F3F5;--dim:#8b9298;--faint:#565b61;--mapbg:#08090b;--dotc:rgba(255,255,255,.05);}
+  body[data-theme="light"]{--bg:#EDEEEF;--bg2:#F6F7F7;--card:rgba(255,255,255,.84);--border:rgba(0,0,0,.12);--txt:#0E0F11;--dim:#5f6671;--faint:#9aa0a8;--mapbg:#e6eaee;--dotc:rgba(0,0,0,.07);}
   html,body{height:100%;}
-  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;overflow:hidden;transition:background .5s,color .5s;}
+  body{font-family:'Inter',sans-serif;background-color:var(--bg);background-image:radial-gradient(var(--dotc) .7px,transparent .8px);background-size:24px 24px;color:var(--txt);-webkit-font-smoothing:antialiased;overflow:hidden;transition:background .5s,color .5s;}
   .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);}
   .card{background:var(--card);backdrop-filter:blur(22px);border:.5px solid var(--border);border-radius:18px;box-shadow:0 10px 34px rgba(0,0,0,.32);transition:background .5s,border-color .5s;}
 
   /* ---- layout: dashboard ---- */
-  .os{display:grid;grid-template-columns:280px 1fr 300px;grid-template-rows:auto 1fr auto;gap:12px;height:100dvh;padding:calc(12px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom));}
+  .os{display:grid;grid-template-columns:280px 1fr 300px;grid-template-rows:auto 1fr auto;gap:12px;height:100dvh;padding:calc(12px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom));counter-reset:wt;}
   .topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 4px;}
   .col-l{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:12px;min-height:0;overflow:auto;}
   .center{grid-column:2;grid-row:2;position:relative;border-radius:20px;overflow:hidden;border:.5px solid var(--border);min-height:0;}
@@ -33,7 +33,7 @@
   .col-l::-webkit-scrollbar,.col-r::-webkit-scrollbar{width:0;}
 
   /* ---- topbar ---- */
-  .wm{font-family:var(--mono);font-size:12px;letter-spacing:.34em;text-transform:uppercase;display:flex;align-items:center;gap:10px;}
+  .wm{font-family:var(--dot);font-size:15px;letter-spacing:.18em;text-transform:uppercase;display:flex;align-items:center;gap:10px;}
   .wm .tri{width:14px;height:14px;border:1px solid var(--txt);border-radius:3px;transform:rotate(45deg);opacity:.7;}
   .topright{display:flex;align-items:center;gap:16px;font-family:var(--mono);font-size:12px;color:var(--dim);}
   .topright .clock{color:var(--txt);}
@@ -58,14 +58,14 @@
   .search{flex:1;display:flex;gap:6px;background:var(--card);backdrop-filter:blur(22px);border:.5px solid var(--border);border-radius:14px;padding:5px 5px 5px 14px;align-items:center;}
   .search input{flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-size:14px;}
   .search input::placeholder{color:var(--faint);}
-  .search button{background:var(--txt);color:var(--bg);border:none;border-radius:9px;padding:8px 14px;font-size:10px;font-weight:600;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+  .search button{background:var(--acc);color:#0a0a0a;border:none;border-radius:9px;padding:8px 14px;font-size:10px;font-weight:700;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
   .suggest{position:absolute;top:54px;left:12px;right:90px;z-index:7;display:none;flex-direction:column;background:var(--bg2);border:.5px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 16px 44px rgba(0,0,0,.5);}
   .suggest.show{display:flex;}
   .suggest div{padding:12px 15px;font-size:13px;color:var(--txt);cursor:pointer;border-bottom:.5px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .suggest div:last-child{border-bottom:none;}
   .suggest div small{color:var(--dim);}
   .speed-ov{position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);z-index:4;text-align:center;pointer-events:none;}
-  .speed-ov .v{font-size:84px;font-weight:200;line-height:.9;letter-spacing:-3px;text-shadow:0 4px 30px rgba(0,0,0,.6);}
+  .speed-ov .v{font-family:var(--dot);font-size:76px;line-height:.92;text-shadow:0 4px 30px rgba(0,0,0,.6);}
   .speed-ov .u{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;}
 
   /* maneuver banner (bottom of map) */
@@ -82,7 +82,8 @@
   /* ---- widgets ---- */
   .w{padding:16px 17px;}
   .w-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-  .w-title{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);}
+  .w-title{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);counter-increment:wt;}
+  .w-title::before{content:counter(wt,decimal-leading-zero);color:var(--acc);margin-right:9px;font-weight:700;}
   /* AI copilot */
   .w-ai{display:flex;flex-direction:column;gap:12px;}
   .ai-top{display:flex;align-items:flex-start;gap:14px;}
@@ -107,7 +108,7 @@
   .wx-sub b{color:var(--txt);font-weight:500;display:block;font-size:12px;}
 
   /* navigation mini */
-  .nav-eta{font-size:30px;font-weight:200;letter-spacing:-1px;}
+  .nav-eta{font-family:var(--dot);font-size:26px;letter-spacing:0;}
   .nav-sub{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:3px;}
 
   /* media (mock) */
@@ -131,17 +132,17 @@
   .navtabs{display:flex;gap:4px;background:var(--card);border:.5px solid var(--border);border-radius:16px;padding:5px;backdrop-filter:blur(20px);}
   .navtabs button{background:transparent;border:none;color:var(--dim);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;}
   .navtabs button .i{font-size:15px;}
-  .navtabs button.on{background:var(--txt);color:var(--bg);}
+  .navtabs button.on{background:var(--acc);color:#0a0a0a;}
   .navtabs button.muted{opacity:.38;}
 
   /* gate */
-  .gate{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:radial-gradient(ellipse 90% 80% at 50% 42%,var(--bg2),var(--bg) 78%);text-align:center;padding:24px;}
+  .gate{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background-color:var(--bg);background-image:radial-gradient(var(--dotc) .7px,transparent .8px),radial-gradient(ellipse 90% 80% at 50% 42%,var(--bg2),transparent 78%);background-size:24px 24px,100% 100%;text-align:center;padding:24px;}
   .gate-inner{display:flex;flex-direction:column;align-items:center;}
   .gate-orb{width:clamp(170px,40vw,260px);height:clamp(170px,40vw,260px);margin-bottom:28px;}
-  .gate .wm2{font-family:var(--mono);font-size:13px;letter-spacing:.42em;text-transform:uppercase;}
+  .gate .wm2{font-family:var(--dot);font-size:18px;letter-spacing:.2em;text-transform:uppercase;}
   .gate .wm-sub{font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:var(--faint);text-transform:uppercase;margin-top:8px;}
   .gate p{color:var(--dim);font-size:13px;max-width:320px;margin:16px auto 24px;line-height:1.6;}
-  .gate .go{background:var(--txt);color:var(--bg);border:none;border-radius:13px;padding:15px 30px;font-size:12px;font-weight:600;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;}
+  .gate .go{background:var(--acc);color:#0a0a0a;border:none;border-radius:13px;padding:15px 32px;font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
   .gate .demo{display:block;margin:13px auto 0;background:transparent;border:.5px solid var(--border);color:var(--dim);border-radius:11px;padding:11px 22px;font-size:11px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
   .gate .lang{display:flex;gap:6px;justify-content:center;margin-top:24px;}
   .gate .lang button{background:var(--card);border:.5px solid var(--border);color:var(--dim);border-radius:9px;padding:7px 13px;font-family:var(--mono);font-size:11px;cursor:pointer;}
@@ -176,7 +177,7 @@
   #ggDot{fill:var(--txt);filter:drop-shadow(0 0 6px var(--txt));transition:cx .25s,cy .25s;}
   .gg-bottom{text-align:center;margin-top:6px;} .gg-bottom .n{font-size:15px;font-weight:300;font-family:var(--mono);} .gg-bottom .k{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-family:var(--mono);}
   /* gear + speed limit overlay */
-  .speed-ov .lim{position:absolute;top:16px;left:calc(100% + 26px);width:46px;height:46px;border-radius:50%;border:2px solid var(--txt);display:grid;place-items:center;font-family:var(--mono);font-size:14px;background:var(--bg);color:var(--txt);}
+  .speed-ov .lim{position:absolute;top:16px;left:calc(100% + 26px);width:46px;height:46px;border-radius:50%;border:2.5px solid var(--acc);display:grid;place-items:center;font-family:var(--dot);font-size:15px;background:var(--bg);color:var(--txt);}
   .speed-ov .gear{display:inline-block;margin-top:8px;border:.5px solid var(--border);border-radius:7px;padding:2px 11px;font-family:var(--mono);font-size:12px;color:var(--txt);}
   /* status icons */
   .status-ic{display:flex;gap:12px;align-items:center;color:var(--dim);font-size:13px;}
@@ -185,6 +186,59 @@
   .climate.l{left:20px;} .climate.r{right:20px;}
   .climate b{color:var(--txt);font-weight:400;}
   @media(max-width:900px){ .climate{display:none;} }
+
+  /* ===== ADAPTIVE IDENTITY SYSTEM — each mode = a different personality ===== */
+  .card,.search,.navbar,.icon-btn,.navtabs,.copilot{transition:background .8s ease,border-color .8s ease,box-shadow .8s ease;}
+  /* accents per mode (PRACTICE DNA stays: minimal, monochrome base + one accent) */
+  body[data-mode="copilot"]{--acc:#6AA1FF;}
+  body[data-mode="learning"]{--acc:#46C28E;}
+  body[data-mode="performance"]{--acc:#E2554F;}
+  body[data-mode="ultra"]{--acc:#FF1F1F;}
+  body[data-mode="gt"]{--acc:#E0A33A;}
+  body[data-mode="night"]{--acc:#B98BFF;}
+  /* strongly-coloured identities (dark base) */
+  body[data-theme="dark"][data-mode="ultra"]{--bg:#040404;--card:rgba(255,40,40,.055);--border:rgba(255,55,55,.16);--dotc:rgba(255,40,40,.05);}
+  body[data-theme="dark"][data-mode="gt"]{--bg:#12100b;--bg2:#191510;--card:rgba(224,163,58,.06);--border:rgba(224,163,58,.16);--txt:#F3EEE4;--dotc:rgba(224,163,58,.05);}
+  body[data-theme="dark"][data-mode="night"]{--bg:#000;--bg2:#060409;--card:rgba(185,139,255,.05);--border:rgba(185,139,255,.13);--dotc:rgba(185,139,255,.045);}
+  body[data-theme="dark"][data-mode="learning"]{--bg:#0a0e11;--card:rgba(70,194,142,.05);--border:rgba(70,194,142,.15);--dotc:rgba(70,194,142,.05);}
+  /* orb tempo = the system's pulse changes per mode */
+  body[data-mode="copilot"] .orb::before{animation-duration:11s;}
+  body[data-mode="learning"] .orb::before{animation-duration:9s;}
+  body[data-mode="performance"] .orb::before{animation-duration:4.5s;}
+  body[data-mode="ultra"] .orb::before{animation-duration:2.2s;}
+  body[data-mode="gt"] .orb::before{animation-duration:13s;}
+  body[data-mode="night"] .orb::before{animation-duration:18s;}
+  /* accent glow on the orb */
+  body[data-mode="ultra"] .orb,body[data-mode="performance"] .orb{box-shadow:inset 0 0 0 .5px rgba(255,40,40,.5),0 0 26px rgba(255,40,40,.32);}
+  body[data-mode="night"] .orb{box-shadow:inset 0 0 0 .5px rgba(185,139,255,.5),0 0 26px rgba(185,139,255,.32);}
+  body[data-mode="copilot"] .orb{box-shadow:inset 0 0 0 .5px rgba(106,161,255,.5),0 0 24px rgba(106,161,255,.28);}
+  /* density: ULTRA RACE strips the superfluous — only the essentials remain */
+  body[data-mode="ultra"] .col-l .card:first-child,body[data-mode="ultra"] #mediaCard,body[data-mode="ultra"] #wxCard{opacity:.18;filter:grayscale(.7);pointer-events:none;}
+  body[data-mode="ultra"] .speed-ov .v{font-size:92px;}
+  body[data-mode="night"]{filter:brightness(.84);}
+  body[data-mode="performance"] .w,body[data-mode="ultra"] .w{padding:13px 15px;}
+  /* drive-mode card is the mode switcher */
+  #dmCard{cursor:pointer;}
+  #dmMode{font-family:var(--dot);}
+
+  /* ===== panel overlay (modes / settings) ===== */
+  .panel-bg{position:fixed;inset:0;z-index:50;display:none;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);}
+  .panel-bg.show{display:grid;place-items:center;}
+  .panel{width:min(560px,92vw);max-height:86vh;overflow:auto;background:var(--bg2);border:.5px solid var(--border);border-radius:22px;padding:22px 22px 24px;box-shadow:0 30px 80px rgba(0,0,0,.6);}
+  .panel h3{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:18px 0 10px;}
+  .panel h3:first-child{margin-top:0;}
+  .panel .x{float:right;background:transparent;border:.5px solid var(--border);color:var(--dim);border-radius:9px;width:30px;height:28px;cursor:pointer;}
+  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .mode-btn{text-align:left;background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:13px 15px;cursor:pointer;color:var(--txt);transition:.15s;}
+  .mode-btn:hover{border-color:rgba(255,255,255,.3);}
+  .mode-btn.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc);}
+  .mode-btn .mn{font-family:var(--dot);font-size:14px;letter-spacing:.06em;}
+  .mode-btn .md{font-size:11px;color:var(--dim);margin-top:4px;font-family:var(--mono);}
+  .mode-btn .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:middle;}
+  .seg{display:inline-flex;background:var(--card);border:.5px solid var(--border);border-radius:11px;padding:3px;gap:2px;}
+  .seg button{font-family:var(--mono);font-size:11px;color:var(--dim);background:transparent;border:none;padding:8px 13px;border-radius:8px;cursor:pointer;letter-spacing:.04em;}
+  .seg button.on{background:var(--acc);color:#0a0a0a;font-weight:600;}
+  .card.flash{border-color:var(--acc)!important;box-shadow:0 0 0 1px var(--acc),0 0 34px rgba(255,80,0,.25)!important;}
 
   /* responsive: stack on narrow (phone portrait) */
   @media(max-width:900px){
@@ -218,8 +272,8 @@
 
   <!-- LEFT WIDGETS -->
   <div class="col-l">
-    <div class="card w">
-      <div class="w-head"><div><div class="dm-mode">Drive mode</div><div class="dm-perf">Performance</div></div><span class="lbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span></div>
+    <div class="card w" id="dmCard">
+      <div class="w-head"><div><div class="dm-mode">Drive mode ▾</div><div class="dm-perf" id="dmMode">Copilot</div></div><span class="lbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span></div>
       <div class="car-img">
         <img src="/practice-car.jpg" alt="Practice car" loading="lazy" onerror="this.style.display='none';var s=this.parentNode.querySelector('svg');if(s)s.style.display='block';"/>
       <svg class="car-svg" style="display:none" viewBox="0 0 220 78">
@@ -231,7 +285,7 @@
       </svg>
       </div>
     </div>
-    <div class="card w">
+    <div class="card w" id="vehCard">
       <div class="w-head"><span class="w-title">Véhicule</span><span class="lbl">Nominal</span></div>
       <div class="veh-row"><span class="k"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M20 10v4"/></svg>Batterie</span><span class="bar"><span style="width:78%"></span></span><span class="val">78%</span></div>
       <div class="veh-row"><span class="k"><svg viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v16"/><path d="M3 21h12"/><path d="M14 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3"/></svg>Carburant</span><span class="bar"><span style="width:62%"></span></span><span class="val">62 L</span></div>
@@ -281,13 +335,13 @@
       <div class="nav-eta" id="navEta">—</div>
       <div class="nav-sub" id="navSub">Entre une destination</div>
     </div>
-    <div class="card w">
+    <div class="card w" id="wxCard">
       <div class="w-head"><span class="w-title">Météo</span><span class="lbl" id="wxLoc">—</span></div>
       <div class="wx"><div class="t"><span id="wxTemp">--</span>°</div><div class="ico" id="wxIco">○</div></div>
       <div class="wx-sub"><div>Pluie<b id="wxRain">0%</b></div><div>Vent<b id="wxWind">--</b></div><div>Ressenti<b id="wxFeel">--°</b></div></div>
       <div class="nav-sub" id="wxDesc" style="margin-top:8px;">—</div>
     </div>
-    <div class="card w">
+    <div class="card w" id="mediaCard">
       <div class="w-head"><span class="w-title">Média</span><span class="lbl">SoundCloud</span></div>
       <div class="sc-wrap">
         <iframe allow="autoplay" loading="lazy" src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fbetterstatee%2Fsets%2Fpigeons-planes&color=%23ffffff&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false&show_teaser=false"></iframe>
@@ -312,6 +366,27 @@
 
 <div class="climate l">🔊 → <b>20.5°</b></div>
 <div class="climate r"><b>21.0°</b> ← 🪑</div>
+
+<div class="panel-bg" id="panelBg">
+  <div class="panel">
+    <button class="x" id="panelX">✕</button>
+    <h3>Mode de conduite — chaque mode change toute l'identité</h3>
+    <div class="mode-grid" id="modeGrid">
+      <button class="mode-btn" data-m="copilot"><span class="mn"><span class="dot" style="background:#6AA1FF"></span>Copilot</span><div class="md">Confiance · pédagogue · carte simple</div></button>
+      <button class="mode-btn" data-m="learning"><span class="mn"><span class="dot" style="background:#46C28E"></span>Learning</span><div class="md">Apprentissage · encourage · explique</div></button>
+      <button class="mode-btn" data-m="performance"><span class="mn"><span class="dot" style="background:#E2554F"></span>Performance</span><div class="md">Précision · dense · concis</div></button>
+      <button class="mode-btn" data-m="ultra"><span class="mn"><span class="dot" style="background:#FF1F1F"></span>Ultra Race</span><div class="md">Hypercar · nerveux · « Freine. Apex. »</div></button>
+      <button class="mode-btn" data-m="gt"><span class="mn"><span class="dot" style="background:#E0A33A"></span>Grand Touring</span><div class="md">Voyage · contemplatif · conversation</div></button>
+      <button class="mode-btn" data-m="night"><span class="mn"><span class="dot" style="background:#B98BFF"></span>Night</span><div class="md">Nuit · sombre · discret</div></button>
+    </div>
+    <h3>Thème</h3>
+    <div class="seg" id="themeSeg2"><button data-t="auto">Auto</button><button data-t="dark">Nuit</button><button data-t="light">Jour</button></div>
+    <h3>Langue</h3>
+    <div class="seg" id="langSeg2"><button data-l="fr">Français</button><button data-l="en">English</button><button data-l="ja">日本語</button></div>
+    <h3>Voix</h3>
+    <div class="seg" id="voiceSeg"><button data-v="on">Activée</button><button data-v="off">Coupée</button></div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -362,7 +437,7 @@
 
   /* ---------- voice ---------- */
   var Voice = {
-    on:true, supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
+    on:true, rate:0.98, supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
     pick:function(){ if(!this.supported) return; var all=speechSynthesis.getVoices()||[]; var base=T().code.slice(0,2);
       var m=all.filter(function(v){return (v.lang||'').toLowerCase().indexOf(base)===0;});
       m.sort(function(a,b){return s(b)-s(a);}); this.voice=m[0]||null;
@@ -371,7 +446,7 @@
     _speak:function(t){ this.busy=true; var self=this,called=false; var done=function(){if(called)return;called=true;clearTimeout(self.safety);self.busy=false;if(self.queue.length){var n=self.queue.shift();self._speak(n.t,n.p);}};
       if(!this.supported){setTimeout(done,300);return;}
       var u=new SpeechSynthesisUtterance(t); if(this.voice){u.voice=this.voice;u.lang=this.voice.lang;}else u.lang=T().code;
-      u.rate=0.98;u.pitch=1; u.onend=done;u.onerror=done; clearTimeout(this.safety); this.safety=setTimeout(done,1400+t.length*80);
+      u.rate=this.rate||0.98;u.pitch=1; u.onend=done;u.onerror=done; clearTimeout(this.safety); this.safety=setTimeout(done,1400+t.length*80);
       try{speechSynthesis.speak(u);}catch(e){done();} },
     flush:function(){ this.queue=[];this.busy=false;clearTimeout(this.safety); if(this.supported)speechSynthesis.cancel(); }
   };
@@ -383,6 +458,18 @@
   var pts=[], totalDist=0, route=null, stepIdx=0, stepAnnounced=false, navActive=false, lastSpeedState=null, maxSpd=0;
   var currentDest=null, offCount=0, rerouting=false, wakeLock=null, suggTimer=null, stepMinD=Infinity, lastCruise=0;
   var THEMES={dark:'dark_all',light:'light_all'}; var themeMode='auto';
+  /* ---------- ADAPTIVE IDENTITY: modes ---------- */
+  var mode='copilot';
+  var MODES={
+    copilot:{name:'Copilot',rate:0.98,say:'Mode copilote. Je veille sur toi.'},
+    learning:{name:'Learning',rate:0.97,say:'Mode apprentissage. On progresse ensemble.'},
+    performance:{name:'Performance',rate:1.05,say:'Mode performance. Concentration.'},
+    ultra:{name:'Ultra Race',rate:1.18,say:'Mode course. Attaque.'},
+    gt:{name:'Grand Touring',rate:0.92,say:'Mode grand tourisme. Profite de la route.'},
+    night:{name:'Night',rate:0.9,say:'Mode nuit. Tout est calme.'}
+  };
+  function tileStyle(){ var t=effectiveTheme(); if(mode==='gt')return 'voyager_nolabels'; if(mode==='night'||mode==='ultra'||mode==='performance')return 'dark_all'; return THEMES[t]; }
+  function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; applyTheme(); syncPanel(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} }
 
   function haversine(a,b){var R=6371000,r=Math.PI/180;var dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;var s=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(s)));}
   function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
@@ -391,12 +478,12 @@
   function toast(m){var t=$('toast');if(!m){t.className='toast';return;}t.textContent=m;t.className='toast show';setTimeout(function(){t.className='toast';},3500);}
 
   /* ---------- theme ---------- */
-  function effectiveTheme(){ if(themeMode!=='auto') return themeMode; var h=new Date().getHours(); return (h>=7&&h<19)?'light':'dark'; }
+  function effectiveTheme(){ if(mode==='ultra'||mode==='night'||mode==='performance'||mode==='gt') return 'dark'; if(themeMode!=='auto') return themeMode; var h=new Date().getHours(); return (h>=7&&h<19)?'light':'dark'; }
   function applyTheme(){
     var t=effectiveTheme(); document.body.setAttribute('data-theme',t);
     $('themeBtn').textContent = themeMode==='auto'?'◐ Auto':(themeMode==='dark'?'● Nuit':'○ Jour');
-    if(map&&tileLayer){ tileLayer.setUrl('https://{s}.basemaps.cartocdn.com/'+THEMES[t]+'/{z}/{x}/{y}{r}.png'); }
-    if(routeLine){ routeLine.setStyle({color: t==='dark'?'#ffffff':'#111111'}); }
+    if(map&&tileLayer){ tileLayer.setUrl('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}{r}.png'); }
+    if(routeLine){ var dk=(t==='dark')||mode==='night'||mode==='ultra'||mode==='performance'; routeLine.setStyle({color: dk?'#ffffff':'#111111'}); }
   }
   setInterval(function(){ if(themeMode==='auto') applyTheme(); }, 60000);
 
@@ -571,12 +658,45 @@
   $('dest').addEventListener('blur',function(){setTimeout(hideSuggest,180);});
   $('routeCancel').addEventListener('click',function(){if(demoTimer){clearInterval(demoTimer);demoTimer=null;}stopNav();setMsg(T().ready,'');});
   $('followBtn').addEventListener('click',function(){follow=!follow;this.textContent=follow?'⊙':'⊕';});
-  $('voiceBtn').addEventListener('click',function(){Voice.on=!Voice.on;this.classList.toggle('muted',!Voice.on);if(!Voice.on)Voice.flush();});
-  $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();});
+  $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();});
+
+  /* ---------- functional tabs ---------- */
+  function flashCard(el){ if(!el)return; el.classList.add('flash'); setTimeout(function(){el.classList.remove('flash');},1000); }
+  var navtabs=document.querySelector('.navtabs');
+  navtabs.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return; var t=(b.textContent||'').trim().toLowerCase();
+    if(t==='voix'){ Voice.on=!Voice.on; b.classList.toggle('muted',!Voice.on); if(!Voice.on)Voice.flush(); var vs=$('voiceSeg'); return; }
+    if(t==='settings'){ openPanel(); return; }
+    [].forEach.call(navtabs.querySelectorAll('button'),function(x){ if(x.id!=='voiceBtn') x.classList.remove('on'); });
+    b.classList.add('on');
+    if(t==='home'){ if(pts.length){follow=true;$('followBtn').textContent='⊙';map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],16);} try{window.scrollTo({top:0,behavior:'smooth'});}catch(e2){} }
+    else if(t==='nav'){ try{document.querySelector('.center').scrollIntoView({behavior:'smooth',block:'center'});}catch(e2){} $('dest').focus(); }
+    else if(t==='media'){ var m=$('mediaCard'); m.scrollIntoView({behavior:'smooth',block:'center'}); flashCard(m); }
+    else if(t==='vehicle'){ var v=$('vehCard'); v.scrollIntoView({behavior:'smooth',block:'center'}); flashCard(v); }
+    else if(t==='phone'){ toast('Téléphone — appaire ton téléphone en Bluetooth pour appeler.'); }
+  });
+
+  /* ---------- mode / settings panel ---------- */
+  function openPanel(){ syncPanel(); $('panelBg').classList.add('show'); }
+  function closePanel(){ $('panelBg').classList.remove('show'); }
+  function syncPanel(){
+    [].forEach.call(document.querySelectorAll('#modeGrid .mode-btn'),function(b){b.classList.toggle('on',b.dataset.m===mode);});
+    [].forEach.call(document.querySelectorAll('#themeSeg2 button'),function(b){b.classList.toggle('on',b.dataset.t===themeMode);});
+    [].forEach.call(document.querySelectorAll('#langSeg2 button'),function(b){b.classList.toggle('on',b.dataset.l===LANG);});
+    [].forEach.call(document.querySelectorAll('#voiceSeg button'),function(b){b.classList.toggle('on',(b.dataset.v==='on')===Voice.on);});
+  }
+  $('panelX').addEventListener('click',closePanel);
+  $('panelBg').addEventListener('click',function(e){ if(e.target===this) closePanel(); });
+  $('dmCard').addEventListener('click',openPanel);
+  $('modeGrid').addEventListener('click',function(e){ var b=e.target.closest('.mode-btn'); if(b) setMode(b.dataset.m); });
+  $('themeSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; themeMode=b.dataset.t; applyTheme(); syncPanel(); });
+  $('langSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; LANG=b.dataset.l; Voice.pick(); syncPanel(); });
+  $('voiceSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; Voice.on=(b.dataset.v==='on'); if(!Voice.on)Voice.flush(); var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); syncPanel(); });
 
   /* ---------- init ---------- */
   applyTheme();
   if(window.L) initMap(); else toast('La carte n’a pas pu se charger.');
+  setMode('copilot',true);
   if(/[?&]demo/.test(location.search)) setTimeout(function(){$('gateDemo').click();},700);
   else setTimeout(beginLocate, 600); // auto-activate position — iOS shows the permission prompt by itself
 })();
