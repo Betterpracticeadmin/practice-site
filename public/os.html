@@ -153,6 +153,67 @@
   .key-in{width:100%;background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:11px 13px;color:var(--txt);font-size:12px;font-family:var(--mono);box-sizing:border-box;}
   .key-note{font-size:10.5px;color:var(--faint);margin-top:7px;line-height:1.45;}
 
+  /* ===== ORGANIC LOADERS & LIVING UI ===== */
+  .org{position:relative;width:48px;height:48px;filter:url(#gooLoad);}
+  .org i{position:absolute;top:50%;left:50%;width:13px;height:13px;margin:-6.5px;border-radius:50%;background:var(--acc);}
+  .org i:nth-child(1){animation:orbA 2.2s ease-in-out infinite;}
+  .org i:nth-child(2){animation:orbB 2.2s ease-in-out infinite;}
+  .org i:nth-child(3){animation:orbC 2.2s ease-in-out infinite;}
+  @keyframes orbA{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(14px,-7px) scale(1.25)}66%{transform:translate(-11px,10px) scale(.8)}}
+  @keyframes orbB{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-13px,9px) scale(.85)}66%{transform:translate(12px,8px) scale(1.2)}}
+  @keyframes orbC{0%,100%{transform:translate(0,0) scale(.9)}33%{transform:translate(2px,13px) scale(1.1)}66%{transform:translate(-10px,-11px) scale(1)}}
+  .org-sm{width:32px;height:32px;} .org-sm i{width:9px;height:9px;margin:-4.5px;}
+  @keyframes blob{0%,100%{border-radius:42% 58% 63% 37%/41% 44% 56% 59%}25%{border-radius:60% 40% 38% 62%/55% 48% 52% 45%}50%{border-radius:35% 65% 56% 44%/52% 36% 64% 48%}75%{border-radius:55% 45% 48% 52%/38% 60% 40% 62%}}
+  .blob{animation:blob 7s ease-in-out infinite;}
+
+  /* boot / system wake-up */
+  .boot{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:var(--bg);transition:opacity .9s ease;}
+  .boot.hide{opacity:0;pointer-events:none;}
+  .boot-blob{width:116px;height:116px;background:radial-gradient(circle at 38% 32%,rgba(255,255,255,.92),var(--acc) 60%,transparent 84%);filter:blur(1px);box-shadow:0 0 60px -10px var(--acc);}
+  .boot-title{font-family:var(--mono);font-size:10px;letter-spacing:.42em;text-transform:uppercase;color:var(--dim);}
+  .boot-lines{font-family:var(--mono);font-size:10px;color:var(--faint);line-height:1.95;min-height:150px;text-align:left;width:248px;}
+  .boot-lines .ok{color:#39d98a;}
+
+  /* agents strip + driver state (in AI card) */
+  .dstate{display:flex;align-items:center;gap:7px;font-size:11.5px;}
+  .dstate .dd{width:8px;height:8px;border-radius:50%;background:var(--dim);color:var(--dim);box-shadow:0 0 8px currentColor;flex-shrink:0;}
+  .agents{display:flex;gap:4px;flex-wrap:wrap;}
+  .agent{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);padding:3px 6px;border:.5px solid var(--border);border-radius:20px;transition:.3s;}
+  .agent .ad{width:5px;height:5px;border-radius:50%;background:var(--faint);transition:.3s;}
+  .agent.act{color:var(--txt);border-color:var(--acc);}
+  .agent.act .ad{background:var(--acc);box-shadow:0 0 7px var(--acc);}
+  .agent.safety.act{border-color:#ff5a5f;color:#ff5a5f;} .agent.safety.act .ad{background:#ff5a5f;box-shadow:0 0 7px #ff5a5f;}
+
+  /* driver twin overlay */
+  .twin-top{display:flex;align-items:center;gap:18px;margin:8px 0 16px;}
+  .twin-blob{width:104px;height:104px;flex-shrink:0;background:radial-gradient(circle at 38% 32%,rgba(255,255,255,.85),#46C28E 62%,transparent 86%);transition:background .6s;}
+  .twin-scores{display:flex;flex-direction:column;gap:12px;}
+  .tsc-h{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.08em;}
+  .tsc-bar{height:6px;background:var(--border);border-radius:4px;overflow:hidden;}
+  .tsc-bar i{display:block;height:100%;width:2%;border-radius:4px;transition:width .6s ease,background .4s;}
+  .twin-learn{margin-top:16px;}
+  .tl-item{font-size:11.5px;color:var(--dim);padding:8px 0;border-bottom:.5px solid var(--border);display:flex;gap:9px;align-items:flex-start;}
+  .tl-item::before{content:'◇';color:var(--acc);flex-shrink:0;}
+
+  /* calm mode — emotion agent simplifies the cockpit */
+  body[data-calm] #telemetry,body[data-calm] .climate{opacity:.45;transition:opacity .8s;}
+  body[data-calm] .wave span{animation-duration:2s;}
+  body[data-calm] .orb::before{animation-duration:18s;}
+
+  /* VIN decoder */
+  .vin-in{display:flex;gap:8px;margin-bottom:8px;}
+  .vin-in input{flex:1;min-width:0;background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:11px 13px;color:var(--txt);font-size:14px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;box-sizing:border-box;}
+  .vin-in button{background:var(--acc);color:#000;border:none;border-radius:12px;padding:0 18px;font-weight:600;cursor:pointer;flex-shrink:0;}
+  .vin-note{font-size:10.5px;color:var(--faint);line-height:1.45;margin-bottom:14px;}
+  .vin-result{min-height:10px;}
+  .vin-hero{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:2px;}
+  .vin-hero b{font-size:24px;font-weight:300;} .vin-hero span{color:var(--dim);font-size:13px;font-family:var(--mono);}
+  .vin-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;margin-top:12px;}
+  .vin-cell{padding:9px 2px;border-bottom:.5px solid var(--border);}
+  .vin-cell .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:3px;}
+  .vin-cell .v{font-size:12.5px;color:var(--txt);}
+  .vin-err{color:#ff5a5f;font-size:12px;padding:8px 0;}
+
   /* media (mock) */
   .media-row{display:flex;align-items:center;gap:12px;}
   .media-art{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#333,#111);flex-shrink:0;border:.5px solid var(--border);}
@@ -503,6 +564,16 @@
         <div class="orb"></div>
         <div><div class="ai-msg" id="cpMsg">Copilote prêt.</div><div class="ai-sub" id="cpSub">Active ta position</div></div>
       </div>
+      <div class="dstate"><span class="dd" id="dStateDot"></span><span id="dStateLbl">Calme</span><span class="lbl" id="agentLbl" style="margin-left:auto">Driving</span></div>
+      <div class="agents" id="agents">
+        <div class="agent safety" data-a="safety"><span class="ad"></span>Saf</div>
+        <div class="agent act" data-a="driving"><span class="ad"></span>Drv</div>
+        <div class="agent" data-a="nav"><span class="ad"></span>Nav</div>
+        <div class="agent" data-a="emotion"><span class="ad"></span>Emo</div>
+        <div class="agent" data-a="comms"><span class="ad"></span>Com</div>
+        <div class="agent" data-a="infotainment"><span class="ad"></span>Inf</div>
+      </div>
+      <button class="diag-open" id="twinBtn" style="margin-top:4px;padding:9px;font-size:12px;">◍ Jumeau du conducteur</button>
       <div class="wave" id="wave"></div>
     </div>
     <div class="card w">
@@ -637,6 +708,19 @@
       <button class="vc" data-c="defrost"><svg viewBox="0 0 24 24"><path d="M12 2v20M4 7l16 10M20 7 4 17M2 12h20"/></svg><span>Dégivrage</span></button>
     </div>
     <button class="diag-open" id="diagBtn">⚙ Diagnostic complet — santé & codes (OBD)</button>
+    <button class="diag-open" id="vinBtn">🔎 Décoder le VIN — fiche complète</button>
+  </div>
+</div>
+
+<!-- VIN DECODER -->
+<div class="ov" id="vinOv">
+  <div class="ov-panel">
+    <button class="x" id="vinX">✕</button>
+    <h3>Décodeur VIN — fiche véhicule</h3>
+    <div class="vin-in"><input id="vinInput" type="text" maxlength="17" placeholder="VIN — 17 caractères" autocomplete="off" spellcheck="false"/><button id="vinGo">Décoder</button></div>
+    <div class="vin-note">Le VIN est gravé en bas du pare-brise (côté conducteur), sur le montant de portière et sur la carte grise (champ <b>E</b>). 17 caractères, sans I/O/Q.</div>
+    <div id="vinResult" class="vin-result"></div>
+    <div class="diag-foot">Décodage via la base publique <b>NHTSA vPIC</b> (gratuite, mondiale) — caractéristiques constructeur réelles. L'historique (accidents, kilométrage, vol) façon carVertical exige un fournisseur payant et n'est pas inclus.</div>
   </div>
 </div>
 
@@ -677,6 +761,36 @@
       <button data-lang="en">English</button>
       <button data-lang="ja">日本語</button>
     </div>
+  </div>
+</div>
+
+<!-- goo filter for organic metaball loaders -->
+<svg width="0" height="0" style="position:absolute"><defs><filter id="gooLoad"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
+
+<!-- organic system boot -->
+<div class="boot" id="boot">
+  <div class="boot-blob blob"></div>
+  <div class="boot-title">Practice OS</div>
+  <div class="boot-lines" id="bootLines"></div>
+</div>
+
+<!-- DRIVER DIGITAL TWIN -->
+<div class="ov" id="twinOv">
+  <div class="ov-panel">
+    <button class="x" id="twinX">✕</button>
+    <h3>Jumeau du conducteur — modèle temps réel</h3>
+    <div class="twin-top">
+      <div class="twin-blob blob" id="twinBlob"></div>
+      <div><div class="lbl">État estimé</div><div class="veh-big" id="twinStateLbl">Calme</div><div class="nav-sub" style="margin-top:4px">d'après ta dynamique de conduite</div></div>
+    </div>
+    <div class="twin-scores">
+      <div><div class="tsc-h"><span>Fluidité</span><span id="tvSmooth">—</span></div><div class="tsc-bar"><i id="tbSmooth"></i></div></div>
+      <div><div class="tsc-h"><span>Agressivité</span><span id="tvAggr">—</span></div><div class="tsc-bar"><i id="tbAggr"></i></div></div>
+      <div><div class="tsc-h"><span>Concentration</span><span id="tvFocus">—</span></div><div class="tsc-bar"><i id="tbFocus"></i></div></div>
+      <div><div class="tsc-h"><span>Fatigue cognitive</span><span id="tvFat">—</span></div><div class="tsc-bar"><i id="tbFat"></i></div></div>
+    </div>
+    <div class="twin-learn"><div class="dc-head"><span>Ce que j'ai appris de toi</span></div><div id="twinLearn"></div></div>
+    <div class="diag-foot">Estimation logicielle à partir du GPS, de l'accélération et du cap — sans capteur biométrique. Plus tu roules, plus le modèle s'affine.</div>
   </div>
 </div>
 
@@ -789,9 +903,10 @@
     $('spd').textContent=spdK.toFixed(0);
     var arrow=$('meArrow'); if(arrow&&hdg!=null&&!isNaN(hdg))arrow.style.transform='translateX(-50%) rotate('+hdg+'deg)';
     $('trDist').textContent=totalDist<1000?Math.round(totalDist)+' m':(totalDist/1000).toFixed(1)+' km';
-    updateGForce(spd,hdg,ts);
+    updateGForce(spd,hdg,ts); updateTwin(spdK,ts); updateTwinUI();
     maybeWeather(lat,lon); loadPOI(lat,lon);
-    if(navActive&&route) navigate({lat:lat,lon:lon},spdK); else reactive(spdK);
+    if(navActive&&route){ navigate({lat:lat,lon:lon},spdK); setActiveAgents(spdK>118?['safety']:['driving','nav']); proactiveFatigue(); }
+    else orchestrate(spdK);
   }
   /* g-force estimated from GPS (longitudinal from speed delta, lateral from yaw rate × speed) */
   var gPrevSpd=null,gPrevHdg=null,gPrevT=null,ggS={lat:0,lon:0};
@@ -932,6 +1047,93 @@
     $('diagSys').innerHTML=h;
   }
   function openDiag(){ buildDiag(); $('vehOv').classList.remove('show'); $('diagOv').classList.add('show'); var avg=Math.round(DSYS.reduce(function(a,b){return a+b.s;},0)/DSYS.length); if(Voice.on)Voice.say('Diagnostic terminé. Santé globale '+avg+' pour cent. Un point à surveiller : l’efficacité du catalyseur.',2); }
+
+  /* ===== DRIVER DIGITAL TWIN (estimated from GPS dynamics, no biometrics) ===== */
+  var Twin={ smooth:82, aggr:12, focus:86, fatigue:6, state:'calm', tStart:Date.now(), lastUpd:0 };
+  var TWINS={calm:['Calme','#46C28E'],focused:['Focalisé','#6AA1FF'],stressed:['Tendu','#E0A33A'],aggressive:['Agressif','#E2554F'],fatigued:['Fatigué','#B98BFF']};
+  function updateTwin(spdK,ts){
+    Twin.lastUpd=ts; var gLon=ggS.lon||0, gLat=Math.abs(ggS.lat||0);
+    var inst=100-(Math.min(1,Math.abs(gLon)/0.5)*55)-(Math.min(1,gLat/0.7)*35); Twin.smooth=Twin.smooth*0.93+Math.max(0,inst)*0.07;
+    var ia=Math.min(100,(Math.max(0,Math.abs(gLon)-0.18)/0.5+Math.max(0,gLat-0.3)/0.6)*100); Twin.aggr=Twin.aggr*0.92+ia*0.08;
+    var mins=(ts-Twin.tStart)/60000, h=new Date().getHours(); var nightF=(h>=22||h<6)?22:((h>=20||h<7)?10:0);
+    Twin.fatigue=Math.min(100, 4 + mins*0.42 + nightF + (Twin.smooth>90&&spdK>70?mins*0.14:0));
+    Twin.focus=Math.max(20, 100 - Twin.aggr*0.35 - Math.max(0,Twin.fatigue-40)*0.6);
+    var st='calm';
+    if(gLat>0.55||Twin.aggr>55) st='aggressive';
+    else if(Twin.fatigue>62) st='fatigued';
+    else if(Twin.aggr>34||spdK>110) st='stressed';
+    else if(spdK>30&&Twin.smooth>72) st='focused';
+    Twin.state=st;
+  }
+  function setActiveAgents(list){ var s=$('agents'); if(!s)return;
+    [].forEach.call(s.children,function(el){ el.classList.toggle('act',list.indexOf(el.dataset.a)>=0); });
+    var lbl=$('agentLbl'); if(lbl)lbl.textContent={safety:'Safety',driving:'Driving',nav:'Navigation',emotion:'Emotion',comms:'Comms',infotainment:'Infotainment'}[list[0]]||'Driving'; }
+  function updateTwinUI(){ var t=TWINS[Twin.state]||TWINS.calm; var dot=$('dStateDot'),lb=$('dStateLbl'); if(dot){dot.style.background=t[1];dot.style.color=t[1];} if(lb)lb.textContent=t[0];
+    if($('twinOv')&&$('twinOv').classList.contains('show')) renderTwin(); }
+  function setBar(id,vid,v,c){ var e=$(id); if(e){e.style.width=Math.max(2,Math.min(100,v)).toFixed(0)+'%';e.style.background=c;} var t=$(vid); if(t)t.textContent=Math.round(v); }
+  function renderTwin(){ var t=TWINS[Twin.state]||TWINS.calm; var b=$('twinBlob'); if(b)b.style.background='radial-gradient(circle at 38% 32%,rgba(255,255,255,.85),'+t[1]+' 62%,transparent 86%)';
+    $('twinStateLbl').textContent=t[0]; $('twinStateLbl').style.color=t[1];
+    setBar('tbSmooth','tvSmooth',Twin.smooth,'#46C28E'); setBar('tbAggr','tvAggr',Twin.aggr,'#E2554F'); setBar('tbFocus','tvFocus',Twin.focus,'#6AA1FF'); setBar('tbFat','tvFat',Twin.fatigue,'#B98BFF');
+    var L=$('twinLearn'); if(L){ if(!TwinMem.length){L.innerHTML='<div class="tl-item" style="border:none">J\'apprends ton style au fil des trajets…</div>';} else { L.innerHTML=''; TwinMem.forEach(function(m){var d=document.createElement('div');d.className='tl-item';d.textContent=m;L.appendChild(d);}); } } }
+  /* context memory (pattern graph, lite) */
+  var TwinMem=[]; try{TwinMem=JSON.parse(localStorage.getItem('practiceTwin')||'[]');}catch(e){TwinMem=[];}
+  function learn(txt){ if(!txt||TwinMem.indexOf(txt)>=0)return; TwinMem.unshift(txt); TwinMem=TwinMem.slice(0,6); try{localStorage.setItem('practiceTwin',JSON.stringify(TwinMem));}catch(e){} }
+  function wxCtx(){ var w=document.body.getAttribute('data-wx'); return w==='rain'?' sous la pluie':w==='snow'?' sur neige':w==='fog'?' dans le brouillard':''; }
+  function nightCtx(){ var h=new Date().getHours(); return (h>=20||h<7)?' de nuit':''; }
+
+  /* ===== ORCHESTRATOR (6-agent arbitration, Safety override) ===== */
+  var lastAgentMsg=0, calmMode=false;
+  function applyCalm(on){ calmMode=on; if(on)document.body.setAttribute('data-calm','1'); else document.body.removeAttribute('data-calm'); }
+  function orchestrate(spdK){
+    var now=Date.now(), st=Twin.state;
+    if(spdK<2){ setActiveAgents(['driving']); if(lastSpeedState!=='stop'){lastSpeedState='stop';setState('safe');setMsg(T().stop,'');if(Voice.on)Voice.say(T().stop,1);} $('navSub').textContent='—'; return; }
+    lastSpeedState='move';
+    if(spdK>118){ setActiveAgents(['safety']); setState('critical'); setMsg(T().fast,Math.round(spdK)+' km/h'); if(now-lastCruise>8000){lastCruise=now;if(Voice.on)Voice.say(T().fast,2);} return; }
+    setState('safe');
+    var agents=['driving']; if(scWidget)agents.push('infotainment');
+    if(st==='aggressive'||st==='stressed'||st==='fatigued')agents.push('emotion');
+    setActiveAgents(agents);
+    if(now-lastAgentMsg>22000){
+      if(st==='fatigued'){ lastAgentMsg=now; applyCalm(true); learn('Fatigue après ~'+Math.round((now-Twin.tStart)/60000)+ ' min de conduite'+nightCtx()); setMsg('Signes de fatigue — pense à une pause.','◍ Emotion agent'); if(Voice.on)Voice.say('Je détecte des signes de fatigue. Une pause serait bienvenue.',2); return; }
+      if((st==='aggressive'||st==='stressed')&&!calmMode){ lastAgentMsg=now; applyCalm(true); learn('Conduite tendue détectée'+wxCtx()+nightCtx()); setMsg('Conduite tendue — j\'apaise l\'ambiance et je simplifie.','◍ Emotion agent'); if(Voice.on)Voice.say('Tu sembles tendu. Je simplifie l\'affichage et j\'adoucis l\'ambiance.',2); return; }
+      if((st==='calm'||st==='focused')&&calmMode){ applyCalm(false); }
+    }
+    if(now-lastCruise>16000){ lastCruise=now; var c=T().cruising[Math.floor((now/1000)%T().cruising.length)]; setMsg(c,Math.round(spdK)+' km/h'); if(Voice.on)Voice.say(c,1); }
+    else setMsg($('cpMsg').textContent||T().go,Math.round(spdK)+' km/h');
+  }
+  function proactiveFatigue(){ var now=Date.now(); if(Twin.state==='fatigued'&&now-lastAgentMsg>45000){ lastAgentMsg=now; applyCalm(true); learn('Fatigue en navigation après ~'+Math.round((now-Twin.tStart)/60000)+' min'+nightCtx()); if(Voice.on)Voice.say('Signes de fatigue détectés. Prévois une pause.',2); } }
+  $('twinBtn').addEventListener('click',function(){ renderTwin(); $('twinOv').classList.add('show'); });
+  $('twinX').addEventListener('click',function(){ $('twinOv').classList.remove('show'); });
+  $('twinOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+
+  /* ===== VIN decoder (NHTSA vPIC, free, no key) ===== */
+  function decodeVin(){ var v=($('vinInput').value||'').toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g,''); var R=$('vinResult');
+    if(v.length<11){ R.innerHTML='<div class="vin-err">VIN trop court — 17 caractères attendus (min. 11 pour un décodage partiel).</div>'; return; }
+    R.innerHTML='<div class="org org-sm" style="margin:16px auto"><i></i><i></i><i></i></div>';
+    fetch('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/'+encodeURIComponent(v)+'?format=json')
+      .then(function(r){return r.json();}).then(function(j){ var d=j&&j.Results&&j.Results[0]; if(!d){ R.innerHTML='<div class="vin-err">Décodage impossible.</div>'; return; }
+        var na=function(x){ return x&&(''+x).trim()&&x!=='Not Applicable'?(''+x).trim():''; };
+        var fields=[['Marque',na(d.Make)],['Modèle',na(d.Model)],['Série',na(d.Series)],['Année',na(d.ModelYear)],['Type',na(d.BodyClass)],['Catégorie',na(d.VehicleType)],['Carburant',na(d.FuelTypePrimary)],['Cylindrée',d.DisplacementL?(parseFloat(d.DisplacementL).toFixed(1)+' L'):''],['Cylindres',na(d.EngineCylinders)],['Puissance',d.EngineHP?(Math.round(d.EngineHP)+' ch'):''],['Transmission',na(d.TransmissionStyle)],['Vitesses',na(d.TransmissionSpeeds)],['Transmission roues',na(d.DriveType)],['Portes',na(d.Doors)],['Places',na(d.Seats)],['Usine',na(d.PlantCity)?(na(d.PlantCity)+(na(d.PlantCountry)?', '+na(d.PlantCountry):'')):''],['Constructeur',na(d.Manufacturer)],['Pays origine',na(d.PlantCountry)]];
+        var title=[na(d.Make),na(d.Model)].filter(Boolean).join(' ')||'Véhicule';
+        var hero='<div class="vin-hero"><b>'+title+'</b><span>'+na(d.ModelYear)+'</span></div>';
+        var grid=''; fields.forEach(function(f){ if(f[1]){ grid+='<div class="vin-cell"><span class="k">'+f[0]+'</span><span class="v">'+f[1]+'</span></div>'; } });
+        var warn=''; if(na(d.ErrorText)&&d.ErrorText.indexOf('0 - VIN decoded clean')<0){ var et=d.ErrorText.split(';')[0]; if(et&&et.indexOf('0 -')<0)warn='<div class="vin-note" style="margin:4px 0 2px;color:var(--amber)">⚠ '+et+'</div>'; }
+        R.innerHTML=hero+warn+(grid?'<div class="vin-grid">'+grid+'</div>':'<div class="vin-err">Aucune donnée constructeur pour ce VIN.</div>');
+        if(Voice.on&&na(d.Make))Voice.say('Véhicule identifié : '+[na(d.Make),na(d.Model),na(d.ModelYear)].filter(Boolean).join(' ')+'.',2);
+      }).catch(function(){ R.innerHTML='<div class="vin-err">Réseau indisponible.</div>'; }); }
+  $('vinBtn').addEventListener('click',function(){ $('vehOv').classList.remove('show'); $('vinOv').classList.add('show'); setTimeout(function(){$('vinInput').focus();},120); });
+  $('vinX').addEventListener('click',function(){ $('vinOv').classList.remove('show'); });
+  $('vinOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+  $('vinGo').addEventListener('click',decodeVin);
+  $('vinInput').addEventListener('keydown',function(e){ if(e.key==='Enter')decodeVin(); });
+
+  /* ===== organic system boot ===== */
+  (function bootSeq(){ var el=$('bootLines'); if(!el)return;
+    var lines=['Orchestrateur central','Safety agent','Driving agent','Navigation agent','Emotion · jumeau conducteur','Comms agent','Infotainment agent','Boucle temps réel'];
+    var st=['OK','en ligne','en ligne','en ligne','calibrage','en ligne','en ligne','active'];
+    var i=0,acc=''; function step(){ if(i>=lines.length){ setTimeout(function(){ var b=$('boot'); if(b){b.classList.add('hide'); setTimeout(function(){b.style.display='none';},950);} },600); return; }
+      acc+=lines[i]+' … <span class="ok">'+st[i]+'</span><br>'; el.innerHTML=acc; i++; setTimeout(step,255); } step();
+  })();
 
   /* ---------- routing ---------- */
   function fetchJSON(url,opts,tries){ tries=tries==null?2:tries; var ctrl=('AbortController'in window)?new AbortController():null; var to=setTimeout(function(){if(ctrl)ctrl.abort();},8000); var o=opts||{};if(ctrl)o.signal=ctrl.signal;
@@ -1108,7 +1310,7 @@
   $('diagBtn').addEventListener('click',openDiag);
   $('diagX').addEventListener('click',function(){ $('diagOv').classList.remove('show'); });
   $('diagOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
-  $('diagScan').addEventListener('click',function(){ var L=$('diagCodes'),b=this; b.disabled=true; L.innerHTML='<div class="dc-empty">Interrogation des calculateurs…</div>';
+  $('diagScan').addEventListener('click',function(){ var L=$('diagCodes'),b=this; b.disabled=true; L.innerHTML='<div class="org org-sm" style="margin:10px auto"><i></i><i></i><i></i></div>';
     setTimeout(function(){ b.disabled=false; if(!DTC.length){ L.innerHTML='<div class="dc-empty">✓ Aucun code défaut actif.</div>'; if(Voice.on)Voice.say('Aucun code défaut. Véhicule sain.',2); return; }
       L.innerHTML=''; DTC.forEach(function(d){ var el=document.createElement('div'); el.className='dc-item'; el.innerHTML='<span class="dc-code">'+d.c+'</span><span class="dc-txt">'+d.t+'</span><span class="dc-sv">'+d.sv+'</span><button class="dc-clear">Effacer</button>'; el.querySelector('.dc-clear').addEventListener('click',function(){ el.remove(); if(!L.children.length)L.innerHTML='<div class="dc-empty">✓ Codes effacés. Re-scanne pour confirmer.</div>'; }); L.appendChild(el); });
       if(Voice.on)Voice.say(DTC.length+' code défaut trouvé. '+DTC[0].c+', catalyseur à surveiller.',2);
