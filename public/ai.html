@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice AI — Engine · The co-pilot that learns the racing line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0b0b0c; --panel: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.1);
+    --teal: #5DCAA5; --amber: #EF9F27; --red: #E24B4A; --violet: #B98BFF;
+    --g4: #999; --g6: #555; --mono: 'JetBrains Mono', monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: #ccc; -webkit-font-smoothing: antialiased; line-height: 1.6; overflow-x: hidden; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 58px; border-bottom: 0.5px solid var(--border); background: rgba(10,10,10,0.85); backdrop-filter: blur(14px); }
+  .logo { font-size: 13px; letter-spacing: 0.18em; font-weight: 600; color: #fff; text-transform: uppercase; }
+  .logo span { color: var(--teal); }
+  .nav-meta { font-size: 11px; color: var(--g6); font-family: var(--mono); display: flex; gap: 8px; }
+  .nav-pill { font-size: 11px; text-decoration: none; color: var(--g4); padding: 6px 11px; border-radius: 100px; border: 0.5px solid var(--border); transition: .15s; }
+  .nav-pill.active { color: #04140e; background: var(--teal); border-color: transparent; font-weight: 600; }
+  .nav-pill:not(.active):hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+  /* HERO */
+  .hero { text-align: center; padding: 4.5rem 2rem 2.5rem; position: relative; overflow: hidden; }
+  .hero-glow { position: absolute; width: 700px; height: 300px; background: radial-gradient(ellipse, rgba(93,202,165,0.10) 0%, transparent 70%); top: -40px; left: 50%; transform: translateX(-50%); pointer-events: none; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--g6); text-transform: uppercase; font-family: var(--mono); margin-bottom: 1.3rem; }
+  .hero h1 { font-size: clamp(40px, 6vw, 72px); font-weight: 300; letter-spacing: -2.5px; line-height: 0.98; color: #fff; }
+  .hero h1 em { font-style: normal; color: var(--g6); }
+  .hero p { max-width: 600px; margin: 1.4rem auto 0; color: var(--g4); font-size: 16px; }
+  .hero .tag { display: inline-block; margin-top: 1.4rem; font-size: 11px; font-family: var(--mono); color: var(--teal); border: 0.5px solid rgba(93,202,165,0.35); border-radius: 100px; padding: 5px 14px; }
+
+  /* LAB */
+  .lab { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1.5rem 4rem; }
+  .lab-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px; }
+  .panel { background: var(--panel); border: 0.5px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 0.5px solid var(--border); }
+  .ph-title { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--g4); font-family: var(--mono); }
+  .ph-meta { font-size: 11px; color: var(--g6); font-family: var(--mono); }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); display: inline-block; margin-right: 7px; box-shadow: 0 0 8px var(--teal); animation: pulse 1.2s infinite; vertical-align: middle; }
+  /* living AI orb — colour = system state (SAFE / ATTENTION / CRITICAL) */
+  .ai-orb { width: 11px; height: 11px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; background: radial-gradient(circle at 35% 35%, #fff, var(--teal) 55%, transparent 75%); box-shadow: 0 0 10px var(--teal), 0 0 20px rgba(93,202,165,0.5); animation: orbPulse 2.4s ease-in-out infinite; transition: box-shadow 0.3s; }
+  .ai-orb.safe { background: radial-gradient(circle at 35% 35%, #fff, var(--teal) 55%, transparent 75%); box-shadow: 0 0 10px var(--teal), 0 0 20px rgba(93,202,165,0.45); animation-duration: 2.8s; }
+  .ai-orb.attention { background: radial-gradient(circle at 35% 35%, #fff, var(--amber) 55%, transparent 75%); box-shadow: 0 0 11px var(--amber), 0 0 22px rgba(239,159,39,0.5); animation-duration: 1.3s; }
+  .ai-orb.critical { background: radial-gradient(circle at 35% 35%, #fff, var(--red) 55%, transparent 75%); box-shadow: 0 0 13px var(--red), 0 0 26px rgba(226,75,74,0.6); animation-duration: 0.6s; }
+  @keyframes orbPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.78); opacity: 0.65; } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* track canvas */
+  .track-body { padding: 8px; position: relative; }
+  .track-svg { width: 100%; height: auto; display: block; }
+  .road { fill: none; stroke: rgba(255,255,255,0.06); stroke-linejoin: round; stroke-linecap: round; }
+  .edge { fill: none; stroke: rgba(255,255,255,0.16); stroke-width: 1; }
+  .center-line { fill: none; stroke: rgba(255,255,255,0.18); stroke-width: 1; stroke-dasharray: 1 5; }
+  .apex-mark { fill: rgba(255,255,255,0.5); }
+  .apex-label { fill: #fff; font-family: var(--mono); font-size: 8px; text-anchor: middle; }
+  #carDot .glow { fill: var(--teal); opacity: 0.25; }
+  #carDot .core { fill: #fff; stroke: var(--teal); stroke-width: 1.5; }
+  .track-legend { display: flex; gap: 16px; padding: 4px 12px 8px; flex-wrap: wrap; }
+  .lg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--g4); font-family: var(--mono); }
+  .lg-swatch { width: 18px; height: 3px; border-radius: 2px; }
+
+  /* drive hud bar under track */
+  .drive-hud { display: grid; grid-template-columns: auto auto 1fr auto; gap: 14px; align-items: center; padding: 10px 14px; border-top: 0.5px solid var(--border); }
+  .dh-speed { font-family: var(--mono); font-size: 26px; color: #fff; font-weight: 300; letter-spacing: -1px; white-space: nowrap; }
+  .dh-speed span { font-size: 12px; color: var(--g6); }
+  .dh-gear { display: flex; align-items: center; gap: 6px; }
+  .dh-gear-num { font-family: var(--mono); font-size: 30px; font-weight: 600; color: var(--teal); line-height: 1; min-width: 24px; text-align: center; border-radius: 6px; padding: 2px 4px; transition: background 0.1s; }
+  .dh-gear-num.flash-up { animation: gflashUp 0.5s ease; }
+  .dh-gear-num.flash-down { animation: gflashDown 0.5s ease; }
+  @keyframes gflashUp { 0% { background: rgba(93,202,165,0.6); color: #04140e; transform: scale(1.18); } 100% { background: transparent; transform: scale(1); } }
+  @keyframes gflashDown { 0% { background: rgba(239,159,39,0.6); color: #1a0f00; transform: scale(1.18); } 100% { background: transparent; transform: scale(1); } }
+  .shift-light { font-size: 13px; width: 16px; text-align: center; color: transparent; transition: color 0.1s; }
+  .shift-light.ready.up { color: var(--amber); animation: blink 0.5s steps(2) infinite; }
+  .shift-light.ready.down { color: var(--amber); animation: blink 0.5s steps(2) infinite; }
+  .shift-light.go.up { color: var(--teal); }
+  .shift-light.go.down { color: var(--amber); }
+  @keyframes blink { 50% { opacity: 0.25; } }
+  .dh-note { font-size: 13px; color: var(--teal); font-style: italic; font-family: var(--mono); }
+
+  /* right column blocks */
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; }
+  .stat { background: #0e0e10; padding: 14px 16px; }
+  .stat .k { font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--g6); font-family: var(--mono); }
+  .stat .v { font-size: 26px; font-family: var(--mono); color: #fff; font-weight: 300; margin-top: 3px; letter-spacing: -1px; }
+  .stat .v small { font-size: 12px; color: var(--g6); }
+  .stat .v.teal { color: var(--teal); } .stat .v.amber { color: var(--amber); }
+
+  .curve-body { padding: 12px 14px 6px; }
+  .curve-svg { width: 100%; height: auto; display: block; }
+  .curve-axis { stroke: rgba(255,255,255,0.08); stroke-width: 1; }
+  .curve-area { fill: rgba(93,202,165,0.10); }
+  .curve-line { fill: none; stroke: var(--teal); stroke-width: 1.5; }
+  .curve-lbl { fill: var(--g6); font-family: var(--mono); font-size: 8px; }
+
+  /* controls */
+  .ctrl { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .ctrl-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .ctrl-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--g6); font-family: var(--mono); }
+  .seg { display: inline-flex; background: rgba(255,255,255,0.04); border: 0.5px solid var(--border); border-radius: 9px; padding: 3px; gap: 2px; }
+  .seg button { font-family: var(--mono); font-size: 12px; color: var(--g4); background: transparent; border: none; padding: 6px 11px; border-radius: 7px; cursor: pointer; transition: all 0.18s; }
+  .seg button:hover { color: #fff; }
+  .seg button.on { background: #fff; color: #000; font-weight: 500; }
+  .btn { font-family: var(--mono); font-size: 12px; color: var(--g4); background: rgba(255,255,255,0.04); border: 0.5px solid var(--border); padding: 8px 14px; border-radius: 9px; cursor: pointer; transition: all 0.18s; }
+  .btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+  .btn.primary { background: var(--teal); color: #04140e; border-color: transparent; font-weight: 600; }
+  .btn.primary:hover { opacity: 0.9; }
+  .btn.voice-on { background: var(--teal); color: #04140e; border-color: transparent; font-weight: 600; }
+  .voice-select { font-family: var(--mono); font-size: 11px; color: var(--g4); background: rgba(255,255,255,0.04); border: 0.5px solid var(--border); border-radius: 9px; padding: 7px 10px; max-width: 200px; cursor: pointer; }
+  .voice-select:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+  .rate-wrap { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px; color: var(--g6); }
+  .rate-wrap input { accent-color: var(--teal); width: 90px; }
+  .voice-hint { font-size: 10px; color: var(--g6); font-family: var(--mono); margin-top: 2px; }
+  .dh-lap { font-family: var(--mono); font-size: 11px; color: var(--g6); text-align: right; white-space: nowrap; }
+
+  /* insights */
+  .insights-body { padding: 6px 6px 10px; max-height: 260px; overflow-y: auto; }
+  .ins-row { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: center; padding: 9px 12px; border-bottom: 0.5px solid var(--border); }
+  .ins-row:last-child { border-bottom: none; }
+  .ins-num { font-family: var(--mono); font-size: 13px; color: var(--teal); }
+  .ins-desc { font-size: 13px; color: #ddd; }
+  .ins-desc b { color: #fff; font-weight: 500; }
+  .ins-desc .sub { display: block; font-size: 11px; color: var(--g6); font-family: var(--mono); margin-top: 1px; }
+  .ins-spd { font-family: var(--mono); font-size: 14px; color: var(--amber); white-space: nowrap; }
+
+  /* explain strip */
+  .explain { max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem 4rem; }
+  .explain-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 0.5px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .ex-cell { background: #0e0e10; padding: 1.5rem 1.3rem; }
+  .ex-step { font-size: 11px; font-family: var(--mono); color: var(--teal); margin-bottom: 0.5rem; }
+  .ex-title { font-size: 15px; color: #fff; font-weight: 500; margin-bottom: 0.35rem; }
+  .ex-desc { font-size: 13px; color: var(--g6); line-height: 1.55; }
+
+  footer { border-top: 0.5px solid var(--border); padding: 1.6rem 2rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  footer p { font-size: 12px; color: #444; }
+
+  @media (max-width: 900px) { .lab-grid { grid-template-columns: 1fr; } .explain-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .stat-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Practice <span>AI</span> · Engine</div>
+  <div class="nav-meta">
+    <a href="/ai.html" class="nav-pill active">🤖 Co-pilote IA</a>
+    <a href="/gps.html" class="nav-pill">📍 Ma position</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <p class="eyebrow">/// The intelligence, on its own</p>
+  <h1>An AI that learns<br><em>the racing line.</em></h1>
+  <p>No pre-scripted trajectory. The agent starts on the centerline and discovers the fastest line by trial over thousands of simulated laps — constrained by a real grip / braking / acceleration model. Watch it learn.</p>
+  <span class="tag" id="heroTag">● initializing agent…</span>
+</section>
+
+<div class="lab">
+  <div class="lab-grid">
+    <!-- TRACK -->
+    <div class="panel">
+      <div class="panel-head">
+        <span class="ph-title"><span class="ai-orb safe" id="aiOrb"></span>Learned racing line</span>
+        <span class="ph-meta" id="trackMeta">—</span>
+      </div>
+      <div class="track-body">
+        <svg class="track-svg" id="trackSvg" viewBox="0 0 460 300">
+          <path id="road" class="road"></path>
+          <path id="edgeIn" class="edge"></path>
+          <path id="edgeOut" class="edge"></path>
+          <path id="centerLine" class="center-line"></path>
+          <g id="racingLine"></g>
+          <g id="apexes"></g>
+          <g id="carDot" transform="translate(-30,-30)">
+            <circle class="glow" r="9"></circle>
+            <circle class="core" r="4"></circle>
+          </g>
+        </svg>
+      </div>
+      <div class="track-legend">
+        <div class="lg-item"><span class="lg-swatch" style="background:var(--teal)"></span>high speed</div>
+        <div class="lg-item"><span class="lg-swatch" style="background:var(--amber)"></span>medium</div>
+        <div class="lg-item"><span class="lg-swatch" style="background:var(--red)"></span>slow / apex</div>
+        <div class="lg-item"><span class="lg-swatch" style="background:rgba(255,255,255,0.18)"></span>centerline (naive)</div>
+      </div>
+      <div class="drive-hud">
+        <div class="dh-speed" id="driveSpeed">0<span> km/h</span></div>
+        <div class="dh-gear"><span class="dh-gear-num" id="gearNum">N</span><span class="shift-light" id="shiftLight"></span></div>
+        <div class="dh-note" id="driveNote">› co-pilot ready</div>
+        <div class="dh-lap" id="driveLapMeta">lap 0</div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="stack">
+      <div class="stat-grid">
+        <div class="stat"><div class="k">Training laps</div><div class="v" id="sLaps">0</div></div>
+        <div class="stat"><div class="k">Best lap (learned)</div><div class="v teal" id="sBest">—</div></div>
+        <div class="stat"><div class="k">Naive centerline</div><div class="v" id="sNaive">—</div></div>
+        <div class="stat"><div class="k">Time gained</div><div class="v amber" id="sGain">—</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="ph-title">Learning curve</span><span class="ph-meta" id="curveMeta">lap time vs laps</span></div>
+        <div class="curve-body">
+          <svg class="curve-svg" id="curveSvg" viewBox="0 0 460 150" preserveAspectRatio="none">
+            <line class="curve-axis" x1="0" y1="149" x2="460" y2="149"></line>
+            <path class="curve-area" id="curveArea"></path>
+            <path class="curve-line" id="curveLine"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Track</span>
+            <div class="seg" id="trackSeg">
+              <button data-track="monaco" class="on">Monaco</button>
+              <button data-track="lemans">Le Mans</button>
+              <button data-track="pikes">Pikes Peak</button>
+            </div>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Grip model</span>
+            <div class="seg" id="gripSeg">
+              <button data-grip="dry" class="on">Dry · slicks</button>
+              <button data-grip="wet">Wet</button>
+              <button data-grip="ice">Low grip</button>
+            </div>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Agent</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn primary" id="btnTrain">⏸ Pause training</button>
+              <button class="btn" id="btnReset">↻ Reset line</button>
+              <button class="btn" id="btnSpeed">Train ×1</button>
+            </div>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Language</span>
+            <div class="seg" id="langSeg">
+              <button data-lang="fr">Français</button>
+              <button data-lang="en" class="on">English</button>
+              <button data-lang="ja">日本語</button>
+            </div>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Co-pilot mode</span>
+            <div class="seg" id="modeSeg">
+              <button data-mode="ghost" title="Safety only — calls just the dangerous corners">Ghost</button>
+              <button data-mode="copilot" class="on" title="Standard: every meaningful corner, anticipated">Copilot</button>
+              <button data-mode="performance" title="Adds coaching + calls fast corners too">Performance</button>
+            </div>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">Voice</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button class="btn" id="btnVoice">🔈 Voice OFF</button>
+              <select class="voice-select" id="voiceSelect" title="Choose a voice"></select>
+              <label class="rate-wrap">rate <input type="range" id="rateSlider" min="0.8" max="1.3" step="0.05" value="0.95"></label>
+            </div>
+          </div>
+          <div class="voice-hint" id="voiceHint">Tip: for a natural (non-robotic) voice, use Chrome/Edge — pick a “Natural / Online / Google” voice in the list.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="ph-title">What the agent discovered</span><span class="ph-meta" id="insMeta">— corners</span></div>
+        <div class="insights-body" id="insights"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="explain">
+  <div class="explain-grid">
+    <div class="ex-cell"><div class="ex-step">01 — Represent</div><div class="ex-title">The track as data</div><div class="ex-desc">The circuit is sampled into nodes; each carries a position, a normal, and the legal track width. The line is a lateral offset at every node.</div></div>
+    <div class="ex-cell"><div class="ex-step">02 — Evaluate</div><div class="ex-title">A physics lap clock</div><div class="ex-desc">For any candidate line: curvature → max corner speed (grip), then forward/backward passes for braking &amp; power. Sum the segment times = lap time.</div></div>
+    <div class="ex-cell"><div class="ex-step">03 — Search</div><div class="ex-title">Local-search optimizer</div><div class="ex-desc">Each lap, the agent molds a smooth local bump in the line, re-clocks it, and keeps the change only if it's faster. Exploration cools over time.</div></div>
+    <div class="ex-cell"><div class="ex-step">04 — Explain</div><div class="ex-title">Co-pilot output</div><div class="ex-desc">From the converged line it extracts apex side, braking points and minimum speeds — the pace notes a driver actually hears.</div></div>
+  </div>
+</section>
+
+<footer>
+  <p>PRACTICE AI — Engine · separate from the marketing site</p>
+  <p>Better-practice /// 2026</p>
+</footer>
+
+<script>
+"use strict";
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+
+  /* ---------- tracks (centerline as closed SVG paths) ---------- */
+  // Real-circuit database. lengthM = real length (display). scaleM = metres per drawing-unit
+  // (tuned so each track has its true character). vmax = top speed cap (km/h) for that circuit.
+  const TRACKS = {
+    monaco: { name: 'Monaco · GP', lengthM: 3337, scaleM: 6.5, rGain: 0.80, vmax: 290, halfW: 8,
+              d: 'M95,212 C95,196 106,191 119,186 C141,178 131,160 146,150 C159,141 173,151 181,138 C191,122 176,110 191,100 C203,92 216,101 221,88 C227,73 214,63 227,57 C240,51 252,62 250,77 C248,91 233,88 236,104 C239,122 259,113 263,129 C267,147 250,151 257,167 C263,185 287,178 297,193 C309,209 290,221 270,223 C235,226 244,205 214,206 C191,207 200,225 171,227 C139,229 150,212 127,215 C107,217 95,226 95,212 Z' },
+    lemans: { name: 'Le Mans · Sarthe', lengthM: 13626, scaleM: 8.5, rGain: 2.40, vmax: 345, halfW: 10,
+              d: 'M110,100 C98,96 94,110 103,120 C112,130 100,141 113,149 L350,233 C366,240 380,232 375,217 C370,205 355,208 342,201 C300,179 250,168 196,160 C171,156 156,146 150,128 C146,116 153,104 143,100 C133,96 122,102 110,100 Z' },
+    pikes:  { name: 'Pikes Peak · Hillclimb', lengthM: 19990, scaleM: 6.0, rGain: 0.55, vmax: 205, halfW: 8,
+              d: 'M120,252 C100,238 132,228 142,212 C154,194 112,187 124,167 C134,150 170,157 180,140 C192,120 152,110 167,94 C180,80 212,90 222,74 C234,56 202,44 222,38 C252,30 272,57 297,57 C332,57 347,82 327,100 C310,115 287,107 280,127 C272,150 307,152 297,172 C287,192 254,182 247,202 C239,224 274,230 257,244 C234,262 162,264 132,252 Z' }
+  };
+  const GRIP = { dry: 22.5, wet: 15.5, ice: 10.5 };       // max lateral accel m/s^2
+  const GEAR_TOP = [0, 72, 112, 158, 205, 256, 345];
+
+  const A_ACCEL = 11.5, A_BRAKE = 28;                     // m/s^2
+  let V_MAX_CAR = 96;                                     // m/s — overridden per track (TK.vmaxCar)
+  const G = 9.81;
+
+  /* ---------- state ---------- */
+  const state = { track: 'monaco', grip: 'dry', training: true, speedMult: 1, lang: 'en', mode: 'copilot' };
+  let TK = null;            // built track geometry
+  let bestA = null, bestTime = Infinity, naiveTime = Infinity;
+  let laps = 0, sigma = 0.28;
+  let curve = [];           // [{laps, t}]
+  let lineDirty = true, insightsDirty = true;
+  let driveIdx = 0;
+  // drive-lap timing + voice event bookkeeping
+  let driveLapTime = 0, driveLap = 0, driveBest = null;
+  let firedEvents = new Set(), lastShoutGear = 0, lastDrivenGear = 0, lastOrbState = '';
+
+  const measurePath = document.createElementNS(NS, 'path');
+
+  /* ---------- helpers ---------- */
+  function gauss() { let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function gearFromSpeed(kmh) { for (let g = 1; g <= 6; g++) if (kmh <= GEAR_TOP[g]) return g; return 6; }
+  function fmtTime(t) { if (!isFinite(t)) return '—'; const m = Math.floor(t / 60), s = t - m * 60; return (m > 0 ? m + ':' + s.toFixed(2).padStart(5, '0') : s.toFixed(2)) + 's'; }
+  function ordinal(n) { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+
+  /* ---------- build track ---------- */
+  function buildTrack(key) {
+    const t = TRACKS[key];
+    measurePath.setAttribute('d', t.d);
+    const L = measurePath.getTotalLength();
+    const N = 150;
+    const C = new Array(N), Nrm = new Array(N);
+    for (let i = 0; i < N; i++) { const p = measurePath.getPointAtLength(L * i / N); C[i] = { x: p.x, y: p.y }; }
+    for (let i = 0; i < N; i++) {
+      const a = C[(i - 1 + N) % N], b = C[(i + 1) % N];
+      let tx = b.x - a.x, ty = b.y - a.y; const d = Math.hypot(tx, ty) || 1; tx /= d; ty /= d;
+      Nrm[i] = { x: -ty, y: tx };
+    }
+    const mPerUnit = t.scaleM;                 // physics distance scale (decoupled from display length)
+    V_MAX_CAR = t.vmax / 3.6;                   // per-track top speed (m/s)
+    TK = { key, name: t.name, lengthM: t.lengthM, N, C, Nrm, W: t.halfW, mPerUnit, L, vmaxCar: V_MAX_CAR, rGain: t.rGain };
+    // scratch (overwritten on every candidate eval)
+    TK.v = new Float64Array(N); TK.Rm = new Float64Array(N); TK.dsM = new Float64Array(N); TK.LX = new Float64Array(N); TK.LY = new Float64Array(N);
+    // committed geometry of the CURRENT BEST line (stable — used by render + drive + voice)
+    TK.bV = new Float64Array(N); TK.bRm = new Float64Array(N); TK.bDs = new Float64Array(N); TK.bX = new Float64Array(N); TK.bY = new Float64Array(N);
+    $('trackMeta').textContent = t.name + ' · ' + (t.lengthM / 1000).toFixed(1) + ' km';
+  }
+
+  /* ---------- geometry + speed + lap time for an offset vector ---------- */
+  function evalLap(a) {
+    const N = TK.N, C = TK.C, Nrm = TK.Nrm, W = TK.W, mPerUnit = TK.mPerUnit;
+    const LX = TK.LX, LY = TK.LY, Rm = TK.Rm, dsM = TK.dsM, v = TK.v;
+    const aLat = GRIP[state.grip];
+    for (let i = 0; i < N; i++) { LX[i] = C[i].x + a[i] * W * Nrm[i].x; LY[i] = C[i].y + a[i] * W * Nrm[i].y; }
+    for (let i = 0; i < N; i++) {
+      const ax = LX[(i - 1 + N) % N], ay = LY[(i - 1 + N) % N];
+      const bx = LX[i], by = LY[i];
+      const cx = LX[(i + 1) % N], cy = LY[(i + 1) % N];
+      const abx = bx - ax, aby = by - ay, bcx = cx - bx, bcy = cy - by, cax = ax - cx, cay = ay - cy;
+      const area = Math.abs(abx * bcy - aby * bcx) / 2;
+      const dab = Math.hypot(abx, aby), dbc = Math.hypot(bcx, bcy), dca = Math.hypot(cax, cay);
+      const Runit = area > 0.01 ? (dab * dbc * dca) / (4 * area) : 1e6;
+      Rm[i] = Runit * mPerUnit;
+      dsM[i] = dbc * mPerUnit; // segment i -> i+1
+      v[i] = Math.min(V_MAX_CAR, Math.sqrt(aLat * Rm[i] * TK.rGain)); // rGain tunes corner speed per circuit
+    }
+    for (let it = 0; it < 3; it++) {
+      for (let i = N - 1; i >= 0; i--) { const j = (i + 1) % N; const lim = Math.sqrt(v[j] * v[j] + 2 * A_BRAKE * dsM[i]); if (v[i] > lim) v[i] = lim; }
+      for (let i = 0; i < N; i++) { const p = (i - 1 + N) % N; const lim = Math.sqrt(v[p] * v[p] + 2 * A_ACCEL * dsM[p]); if (v[i] > lim) v[i] = lim; }
+    }
+    let time = 0;
+    for (let i = 0; i < N; i++) { const vv = (v[i] + v[(i + 1) % N]) / 2; time += dsM[i] / Math.max(vv, 1); }
+    return time;
+  }
+
+  // Copy the scratch geometry (just produced by evalLap) into the committed best buffers.
+  function commitBest() {
+    TK.bV.set(TK.v); TK.bRm.set(TK.Rm); TK.bDs.set(TK.dsM); TK.bX.set(TK.LX); TK.bY.set(TK.LY);
+  }
+
+  /* ---------- local-search perturbation (smooth bump) ---------- */
+  function perturb(a, s) {
+    const N = TK.N, c = a.slice();
+    const center = (Math.random() * N) | 0;
+    const half = 5 + ((Math.random() * 16) | 0);
+    const amp = gauss() * s;
+    for (let j = -half; j <= half; j++) {
+      const w = 0.5 + 0.5 * Math.cos(Math.PI * j / half); // hann window
+      const idx = (center + j + N) % N;
+      c[idx] = clamp(c[idx] + amp * w, -1, 1);
+    }
+    return c;
+  }
+
+  /* ---------- training step (many candidate laps per frame) ---------- */
+  function trainStep(K) {
+    for (let k = 0; k < K; k++) {
+      const cand = perturb(bestA, sigma);
+      const t = evalLap(cand);
+      laps++;
+      if (t < bestTime - 1e-5) {
+        bestA = cand; bestTime = t; lineDirty = true; insightsDirty = true;
+        commitBest(); // scratch currently holds cand's geometry -> store as best
+        pushCurve();
+      }
+    }
+    sigma = Math.max(0.03, sigma * 0.9985);
+  }
+
+  function pushCurve() {
+    curve.push({ laps, t: bestTime });
+    if (curve.length > 600) curve = curve.filter((_, i) => i % 2 === 0); // decimate
+  }
+
+  /* ---------- reset / track change ---------- */
+  function resetAgent(keepTrack) {
+    bestA = new Float64Array(TK.N); // centerline (all zeros)
+    naiveTime = evalLap(bestA);
+    bestTime = naiveTime; commitBest();
+    laps = 0; sigma = 0.28; curve = [{ laps: 0, t: bestTime }];
+    lineDirty = true; insightsDirty = true; driveIdx = 0;
+    driveLapTime = 0; driveLap = 0; driveBest = null; firedEvents = new Set(); lastShoutGear = 0;
+  }
+  function changeTrack(key) { state.track = key; buildTrack(key); resetAgent(); renderStatic(); }
+  function changeGrip(key) { state.grip = key; naiveTime = evalLap(new Float64Array(TK.N)); bestTime = evalLap(bestA); commitBest(); insightsDirty = true; lineDirty = true; }
+
+  /* ---------- static render (road, edges, centerline) ---------- */
+  function pathFrom(xs, ys, N) { let d = 'M' + xs[0].toFixed(1) + ',' + ys[0].toFixed(1); for (let i = 1; i < N; i++) d += ' L' + xs[i].toFixed(1) + ',' + ys[i].toFixed(1); return d + ' Z'; }
+  function renderStatic() {
+    const N = TK.N, C = TK.C, Nrm = TK.Nrm, W = TK.W;
+    const cx = [], cy = [], ix = [], iy = [], ox = [], oy = [];
+    for (let i = 0; i < N; i++) { cx.push(C[i].x); cy.push(C[i].y); ix.push(C[i].x - W * Nrm[i].x); iy.push(C[i].y - W * Nrm[i].y); ox.push(C[i].x + W * Nrm[i].x); oy.push(C[i].y + W * Nrm[i].y); }
+    const road = $('road'); road.setAttribute('d', pathFrom(cx, cy, N)); road.setAttribute('stroke-width', (W * 2).toFixed(1));
+    $('edgeIn').setAttribute('d', pathFrom(ix, iy, N));
+    $('edgeOut').setAttribute('d', pathFrom(ox, oy, N));
+    $('centerLine').setAttribute('d', pathFrom(cx, cy, N));
+    // pre-create racing-line segments
+    const g = $('racingLine'); g.textContent = '';
+    TK.segs = new Array(N);
+    for (let i = 0; i < N; i++) { const ln = document.createElementNS(NS, 'line'); ln.setAttribute('stroke-width', '2.5'); ln.setAttribute('stroke-linecap', 'round'); g.appendChild(ln); TK.segs[i] = ln; }
+  }
+
+  function speedColor(v) {
+    const f = clamp(v / V_MAX_CAR, 0, 1);
+    // red(slow) -> amber -> teal(fast)
+    if (f < 0.5) { const u = f / 0.5; return lerpCol([226, 75, 74], [239, 159, 39], u); }
+    const u = (f - 0.5) / 0.5; return lerpCol([239, 159, 39], [93, 202, 165], u);
+  }
+  function lerpCol(a, b, u) { return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * u) + ',' + Math.round(a[1] + (b[1] - a[1]) * u) + ',' + Math.round(a[2] + (b[2] - a[2]) * u) + ')'; }
+
+  function renderLine() {
+    const N = TK.N, LX = TK.bX, LY = TK.bY, v = TK.bV, segs = TK.segs;
+    for (let i = 0; i < N; i++) {
+      const j = (i + 1) % N, ln = segs[i];
+      ln.setAttribute('x1', LX[i].toFixed(1)); ln.setAttribute('y1', LY[i].toFixed(1));
+      ln.setAttribute('x2', LX[j].toFixed(1)); ln.setAttribute('y2', LY[j].toFixed(1));
+      ln.setAttribute('stroke', speedColor((v[i] + v[j]) / 2));
+    }
+  }
+
+  /* ---------- learning curve render ---------- */
+  function renderCurve() {
+    if (curve.length < 2) return;
+    const W = 460, H = 150;
+    const maxT = curve[0].t, minT = bestTime;
+    const span = Math.max(0.01, maxT - minT);
+    const lx = (Math.log(curve[curve.length - 1].laps + 1)) || 1;
+    const pts = curve.map(p => {
+      const x = (Math.log(p.laps + 1) / lx) * W;
+      const y = H - 6 - ((p.t - minT) / span) * (H - 18);
+      return [x, y];
+    });
+    let d = 'M' + pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' L');
+    $('curveLine').setAttribute('d', d);
+    $('curveArea').setAttribute('d', d + ' L' + W + ',' + H + ' L0,' + H + ' Z');
+    $('curveMeta').textContent = fmtTime(maxT) + ' → ' + fmtTime(minT);
+  }
+
+  /* ---------- insights (corners) ---------- */
+  function extractCorners() {
+    const N = TK.N, v = TK.bV, Rm = TK.bRm, dsM = TK.bDs, a = bestA;
+    const mins = [];
+    for (let i = 0; i < N; i++) { const p = v[(i - 5 + N) % N], c = v[i], n = v[(i + 5) % N]; if (c <= p && c <= n && c < V_MAX_CAR * 0.9) mins.push(i); }
+    // merge close
+    const merged = [];
+    mins.sort((x, y) => x - y);
+    for (const i of mins) { if (merged.length) { const last = merged[merged.length - 1]; const gap = Math.min(Math.abs(i - last), N - Math.abs(i - last)); if (gap < 12) { if (v[i] < v[last]) merged[merged.length - 1] = i; continue; } } merged.push(i); }
+    return merged.map(apex => {
+      // braking point: walk back while decelerating -> index + distance
+      let bi = apex, dist = 0;
+      for (let k = 0; k < N; k++) { const prev = (bi - 1 + N) % N; if (v[prev] > v[bi] + 0.2) { dist += dsM[prev]; bi = prev; } else break; if (dist > 400) break; }
+      const apexSpeed = v[apex] * 3.6;
+      const gear = gearFromSpeed(apexSpeed);
+      const entryGear = gearFromSpeed(v[bi] * 3.6);          // gear at the braking point
+      const exitIdx = (apex + 7) % N;
+      const exitGear = gearFromSpeed(v[exitIdx] * 3.6);
+      const side = a[apex] >= 0 ? 'left' : 'right';
+      const kind = Rm[apex] < 45 ? 'Hairpin' : Rm[apex] < 90 ? 'Tight' : Rm[apex] < 160 ? 'Medium' : 'Fast';
+      // announce point: ~3.2 s ahead of the braking point so the call lands BEFORE the corner
+      let ai = bi, ad = 0, at = 0;
+      for (let k = 0; k < N; k++) { const prev = (ai - 1 + N) % N; const seg = dsM[prev]; ad += seg; at += seg / Math.max(v[prev], 8); ai = prev; if (at > 3.2 || ad > 280) break; }
+      const announceDist = Math.max(25, Math.round(ad / 25) * 25);
+      return { apex, announceIdx: ai, announceDist, brakeIdx: bi, exitIdx, apexSpeed, gear, entryGear, exitGear, side, brakeDist: Math.round(dist), kind };
+    });
+  }
+
+  // detect every gear change along the learned line -> anticipated shift cues
+  function buildShiftEvents() {
+    const N = TK.N, v = TK.bV, ds = TK.bDs;
+    const gearAt = new Array(N);
+    for (let i = 0; i < N; i++) gearAt[i] = gearFromSpeed(v[i] * 3.6);
+    const evts = [];
+    for (let i = 0; i < N; i++) { const p = (i - 1 + N) % N; if (gearAt[i] !== gearAt[p]) evts.push({ idx: i, gear: gearAt[i], up: gearAt[i] > gearAt[p] }); }
+    for (let k = 0; k < evts.length; k++) {
+      const cur = evts[k], prev = evts[(k - 1 + evts.length) % evts.length];
+      let dist = 0, i = prev.idx, guard = 0; while (i !== cur.idx && guard++ < N) { dist += ds[i]; i = (i + 1) % N; }
+      cur.gap = dist; cur.isolated = dist > 130;
+      let pi = cur.idx, pd = 0; for (let s = 0; s < N; s++) { const pp = (pi - 1 + N) % N; pd += ds[pp]; pi = pp; if (pd > 55) break; }
+      cur.prepIdx = pi;
+    }
+    return evts;
+  }
+  function renderInsights() {
+    const corners = extractCorners();
+    TK.corners = corners;
+    // co-driver linking + modifiers: link a corner to the next when they're close (chained call)
+    corners.forEach((c, i) => {
+      c.mod = c.kind === 'Hairpin' ? 'cut' : c.kind === 'Tight' ? 'tight' : (c.kind === 'Fast' || c.kind === 'Medium') ? 'long' : '';
+      if (corners.length > 1) {
+        const nxt = corners[(i + 1) % corners.length];
+        let dd = 0, j = c.apex, guard = 0; while (j !== nxt.apex && guard++ < TK.N) { dd += TK.bDs[j]; j = (j + 1) % TK.N; }
+        c.toNext = dd; c.linkNext = dd < 140 && nxt.apex !== c.apex;
+      } else { c.linkNext = false; }
+    });
+    corners.forEach((c, i) => { c.linkedFrom = corners[(i - 1 + corners.length) % corners.length].linkNext && corners.length > 1; });
+    TK.shiftEvents = buildShiftEvents();
+    // the single most important upshift (longest straight) gets the spoken "ready… now" cue
+    TK.majorShift = TK.shiftEvents.filter(s => s.up && s.gear >= 4).sort((a, b) => b.gap - a.gap)[0] || null;
+    const box = $('insights'); box.textContent = '';
+    corners.forEach((c, i) => {
+      const row = document.createElement('div'); row.className = 'ins-row';
+      const brakeTxt = c.brakeDist < 12 ? 'lift only — no brake' : 'brake ~' + c.brakeDist + ' m before';
+      row.innerHTML =
+        '<div class="ins-num">T' + (i + 1) + '</div>' +
+        '<div class="ins-desc"><b>' + c.kind + ' ' + c.side + '</b>' +
+        '<span class="sub">' + brakeTxt + ' · ' + ordinal(c.gear) + ' gear</span></div>' +
+        '<div class="ins-spd">' + Math.round(c.apexSpeed) + ' km/h</div>';
+      box.appendChild(row);
+    });
+    $('insMeta').textContent = corners.length + ' corners';
+    // apex markers on map
+    const g = $('apexes'); g.textContent = '';
+    corners.forEach((c, i) => {
+      const x = TK.bX[c.apex], y = TK.bY[c.apex];
+      const circ = document.createElementNS(NS, 'circle'); circ.setAttribute('cx', x.toFixed(1)); circ.setAttribute('cy', y.toFixed(1)); circ.setAttribute('r', '7'); circ.setAttribute('fill', 'rgba(226,75,74,0.18)'); circ.setAttribute('stroke', 'var(--red)'); circ.setAttribute('stroke-width', '0.5'); g.appendChild(circ);
+      const tx = document.createElementNS(NS, 'text'); tx.setAttribute('class', 'apex-label'); tx.setAttribute('x', x.toFixed(1)); tx.setAttribute('y', (y + 3).toFixed(1)); tx.textContent = (i + 1); g.appendChild(tx);
+    });
+  }
+
+  /* ---------- stats ---------- */
+  function renderStats() {
+    $('sLaps').textContent = laps.toLocaleString('en-US');
+    $('sBest').textContent = fmtTime(bestTime);
+    $('sNaive').textContent = fmtTime(naiveTime);
+    const gain = naiveTime - bestTime;
+    const pct = naiveTime > 0 ? (gain / naiveTime * 100) : 0;
+    $('sGain').innerHTML = (gain > 0 ? '−' : '') + gain.toFixed(2) + 's <small>(' + pct.toFixed(1) + '%)</small>';
+    $('heroTag').innerHTML = '● ' + laps.toLocaleString('en-US') + ' laps trained · best ' + fmtTime(bestTime);
+  }
+
+  /* ---------- drive playback + voice co-pilot (runs the learned line) ---------- */
+  const DRIVE_PLAYBACK = 2.0; // playback is sped up for liveliness; announced lap time stays the true physics lap (= the on-screen best lap)
+  function crossed(e, lo, hi) { if (e > lo && e <= hi) return true; if (e + TK.N > lo && e + TK.N <= hi) return true; return false; }
+
+  // flash the gear number on each shift (green up / amber down)
+  let gearFlashTO = null;
+  function flashGear(up) {
+    const el = $('gearNum'); if (!el) return;
+    el.classList.remove('flash-up', 'flash-down'); void el.offsetWidth;
+    el.classList.add(up ? 'flash-up' : 'flash-down');
+    clearTimeout(gearFlashTO); gearFlashTO = setTimeout(() => el.classList.remove('flash-up', 'flash-down'), 520);
+  }
+
+  // visual shift light (works even when voice is off — "see the gear changes")
+  let shiftLightTO = null;
+  function setShiftLight(kind, up) {
+    const el = $('shiftLight'); if (!el) return;
+    el.className = 'shift-light ' + kind + (up ? ' up' : ' down');
+    el.textContent = up ? '▲' : '▼';
+    clearTimeout(shiftLightTO);
+    shiftLightTO = setTimeout(() => { el.className = 'shift-light'; el.textContent = ''; }, kind === 'ready' ? 1200 : 650);
+  }
+
+  function handleVoiceEvents(lo, hi) {
+    const d = L(), mode = state.mode, corners = TK.corners;
+    // ONE anticipated, condensed, co-driver-style call per corner — chained when corners are close
+    corners.forEach((c, k) => {
+      if (c.linkedFrom) return;                       // already chained into the previous call
+      const isHard = c.kind === 'Hairpin' || c.kind === 'Tight';
+      const announce = mode === 'ghost' ? isHard
+        : mode === 'performance' ? true
+          : (isHard || c.kind === 'Medium' || c.brakeDist >= 16);   // copilot (default)
+      if (!announce) return;
+      if (crossed(c.announceIdx, lo, hi) && !firedEvents.has('c' + k)) {
+        firedEvents.add('c' + k);
+        let link = '';
+        if (c.linkNext) { const nx = corners[(k + 1) % corners.length]; link = d.link(d.sevS[nx.kind], d.side[nx.side]); }
+        Voice.say(d.corner(c.announceDist, d.sevS[c.kind], d.side[c.side], d.mod[c.mod] || '', link), 2);
+        if (mode === 'performance' && c.kind === 'Fast') Voice.say(d.coach[c.apex % d.coach.length], 1);  // coaching
+      }
+    });
+    // anticipated upshift cue on the longest straight ("ready for sixth… now") — silenced in ghost mode
+    const ms = TK.majorShift;
+    if (ms && mode !== 'ghost') {
+      if (crossed(ms.prepIdx, lo, hi) && !firedEvents.has('msp')) { firedEvents.add('msp'); setShiftLight('ready', true); Voice.say(d.shiftPrep(d.gear(ms.gear), true), 1); }
+      if (crossed(ms.idx, lo, hi) && !firedEvents.has('msn')) { firedEvents.add('msn'); setShiftLight('go', true); Voice.say(d.shiftNow(true), 2); }
+    }
+    // every gear change still flashes the shift-light visually (no voice) so you SEE the shifts
+    TK.shiftEvents.forEach((s, k) => {
+      if (crossed(s.idx, lo, hi) && !firedEvents.has('sv' + k)) { firedEvents.add('sv' + k); if (!(ms && s.idx === ms.idx)) setShiftLight('go', s.up); }
+    });
+  }
+
+  function updateDrive(dt) {
+    if (!TK.bV || !TK.segs) return;
+    const N = TK.N, v = TK.bV;
+    const i0 = Math.floor(driveIdx) % N, i1 = (i0 + 1) % N, f = driveIdx - Math.floor(driveIdx);
+    const vmps = Math.max(v[i0] + (v[i1] - v[i0]) * f, 1);
+    const speedK = vmps * 3.6;
+    Voice.ctx = 0.86 + clamp(speedK / Math.max(TK.vmaxCar * 3.6, 1), 0, 1) * 0.22; // speech pace follows car pace (calm)
+    // live gear + shift flash (visible even with voice off)
+    const dg = gearFromSpeed(speedK);
+    if (dg !== lastDrivenGear) { if (lastDrivenGear !== 0) flashGear(dg > lastDrivenGear); lastDrivenGear = dg; }
+    const gn = $('gearNum'); if (gn) gn.textContent = dg;
+    const pb = clamp((bestTime || 30) / 36, 1, 2.4);  // adaptive: calmer pace so the co-pilot has time to speak
+    const adv = vmps * dt * pb;                        // meters this frame
+    driveLapTime += adv / vmps;                       // physical time elapsed
+    let next = driveIdx + adv / Math.max(TK.bDs[i0], 0.5);
+
+    if (TK.corners && TK.shiftEvents) handleVoiceEvents(driveIdx, next);
+
+    if (next >= N) {                                  // crossed start/finish
+      next -= N;
+      const isBest = driveBest != null && driveLapTime < driveBest; // best only after a reference exists
+      Voice.say(spokenTime(driveLapTime, isBest), 2);
+      if (driveBest == null || driveLapTime < driveBest) driveBest = driveLapTime;
+      driveLap++; driveLapTime = 0; firedEvents.clear();
+      $('driveLapMeta') && ($('driveLapMeta').textContent = 'lap ' + driveLap + (driveBest ? ' · best ' + driveBest.toFixed(1) + 's' : ''));
+    }
+    driveIdx = next;
+
+    const x = TK.bX[i0] + (TK.bX[i1] - TK.bX[i0]) * f, y = TK.bY[i0] + (TK.bY[i1] - TK.bY[i0]) * f;
+    $('carDot').setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')');
+    $('driveSpeed').innerHTML = Math.round(speedK) + '<span> km/h</span>';
+    // text note (shown even when voice is off)
+    if (TK.corners && TK.corners.length) {
+      let bestC = null, bestGap = 1e9;
+      for (const c of TK.corners) { const gap = (c.apex - driveIdx + N) % N; if (gap < bestGap) { bestGap = gap; bestC = c; } }
+      const d = L();
+      if (bestC && bestGap < 26) $('driveNote').textContent = d.note(d.sev[bestC.kind], d.side[bestC.side], d.gear(bestC.gear), Math.round(bestC.apexSpeed));
+      else $('driveNote').textContent = d.full;
+      // AI orb state: SAFE (flat-out) / ATTENTION (corner approaching) / CRITICAL (hard corner imminent)
+      let st = 'safe';
+      if (bestC) { const hard = bestC.kind === 'Hairpin' || bestC.kind === 'Tight'; st = bestGap < 6 ? (hard ? 'critical' : 'attention') : bestGap < 16 ? 'attention' : 'safe'; }
+      if (st !== lastOrbState) { const orb = $('aiOrb'); if (orb) orb.className = 'ai-orb ' + st; lastOrbState = st; }
+    }
+  }
+
+  /* ---------- i18n: spoken phrases in EN / FR / JA ---------- */
+  const I18N = {
+    en: {
+      code: 'en-US', label: 'English',
+      online: 'Alright, co-pilot online. Let’s go.',
+      sev: { Hairpin: 'hairpin', Tight: 'tight', Medium: 'medium', Fast: 'fast' },
+      side: { left: 'left', right: 'right' },
+      gear: (n) => ['zero', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth'][n] || ordinal(n),
+      sevS: { Hairpin: 'hairpin', Tight: 'tight', Medium: 'medium', Fast: 'fast' },
+      mod: { cut: "don't cut", tight: 'tightens', long: 'long' },
+      link: (sev, side) => 'into ' + sev + ' ' + side,
+      corner: (dist, sev, side, mod, link) => (dist ? dist + ', ' : '') + sev + ' ' + side + (mod ? ', ' + mod : '') + (link ? ', ' + link : ''),
+      coach: ['carry the speed', 'good exit', 'nice line', 'smooth, full throttle'],
+      brake: () => 'brake, brake!',
+      shiftPrep: (g, up) => up ? 'get ready for ' + g : 'easy, down to ' + g,
+      shiftNow: (up) => up ? 'and… now' : 'down now',
+      shiftQuick: (g) => g,
+      lap: (t, best) => (best ? 'Yes! New best lap, ' : 'Lap done, ') + t.toFixed(1).replace('.', ' point ') + ' seconds.',
+      note: (sev, side, g, spd) => '› ' + cap(sev) + ' ' + side + ' — ' + g + ', min ' + spd + ' km/h',
+      full: '› all clear, full throttle'
+    },
+    fr: {
+      code: 'fr-FR', label: 'Français',
+      online: 'Allez, copilote en ligne. C’est parti.',
+      sev: { Hairpin: 'épingle', Tight: 'virage serré', Medium: 'virage moyen', Fast: 'virage rapide' },
+      side: { left: 'à gauche', right: 'à droite' },
+      gear: (n) => ['zéro', 'première', 'deuxième', 'troisième', 'quatrième', 'cinquième', 'sixième'][n] || n,
+      sevS: { Hairpin: 'épingle', Tight: 'serré', Medium: 'moyen', Fast: 'rapide' },
+      mod: { cut: 'ne coupe pas', tight: 'ça resserre', long: 'longue' },
+      link: (sev, side) => 'enchaîne ' + sev + ' ' + side,
+      corner: (dist, sev, side, mod, link) => (dist ? dist + ', ' : '') + sev + ' ' + side + (mod ? ', ' + mod : '') + (link ? ', ' + link : ''),
+      coach: ['porte la vitesse', 'belle sortie', 'belle trajectoire', 'plein gaz, c’est propre'],
+      brake: () => 'freine, freine !',
+      shiftPrep: (g, up) => up ? 'prêt pour la ' + g : 'doucement, rétrograde en ' + g,
+      shiftNow: (up) => up ? 'et… maintenant' : 'rétrograde maintenant',
+      shiftQuick: (g) => g,
+      lap: (t, best) => (best ? 'Oui ! Meilleur tour, ' : 'Tour bouclé, ') + t.toFixed(1).replace('.', ' virgule ') + ' secondes.',
+      note: (sev, side, g, spd) => '› ' + cap(sev) + ' ' + side + ' — ' + g + ', min ' + spd + ' km/h',
+      full: '› tout droit, plein gaz'
+    },
+    ja: {
+      code: 'ja-JP', label: '日本語',
+      online: 'よし、コ・パイロット起動。行きましょう。',
+      sev: { Hairpin: 'ヘアピン', Tight: 'きついコーナー', Medium: '中速コーナー', Fast: '高速コーナー' },
+      side: { left: '左', right: '右' },
+      gear: (n) => n + '速',
+      sevS: { Hairpin: 'ヘアピン', Tight: 'タイト', Medium: '中速', Fast: '高速' },
+      mod: { cut: 'カットしない', tight: '奥で締まる', long: 'ロング' },
+      link: (sev, side) => 'そこから' + side + sev,
+      corner: (dist, sev, side, mod, link) => dist + 'メートル、' + side + sev + (mod ? '、' + mod : '') + (link ? '、' + link : ''),
+      coach: ['スピードを保って', '良い立ち上がり', 'いいライン', 'スムーズ、全開'],
+      brake: () => 'ブレーキ、ブレーキ！',
+      shiftPrep: (g, up) => up ? g + 'の準備' : g + 'に落とす準備',
+      shiftNow: (up) => up ? '今、シフトアップ！' : '今、シフトダウン！',
+      shiftQuick: (g) => g,
+      lap: (t, best) => (best ? 'ベストラップ更新！' : 'ラップ完了。') + t.toFixed(1) + '秒。',
+      note: (sev, side, g, spd) => '› ' + side + sev + ' — ' + g + '、最低 ' + spd + ' km/h',
+      full: '› クリア、全開'
+    }
+  };
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function L() { return I18N[state.lang]; }
+
+  /* ---------- VOICE CO-PILOT (Web Speech API, picks the most natural voice for the language) ---------- */
+  const Voice = {
+    on: false, voice: null, rate: 0.95, ctx: 1, list: [], lastSpokeAt: -999,
+    queue: [], busy: false, safetyTO: null,
+    supported: ('speechSynthesis' in window),
+    base() { return state.lang; },               // 'en' | 'fr' | 'ja'
+    // score a voice: must match the chosen language, then reward natural (neural/online/google) voices
+    score(v) {
+      const n = (v.name + ' ' + (v.voiceURI || '')).toLowerCase();
+      const lang = (v.lang || '').toLowerCase().replace('_', '-');
+      let s = 0;
+      if (lang.indexOf(this.base()) === 0) s += 100;            // right language wins above all
+      if (/natural|neural/.test(n)) s += 70;                    // modern neural voices = far less robotic
+      if (/online/.test(n)) s += 34;
+      if (v.localService === false) s += 18;                    // cloud voices sound best
+      if (/google/.test(n)) s += 30;
+      if (/(aria|jenny|guy|ryan|sonia|libby|michelle|emma|ana|denise|henri|remy|vivienne|nanami|keita|ayumi|haruka|masaru)/.test(n)) s += 16;
+      if (/(samantha|alex|daniel|karen|kyoko|otoya|thomas|amelie|audrey|flo)/.test(n)) s += 12;
+      if (/(david|zira|mark|hazel|hortense|paul|julie)/.test(n)) s -= 6;   // older robotic SAPI voices
+      return s;
+    },
+    refresh() {
+      if (!this.supported) return;
+      const all = window.speechSynthesis.getVoices() || [];
+      this.list = all.slice().sort((a, b) => this.score(b) - this.score(a));
+      // auto-pick the best voice ONLY if it matches the chosen language;
+      // otherwise leave null so the browser uses its default voice for that language.
+      const match = this.list.filter(v => (v.lang || '').toLowerCase().indexOf(this.base()) === 0);
+      this.voice = match.length ? match[0] : null;
+      this.populateSelect();
+      const hint = $('voiceHint');
+      if (hint) {
+        hint.textContent = match.length
+          ? 'Tip: pick a “Natural / Online / Google” voice for the most human sound. ' + match.length + ' ' + L().label + ' voice(s) found.'
+          : 'No ' + L().label + ' voice installed — the browser will try its default; add one in OS settings, or use Chrome/Edge for online voices.';
+      }
+    },
+    populateSelect() {
+      const sel = $('voiceSelect'); if (!sel) return;
+      const cur = this.voice ? this.voice.voiceURI : '';
+      sel.innerHTML = '';
+      this.list.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v.voiceURI; o.textContent = v.name + ' — ' + v.lang + (v.localService === false ? ' · online' : '');
+        if (v.voiceURI === cur) o.selected = true;
+        sel.appendChild(o);
+      });
+    },
+    pick(uri) { const v = this.list.find(x => x.voiceURI === uri); if (v) this.voice = v; },
+    setLang() { this.refresh(); this.flush(); if (this.on) this.say(L().online, 2); },
+    // prio: 1 low (upshift), 2 normal (corner/lap), 3 urgent (brake) — urgent interrupts
+    // queued speech: each phrase finishes before the next — NEVER cut off mid-word.
+    // At most one phrase waits; a higher-priority one replaces the waiting one (no backlog/lag).
+    say(text, prio) {
+      if (!this.on || !this.supported || !text) return;
+      if (this.busy) {
+        if (this.queue.length === 0) this.queue.push({ text: text, prio: prio });
+        else if (prio > this.queue[0].prio) this.queue[0] = { text: text, prio: prio };
+        return;
+      }
+      this._speak(text, prio);
+    },
+    _speak(text, prio) {
+      this.busy = true;
+      const u = new SpeechSynthesisUtterance(text);
+      if (this.voice) { u.voice = this.voice; u.lang = this.voice.lang; } else { u.lang = L().code; }
+      // rate adapts to driving pace (this.ctx) + slight urgency + subtle variation -> less robotic
+      u.rate = clamp(this.rate * (this.ctx || 1) * (prio >= 3 ? 1.06 : 1) + (Math.random() * 0.03 - 0.015), 0.6, 1.45);
+      u.pitch = 0.98 + (Math.random() * 0.03 - 0.015);
+      u.volume = 1.0;
+      const done = () => {
+        clearTimeout(this.safetyTO); this.busy = false;
+        if (this.queue.length) { const n = this.queue.shift(); this._speak(n.text, n.prio); }
+      };
+      u.onend = done; u.onerror = done;
+      clearTimeout(this.safetyTO);              // safety: free the queue even if onend never fires
+      this.safetyTO = setTimeout(done, 1300 + text.length * 85);
+      try { window.speechSynthesis.speak(u); } catch (e) { done(); }
+    },
+    flush() { this.queue = []; this.busy = false; clearTimeout(this.safetyTO); if (this.supported) window.speechSynthesis.cancel(); },
+    toggle() {
+      this.on = !this.on;
+      this.flush();
+      if (this.on) { this.refresh(); this.say(L().online, 2); }
+      return this.on;
+    }
+  };
+
+  /* ---------- localized spoken phrase builders ---------- */
+  function spokenCorner(c) { const d = L(); return d.corner(d.sev[c.kind], d.side[c.side]); }
+  function spokenBrake() { return L().brake(); }
+  function spokenTime(t, isBest) { return L().lap(t, isBest); }
+
+  /* ---------- main loop ---------- */
+  let prev = 0, acc = 0;
+  function frame(ts) {
+    if (!prev) prev = ts; let dt = (ts - prev) / 1000; prev = ts; if (dt > 0.1) dt = 0.05;
+
+    if (state.training) {
+      const K = 18 * state.speedMult;
+      trainStep(K);
+    }
+    updateDrive(dt);
+
+    // throttled heavy renders
+    acc += dt;
+    if (lineDirty) { renderLine(); lineDirty = false; }
+    if (acc > 0.12) { acc = 0; renderCurve(); renderStats(); if (insightsDirty) { renderInsights(); insightsDirty = false; } }
+
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- controls ---------- */
+  function bind() {
+    $('trackSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; [...e.currentTarget.children].forEach(x => x.classList.toggle('on', x === b)); changeTrack(b.dataset.track); });
+    $('gripSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; [...e.currentTarget.children].forEach(x => x.classList.toggle('on', x === b)); changeGrip(b.dataset.grip); });
+    $('btnTrain').addEventListener('click', e => { state.training = !state.training; e.target.textContent = state.training ? '⏸ Pause training' : '▶ Resume training'; });
+    $('btnReset').addEventListener('click', () => { resetAgent(); renderLine(); renderCurve(); renderStats(); renderInsights(); });
+    $('btnSpeed').addEventListener('click', e => { const seq = [1, 3, 6]; state.speedMult = seq[(seq.indexOf(state.speedMult) + 1) % seq.length]; e.target.textContent = 'Train ×' + state.speedMult; });
+    // language + voice controls
+    $('langSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; [...e.currentTarget.children].forEach(x => x.classList.toggle('on', x === b)); state.lang = b.dataset.lang; Voice.setLang(); });
+    $('modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; [...e.currentTarget.children].forEach(x => x.classList.toggle('on', x === b)); state.mode = b.dataset.mode; Voice.flush(); });
+    $('btnVoice').addEventListener('click', e => { const on = Voice.toggle(); e.target.classList.toggle('voice-on', on); e.target.textContent = on ? '🔊 Voice ON' : '🔈 Voice OFF'; });
+    $('voiceSelect').addEventListener('change', e => Voice.pick(e.target.value));
+    $('rateSlider').addEventListener('input', e => { Voice.rate = parseFloat(e.target.value); });
+  }
+
+  /* ---------- init ---------- */
+  function init() {
+    bind();
+    // voice setup
+    if (Voice.supported) {
+      Voice.refresh();
+      window.speechSynthesis.onvoiceschanged = () => Voice.refresh();
+    } else {
+      $('btnVoice').disabled = true; $('btnVoice').textContent = 'Voice unsupported';
+      $('voiceHint').textContent = 'This browser does not support speech synthesis.';
+    }
+    buildTrack(state.track);
+    resetAgent();
+    renderStatic();
+    renderLine();
+    renderInsights();
+    renderStats();
+    requestAnimationFrame(frame);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+</body>
+</html>
