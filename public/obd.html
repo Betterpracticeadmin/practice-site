@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<title>PRACTICE OS — OBD live</title>
+<link rel="manifest" href="/practice.webmanifest"/>
+<meta name="theme-color" content="#050506"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--acc:#FF5000;--mono:'JetBrains Mono',monospace;--safe:#39d98a;--alert:#f5a623;--crit:#ff3b46;--card:rgba(255,255,255,.045);--border:rgba(255,255,255,.1);--dim:#8b9298;--faint:#565b61;}
+  html,body{min-height:100%;background:#050506;color:#F2F3F5;font-family:'Inter',sans-serif;}
+  body{padding:calc(16px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));max-width:680px;margin:0 auto;}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .brand{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint);}
+  .brand b{color:#F2F3F5;}
+  a.back{color:var(--dim);text-decoration:none;font-size:13px;}
+  .conn{display:flex;align-items:center;gap:10px;background:var(--card);backdrop-filter:blur(20px);border:.5px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;}
+  .conn .dot{width:10px;height:10px;border-radius:50%;background:#565b61;box-shadow:0 0 8px currentColor;color:#565b61;flex-shrink:0;}
+  .conn.on .dot{background:var(--safe);color:var(--safe);}
+  .conn .st{flex:1;font-size:13px;}
+  .conn .st small{display:block;color:var(--dim);font-size:11px;font-family:var(--mono);margin-top:2px;}
+  .btn{background:var(--acc);color:#000;border:none;border-radius:12px;padding:11px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter';}
+  .btn.ghost{background:transparent;color:#F2F3F5;border:.5px solid var(--border);}
+  .btn:disabled{opacity:.5;cursor:default;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .g{background:var(--card);backdrop-filter:blur(20px);border:.5px solid var(--border);border-radius:16px;padding:15px 16px;}
+  .g .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
+  .g .v{font-size:30px;font-weight:200;letter-spacing:-1px;font-family:var(--mono);margin-top:6px;}
+  .g .v small{font-size:13px;color:var(--dim);letter-spacing:0;margin-left:4px;}
+  .g .bar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:9px;}
+  .g .bar i{display:block;height:100%;width:0;border-radius:3px;background:var(--acc);transition:width .4s,background .4s;}
+  .full{grid-column:1/3;}
+  h3{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:18px 0 10px;}
+  .dtc{background:var(--card);border:.5px solid var(--border);border-radius:16px;padding:15px 16px;}
+  .dtc-row{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:.5px solid var(--border);}
+  .dtc-row:last-child{border:none;}
+  .dtc-code{font-family:var(--mono);font-weight:700;color:#f5a623;}
+  .dtc-actions{display:flex;gap:8px;margin-top:12px;}
+  .log{font-family:var(--mono);font-size:10px;color:var(--dim);background:#0a0b0d;border:.5px solid var(--border);border-radius:12px;padding:11px;max-height:130px;overflow:auto;white-space:pre-wrap;line-height:1.6;margin-top:14px;}
+  .warn{background:rgba(245,166,35,.1);border:.5px solid rgba(245,166,35,.3);color:#f5d9a8;border-radius:14px;padding:13px 15px;font-size:12.5px;line-height:1.5;margin-bottom:14px;}
+  .warn b{color:#f5a623;}
+  .muted{font-size:11px;color:var(--faint);line-height:1.5;margin-top:14px;}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="brand"><b>PRACTICE</b> OS · OBD-II LIVE</div>
+    <a class="back" href="/os.html">‹ Cockpit</a>
+  </div>
+
+  <div id="unsupp" class="warn" style="display:none"></div>
+
+  <div class="conn" id="conn">
+    <span class="dot"></span>
+    <div class="st"><span id="connTxt">Lecteur non connecté</span><small id="connSub">Adaptateur ELM327 Bluetooth LE requis</small></div>
+    <button class="btn" id="connectBtn">Connecter</button>
+  </div>
+
+  <div class="grid">
+    <div class="g"><div class="k">Régime</div><div class="v"><span id="rpm">—</span><small>tr/min</small></div><div class="bar"><i id="rpmB"></i></div></div>
+    <div class="g"><div class="k">Vitesse</div><div class="v"><span id="spd">—</span><small>km/h</small></div><div class="bar"><i id="spdB"></i></div></div>
+    <div class="g"><div class="k">Liquide refroid.</div><div class="v"><span id="cool">—</span><small>°C</small></div><div class="bar"><i id="coolB"></i></div></div>
+    <div class="g"><div class="k">Admission</div><div class="v"><span id="intk">—</span><small>°C</small></div><div class="bar"><i id="intkB"></i></div></div>
+    <div class="g"><div class="k">Charge moteur</div><div class="v"><span id="load">—</span><small>%</small></div><div class="bar"><i id="loadB"></i></div></div>
+    <div class="g"><div class="k">Papillon</div><div class="v"><span id="thr">—</span><small>%</small></div><div class="bar"><i id="thrB"></i></div></div>
+    <div class="g"><div class="k">Carburant</div><div class="v"><span id="fuel">—</span><small>%</small></div><div class="bar"><i id="fuelB"></i></div></div>
+    <div class="g"><div class="k">Tension batt.</div><div class="v"><span id="volt">—</span><small>V</small></div><div class="bar"><i id="voltB"></i></div></div>
+  </div>
+
+  <h3>Codes défaut (DTC)</h3>
+  <div class="dtc">
+    <div id="dtcList"><span class="muted">Connecte le lecteur puis scanne les calculateurs.</span></div>
+    <div class="dtc-actions">
+      <button class="btn ghost" id="scanBtn" disabled>Scanner</button>
+      <button class="btn ghost" id="clearBtn" disabled>Effacer les codes</button>
+    </div>
+  </div>
+
+  <div class="log" id="log">prêt.</div>
+  <div class="muted" id="hint"></div>
+
+<script>
+"use strict";
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var log=function(m){ var l=$('log'); l.textContent=(l.textContent+'\n'+m).split('\n').slice(-40).join('\n'); l.scrollTop=l.scrollHeight; };
+
+  // Known BLE serial services exposed by ELM327 clones (Vgate, Veepeak, OBDLink LX, etc.)
+  var UART='6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+  var SERVICES=[0xFFE0,0xFFF0,0xFFE5,0xFEE7, UART, '0000ffe0-0000-1000-8000-00805f9b34fb','0000fff0-0000-1000-8000-00805f9b34fb'];
+
+  var dev=null, gatt=null, wCh=null, nCh=null, buf='', queue=[], pending=null, connected=false;
+
+  // feature detection — Web Bluetooth is Android Chrome / desktop Chrome / Bluefy(iOS). Not Safari.
+  var isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  if(!navigator.bluetooth){
+    var u=$('unsupp'); u.style.display='block';
+    u.innerHTML= isiOS
+      ? '<b>iPhone :</b> Safari ne supporte pas le Bluetooth web. Ouvre cette page dans le navigateur <b>Bluefy</b> (gratuit, App Store) pour connecter ton lecteur OBD. Tout le reste (RPM, températures, codes) fonctionnera.'
+      : '<b>Navigateur non compatible Web Bluetooth.</b> Utilise <b>Chrome sur Android</b> (ou Chrome/Edge desktop) pour connecter le lecteur OBD.';
+    $('connectBtn').disabled=true;
+  }
+  $('hint').innerHTML='Compatible avec les adaptateurs <b>ELM327 Bluetooth LE</b> (Vgate iCar Pro BLE, Veepeak BLE+, OBDLink…). Branche le lecteur sur la prise OBD, contact mis, puis « Connecter ». L\'adaptateur Carly d\'origine est chiffré et peut ne pas répondre — un ELM327 BLE générique est recommandé.';
+
+  function writeCmd(cmd){ // returns Promise resolved with full response (up to '>')
+    return new Promise(function(res,rej){
+      queue.push({cmd:cmd,res:res,rej:rej}); pump();
+    });
+  }
+  function pump(){ if(pending||!queue.length||!wCh)return; pending=queue.shift(); buf='';
+    var data=new TextEncoder().encode(pending.cmd+'\r');
+    (wCh.writeValueWithoutResponse?wCh.writeValueWithoutResponse(data):wCh.writeValue(data)).catch(function(e){ if(pending){pending.rej(e);pending=null;} pump(); });
+    pending._to=setTimeout(function(){ if(pending){ var p=pending; pending=null; p.res(buf); pump(); } },1400);
+  }
+  function onNotify(ev){ var v=ev.target.value; var s=''; for(var i=0;i<v.byteLength;i++)s+=String.fromCharCode(v.getUint8(i)); buf+=s;
+    if(buf.indexOf('>')>=0 && pending){ clearTimeout(pending._to); var p=pending; pending=null; p.res(buf.replace('>','').trim()); pump(); }
+  }
+
+  async function connect(){
+    try{
+      log('recherche de l\'adaptateur…');
+      dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SERVICES});
+      log('appairage : '+(dev.name||'OBD')); $('connSub').textContent=dev.name||'OBD';
+      dev.addEventListener('gattserverdisconnected',function(){ connected=false; $('conn').classList.remove('on'); $('connTxt').textContent='Déconnecté'; log('déconnecté.'); });
+      gatt=await dev.gatt.connect();
+      var svcs=await gatt.getPrimaryServices();
+      for(var i=0;i<svcs.length && (!wCh||!nCh);i++){ var chs=await svcs[i].getCharacteristics();
+        for(var j=0;j<chs.length;j++){ var c=chs[j], p=c.properties;
+          if((p.notify||p.indicate)&&!nCh){ nCh=c; }
+          if((p.write||p.writeWithoutResponse)&&!wCh){ wCh=c; }
+        } }
+      if(!wCh||!nCh){ log('caractéristiques série introuvables sur cet adaptateur.'); return; }
+      await nCh.startNotifications(); nCh.addEventListener('characteristicvaluechanged',onNotify);
+      log('canal série ouvert. initialisation ELM327…');
+      // ELM327 init
+      for(var k=0;k<['ATZ','ATE0','ATL0','ATS0','ATSP0'].length;k++){ await writeCmd(['ATZ','ATE0','ATL0','ATS0','ATSP0'][k]); await sleep(120); }
+      connected=true; $('conn').classList.add('on'); $('connTxt').textContent='Lecteur connecté'; $('connectBtn').textContent='Déconnecter';
+      $('scanBtn').disabled=false; $('clearBtn').disabled=false;
+      log('connecté ✓ — lecture des PID en direct.');
+      poll();
+    }catch(e){ log('échec : '+(e.message||e)); }
+  }
+
+  var PIDS=[
+    {pid:'0104',id:'load',f:function(b){return b[0]*100/255;},max:100},
+    {pid:'0105',id:'cool',f:function(b){return b[0]-40;},max:130},
+    {pid:'010C',id:'rpm',f:function(b){return ((b[0]*256)+b[1])/4;},max:8000},
+    {pid:'010D',id:'spd',f:function(b){return b[0];},max:240},
+    {pid:'010F',id:'intk',f:function(b){return b[0]-40;},max:90},
+    {pid:'0111',id:'thr',f:function(b){return b[0]*100/255;},max:100},
+    {pid:'012F',id:'fuel',f:function(b){return b[0]*100/255;},max:100},
+  ];
+  function parseBytes(resp,pid){ // resp like "41 0C 1A F8"
+    var hex=resp.replace(/[^0-9A-Fa-f ]/g,' ').trim().split(/\s+/);
+    var i=hex.findIndex(function(h,k){return h==='41'&&hex[k+1]&&('01'+hex[k+1])===pid;});
+    if(i<0){ // some adapters strip spaces
+      var flat=resp.replace(/[^0-9A-Fa-f]/g,''); var key='41'+pid.slice(2); var p=flat.indexOf(key);
+      if(p<0)return null; var bytes=[]; for(var q=p+4;q<flat.length;q+=2)bytes.push(parseInt(flat.substr(q,2),16)); return bytes;
+    }
+    var b=[]; for(var j=i+2;j<hex.length;j++){ var n=parseInt(hex[j],16); if(!isNaN(n))b.push(n); } return b;
+  }
+  async function poll(){ if(!connected)return;
+    for(var i=0;i<PIDS.length;i++){ var P=PIDS[i]; try{ var r=await writeCmd(P.pid); var b=parseBytes(r,P.pid); if(b&&b.length){ var val=P.f(b); setG(P.id,val,P.max); } }catch(e){} }
+    try{ var v=await writeCmd('ATRV'); var m=(v.match(/([0-9]+\.?[0-9]*)/)); if(m){ setG('volt',parseFloat(m[1]),15); } }catch(e){}
+    if(connected) setTimeout(poll,350);
+  }
+  function setG(id,val,max){ var v=Math.round(val*10)/10; $(id).textContent=(id==='volt')?v.toFixed(1):Math.round(v);
+    var b=$(id+'B'); if(b){ var pct=Math.max(0,Math.min(100,val/max*100)); b.style.width=pct+'%';
+      b.style.background = (id==='cool'&&val>106)||(id==='rpm'&&val>6500)?'var(--crit)':(id==='cool'&&val>98)||(id==='rpm'&&val>5000)?'var(--alert)':'var(--acc)'; } }
+
+  // DTC decoding (mode 03)
+  function decodeDTC(resp){ var flat=resp.replace(/[^0-9A-Fa-f]/g,'').toUpperCase(); var p=flat.indexOf('43'); if(p<0)return []; flat=flat.slice(p+2);
+    var codes=[]; for(var i=0;i+4<=flat.length;i+=4){ var a=parseInt(flat.substr(i,2),16), b=flat.substr(i+2,2); if(isNaN(a)||(a===0&&b==='00'))continue;
+      var L='PCBU'[(a>>6)&3]; var code=L+((a>>4)&3)+(a&15).toString(16).toUpperCase()+b; if(code!=='P0000')codes.push(code); } return codes; }
+  async function scan(){ $('scanBtn').disabled=true; log('scan ECU (mode 03)…'); try{ var r=await writeCmd('03'); var codes=decodeDTC(r);
+    if(!codes.length){ $('dtcList').innerHTML='<span class="muted">✓ Aucun code défaut actif.</span>'; }
+    else { $('dtcList').innerHTML=codes.map(function(c){return '<div class="dtc-row"><span class="dtc-code">'+c+'</span><span style="flex:1;font-size:12px;color:var(--dim)">code constructeur — voir base DTC</span></div>';}).join(''); }
+    log(codes.length+' code(s) : '+(codes.join(', ')||'aucun')); }catch(e){ log('scan échoué'); } $('scanBtn').disabled=false; }
+  async function clearDTC(){ if(!confirm('Effacer les codes défaut du véhicule ? (éteint aussi le voyant moteur)'))return; log('effacement (mode 04)…'); try{ await writeCmd('04'); $('dtcList').innerHTML='<span class="muted">✓ Codes effacés. Re-scanne pour confirmer.</span>'; log('codes effacés.'); }catch(e){ log('effacement échoué'); } }
+
+  function sleep(ms){ return new Promise(function(r){setTimeout(r,ms);}); }
+  $('connectBtn').addEventListener('click',function(){ if(connected&&gatt){ gatt.disconnect(); connected=false; this.textContent='Connecter'; $('conn').classList.remove('on'); $('connTxt').textContent='Lecteur non connecté'; $('scanBtn').disabled=true; $('clearBtn').disabled=true; } else connect(); });
+  $('scanBtn').addEventListener('click',scan);
+  $('clearBtn').addEventListener('click',clearDTC);
+})();
+</script>
+</body>
+</html>

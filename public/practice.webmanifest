@@ -1,15 +1,19 @@
 {
-  "name": "Practice Co-pilote",
-  "short_name": "Practice",
-  "description": "Ta position en direct et un copilote vocal, sur de vraies routes.",
-  "start_url": "/drive.html",
+  "name": "Practice OS — Cockpit",
+  "short_name": "Practice OS",
+  "description": "Cockpit cognitif : carte live, copilote vocal, télémétrie, lecteur OBD réel et HUD.",
+  "start_url": "/os.html",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#060607",
-  "theme_color": "#060607",
+  "orientation": "any",
+  "background_color": "#050506",
+  "theme_color": "#050506",
   "icons": [
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "HUD cognitif", "url": "/hud.html" },
+    { "name": "Lecteur OBD", "url": "/obd.html" }
   ]
 }

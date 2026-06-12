@@ -221,6 +221,8 @@
   .nav-exit{position:absolute;top:12px;left:12px;z-index:30;display:none;align-items:center;gap:7px;background:var(--card);backdrop-filter:blur(14px);border:.5px solid var(--border);color:var(--txt);border-radius:30px;padding:9px 15px;font-size:12px;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.3);}
   body[data-navfocus] .nav-exit{display:flex;}
   body[data-navfocus] .nav-exit svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;}
+  .nav-hud{position:absolute;top:12px;right:12px;z-index:30;display:none;align-items:center;gap:7px;background:var(--acc);color:#000;border:none;border-radius:30px;padding:10px 17px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.35);}
+  body[data-navfocus] .nav-hud{display:flex;}
 
   /* media (mock) */
   .media-row{display:flex;align-items:center;gap:12px;}
@@ -550,6 +552,7 @@
   <div class="center">
     <div id="map"></div>
     <button class="nav-exit" id="navExit"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Cockpit</button>
+    <button class="nav-hud" id="navHud">◈ HUD</button>
     <div class="speed-ov"><div class="lim">130</div><div class="v" id="spd">0</div><div class="u">km/h</div><div class="gear">D</div></div>
     <div class="map-search">
       <div class="search"><input id="dest" type="text" placeholder="Où va-t-on ?" autocomplete="off"/><button id="goBtn">Y aller</button></div>
@@ -717,6 +720,7 @@
       <button class="vc" data-c="defrost"><svg viewBox="0 0 24 24"><path d="M12 2v20M4 7l16 10M20 7 4 17M2 12h20"/></svg><span>Dégivrage</span></button>
     </div>
     <button class="diag-open" id="diagBtn">⚙ Diagnostic complet — santé & codes (OBD)</button>
+    <button class="diag-open" id="obdBtn">🔌 Connecter mon lecteur OBD réel (Bluetooth)</button>
     <button class="diag-open" id="vinBtn">🔎 Décoder le VIN — fiche complète</button>
   </div>
 </div>
@@ -1249,6 +1253,7 @@
   $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();});
   /* TomTom live-traffic key + refresh loop */
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
+  if($('navHud')){ $('navHud').addEventListener('click',function(){ var q=''; if(currentDest)q='?to='+currentDest.lat+','+currentDest.lon; window.location.href='/hud.html'+q; }); }
   if($('trSrc')) $('trSrc').textContent = TT_KEY ? '● live' : 'estimation';
   if($('ttKey')){ $('ttKey').value=TT_KEY;
     $('ttKey').addEventListener('change',function(){ TT_KEY=this.value.trim(); try{localStorage.setItem('practiceTomTom',TT_KEY);}catch(e){} $('trSrc').textContent=TT_KEY?'● live':'estimation'; toast(TT_KEY?'Trafic live activé (TomTom).':'Trafic en estimation.'); updateTraffic(); }); }
@@ -1319,6 +1324,7 @@
   $('vehX').addEventListener('click',function(){ $('vehOv').classList.remove('show'); });
   $('vehOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
   $('diagBtn').addEventListener('click',openDiag);
+  if($('obdBtn'))$('obdBtn').addEventListener('click',function(){ window.location.href='/obd.html'; });
   $('diagX').addEventListener('click',function(){ $('diagOv').classList.remove('show'); });
   $('diagOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
   $('diagScan').addEventListener('click',function(){ var L=$('diagCodes'),b=this; b.disabled=true; L.innerHTML='<div class="org org-sm" style="margin:10px auto"><i></i><i></i><i></i></div>';
