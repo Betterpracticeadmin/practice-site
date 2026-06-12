@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0c">
+<title>Practice · Ma position</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg:#0b0b0c; --teal:#5DCAA5; --amber:#EF9F27; --red:#E24B4A; --border:rgba(255,255,255,0.1); --panel:rgba(255,255,255,0.04); --dim:#7d8590; --faint:#4a5057; --mono:'JetBrains Mono',monospace; }
+  html,body{height:100%;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:#e8eaec;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 16px calc(16px + env(safe-area-inset-bottom));}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 2px 14px;}
+  .logo{font-size:13px;letter-spacing:.2em;font-weight:600;text-transform:uppercase;}
+  .logo b{color:var(--teal);}
+  .pill{font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:100px;border:.5px solid var(--border);background:var(--panel);color:var(--dim);display:inline-flex;align-items:center;gap:7px;}
+  .pill i{width:7px;height:7px;border-radius:50%;background:var(--faint);transition:background .3s,box-shadow .3s;}
+  .pill.live i{background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 1.3s infinite;}
+  .pill.warn i{background:var(--amber);box-shadow:0 0 8px var(--amber);}
+  .pill.err i{background:var(--red);box-shadow:0 0 8px var(--red);}
+  @keyframes pulse{50%{opacity:.4;}}
+
+  .map-card{position:relative;border:.5px solid var(--border);border-radius:18px;overflow:hidden;background:radial-gradient(ellipse 80% 80% at 50% 45%,#141416,#0a0a0b);}
+  canvas{display:block;width:100%;height:auto;}
+  .map-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--faint);font-size:13px;font-family:var(--mono);line-height:1.7;}
+  .map-badge{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  .stat{background:var(--panel);border:.5px solid var(--border);border-radius:14px;padding:14px 16px;}
+  .stat .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);font-family:var(--mono);}
+  .stat .v{font-size:30px;font-weight:300;letter-spacing:-1px;font-family:var(--mono);margin-top:4px;}
+  .stat .v small{font-size:13px;color:var(--faint);}
+  .stat.compass{display:flex;align-items:center;justify-content:space-between;}
+  .compass-rose{width:54px;height:54px;flex-shrink:0;}
+  .cr-needle{transition:transform .25s ease;transform-origin:27px 27px;}
+
+  .coords{margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--dim);background:var(--panel);border:.5px solid var(--border);border-radius:12px;padding:11px 14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .coords b{color:#e8eaec;font-weight:500;}
+
+  .actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .btn{flex:1;min-width:130px;font-family:var(--mono);font-size:13px;padding:14px 16px;border-radius:12px;border:.5px solid var(--border);background:var(--panel);color:#e8eaec;cursor:pointer;transition:all .15s;}
+  .btn:hover{border-color:rgba(255,255,255,.3);}
+  .btn.primary{background:var(--teal);color:#04140e;border-color:transparent;font-weight:600;flex-basis:100%;}
+  .btn.primary:active{opacity:.85;}
+  .btn.ghost{flex:0 1 auto;color:var(--dim);}
+
+  .note{margin-top:14px;font-size:12px;color:var(--faint);line-height:1.7;font-family:var(--mono);}
+  .note b{color:var(--dim);}
+  .err-box{display:none;margin-top:12px;border:.5px solid rgba(226,75,74,.4);background:rgba(226,75,74,.08);border-radius:12px;padding:12px 14px;font-size:12.5px;color:#f2b8b8;line-height:1.6;}
+  .err-box.show{display:block;}
+  footer{margin-top:auto;padding-top:18px;text-align:center;font-size:11px;color:var(--faint);font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="logo">Practice <b>· Position</b></span>
+    <span class="pill" id="pill"><i></i><span id="pillTxt">en veille</span></span>
+  </header>
+
+  <div class="map-card">
+    <canvas id="map" width="600" height="600"></canvas>
+    <div class="map-badge" id="mapBadge">Trace GPS</div>
+    <div class="map-empty" id="mapEmpty">Active ta position pour tracer<br>ta trajectoire sur le circuit.</div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><div class="k">Vitesse</div><div class="v"><span id="spd">0</span><small> km/h</small></div></div>
+    <div class="stat compass">
+      <div><div class="k">Cap</div><div class="v"><span id="hdg">--</span><small>°</small></div></div>
+      <svg class="compass-rose" viewBox="0 0 54 54">
+        <circle cx="27" cy="27" r="24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+        <text x="27" y="11" fill="#7d8590" font-size="8" text-anchor="middle" font-family="monospace">N</text>
+        <g class="cr-needle" id="needle">
+          <path d="M27 8 L31 28 L27 24 L23 28 Z" fill="var(--teal)"/>
+          <path d="M27 46 L31 28 L27 32 L23 28 Z" fill="rgba(255,255,255,0.25)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="stat"><div class="k">Précision</div><div class="v">±<span id="acc">--</span><small> m</small></div></div>
+    <div class="stat"><div class="k">Distance</div><div class="v"><span id="dist">0</span><small> m</small></div></div>
+  </div>
+
+  <div class="coords">
+    <span>lat <b id="lat">--</b></span>
+    <span>lon <b id="lon">--</b></span>
+    <span>alt <b id="alt">--</b> m</span>
+  </div>
+
+  <div class="err-box" id="errBox"></div>
+
+  <div class="actions">
+    <button class="btn primary" id="startBtn">📍 Activer ma position</button>
+    <button class="btn ghost" id="resetBtn">↻ Réinitialiser la trace</button>
+    <button class="btn ghost" id="demoBtn">▶ Démo</button>
+  </div>
+
+  <p class="note">
+    <b>Astuce :</b> ouvre cette page sur ton <b>téléphone</b>, en extérieur, et autorise la localisation.
+    Le GPS précis nécessite une page en <b>HTTPS</b>. Ta position reste sur ton appareil — rien n'est envoyé.
+  </p>
+
+  <footer>PRACTICE — Build it. Drive it. Master it.</footer>
+</div>
+
+<script>
+"use strict";
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var pill = $('pill'), pillTxt = $('pillTxt');
+  var canvas = $('map'), ctx = canvas.getContext('2d');
+  var pts = [];           // {lat, lon, t}
+  var watchId = null, demoTimer = null;
+  var totalDist = 0;
+
+  function setPill(state, txt) { pill.className = 'pill' + (state ? ' ' + state : ''); pillTxt.textContent = txt; }
+  function showErr(msg) { var b = $('errBox'); if (!msg) { b.className = 'err-box'; return; } b.className = 'err-box show'; b.innerHTML = msg; }
+
+  // equirectangular projection around the first fixed point
+  var lat0 = null;
+  function project(lat, lon) {
+    if (lat0 === null) lat0 = lat;
+    var R = 6371000, rad = Math.PI / 180;
+    var x = (lon * rad) * R * Math.cos(lat0 * rad);
+    var y = (lat * rad) * R;
+    return { x: x, y: y };
+  }
+  function haversine(a, b) {
+    var R = 6371000, rad = Math.PI / 180;
+    var dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
+    var s = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+  }
+
+  function draw(headingDeg) {
+    var W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    if (pts.length < 1) return;
+    // bounds
+    var P = pts.map(function (p) { return project(p.lat, p.lon); });
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    P.forEach(function (p) { if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x; if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y; });
+    var pad = 60, spanX = Math.max(maxX - minX, 1), spanY = Math.max(maxY - minY, 1);
+    var scale = Math.min((W - pad * 2) / spanX, (H - pad * 2) / spanY);
+    if (!isFinite(scale) || scale <= 0) scale = 1;
+    function tx(p) { return { x: pad + (p.x - minX) * scale + (W - pad * 2 - spanX * scale) / 2, y: H - (pad + (p.y - minY) * scale + (H - pad * 2 - spanY * scale) / 2) }; }
+    // trail
+    ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(93,202,165,0.85)';
+    ctx.beginPath();
+    P.forEach(function (p, i) { var c = tx(p); if (i === 0) ctx.moveTo(c.x, c.y); else ctx.lineTo(c.x, c.y); });
+    ctx.stroke();
+    // start marker
+    var s = tx(P[0]);
+    ctx.fillStyle = 'rgba(239,159,39,0.9)'; ctx.beginPath(); ctx.arc(s.x, s.y, 6, 0, 7); ctx.fill();
+    // current position (you are here)
+    var cur = tx(P[P.length - 1]);
+    ctx.fillStyle = 'rgba(93,202,165,0.20)'; ctx.beginPath(); ctx.arc(cur.x, cur.y, 22, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cur.x, cur.y, 8, 0, 7); ctx.fill();
+    ctx.strokeStyle = 'var(--teal)';
+    // heading arrow
+    if (headingDeg != null && !isNaN(headingDeg)) {
+      var a = (headingDeg - 90) * Math.PI / 180;
+      ctx.strokeStyle = 'rgba(93,202,165,1)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(cur.x, cur.y); ctx.lineTo(cur.x + Math.cos(a) * 26, cur.y + Math.sin(a) * 26); ctx.stroke();
+    }
+  }
+
+  function onPosition(coords, ts) {
+    $('mapEmpty').style.display = 'none';
+    var lat = coords.latitude, lon = coords.longitude;
+    var last = pts.length ? pts[pts.length - 1] : null;
+    var moved = last ? haversine(last, { lat: lat, lon: lon }) : 0;
+    // ignore tiny GPS jitter (< 1.5 m) but always keep first point
+    if (last && moved < 1.5) { updateReadout(coords, last, lat, lon); return; }
+    if (last) totalDist += moved;
+    var p = { lat: lat, lon: lon, t: ts };
+    pts.push(p);
+    if (pts.length > 5000) pts.shift();
+    updateReadout(coords, last, lat, lon);
+  }
+
+  function updateReadout(coords, last, lat, lon) {
+    // speed: prefer GPS speed, else compute from last point
+    var spd = coords.speed;
+    if (spd == null || isNaN(spd)) {
+      if (last) { var dt = (Date.now() - last.t) / 1000; var d = haversine(last, { lat: lat, lon: lon }); spd = dt > 0 ? d / dt : 0; } else spd = 0;
+    }
+    var spdK = Math.max(0, spd * 3.6);
+    // heading: prefer GPS heading, else from last movement
+    var hdg = coords.heading;
+    if ((hdg == null || isNaN(hdg)) && last) {
+      var dy = lat - last.lat, dx = (lon - last.lon) * Math.cos(lat * Math.PI / 180);
+      if (Math.abs(dx) > 1e-9 || Math.abs(dy) > 1e-9) hdg = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
+    }
+    $('spd').textContent = spdK.toFixed(0);
+    $('hdg').textContent = (hdg == null || isNaN(hdg)) ? '--' : hdg.toFixed(0);
+    if (hdg != null && !isNaN(hdg)) $('needle').style.transform = 'rotate(' + hdg + 'deg)';
+    $('acc').textContent = coords.accuracy != null ? coords.accuracy.toFixed(0) : '--';
+    $('dist').textContent = totalDist < 1000 ? totalDist.toFixed(0) : (totalDist / 1000).toFixed(2) + ' k';
+    $('lat').textContent = lat.toFixed(5); $('lon').textContent = lon.toFixed(5);
+    $('alt').textContent = coords.altitude != null ? coords.altitude.toFixed(0) : '--';
+    draw(hdg);
+  }
+
+  function start() {
+    if (!('geolocation' in navigator)) { setPill('err', 'non supporté'); showErr('Ton navigateur ne supporte pas la géolocalisation.'); return; }
+    if (!window.isSecureContext) { showErr('⚠ Page non sécurisée (HTTP). Le GPS précis exige une page en <b>HTTPS</b> — ouvre la version en ligne sur ton téléphone.'); }
+    stopDemo();
+    setPill('warn', 'autorisation…');
+    showErr('');
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(
+      function (pos) { setPill('live', 'en direct'); onPosition(pos.coords, Date.now()); },
+      function (err) {
+        setPill('err', 'refusé');
+        var m = err.code === 1 ? 'Localisation refusée. Autorise-la dans les réglages du navigateur, puis réessaie.'
+          : err.code === 2 ? 'Position indisponible (pas de signal GPS ?). Réessaie en extérieur.'
+            : 'Délai dépassé. Réessaie.';
+        showErr(m);
+      },
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 12000 }
+    );
+  }
+
+  function reset() { pts = []; totalDist = 0; lat0 = null; ctx.clearRect(0, 0, canvas.width, canvas.height); $('mapEmpty').style.display = 'flex'; ['spd', 'hdg', 'acc', 'lat', 'lon', 'alt'].forEach(function (id) { $(id).textContent = id === 'spd' ? '0' : '--'; }); $('dist').textContent = '0'; }
+
+  // ---- DEMO: simulate driving a lap (so you can preview without a car) ----
+  function startDemo() {
+    stop(); reset(); setPill('warn', 'démo'); showErr(''); $('mapBadge').textContent = 'Trace GPS · démo';
+    var base = { lat: 48.8566, lon: 2.3522 }; // Paris-ish anchor
+    var i = 0;
+    demoTimer = setInterval(function () {
+      i++;
+      var a = i * 0.06;
+      // a wiggly closed circuit shape in degrees (~ a few hundred meters)
+      var rLat = 0.0016 * (1 + 0.35 * Math.sin(a * 3));
+      var rLon = 0.0024 * (1 + 0.30 * Math.cos(a * 2));
+      var lat = base.lat + rLat * Math.sin(a);
+      var lon = base.lon + rLon * Math.cos(a);
+      var spd = (90 + 60 * Math.abs(Math.cos(a * 2))) / 3.6; // m/s, varies like a lap
+      setPill('live', 'démo · en direct');
+      onPosition({ latitude: lat, longitude: lon, accuracy: 4, altitude: 35, speed: spd, heading: null }, Date.now());
+      if (i > 220) { stopDemo(); setPill('', 'démo terminée'); }
+    }, 90);
+  }
+  function stopDemo() { if (demoTimer) { clearInterval(demoTimer); demoTimer = null; } $('mapBadge').textContent = 'Trace GPS'; }
+  function stop() { if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; } stopDemo(); }
+
+  $('startBtn').addEventListener('click', start);
+  $('resetBtn').addEventListener('click', function () { stop(); reset(); setPill('', 'en veille'); });
+  $('demoBtn').addEventListener('click', startDemo);
+})();
+</script>
+</body>
+</html>
