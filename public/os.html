@@ -145,6 +145,9 @@
   .gate .lang{display:flex;gap:6px;justify-content:center;margin-top:24px;}
   .gate .lang button{background:var(--card);border:.5px solid var(--border);color:var(--dim);border-radius:9px;padding:7px 13px;font-family:var(--mono);font-size:11px;cursor:pointer;}
   .gate .lang button.on{background:var(--txt);color:var(--bg);font-weight:600;border-color:transparent;}
+  .gate-help{display:none;margin:14px auto 0;max-width:340px;color:#E2554F;font-size:12px;font-family:var(--mono);line-height:1.55;}
+  .ios-hint{margin:16px auto 0;max-width:320px;color:var(--faint);font-size:11px;font-family:var(--mono);line-height:1.6;}
+  .ios-hint b{color:var(--dim);}
   .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:40;background:rgba(226,85,79,.94);color:#fff;font-size:12px;font-family:var(--mono);padding:9px 15px;border-radius:10px;display:none;max-width:90%;text-align:center;}
   .toast.show{display:block;}
 
@@ -295,8 +298,10 @@
     <div class="wm2">Practice OS</div>
     <div class="wm-sub">Cockpit · live</div>
     <p>Tout ton cockpit : carte live, copilote vocal, météo et véhicule — sur de vraies routes.</p>
-    <button class="go" id="gateGo">Démarrer</button>
+    <button class="go" id="gateGo">Activer ma position</button>
     <button class="demo" id="gateDemo">▶ Voir une démo</button>
+    <div class="gate-help" id="gateHelp"></div>
+    <div class="ios-hint">📍 Au chargement, touche <b>Autoriser</b> quand iOS demande ta position. C’est tout.</div>
     <div class="lang" id="langSeg">
       <button data-lang="fr" class="on">Français</button>
       <button data-lang="en">English</button>
@@ -502,11 +507,22 @@
   function releaseWake(){try{if(wakeLock){wakeLock.release();wakeLock=null;}}catch(e){}}
 
   /* ---------- geolocation + demo ---------- */
-  function startGeo(){ if(!('geolocation'in navigator)){toast('Géolocalisation non supportée.');return;}
-    if(!window.isSecureContext)toast('⚠ Ouvre en HTTPS (téléphone) pour un GPS précis.');
-    hideGate();follow=true;$('followBtn').textContent='⊙';requestWake();setMsg(T().ready,'');Voice.pick();
+  var located=false;
+  function gateHelp(t){ var e=$('gateHelp'); if(e){e.textContent=t;e.style.display='block';} }
+  function iosHelp(){ return 'Localisation refusée. Sur iPhone : Réglages › Confidentialité › Service de localisation › active-le, puis Safari/Practice › « Lorsque l’app est active ». Recharge la page et touche Autoriser.'; }
+  function beginLocate(){
+    if(!('geolocation'in navigator)){ gateHelp('Géolocalisation non supportée par ce navigateur.'); return; }
+    if(!window.isSecureContext){ gateHelp('Ouvre le lien en https:// (le lien Vercel) — le GPS exige une page sécurisée.'); return; }
+    $('gateGo').textContent='Localisation…'; gateHelp(''); $('gateHelp')&&($('gateHelp').style.display='none');
+    Voice.pick(); requestWake();
     if(watchId!=null)navigator.geolocation.clearWatch(watchId);
-    watchId=navigator.geolocation.watchPosition(function(p){onPos(p.coords,Date.now());},function(err){toast(err.code===1?'Localisation refusée.':err.code===2?'Position indisponible.':'Délai dépassé.');},{enableHighAccuracy:true,maximumAge:1000,timeout:12000}); }
+    watchId=navigator.geolocation.watchPosition(
+      function(p){ if(!located){ located=true; hideGate(); follow=true; $('followBtn').textContent='⊙'; setMsg(T().ready,''); } onPos(p.coords,Date.now()); },
+      function(err){ $('gateGo').textContent='Activer ma position';
+        if(err.code===1) gateHelp(iosHelp()); else if(err.code===2) gateHelp('Position indisponible — réessaie en extérieur, ciel dégagé.'); else gateHelp('Délai dépassé — touche « Activer ma position » pour réessayer.'); },
+      {enableHighAccuracy:true,maximumAge:1000,timeout:15000});
+  }
+  var startGeo = beginLocate;
   function startDemo(){ hideGate();Voice.pick(); var from={lat:48.8584,lon:2.2945},to={lat:48.8738,lon:2.2950};
     pts=[from];meMarker.setLatLng([from.lat,from.lon]).setOpacity(1);map.setView([from.lat,from.lon],15);setMsg(T().reroute,'démo');maybeWeather(from.lat,from.lon);
     getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);return;} currentDest=to;setRouteData(rt);
@@ -539,6 +555,7 @@
   applyTheme();
   if(window.L) initMap(); else toast('La carte n’a pas pu se charger.');
   if(/[?&]demo/.test(location.search)) setTimeout(function(){$('gateDemo').click();},700);
+  else setTimeout(beginLocate, 600); // auto-activate position — iOS shows the permission prompt by itself
 })();
 </script>
 </body>
