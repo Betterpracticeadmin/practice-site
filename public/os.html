@@ -469,6 +469,8 @@
 
   /* ===== POI markers (real OSM data) ===== */
   .poi{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--card);border:.5px solid var(--border);backdrop-filter:blur(12px);box-shadow:0 3px 10px rgba(0,0,0,.45);}
+  .radar{position:relative;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:13px;background:rgba(226,85,79,.92);border:1px solid rgba(255,255,255,.5);box-shadow:0 3px 12px rgba(226,85,79,.5);}
+  .radar b{position:absolute;top:-7px;right:-7px;background:#fff;color:#c0211b;font-size:8px;font-weight:700;border-radius:9px;padding:1px 3px;line-height:1.2;font-family:var(--mono);}
   .poi-c{color:#46C28E;text-shadow:0 0 8px rgba(70,194,142,.5);} .poi-f{color:var(--amber);}
   .leaflet-tooltip{background:var(--bg2)!important;border:.5px solid var(--border)!important;color:var(--txt)!important;font-family:var(--mono);font-size:10px;border-radius:8px;}
   .leaflet-tooltip:before{display:none;}
@@ -601,6 +603,21 @@
   .mini-dock .pp svg{width:15px;height:15px;}
   .mini-dock .mdfill{position:absolute;left:0;bottom:0;height:2px;background:var(--acc);width:0;}
   @media(max-width:760px){ .mini-dock.show{display:flex;} body[data-dock] .col-r{bottom:calc(118px + env(safe-area-inset-bottom));} }
+
+  /* ===== phone dialer (real tel: calls) ===== */
+  .dialer{margin-bottom:16px;}
+  .dialer input{width:100%;background:transparent;border:none;border-bottom:.5px solid var(--border);color:var(--txt);font-size:25px;font-family:var(--mono);letter-spacing:.08em;text-align:center;padding:6px 0 12px;outline:none;}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px;}
+  .keypad button{background:var(--card);border:.5px solid var(--border);border-radius:14px;color:var(--txt);font-size:22px;font-weight:300;padding:15px 0;cursor:pointer;font-family:var(--mono);transition:.1s;}
+  .keypad button:active{background:var(--acc);color:#000;}
+  .dial-actions{display:flex;align-items:center;justify-content:center;gap:28px;margin-top:16px;}
+  .dial-back{background:none;border:none;color:var(--dim);font-size:24px;cursor:pointer;width:48px;}
+  .dial-call{width:62px;height:62px;border-radius:50%;background:#2ec28a;display:grid;place-items:center;text-decoration:none;box-shadow:0 10px 26px rgba(46,194,138,.42);}
+  .dial-call svg{width:26px;height:26px;fill:#fff;}
+  .dial-call.disabled{opacity:.35;pointer-events:none;box-shadow:none;}
+  .recents{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px;}
+  .recents .rc{background:var(--card);border:.5px solid var(--border);border-radius:20px;padding:7px 12px;font-size:12px;font-family:var(--mono);color:var(--txt);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  .recents .rc svg{width:11px;height:11px;fill:var(--acc);}
 </style>
 </head>
 <body data-theme="dark" class="safe">
@@ -673,6 +690,7 @@
     <div class="map-search">
       <div class="search"><input id="dest" type="text" placeholder="Où va-t-on ?" autocomplete="off"/><button id="goBtn">Y aller</button></div>
       <button class="theme-btn" id="poiBtn" style="padding:0 12px;" title="Bornes & stations">⚡</button>
+      <button class="theme-btn on" id="radarBtn" style="padding:0 12px;" title="Radars">📷</button>
       <button class="theme-btn" id="followBtn" style="padding:0 14px;">⊕</button>
     </div>
     <div class="favs" id="favs"></div>
@@ -790,6 +808,21 @@
   <div class="ov-panel">
     <button class="x" id="phoneX">✕</button>
     <h3>Téléphone</h3>
+    <div class="dialer">
+      <input id="dialNum" type="tel" inputmode="tel" placeholder="Saisis un numéro…" autocomplete="off" spellcheck="false"/>
+      <div class="keypad" id="keypad">
+        <button>1</button><button>2</button><button>3</button>
+        <button>4</button><button>5</button><button>6</button>
+        <button>7</button><button>8</button><button>9</button>
+        <button data-k="+">+</button><button>0</button><button data-k="#">#</button>
+      </div>
+      <div class="dial-actions">
+        <span style="width:48px"></span>
+        <a class="dial-call disabled" id="dialCall" href="tel:"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
+        <button class="dial-back" id="dialBack">⌫</button>
+      </div>
+      <div class="recents" id="recents"></div>
+    </div>
     <div class="contacts">
       <a class="contact" href="tel:+33600000000"><span class="av">L</span><span class="cn">Léa</span><svg class="cc" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
       <a class="contact" href="tel:+33600000001"><span class="av">A</span><span class="cn">Alex</span><svg class="cc" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
@@ -1032,6 +1065,7 @@
   /* ---------- state ---------- */
   var map, tileLayer, meMarker, accCircle, routeLine, destMarker, poiLayer;
   var poiAt=0, poiLL=null, poiOn=true, favs=[];
+  var radarLayer=null, radarAt=0, radarLL=null, radarOn=true, radars=[], radarSaid={};
   try{ favs=JSON.parse(localStorage.getItem('practiceFavs')||'[]'); }catch(e){ favs=[]; }
   var follow=true, watchId=null, demoTimer=null;
   var pts=[], totalDist=0, route=null, stepIdx=0, stepAnnounced=false, navActive=false, lastSpeedState=null, maxSpd=0;
@@ -1074,6 +1108,7 @@
     routeLine=L.polyline([],{color:t==='dark'?'#fff':'#111',weight:6,opacity:.92,lineJoin:'round'}).addTo(map);
     accCircle=L.circle([46.6,2.4],{radius:0,color:'#888',weight:1,opacity:.3,fillOpacity:.05}).addTo(map);
     poiLayer=L.layerGroup().addTo(map);
+    radarLayer=L.layerGroup().addTo(map);
     var icon=L.divIcon({className:'',html:'<div class="me-wrap"><div class="me-arrow" id="meArrow"></div><div class="me-dot"></div></div>',iconSize:[20,20],iconAnchor:[10,10]});
     meMarker=L.marker([46.6,2.4],{icon:icon,interactive:false}).addTo(map); meMarker.setOpacity(0);
     map.on('dragstart',function(){follow=false;$('followBtn').textContent='⊕';hideSuggest();document.body.removeAttribute('data-sheet');});
@@ -1096,7 +1131,7 @@
     $('trDist').textContent=totalDist<1000?Math.round(totalDist)+' m':(totalDist/1000).toFixed(1)+' km';
     updateGForce(spd,hdg,ts); updateTwin(spdK,ts); updateTwinUI();
     var hf=$('hudFrame'); if(hf&&hf.contentWindow&&$('hudOv').classList.contains('show')){ try{hf.contentWindow.postMessage({type:'gps',speed:Math.max(0,spd||0),heading:hdg,lat:lat,lon:lon,acc:c.accuracy},'*');}catch(e){} }
-    maybeWeather(lat,lon); loadPOI(lat,lon);
+    maybeWeather(lat,lon); loadPOI(lat,lon); loadRadars(lat,lon); checkRadars({lat:lat,lon:lon},hdg,spdK);
     if(navActive&&route){ navigate({lat:lat,lon:lon},spdK); setActiveAgents(spdK>118?['safety']:['driving','nav']); proactiveFatigue(); }
     else orchestrate(spdK);
   }
@@ -1166,6 +1201,36 @@
       });
     }).catch(function(){});
   }
+  /* ---------- radars (real speed cameras from OpenStreetMap) ---------- */
+  function loadRadars(lat,lon){
+    if(!radarOn||!radarLayer) return; var now=Date.now();
+    if(radarLL && haversine(radarLL,{lat:lat,lon:lon})<2500 && (now-radarAt)<300000) return;
+    radarAt=now; radarLL={lat:lat,lon:lon};
+    var q='[out:json][timeout:25];(node["highway"="speed_camera"](around:6000,'+lat+','+lon+');node["enforcement"="maxspeed"](around:6000,'+lat+','+lon+'););out 120;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+      if(!radarLayer)return; radarLayer.clearLayers(); radars=[];
+      (j.elements||[]).forEach(function(e){ if(!e.lat||!e.lon)return; radars.push({lat:e.lat,lon:e.lon,id:e.id});
+        var mx=e.tags&&(e.tags.maxspeed||e.tags['maxspeed:forward']); var lbl=mx?(''+mx).replace(/[^0-9]/g,''):'';
+        var ic=L.divIcon({className:'',html:'<div class="radar">📷'+(lbl?'<b>'+lbl+'</b>':'')+'</div>',iconSize:[28,28],iconAnchor:[14,14]});
+        L.marker([e.lat,e.lon],{icon:ic}).bindTooltip('Radar'+(lbl?' '+lbl:''),{direction:'top',offset:[0,-8]}).addTo(radarLayer);
+      });
+    }).catch(function(){});
+  }
+  /* proximity voice alert when approaching a radar ahead */
+  function checkRadars(pos,hdg,spdK){
+    if(!radarOn||!radars.length||spdK<15) return;
+    for(var i=0;i<radars.length;i++){ var r=radars[i], d=haversine(pos,r);
+      if(d<420){ if(hdg!=null&&!isNaN(hdg)){ var br=bearing(pos,r); var diff=Math.abs(((br-hdg+540)%360)-180); if(diff>70) continue; } // only radars ahead
+        if(!radarSaid[r.id] || (Date.now()-radarSaid[r.id])>120000){ radarSaid[r.id]=Date.now();
+          var dd=Math.max(50,Math.round(d/50)*50); setState('attention'); setMsg('Radar à '+dd+' m','📷 prudence');
+          if(Voice.on)Voice.say(LANG==='en'?'Speed camera in '+dd+' metres.':LANG==='ja'?dd+'メートル先、速度取締り。':'Radar dans '+dd+' mètres.',2);
+          setTimeout(function(){setState('safe');},4000); return; }
+      }
+    }
+  }
+  function bearing(a,b){ var y=Math.sin((b.lon-a.lon)*Math.PI/180)*Math.cos(b.lat*Math.PI/180);
+    var x=Math.cos(a.lat*Math.PI/180)*Math.sin(b.lat*Math.PI/180)-Math.sin(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.cos((b.lon-a.lon)*Math.PI/180);
+    return (Math.atan2(y,x)*180/Math.PI+360)%360; }
   /* ---------- favorites (saved destinations) ---------- */
   function saveFavs(){ try{localStorage.setItem('practiceFavs',JSON.stringify(favs.slice(0,8)));}catch(e){} }
   function addFav(d){ if(!d)return; var nm=((d.name||'').split(',')[0]||'Favori').slice(0,22); if(favs.some(function(x){return Math.abs(x.lat-d.lat)<1e-4&&Math.abs(x.lon-d.lon)<1e-4;}))return; favs.unshift({name:nm,lat:+d.lat,lon:+d.lon}); favs=favs.slice(0,8); saveFavs(); }
@@ -1427,6 +1492,7 @@
   $('dest').addEventListener('blur',function(){setTimeout(function(){hideSuggest();hideFavs();},180);});
   $('dest').addEventListener('focus',function(){ if(!this.value.trim()) showFavs(); });
   $('poiBtn').addEventListener('click',function(){ poiOn=!poiOn; this.classList.toggle('on',poiOn); if(!poiOn){ if(poiLayer)poiLayer.clearLayers(); } else { poiLL=null; if(pts.length)loadPOI(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(poiOn?'Bornes & stations affichées':'POI masqués'); });
+  $('radarBtn').addEventListener('click',function(){ radarOn=!radarOn; this.classList.toggle('on',radarOn); if(!radarOn){ if(radarLayer)radarLayer.clearLayers(); radars=[]; } else { radarLL=null; if(pts.length)loadRadars(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(radarOn?'Radars affichés & alertes vocales':'Radars masqués'); });
   $('routeCancel').addEventListener('click',function(){if(demoTimer){clearInterval(demoTimer);demoTimer=null;}stopNav();setMsg(T().ready,'');});
   $('followBtn').addEventListener('click',function(){follow=!follow;this.textContent=follow?'⊙':'⊕';});
   $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();});
@@ -1534,6 +1600,19 @@
 
   /* ---------- phone (call screen) ---------- */
   function openPhone(){ $('phoneOv').classList.add('show'); }
+  /* real dialer — tel: launches the native call on a phone */
+  var recents=[]; try{recents=JSON.parse(localStorage.getItem('practiceRecents')||'[]');}catch(e){recents=[];}
+  function syncDial(){ var n=($('dialNum').value||'').replace(/[^0-9+*#]/g,''); var c=$('dialCall'); c.href='tel:'+n; c.classList.toggle('disabled',!n); }
+  function pushRecent(n){ n=(n||'').replace(/[^0-9+*#]/g,''); if(!n)return; recents=recents.filter(function(x){return x!==n;}); recents.unshift(n); recents=recents.slice(0,12); try{localStorage.setItem('practiceRecents',JSON.stringify(recents));}catch(e){} renderRecents(); }
+  function renderRecents(){ var r=$('recents'); if(!r)return; r.innerHTML=''; recents.slice(0,6).forEach(function(n){ var a=document.createElement('a'); a.className='rc'; a.href='tel:'+n; a.innerHTML='<svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg>'+n; a.addEventListener('click',function(){pushRecent(n);}); r.appendChild(a); }); }
+  if($('keypad')){
+    $('keypad').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; $('dialNum').value += (b.dataset.k||b.textContent.trim()); syncDial(); });
+    $('dialBack').addEventListener('click',function(){ $('dialNum').value=($('dialNum').value||'').slice(0,-1); syncDial(); });
+    $('dialNum').addEventListener('input',syncDial);
+    $('dialCall').addEventListener('click',function(){ pushRecent($('dialNum').value); });
+    [].forEach.call(document.querySelectorAll('#phoneOv .contact'),function(a){ a.addEventListener('click',function(){ var n=(a.getAttribute('href')||'').replace('tel:',''); pushRecent(n); }); });
+    renderRecents(); syncDial();
+  }
   $('phoneX').addEventListener('click',function(){ $('phoneOv').classList.remove('show'); });
   $('phoneOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
   var callTimer=null,callSec=0;
