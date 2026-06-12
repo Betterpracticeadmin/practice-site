@@ -214,6 +214,14 @@
   .vin-cell .v{font-size:12.5px;color:var(--txt);}
   .vin-err{color:#ff5a5f;font-size:12px;padding:8px 0;}
 
+  /* nav focus — fullscreen navigation, side widgets out */
+  body[data-navfocus] .os{grid-template-columns:1fr;}
+  body[data-navfocus] .col-l,body[data-navfocus] .col-r{display:none;}
+  body[data-navfocus] .center{grid-column:1;}
+  .nav-exit{position:absolute;top:12px;left:12px;z-index:30;display:none;align-items:center;gap:7px;background:var(--card);backdrop-filter:blur(14px);border:.5px solid var(--border);color:var(--txt);border-radius:30px;padding:9px 15px;font-size:12px;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.3);}
+  body[data-navfocus] .nav-exit{display:flex;}
+  body[data-navfocus] .nav-exit svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;}
+
   /* media (mock) */
   .media-row{display:flex;align-items:center;gap:12px;}
   .media-art{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#333,#111);flex-shrink:0;border:.5px solid var(--border);}
@@ -541,6 +549,7 @@
   <!-- CENTER: MAP -->
   <div class="center">
     <div id="map"></div>
+    <button class="nav-exit" id="navExit"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Cockpit</button>
     <div class="speed-ov"><div class="lim">130</div><div class="v" id="spd">0</div><div class="u">km/h</div><div class="gear">D</div></div>
     <div class="map-search">
       <div class="search"><input id="dest" type="text" placeholder="Où va-t-on ?" autocomplete="off"/><button id="goBtn">Y aller</button></div>
@@ -981,7 +990,7 @@
   function hideFavs(){ $('favs').classList.remove('show'); }
 
   /* ---------- traffic flow + departure advisor (Waze-style) ---------- */
-  var TT_KEY=''; try{TT_KEY=localStorage.getItem('practiceTomTom')||'';}catch(e){}
+  var TT_KEY='59Rb6KbxIM3muAQvw4HiMMTBppLqGvpo'; try{var _ttk=localStorage.getItem('practiceTomTom'); if(_ttk!==null)TT_KEY=_ttk;}catch(e){}
   /* typical congestion multiplier by weekday/hour (1.0 = free-flow). Calibrated to urban rush peaks. */
   function congestion(date){ var d=date.getDay(), h=date.getHours()+date.getMinutes()/60;
     if(d===0||d===6) return 1+0.16*Math.exp(-Math.pow((h-14)/3.6,2));
@@ -1239,6 +1248,8 @@
   $('followBtn').addEventListener('click',function(){follow=!follow;this.textContent=follow?'⊙':'⊕';});
   $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();});
   /* TomTom live-traffic key + refresh loop */
+  if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
+  if($('trSrc')) $('trSrc').textContent = TT_KEY ? '● live' : 'estimation';
   if($('ttKey')){ $('ttKey').value=TT_KEY;
     $('ttKey').addEventListener('change',function(){ TT_KEY=this.value.trim(); try{localStorage.setItem('practiceTomTom',TT_KEY);}catch(e){} $('trSrc').textContent=TT_KEY?'● live':'estimation'; toast(TT_KEY?'Trafic live activé (TomTom).':'Trafic en estimation.'); updateTraffic(); }); }
   updateTraffic(); setInterval(updateTraffic,60000);
@@ -1252,8 +1263,8 @@
     if(t==='settings'){ openPanel(); return; }
     [].forEach.call(navtabs.querySelectorAll('button'),function(x){ if(x.id!=='voiceBtn') x.classList.remove('on'); });
     b.classList.add('on');
-    if(t==='home'){ if(pts.length){follow=true;$('followBtn').textContent='⊙';map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],16);} try{window.scrollTo({top:0,behavior:'smooth'});}catch(e2){} }
-    else if(t==='nav'){ try{document.querySelector('.center').scrollIntoView({behavior:'smooth',block:'center'});}catch(e2){} $('dest').focus(); }
+    if(t==='home'){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); if(pts.length){follow=true;$('followBtn').textContent='⊙';map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],16);} try{window.scrollTo({top:0,behavior:'smooth'});}catch(e2){} }
+    else if(t==='nav'){ document.body.setAttribute('data-navfocus','1'); setTimeout(function(){if(map){map.invalidateSize();follow=true;$('followBtn').textContent='⊙';if(pts.length)map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],Math.max(map.getZoom(),16));}},350); $('dest').focus(); }
     else if(t==='media'){ var m=$('mediaCard'); m.scrollIntoView({behavior:'smooth',block:'center'}); flashCard(m); if(scWidget)scWidget.toggle(); }
     else if(t==='vehicle'){ openVehicle(); }
     else if(t==='phone'){ openPhone(); }
