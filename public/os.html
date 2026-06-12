@@ -89,8 +89,9 @@
   .speed-ov .u{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;}
 
   /* maneuver banner (bottom of map) */
-  .navbar{position:absolute;left:12px;right:12px;bottom:12px;z-index:6;display:none;align-items:center;gap:14px;background:var(--card);backdrop-filter:blur(22px);border:.5px solid var(--border);border-radius:16px;padding:12px 15px;}
+  .navbar{position:absolute;left:12px;right:12px;top:66px;z-index:14;display:none;align-items:center;gap:14px;background:var(--card);backdrop-filter:blur(22px);border:.5px solid var(--border);border-radius:16px;padding:13px 16px;box-shadow:0 10px 30px rgba(0,0,0,.35);}
   .navbar.show{display:flex;}
+  @media(max-width:760px){ .navbar{top:calc(104px + env(safe-area-inset-top));left:8px;right:8px;} }
   .mv-arrow{font-size:28px;line-height:1;color:var(--txt);width:36px;text-align:center;flex-shrink:0;}
   .mv-main{flex:1;min-width:0;}
   .mv-dist{font-size:22px;font-weight:300;font-family:var(--mono);}
@@ -174,6 +175,11 @@
   .diag-foot{margin-top:16px;font-size:10.5px;color:var(--faint);line-height:1.45;border-top:.5px solid var(--border);padding-top:12px;}
   .key-in{width:100%;background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:11px 13px;color:var(--txt);font-size:12px;font-family:var(--mono);box-sizing:border-box;}
   .key-note{font-size:10.5px;color:var(--faint);margin-top:7px;line-height:1.45;}
+  .mem-box{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+  .mem-line{font-size:12.5px;color:var(--txt);} .mem-line b{color:var(--acc);}
+  .mem-sub{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:6px 0 2px;}
+  .mem-place{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--txt);font-size:13px;cursor:pointer;text-align:left;}
+  .mem-place span{color:var(--faint);font-family:var(--mono);font-size:11px;}
 
   /* ===== ORGANIC LOADERS & LIVING UI ===== */
   .org{position:relative;width:48px;height:48px;filter:url(#gooLoad);}
@@ -835,6 +841,10 @@
     <h3>Trafic temps réel (optionnel)</h3>
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
     <div class="key-note">Sans clé : estimation honnête selon les heures de pointe (jour/heure). Avec une clé <b>TomTom</b> gratuite (2 500 req/jour), le niveau de trafic, le retard et l'ETA deviennent <b>live</b>, comme Waze.</div>
+    <h3>Mémoire</h3>
+    <div id="memBox" class="mem-box"></div>
+    <div class="seg" id="memActions"><button id="memResume">↻ Reprendre le dernier</button><button id="memClear">Effacer la mémoire</button></div>
+    <div class="key-note">Practice se souvient de tes réglages (mode, thème, langue, voix) et de tes lieux fréquents — en local sur cet appareil, rien n'est envoyé.</div>
   </div>
 </div>
 
@@ -1106,6 +1116,15 @@
   var poiAt=0, poiLL=null, poiOn=true, favs=[];
   var radarLayer=null, radarAt=0, radarLL=null, radarOn=true, radars=[], radarSaid={};
   try{ favs=JSON.parse(localStorage.getItem('practiceFavs')||'[]'); }catch(e){ favs=[]; }
+  /* ---------- persistent memory (the app remembers you) ---------- */
+  var Mem; try{ Mem=JSON.parse(localStorage.getItem('practiceMem')||'{}'); }catch(e){ Mem={}; }
+  Mem.prefs=Mem.prefs||{}; Mem.places=Mem.places||[]; Mem.lastDest=Mem.lastDest||null;
+  function saveMem(){ try{ localStorage.setItem('practiceMem',JSON.stringify(Mem)); }catch(e){} }
+  function rememberPlace(d,nm){ if(!d||d.lat==null)return; nm=((nm||d.name||'Lieu').split(',')[0]||'Lieu').slice(0,28);
+    var p=null; for(var i=0;i<Mem.places.length;i++){ if(Math.abs(Mem.places[i].lat-d.lat)<1e-4&&Math.abs(Mem.places[i].lon-d.lon)<1e-4){p=Mem.places[i];break;} }
+    if(p){ p.count++; p.last=Date.now(); p.name=nm; } else Mem.places.push({name:nm,lat:+d.lat,lon:+d.lon,count:1,last:Date.now()});
+    Mem.places.sort(function(a,b){return b.count-a.count||b.last-a.last;}); Mem.places=Mem.places.slice(0,20);
+    Mem.lastDest={name:nm,lat:+d.lat,lon:+d.lon}; saveMem(); }
   var follow=true, watchId=null, demoTimer=null;
   var pts=[], totalDist=0, route=null, stepIdx=0, stepAnnounced=false, navActive=false, lastSpeedState=null, maxSpd=0;
   var currentDest=null, offCount=0, rerouting=false, wakeLock=null, suggTimer=null, stepMinD=Infinity, lastCruise=0;
@@ -1121,7 +1140,7 @@
     night:{name:'Night',rate:0.9,say:'Mode nuit. Tout est calme.'}
   };
   function tileStyle(){ var t=effectiveTheme(); if(mode==='gt')return 'voyager_nolabels'; if(mode==='night'||mode==='ultra'||mode==='performance')return 'dark_all'; return THEMES[t]; }
-  function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; applyTheme(); syncPanel(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} }
+  function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; applyTheme(); syncPanel(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} if(!silent){Mem.prefs.mode=m;saveMem();} }
 
   function haversine(a,b){var R=6371000,r=Math.PI/180;var dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;var s=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(s)));}
   function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
@@ -1273,7 +1292,11 @@
   /* ---------- favorites (saved destinations) ---------- */
   function saveFavs(){ try{localStorage.setItem('practiceFavs',JSON.stringify(favs.slice(0,8)));}catch(e){} }
   function addFav(d){ if(!d)return; var nm=((d.name||'').split(',')[0]||'Favori').slice(0,22); if(favs.some(function(x){return Math.abs(x.lat-d.lat)<1e-4&&Math.abs(x.lon-d.lon)<1e-4;}))return; favs.unshift({name:nm,lat:+d.lat,lon:+d.lon}); favs=favs.slice(0,8); saveFavs(); }
-  function showFavs(){ var f=$('favs'); if(!favs.length){ f.classList.remove('show'); return; } f.innerHTML=''; favs.forEach(function(fv){ var b=document.createElement('div'); b.className='fav'; b.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 2l3 6.9 7.6.6-5.8 5 1.8 7.4L12 18l-6.4 3.9 1.8-7.4-5.8-5 7.6-.6z"/></svg>'+fv.name; b.addEventListener('mousedown',function(e){ e.preventDefault(); $('favs').classList.remove('show'); $('dest').value=fv.name; startRouteTo(fv); }); f.appendChild(b); }); f.classList.add('show'); }
+  function showFavs(){ var f=$('favs'); var list=Mem.places.length?Mem.places.slice(0,6):favs; if(!list.length){ f.classList.remove('show'); return; } f.innerHTML='';
+    list.forEach(function(fv){ var b=document.createElement('div'); b.className='fav'; var freq=fv.count>1?' <span style="color:var(--faint);font-size:10px">×'+fv.count+'</span>':'';
+      b.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 2l3 6.9 7.6.6-5.8 5 1.8 7.4L12 18l-6.4 3.9 1.8-7.4-5.8-5 7.6-.6z"/></svg>'+fv.name+freq;
+      b.addEventListener('mousedown',function(e){ e.preventDefault(); $('favs').classList.remove('show'); $('dest').value=fv.name; startRouteTo(fv); }); f.appendChild(b); });
+    f.classList.add('show'); }
   function hideFavs(){ $('favs').classList.remove('show'); }
 
   /* ---------- traffic flow + departure advisor (Waze-style) ---------- */
@@ -1451,7 +1474,7 @@
     rt.cum=[0];rt.total=0; for(var i=1;i<rt.coords.length;i++){var a=rt.coords[i-1],b=rt.coords[i];rt.total+=haversine({lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]});rt.cum[i]=rt.total;}
     routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); }
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
-    currentDest=to;hideSuggest();hideFavs();addFav(to);setMsg(T().reroute,'');requestWake();
+    currentDest=to;hideSuggest();hideFavs();addFav(to);rememberPlace(to,($('dest').value||to.name));setMsg(T().reroute,'');requestWake();
     getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);setMsg(T().ready,'');return;} setRouteData(rt);
       if(destMarker)map.removeLayer(destMarker); destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
       try{map.fitBounds(routeLine.getBounds().pad(0.2));}catch(e){} follow=true;$('followBtn').textContent='⊙';
@@ -1524,17 +1547,17 @@
   /* ---------- controls ---------- */
   $('gateGo').addEventListener('click',startGeo);
   $('gateDemo').addEventListener('click',startDemo);
-  $('langSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});LANG=b.dataset.lang;Voice.pick();});
+  $('langSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});LANG=b.dataset.lang;Voice.pick();Mem.prefs.lang=LANG;saveMem();});
   $('goBtn').addEventListener('click',function(){var q=$('dest').value.trim();if(!q)return;hideSuggest();setMsg(T().reroute,'');geocode(q).then(function(d){if(!d){toast(T().notFound);return;}startRouteTo(d);}).catch(function(){toast(T().netErr);});});
   $('dest').addEventListener('keydown',function(e){if(e.key==='Enter'){hideSuggest();$('goBtn').click();}});
   $('dest').addEventListener('input',function(){var q=this.value.trim();clearTimeout(suggTimer);suggTimer=setTimeout(function(){searchSuggest(q);},350);});
   $('dest').addEventListener('blur',function(){setTimeout(function(){hideSuggest();hideFavs();},180);});
   $('dest').addEventListener('focus',function(){ if(!this.value.trim()) showFavs(); });
-  $('poiBtn').addEventListener('click',function(){ poiOn=!poiOn; this.classList.toggle('on',poiOn); if(!poiOn){ if(poiLayer)poiLayer.clearLayers(); } else { poiLL=null; if(pts.length)loadPOI(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(poiOn?'Bornes & stations affichées':'POI masqués'); });
-  $('radarBtn').addEventListener('click',function(){ radarOn=!radarOn; this.classList.toggle('on',radarOn); if(!radarOn){ if(radarLayer)radarLayer.clearLayers(); radars=[]; } else { radarLL=null; if(pts.length)loadRadars(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(radarOn?'Radars affichés & alertes vocales':'Radars masqués'); });
+  $('poiBtn').addEventListener('click',function(){ poiOn=!poiOn; this.classList.toggle('on',poiOn); if(!poiOn){ if(poiLayer)poiLayer.clearLayers(); } else { poiLL=null; if(pts.length)loadPOI(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(poiOn?'Bornes & stations affichées':'POI masqués'); Mem.prefs.poi=poiOn;saveMem(); });
+  $('radarBtn').addEventListener('click',function(){ radarOn=!radarOn; this.classList.toggle('on',radarOn); if(!radarOn){ if(radarLayer)radarLayer.clearLayers(); radars=[]; } else { radarLL=null; if(pts.length)loadRadars(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(radarOn?'Radars affichés & alertes vocales':'Radars masqués'); Mem.prefs.radar=radarOn;saveMem(); });
   $('routeCancel').addEventListener('click',function(){if(demoTimer){clearInterval(demoTimer);demoTimer=null;}stopNav();setMsg(T().ready,'');});
   $('followBtn').addEventListener('click',function(){follow=!follow;this.textContent=follow?'⊙':'⊕';});
-  $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();});
+  $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();Mem.prefs.theme=themeMode;saveMem();});
   /* TomTom live-traffic key + refresh loop */
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
   function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud.html?embed=1'); $('hudOv').classList.add('show'); }
@@ -1559,7 +1582,7 @@
   var navtabs=document.querySelector('.navtabs');
   navtabs.addEventListener('click',function(e){
     var b=e.target.closest('button'); if(!b)return; var t=(b.textContent||'').trim().toLowerCase();
-    if(t==='voix'){ Voice.on=!Voice.on; b.classList.toggle('muted',!Voice.on); if(!Voice.on)Voice.flush(); var vs=$('voiceSeg'); return; }
+    if(t==='voix'){ Voice.on=!Voice.on; b.classList.toggle('muted',!Voice.on); if(!Voice.on)Voice.flush(); Mem.prefs.voice=Voice.on;saveMem(); return; }
     if(t==='settings'){ openPanel(); return; }
     [].forEach.call(navtabs.querySelectorAll('button'),function(x){ if(x.id!=='voiceBtn') x.classList.remove('on'); });
     b.classList.add('on');
@@ -1571,7 +1594,15 @@
   });
 
   /* ---------- mode / settings panel ---------- */
-  function openPanel(){ syncPanel(); $('panelBg').classList.add('show'); }
+  function openPanel(){ syncPanel(); renderMem(); $('panelBg').classList.add('show'); }
+  function renderMem(){ var b=$('memBox'); if(!b)return; var h='';
+    if(Mem.lastDest)h+='<div class="mem-line">Dernier trajet : <b>'+Mem.lastDest.name+'</b></div>';
+    if(Mem.places.length){ h+='<div class="mem-sub">Lieux fréquents</div>'; Mem.places.slice(0,6).forEach(function(p){ h+='<button class="mem-place" data-lat="'+p.lat+'" data-lon="'+p.lon+'" data-n="'+(p.name||'').replace(/"/g,'&quot;')+'">📍 '+(p.name||'Lieu')+'<span>×'+p.count+'</span></button>'; }); }
+    else h+='<div class="mem-line" style="color:var(--dim)">Je mémorise tes habitudes au fil des trajets…</div>';
+    b.innerHTML=h;
+    [].forEach.call(b.querySelectorAll('.mem-place'),function(el){ el.addEventListener('click',function(){ closePanel(); $('dest').value=el.dataset.n; startRouteTo({lat:+el.dataset.lat,lon:+el.dataset.lon,name:el.dataset.n}); }); }); }
+  if($('memResume'))$('memResume').addEventListener('click',function(){ if(Mem.lastDest){ closePanel(); $('dest').value=Mem.lastDest.name; startRouteTo(Mem.lastDest); } else toast('Aucun trajet récent.'); });
+  if($('memClear'))$('memClear').addEventListener('click',function(){ if(!confirm('Effacer la mémoire (lieux & dernier trajet) ?'))return; Mem.places=[]; Mem.lastDest=null; saveMem(); renderMem(); toast('Mémoire effacée.'); });
   function closePanel(){ $('panelBg').classList.remove('show'); }
   function syncPanel(){
     [].forEach.call(document.querySelectorAll('#modeGrid .mode-btn'),function(b){b.classList.toggle('on',b.dataset.m===mode);});
@@ -1583,9 +1614,9 @@
   $('panelBg').addEventListener('click',function(e){ if(e.target===this) closePanel(); });
   $('dmCard').addEventListener('click',openPanel);
   $('modeGrid').addEventListener('click',function(e){ var b=e.target.closest('.mode-btn'); if(b) setMode(b.dataset.m); });
-  $('themeSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; themeMode=b.dataset.t; applyTheme(); syncPanel(); });
-  $('langSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; LANG=b.dataset.l; Voice.pick(); syncPanel(); });
-  $('voiceSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; Voice.on=(b.dataset.v==='on'); if(!Voice.on)Voice.flush(); var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); syncPanel(); });
+  $('themeSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; themeMode=b.dataset.t; applyTheme(); syncPanel(); Mem.prefs.theme=themeMode;saveMem(); });
+  $('langSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; LANG=b.dataset.l; Voice.pick(); syncPanel(); Mem.prefs.lang=LANG;saveMem(); });
+  $('voiceSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; Voice.on=(b.dataset.v==='on'); if(!Voice.on)Voice.flush(); var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); syncPanel(); Mem.prefs.voice=Voice.on;saveMem(); });
 
   /* ---------- SoundCloud real controls (Widget API) ---------- */
   var scWidget=null;
@@ -1767,7 +1798,17 @@
   applyTheme();
   if(window.L) initMap(); else toast('La carte n’a pas pu se charger.');
   initPlayer();
-  setMode('copilot',true);
+  /* restore memory: the app reopens the way you left it */
+  (function restoreMem(){ var p=Mem.prefs||{};
+    if(p.lang)LANG=p.lang; if(p.theme)themeMode=p.theme;
+    if(typeof p.poi==='boolean')poiOn=p.poi; if(typeof p.radar==='boolean')radarOn=p.radar;
+    if(typeof p.voice==='boolean')Voice.on=p.voice;
+    setMode(p.mode||'copilot',true); applyTheme(); Voice.pick();
+    if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
+    var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on);
+    [].forEach.call(document.querySelectorAll('#langSeg button'),function(x){x.classList.toggle('on',x.dataset.lang===LANG);});
+    syncPanel();
+  })();
   if(/[?&]demo/.test(location.search)) setTimeout(function(){$('gateDemo').click();},700);
   else setTimeout(beginLocate, 600); // auto-activate position — iOS shows the permission prompt by itself
 })();
