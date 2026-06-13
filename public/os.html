@@ -1657,14 +1657,18 @@
       box.className='suggest show';
     }).catch(function(){hideSuggest();}); }
   function osrmRt(rt){ var steps=[]; (rt.legs||[]).forEach(function(l){(l.steps||[]).forEach(function(s){steps.push(s);});}); return {coords:rt.geometry.coordinates,dist:rt.distance,dur:rt.duration,steps:steps}; }
-  function getRoute(from,to){ return fetchJSON('https://router.project-osrm.org/route/v1/driving/'+from.lon+','+from.lat+';'+to.lon+','+to.lat+'?overview=full&geometries=geojson&steps=true').then(function(j){
-    if(!j.routes||!j.routes.length)return null; return osrmRt(j.routes[0]); }); }
-  function getRoutes(from,to){ return fetchJSON('https://router.project-osrm.org/route/v1/driving/'+from.lon+','+from.lat+';'+to.lon+','+to.lat+'?overview=full&geometries=geojson&steps=true&alternatives=2').then(function(j){
-    if(!j.routes||!j.routes.length)return null; return j.routes.map(osrmRt); }); }
+  var OSRM=['https://router.project-osrm.org','https://routing.openstreetmap.de/routed-car'];
+  function osrmTry(path,i){ i=i||0; if(i>=OSRM.length)return Promise.resolve(null);
+    return fetchJSON(OSRM[i]+path,null,1).then(function(j){ if(j&&j.routes&&j.routes.length)return j; return osrmTry(path,i+1); }).catch(function(){ return osrmTry(path,i+1); }); }
+  function getRoute(from,to){ return osrmTry('/route/v1/driving/'+from.lon+','+from.lat+';'+to.lon+','+to.lat+'?overview=full&geometries=geojson&steps=true').then(function(j){
+    return (j&&j.routes&&j.routes.length)?osrmRt(j.routes[0]):null; }); }
+  function getRoutes(from,to){ return osrmTry('/route/v1/driving/'+from.lon+','+from.lat+';'+to.lon+','+to.lat+'?overview=full&geometries=geojson&steps=true&alternatives=2').then(function(j){
+    return (j&&j.routes&&j.routes.length)?j.routes.map(osrmRt):null; }); }
   function setRouteData(rt){ route=rt;stepIdx=0;stepAnnounced=false;navActive=true;offCount=0;stepMinD=Infinity;
     rt.cum=[0];rt.total=0; for(var i=1;i<rt.coords.length;i++){var a=rt.coords[i-1],b=rt.coords[i];rt.total+=haversine({lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]});rt.cum[i]=rt.total;}
     routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); refilterMarkers(); if(raceLayer)raceLayer.clearLayers(); }
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
+    pendingNav=null;
     currentDest=to;hideSuggest();hideFavs();addFav(to);setNavContext(to);rememberPlace(to,($('dest').value||to.name));setUiMode('active');setMsg(T().reroute,'');requestWake();
     getRoutes(from,to).then(function(rts){ if(!rts||!rts.length){toast(T().netErr);setMsg(T().ready,'');return;} var rt=rts[0]; altRoute=rts[1]||null; setRouteData(rt); colorRouteTraffic(from,to); drawGhost(altRoute); setTimeout(compareRoutes,1600);
       if(destMarker)map.removeLayer(destMarker); destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
@@ -1988,19 +1992,32 @@
       setTimeout(function(){ try{foundMarker.openPopup();}catch(e){} },450);
     }catch(e){} }
   function clearFound(){ if(foundMarker&&typeof map!=='undefined'&&map){ try{map.removeLayer(foundMarker);}catch(e){} } foundMarker=null; }
+  /* confirmations de lancement de trajet (robustes à toutes les formulations) */
+  var GOCONF=/^\s*(oui+|ouais|ouaip|ok+|okay|d'?accord|yes|yep|yeah|carr[eé]ment|bien s[uû]r|avec plaisir|parfait|nickel|go+|vas[- ]?y|fonce|on y va|j'?y vais|c'?est parti|volontiers|allez)(\s+(oui|ouais|vas[- ]?y|carr[eé]ment|bien s[uû]r|je veux( bien)?|s'?il te pla[iî]t|stp|merci|avec plaisir|go|lance|c'?est parti|pourquoi pas|allez|volontiers|let'?s go|bien))*\s*[!.]*\s*$/i;
+  var GOLAUNCH=/(lance(r)?( (le|la|l'?))?\s*(trajet|navigation|itin[eé]raire|route|guidage|nav\b)|d[eé]marre(r)?( (la|le))?\s*(navigation|trajet|nav\b|itin[eé]raire|guidage)|navigue|let'?s go|go go|envoie (le |la )?(trajet|route|nav|guidage)|en route)/i;
+  function isGo(t){ return GOCONF.test(t)||GOLAUNCH.test(t); }
+  /* ---- recherche de lieu robuste : plusieurs serveurs Overpass + rayon croissant + repli texte (Photon). Ne dit jamais "impossible" si le lieu existe ; toujours trié par distance réelle. ---- */
+  var OVPASS=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
+  function overpassTry(query,i){ i=i||0; if(i>=OVPASS.length)return Promise.reject('overpass');
+    return fetchJSON(OVPASS[i]+'?data='+encodeURIComponent(query),null,1).catch(function(){ return overpassTry(query,i+1); }); }
+  function poiSearch(def,radius){ var pos=pts[pts.length-1]; var q='[out:json][timeout:25];('+def.q+'(around:'+radius+','+pos.lat+','+pos.lon+'););out center 150;';
+    return overpassTry(q).then(function(j){ var best=null,bd=1e12,bla,blo; ((j&&j.elements)||[]).forEach(function(e){ var la=e.lat||(e.center&&e.center.lat),lo=e.lon||(e.center&&e.center.lon); if(la==null||lo==null)return; var d=haversine(pos,{lat:la,lon:lo}); if(d<bd){bd=d;best=e;bla=la;blo=lo;} }); return best?{el:best,d:bd,lat:bla,lon:blo}:null; }); }
+  function announcePOI(def,r,auto){ var pos=pts[pts.length-1]; var nm=(r.el&&r.el.tags&&(r.el.tags.name||r.el.tags.brand||r.el.tags.operator))||r.name||def.n; lastRef={name:nm,lat:r.lat,lon:r.lon};
+    var dtxt=r.d<1000?(Math.round(r.d/10)*10+' mètres'):((r.d/1000).toFixed(1)+' kilomètres'); var dir=cardinal(bearing(pos,{lat:r.lat,lon:r.lon}));
+    showFoundOnMap(nm,r.lat,r.lon);
+    if(auto){ pendingNav=null; $('dest').value=nm; sayVA('Je t\'emmène à '+nm+', à '+dtxt+' vers le '+dir+'. C\'est parti.'); startRouteTo({name:nm,lat:r.lat,lon:r.lon}); return; }
+    pendingNav={name:nm,lat:r.lat,lon:r.lon}; sayVA(nm+', à '+dtxt+' vers le '+dir+'. Je l\'ai placée sur la carte. Tu veux que je lance le trajet ?'); }
+  function poiFallbackText(def,auto){ var pos=pts[pts.length-1];
+    fetchJSON('https://photon.komoot.io/api/?q='+encodeURIComponent(def.n)+'&lat='+pos.lat+'&lon='+pos.lon+'&limit=15&lang=fr',null,2).then(function(j){ var best=null,bd=1e12;
+      ((j&&j.features)||[]).forEach(function(f){ var c=f.geometry&&f.geometry.coordinates; if(!c)return; var d=haversine(pos,{lat:c[1],lon:c[0]}); if(d<bd){bd=d;best={lat:c[1],lon:c[0],d:d,name:(f.properties&&(f.properties.name))||def.n};} });
+      if(!best){ sayVA('Je ne trouve pas de '+def.n+' dans les environs, désolé.'); return; }
+      announcePOI(def,best,auto);
+    }).catch(function(){ sayVA('La recherche est momentanément indisponible, réessaie dans un instant.'); }); }
   function nearestPOI(def,auto){ var pos=pts.length?pts[pts.length-1]:null; if(!pos){ sayVA('Active d\'abord ta position pour que je cherche autour de toi.'); return; }
     sayVA('Je cherche la '+def.n+' la plus proche…');
-    var q='[out:json][timeout:20];('+def.q+'(around:8000,'+pos.lat+','+pos.lon+'););out center 90;';
-    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){ var best=null,bd=1e12,bla,blo;
-      (j.elements||[]).forEach(function(e){ var la=e.lat||(e.center&&e.center.lat), lo=e.lon||(e.center&&e.center.lon); if(la==null||lo==null)return; var d=haversine(pos,{lat:la,lon:lo}); if(d<bd){bd=d;best=e;bla=la;blo=lo;} });
-      if(!best){ sayVA('Je ne trouve pas de '+def.n+' à proximité.'); return; }
-      var nm=(best.tags&&(best.tags.name||best.tags.brand||best.tags.operator))||def.n; lastRef={name:nm,lat:bla,lon:blo};
-      var dtxt=bd<1000?(Math.round(bd/10)*10+' mètres'):((bd/1000).toFixed(1)+' kilomètres'); var dir=cardinal(bearing(pos,{lat:bla,lon:blo}));
-      showFoundOnMap(nm,bla,blo);
-      if(auto){ pendingNav=null; $('dest').value=nm; sayVA('Je t\'emmène à '+nm+', à '+dtxt+' vers le '+dir+'. C\'est parti.'); startRouteTo({name:nm,lat:bla,lon:blo}); return; }
-      pendingNav={name:nm,lat:bla,lon:blo};
-      sayVA(nm+', à '+dtxt+' vers le '+dir+'. Je l\'ai placée sur la carte. Tu veux que je lance le trajet ?');
-    }).catch(function(){ sayVA('Recherche impossible pour le moment.'); }); }
+    poiSearch(def,3000).then(function(r){ return r||poiSearch(def,12000); }).then(function(r){ return r||poiSearch(def,40000); })
+      .then(function(r){ if(r)announcePOI(def,r,auto); else poiFallbackText(def,auto); })
+      .catch(function(){ poiFallbackText(def,auto); }); }
   /* ---- Claude-backed free conversation (needs ANTHROPIC_API_KEY on Vercel) ---- */
   /* repli quand rien ne matche : on évite « je n'ai pas compris » sec. 1) phrase courte ressemblant à un lieu -> on propose la navigation. 2) sinon relance variée avec exemples. */
   var missN=0;
@@ -2130,11 +2147,11 @@
   /* primary dictionary-driven matcher — returns true when it handled the utterance */
   function vocabRun(t){
     /* une destination est proposée et on attend ton feu vert */
-    if(pendingNav){
-      if(/^\s*(oui|ouais|oui vas|ok|okay|d'?accord|vas[- ]?y|lance|c'?est parti|carr[eé]ment|bien s[uû]r|avec plaisir|parfait|go|yes|yep|yeah|let'?s go|j'?y vais|on y va|emm[eè]ne[- ]?moi|fonce|grave)\b/.test(t)){ var pn=pendingNav; pendingNav=null; clearFound(); sayVA('C\'est parti, je lance le trajet vers '+pn.name+'.'); $('dest').value=pn.name; startRouteTo(pn); return true; }
-      if(/^\s*(non|nan|nope|laisse|annule|pas (maintenant|tout de suite|l[aà]|encore)|surtout pas|c'?est bon|plus tard|oublie)\b/.test(t)){ pendingNav=null; clearFound(); sayVA('D\'accord, j\'annule.'); return true; }
-      pendingNav=null; /* tu passes à autre chose -> on abandonne la proposition et on continue */
-    }
+    /* confirmation / lancement de trajet — robuste ; relance aussi le dernier lieu évoqué */
+    if(isGo(t)){ var tg=pendingNav||lastRef; if(tg){ pendingNav=null; clearFound(); sayVA('C\'est parti, je lance le trajet vers '+tg.name+'.'); $('dest').value=tg.name; startRouteTo(tg); return true; }
+      var dv=(($('dest')&&$('dest').value)||'').trim(); if(dv){ sayVA('Je lance le trajet vers '+dv+'.'); geocode(dv).then(function(d){ if(d)startRouteTo({name:dv,lat:d.lat,lon:d.lon}); else sayVA('Adresse introuvable.'); }); return true; }
+      if(GOLAUNCH.test(t)){ sayVA('Dis-moi d\'abord où tu veux aller.'); return true; } }
+    if(pendingNav&&/^\s*(non|nan|nope|laisse|annule|pas (maintenant|tout de suite|l[aà]|encore)|surtout pas|c'?est bon|plus tard|oublie)\b/.test(t)){ pendingNav=null; clearFound(); sayVA('D\'accord, j\'annule.'); return true; }
     if(lx(t,'here')&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return true; }
     /* "emmène-moi à la plage / pharmacie / station la plus proche" -> trouve le lieu ET lance le trajet directement (pas de confirmation) */
     if(/(emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|d[eé]pose[- ]?moi|je veux aller|j'?aimerais aller|on va\b|direction\b|take me|drive me|bring me|go to|\bva (à|a|au|aux|vers)|\bvas (à|a|au|aux|vers))/i.test(t)){
