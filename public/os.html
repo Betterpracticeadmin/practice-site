@@ -735,6 +735,7 @@
         <svg viewBox="0 0 24 24"><path d="M2 8.5a16 16 0 0 1 20 0"/><path d="M5 12a11 11 0 0 1 14 0"/><path d="M8.5 15.5a6 6 0 0 1 7 0"/><circle cx="12" cy="19" r=".6"/></svg>
         <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
       </span>
+      <button class="theme-btn" id="muteBtn" title="Couper / activer la voix">🔊</button>
       <button class="theme-btn" id="themeBtn">◐ Auto</button>
     </div>
   </div>
@@ -1759,6 +1760,8 @@
   if($('ghostPrompt'))$('ghostPrompt').addEventListener('click',takeGhost);
   $('followBtn').addEventListener('click',function(){follow=!follow;this.textContent=follow?'⊙':'⊕';});
   $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();Mem.prefs.theme=themeMode;saveMem();});
+  function reflectMute(){ if($('muteBtn'))$('muteBtn').textContent=Voice.on?'🔊':'🔇'; }
+  if($('muteBtn'))$('muteBtn').addEventListener('click',function(){ Voice.on=!Voice.on; if(!Voice.on)Voice.flush(); reflectMute(); var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); Mem.prefs.voice=Voice.on; saveMem(); syncPanel(); toast(Voice.on?'Voix activée':'Voix coupée'); });
   /* TomTom live-traffic key + refresh loop */
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
   /* ---- three navigation views: Normal (map) · HUD (Practice Vision) · Pulse ---- */
@@ -1800,7 +1803,7 @@
   var navtabs=document.querySelector('.navtabs');
   navtabs.addEventListener('click',function(e){
     var b=e.target.closest('button'); if(!b)return; var t=(b.textContent||'').trim().toLowerCase();
-    if(t==='voix'){ Voice.on=!Voice.on; b.classList.toggle('muted',!Voice.on); if(!Voice.on)Voice.flush(); Mem.prefs.voice=Voice.on;saveMem(); return; }
+    if(t==='voix'){ if(typeof pushToTalk==='function')pushToTalk(); return; }
     if(t==='settings'){ openPanel(); return; }
     [].forEach.call(navtabs.querySelectorAll('button'),function(x){ if(x.id!=='voiceBtn') x.classList.remove('on'); });
     b.classList.add('on');
@@ -1881,6 +1884,20 @@
     if(greet) sayVA('Practice activé, bonjour '+vaName()+'.');
   }
   function stopVA(){ vaOn=false; if(recog){ try{recog.stop();}catch(e){} } if($('micDot'))$('micDot').classList.remove('on'); }
+  /* push-to-talk: tap the Voix button → Practice listens to one request (no wake word needed) */
+  var pttBusy=false;
+  function pushToTalk(){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — Chrome / Android.'); return; }
+    if(pttBusy)return; pttBusy=true;
+    if(recog&&vaOn){ try{recog.stop();}catch(e){} } /* pause continuous VA during direct listen */
+    var p=new SR(); p.continuous=false; p.interimResults=false; p.lang=T().code;
+    if($('micDot')){ $('micDot').classList.add('on','hear'); } if($('micTxt'))$('micTxt').textContent='Je t\'écoute…';
+    var vb=$('voiceBtn'); if(vb)vb.classList.add('on'); try{ if(Voice.supported)speechSynthesis.cancel(); }catch(e){}
+    var done=false; var finish=function(){ if(done)return; done=true; pttBusy=false; if(vb)vb.classList.remove('on'); if($('micDot')){ $('micDot').classList.remove('hear'); if(!vaOn)$('micDot').classList.remove('on'); else $('micTxt').textContent='Dis « Practice… »'; } if(vaOn){ try{recog.start();}catch(e){} } };
+    p.onresult=function(e){ var tx=''; for(var i=0;i<e.results.length;i++)tx+=e.results[i][0].transcript; tx=tx.toLowerCase().trim().replace(/^ok\s+/,'').replace(/^practi[sc]e?\s*/,''); if($('micTxt'))$('micTxt').textContent='« '+tx+' »'; if(tx)runCmd(tx); else sayVA('Je n\'ai rien entendu.'); };
+    p.onend=finish; p.onerror=function(ev){ if(ev.error==='not-allowed')toast('Micro refusé.'); finish(); };
+    try{p.start();}catch(e){ finish(); }
+    setTimeout(function(){ if(!done){ try{p.stop();}catch(e){} } },7000);
+  }
   if($('vaSeg'))$('vaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var on=(b.dataset.va==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Mem.prefs.va=on; saveMem(); if(on)startVA(true); else stopVA(); });
   if($('vaName'))$('vaName').addEventListener('change',function(){ Mem.prefs.name=this.value.trim()||'Aldo'; saveMem(); });
 
@@ -2090,7 +2107,7 @@
     if(typeof p.voice==='boolean')Voice.on=p.voice;
     setMode(p.mode||'copilot',true); applyTheme(); Voice.pick();
     if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
-    var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on);
+    var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); if(typeof reflectMute==='function')reflectMute();
     [].forEach.call(document.querySelectorAll('#langSeg button'),function(x){x.classList.toggle('on',x.dataset.lang===LANG);});
     if($('vaName'))$('vaName').value=p.name||'Aldo';
     [].forEach.call(document.querySelectorAll('#vaSeg button'),function(x){x.classList.toggle('on',(x.dataset.va==='on')===(p.va===true));});
