@@ -95,9 +95,12 @@
   .nv-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .nv-mode{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:5px;flex-shrink:0;}
   .nv-ctx{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .mv-then{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .mv-then b{color:var(--txt);font-weight:500;}
+  .mv-then{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.6;}
+  .mv-then b{color:var(--txt);font-weight:500;} .mv-then i{color:var(--faint);font-style:normal;}
   .eta-conf{font-family:var(--mono);font-size:11px;color:var(--faint);}
+  /* event bubbles (real TomTom incidents) — Waze-style risk layer */
+  .evt{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:#fff;border:1.5px solid rgba(255,255,255,.65);box-shadow:0 3px 12px rgba(0,0,0,.45);font-family:var(--mono);}
+  .evt-acc{background:#ff3b46;} .evt-jam{background:#f5a623;color:#1a1205;} .evt-works{background:#ff8c1a;color:#1a1205;} .evt-closed{background:#c0211b;}
   body[data-uimode="assisted"] .nv-mode{color:#f5a623;}
   body[data-uimode="critical"] .nv-mode{color:#ff5a5f;}
   body[data-uimode="parking"] .nv-mode{color:#46C28E;}
@@ -1134,6 +1137,7 @@
   var map, tileLayer, meMarker, accCircle, routeLine, destMarker, poiLayer;
   var poiAt=0, poiLL=null, poiOn=true, favs=[];
   var radarLayer=null, radarAt=0, radarLL=null, radarOn=true, radars=[], radarSaid={};
+  var incLayer=null, incAt=0, incLL=null, incidents=[];
   try{ favs=JSON.parse(localStorage.getItem('practiceFavs')||'[]'); }catch(e){ favs=[]; }
   /* ---------- persistent memory (the app remembers you) ---------- */
   var Mem; try{ Mem=JSON.parse(localStorage.getItem('practiceMem')||'{}'); }catch(e){ Mem={}; }
@@ -1186,6 +1190,7 @@
     accCircle=L.circle([46.6,2.4],{radius:0,color:'#888',weight:1,opacity:.3,fillOpacity:.05}).addTo(map);
     poiLayer=L.layerGroup().addTo(map);
     radarLayer=L.layerGroup().addTo(map);
+    incLayer=L.layerGroup().addTo(map);
     var icon=L.divIcon({className:'',html:'<div class="me-wrap"><div class="me-arrow" id="meArrow"></div><div class="me-dot"></div></div>',iconSize:[20,20],iconAnchor:[10,10]});
     meMarker=L.marker([46.6,2.4],{icon:icon,interactive:false}).addTo(map); meMarker.setOpacity(0);
     map.on('dragstart',function(){follow=false;$('followBtn').textContent='⊕';hideSuggest();document.body.removeAttribute('data-sheet');});
@@ -1208,7 +1213,7 @@
     $('trDist').textContent=totalDist<1000?Math.round(totalDist)+' m':(totalDist/1000).toFixed(1)+' km';
     updateGForce(spd,hdg,ts); updateTwin(spdK,ts); updateTwinUI();
     var hf=$('hudFrame'); if(hf&&hf.contentWindow&&$('hudOv').classList.contains('show')){ try{hf.contentWindow.postMessage({type:'gps',speed:Math.max(0,spd||0),heading:hdg,lat:lat,lon:lon,acc:c.accuracy},'*');}catch(e){} }
-    maybeWeather(lat,lon); loadPOI(lat,lon); loadRadars(lat,lon); checkRadars({lat:lat,lon:lon},hdg,spdK);
+    maybeWeather(lat,lon); loadPOI(lat,lon); loadRadars(lat,lon); checkRadars({lat:lat,lon:lon},hdg,spdK); loadIncidents(lat,lon);
     if(navActive&&route){ navigate({lat:lat,lon:lon},spdK); setActiveAgents(spdK>118?['safety']:['driving','nav']); proactiveFatigue(); }
     else orchestrate(spdK);
   }
@@ -1292,6 +1297,22 @@
         L.marker([e.lat,e.lon],{icon:ic}).bindTooltip('Radar'+(lbl?' '+lbl:''),{direction:'top',offset:[0,-8]}).addTo(radarLayer);
       });
     }).catch(function(){});
+  }
+  /* ---------- risk layer: real TomTom traffic incidents (event bubbles) ---------- */
+  function evtInfo(cat){ if(cat===1)return{i:'!',c:'evt-acc',l:'Accident'}; if(cat===6)return{i:'≈',c:'evt-jam',l:'Bouchon'}; if(cat===9)return{i:'⚒',c:'evt-works',l:'Travaux'}; if(cat===7)return{i:'┊',c:'evt-works',l:'Voie fermée'}; if(cat===8)return{i:'⛔',c:'evt-closed',l:'Route fermée'}; if(cat===14)return{i:'⛐',c:'evt-jam',l:'Véhicule en panne'}; return{i:'!',c:'evt-jam',l:'Incident'}; }
+  function loadIncidents(lat,lon){
+    if(!incLayer||typeof TT_KEY==='undefined'||!TT_KEY) return; var now=Date.now();
+    if(incLL && haversine(incLL,{lat:lat,lon:lon})<1500 && (now-incAt)<120000) return; incAt=now; incLL={lat:lat,lon:lon};
+    var d=0.06, bbox=(lon-d)+','+(lat-d)+','+(lon+d)+','+(lat+d);
+    var fields=encodeURIComponent('{incidents{type,geometry{type,coordinates},properties{iconCategory,magnitudeOfDelay}}}');
+    fetch('https://api.tomtom.com/traffic/services/5/incidentDetails?key='+encodeURIComponent(TT_KEY)+'&bbox='+bbox+'&fields='+fields+'&language=fr-FR&timeValidityFilter=present')
+      .then(function(r){return r.json();}).then(function(j){ if(!incLayer)return; incLayer.clearLayers(); incidents=[];
+        var list=(j.incidents||[]).filter(function(it){ var p=it.properties||{}, cat=p.iconCategory||0, mag=p.magnitudeOfDelay||0; return cat===1||cat===8||mag>=2; }).slice(0,55);
+        list.forEach(function(it){ var g=it.geometry; if(!g||!g.coordinates)return; var c=(g.type==='Point')?g.coordinates:g.coordinates[Math.floor(g.coordinates.length/2)]; if(!c||c.length<2)return;
+          var cat=(it.properties&&it.properties.iconCategory)||0, info=evtInfo(cat); incidents.push({lat:c[1],lon:c[0],cat:cat});
+          var ic=L.divIcon({className:'',html:'<div class="evt '+info.c+'">'+info.i+'</div>',iconSize:[30,30],iconAnchor:[15,15]});
+          L.marker([c[1],c[0]],{icon:ic}).bindTooltip(info.l,{direction:'top',offset:[0,-12]}).addTo(incLayer); });
+      }).catch(function(){});
   }
   /* proximity voice alert when approaching a radar ahead */
   function checkRadars(pos,hdg,spdK){
@@ -1533,7 +1554,8 @@
     if(stepIdx===route.steps.length-1&&(d<30||remM<25)){setState('safe');setUiMode('parking');$('navbar').classList.remove('show');setMsg(T().arrived,'');Voice.say(T().arrived,2);releaseWake();stopNav();return;}
     var instr=maneuverText(step),name=(step.name&&step.name.length)?step.name:''; stepMinD=Math.min(stepMinD,d);
     $('mvArrow').textContent=arrowGlyph(step); $('mvDist').textContent=d<1000?Math.max(0,Math.round(d/10)*10)+' m':(d/1000).toFixed(1)+' km'; $('mvStreet').textContent=cap(instr)+(name?' · '+name:'');
-    var nx=route.steps[stepIdx+1]; $('mvThen').innerHTML = nx ? 'Puis : <b>'+cap(maneuverText(nx))+'</b>'+((nx.name&&nx.name.length)?' · '+nx.name:'') : 'Puis : arrivée';
+    $('mvThen').innerHTML = (function(){ function ln(s){ if(!s)return ''; var dd=s.distance, ds=dd<1000?Math.round(dd/10)*10+' m':(dd/1000).toFixed(1)+' km'; return '<b>'+cap(maneuverText(s))+'</b>'+((s.name&&s.name.length)?' · '+s.name:'')+' <i>('+ds+')</i>'; }
+      var a=ln(route.steps[stepIdx+1]), b=ln(route.steps[stepIdx+2]); var h=''; if(a)h+='Puis : '+a; if(b)h+='<br>Puis : '+b; return h||'Puis : <b>arrivée</b>'; })();
     setAttn(d<180?'critical':d<560?'high':(spdK>92&&d>1100)?'low':'med');
     setUiMode(d<180?'critical':((function(){try{return congestion(new Date())>1.30;}catch(e){return false;}})()?'assisted':'active'));
     if(!stepAnnounced&&d<230){stepAnnounced=true;setState('attention');var rd=Math.max(20,Math.round(d/20)*20);setMsg(cap(instr),'dans '+rd+' m');Voice.say(T().inDist(rd,instr+(name?T().onto(name):'')),2);}
