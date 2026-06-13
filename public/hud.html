@@ -228,11 +228,20 @@
     var g=roadGeom(); return {x:W/2+lt*((W/120)*(1-t*0.74)), y:g.egoY-t*(g.egoY-g.topY), t:t}; }
   function fillRing(ring,fill){ var pr=[]; for(var i=0;i<ring.length;i++){var p=projGround(ring[i].lat,ring[i].lon);if(p)pr.push(p);} if(pr.length<3)return; ctx.beginPath(); ctx.moveTo(pr[0].x,pr[0].y); for(var j=1;j<pr.length;j++)ctx.lineTo(pr[j].x,pr[j].y); ctx.closePath(); ctx.fillStyle=fill; ctx.fill(); }
   function strokeRing(ring,col,wd){ var pr=[]; for(var i=0;i<ring.length;i++){var p=projGround(ring[i].lat,ring[i].lon);if(p)pr.push(p);} if(pr.length<2)return; ctx.beginPath(); ctx.moveTo(pr[0].x,pr[0].y); for(var j=1;j<pr.length;j++)ctx.lineTo(pr[j].x,pr[j].y); ctx.strokeStyle=col; ctx.lineWidth=wd; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke(); }
+  function ringDepth(ring){ var la=0,lo=0,c=0; for(var i=0;i<ring.length;i++){la+=ring[i].lat;lo+=ring[i].lon;c++;} var p=projGround(la/c,lo/c); return p?p.t:null; }
+  function drawBuilding(ring,td,n){ var base=[]; for(var i=0;i<ring.length;i++){var p=projGround(ring[i].lat,ring[i].lon);if(p)base.push(p);} if(base.length<3)return;
+    var h=Math.max(6, 48*(1-Math.min(1,td))+5); var roof=base.map(function(p){return {x:p.x,y:p.y-h};});
+    ctx.fillStyle=n?'rgba(72,76,96,.62)':'rgba(124,128,148,.6)'; /* walls */
+    for(var i=0;i<base.length-1;i++){ ctx.beginPath(); ctx.moveTo(base[i].x,base[i].y); ctx.lineTo(base[i+1].x,base[i+1].y); ctx.lineTo(roof[i+1].x,roof[i+1].y); ctx.lineTo(roof[i].x,roof[i].y); ctx.closePath(); ctx.fill(); }
+    ctx.beginPath(); ctx.moveTo(roof[0].x,roof[0].y); for(var j=1;j<roof.length;j++)ctx.lineTo(roof[j].x,roof[j].y); ctx.closePath();
+    ctx.fillStyle=n?'rgba(122,128,154,.72)':'rgba(178,182,200,.74)'; ctx.fill(); ctx.strokeStyle=n?'rgba(150,160,192,.5)':'rgba(118,122,140,.55)'; ctx.lineWidth=.8; ctx.stroke(); }
   function drawSurroundings(){ if(!egoLL)return; var n=world.night;
     surr.g.forEach(function(r){fillRing(r, n?'rgba(50,140,90,.4)':'rgba(74,176,108,.5)');});
     surr.w.forEach(function(r){fillRing(r,'rgba(64,132,214,.58)');});
     surr.wl.forEach(function(r){strokeRing(r,'rgba(74,150,224,.7)',6);});
-    surr.b.forEach(function(r){ fillRing(r, n?'rgba(140,144,165,.4)':'rgba(168,170,186,.46)'); strokeRing(r, n?'rgba(180,186,210,.4)':'rgba(120,122,138,.45)',1); });
+    /* extruded 3D buildings, far → near for correct occlusion */
+    var bl=[]; for(var i=0;i<surr.b.length;i++){ var d=ringDepth(surr.b[i]); if(d!=null)bl.push({r:surr.b[i],d:d}); }
+    bl.sort(function(a,b){return b.d-a.d;}); bl.forEach(function(x){ drawBuilding(x.r,x.d,n); });
   }
   function mToY(dist){ var g=roadGeom(); return g.egoY-(dist/VIEW_M)*(g.egoY-g.topY); }
 
@@ -340,8 +349,13 @@
 
     // RACING LINE: chevrons whose colour & behaviour follow the AI mode's identity
     var ms=MODESTYLE[hudMode]||MODESTYLE.copilot;
-    // calm modes stay on the mode's signature colour and only flag real danger; sport modes run the full green→red racing gradient
-    var rlc = S.override?'#ff3b46' : (ms.calm ? (S.risk>0.5?'#ff5a3c':(S.risk>0.32?'#f5d020':ms.base)) : (S.risk>0.45?'#ff8c1a':(S.risk>0.18?'#f5d020':'#39d98a')));
+    // colour by deceleration / braking: green=go, lime=ease, yellow=slowing, orange/red=braking
+    var dec=egoAccel; // m/s² (negative = braking)
+    var rlc = (S.override||dec<-3.5) ? '#ff3b46'   /* freinage fort = rouge */
+            : dec<-1.8 ? '#ff8c1a'                 /* freinage = orange */
+            : dec<-0.7 ? '#f5d020'                 /* ralentit = jaune */
+            : dec<-0.15 ? '#b6e63a'                /* lève le pied = lime */
+            : '#39d98a';                           /* vitesse / dégagé = vert */
     var pul = ms.pulse ? (0.78+0.22*Math.sin(world.t*7)) : 1;
     for(var ci=0;ci<ms.n;ci++){ var f=((ci/ms.n)+((world.t*ms.speed)%1))%1; var yy=g.topY+f*(g.egoY-g.topY); var sz=3+f*11;
       ctx.globalAlpha=(0.18+f*0.7)*ms.dim*pul; ctx.fillStyle=rlc; ctx.beginPath(); ctx.moveTo(elx,yy-sz); ctx.lineTo(elx-sz*0.85,yy+sz*0.55); ctx.lineTo(elx+sz*0.85,yy+sz*0.55); ctx.closePath(); ctx.fill(); }

@@ -1190,7 +1190,7 @@
     if(p){ p.count++; p.last=Date.now(); p.name=nm; } else Mem.places.push({name:nm,lat:+d.lat,lon:+d.lon,count:1,last:Date.now()});
     Mem.places.sort(function(a,b){return b.count-a.count||b.last-a.last;}); Mem.places=Mem.places.slice(0,20);
     Mem.lastDest={name:nm,lat:+d.lat,lon:+d.lon}; saveMem(); }
-  var follow=true, watchId=null, demoTimer=null;
+  var follow=true, watchId=null, demoTimer=null, demoMode=false;
   var pts=[], totalDist=0, route=null, stepIdx=0, stepAnnounced=false, navActive=false, lastSpeedState=null, maxSpd=0;
   var currentDest=null, offCount=0, rerouting=false, wakeLock=null, suggTimer=null, stepMinD=Infinity, lastCruise=0;
   var THEMES={dark:'dark_all',light:'light_all'}; var themeMode='auto';
@@ -1646,7 +1646,7 @@
       var km=(rt.dist/1000).toFixed(1),min=Math.round(rt.dur/60); $('routeInfo').innerHTML='<b>'+km+' km</b> · '+min+' min';
       $('navEta').textContent=min+' min'; $('navSub').textContent=km+' km'; $('navState').textContent='Active';
       setState('safe');setMsg(T().go,km+' km · '+min+' min');Voice.say(T().calc(km,min),2);
-      updateTraffic(); setTimeout(announceTraffic,4200);
+      updateTraffic(); setTimeout(announceTraffic,4200); if(demoMode)driveDemo(rt.coords);
     }).catch(function(){toast(T().netErr);setMsg(T().ready,'');}); }
   function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if(raceLayer)raceLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); refilterMarkers(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
   function reroute(pos){ if(!currentDest)return; rerouting=true;setState('attention');toast(T().reroute);Voice.say(T().reroute,1);
@@ -1706,13 +1706,17 @@
       {enableHighAccuracy:true,maximumAge:1000,timeout:15000});
   }
   var startGeo = beginLocate;
-  function startDemo(){ hideGate();Voice.pick(); var from={lat:48.8584,lon:2.2945},to={lat:48.8738,lon:2.2950};
+  /* animate a demo drive along the given route coords (re-usable for demo navigation) */
+  function driveDemo(co){ if(demoTimer){clearInterval(demoTimer);demoTimer=null;} if(!co||!co.length)return; var i=0;
+    demoTimer=setInterval(function(){ if(!demoMode||i>=co.length){clearInterval(demoTimer);demoTimer=null;return;} var c=co[i],pv=co[Math.max(0,i-1)]; var hdg=null;
+      if(i>0){var dy=c[1]-pv[1],dx=(c[0]-pv[0])*Math.cos(c[1]*Math.PI/180);hdg=(Math.atan2(dx,dy)*180/Math.PI+360)%360;}
+      onPos({latitude:c[1],longitude:c[0],accuracy:5,speed:13,heading:hdg},Date.now()); i+=2; },180); }
+  function startDemo(){ hideGate();Voice.pick();demoMode=true; var from={lat:48.8584,lon:2.2945},to={lat:48.8738,lon:2.2950};
     pts=[from];meMarker.setLatLng([from.lat,from.lon]).setOpacity(1);map.setView([from.lat,from.lon],15);setMsg(T().reroute,'démo');maybeWeather(from.lat,from.lon);
     getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);return;} currentDest=to;setRouteData(rt);colorRouteTraffic(from,to);
       destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
       var km=(rt.dist/1000).toFixed(1),min=Math.round(rt.dur/60);$('routeInfo').innerHTML='<b>'+km+' km</b> · '+min+' min';$('navEta').textContent=min+' min';$('navSub').textContent=km+' km';$('navState').textContent='Démo';
-      Voice.say(T().calc(km,min),2);updateTraffic();setTimeout(announceTraffic,4200);follow=true;$('followBtn').textContent='⊙'; var co=rt.coords,i=0;
-      demoTimer=setInterval(function(){ if(i>=co.length){clearInterval(demoTimer);demoTimer=null;return;} var c=co[i],pv=co[Math.max(0,i-1)]; var hdg=null;if(i>0){var dy=c[1]-pv[1],dx=(c[0]-pv[0])*Math.cos(c[1]*Math.PI/180);hdg=(Math.atan2(dx,dy)*180/Math.PI+360)%360;} onPos({latitude:c[1],longitude:c[0],accuracy:5,speed:13,heading:hdg},Date.now()); i+=2; },180);
+      Voice.say(T().calc(km,min),2);updateTraffic();setTimeout(announceTraffic,4200);follow=true;$('followBtn').textContent='⊙'; driveDemo(rt.coords);
     }).catch(function(){toast(T().netErr);}); }
   function hideGate(){$('gate').style.display='none';}
 
