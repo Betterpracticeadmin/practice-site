@@ -1138,6 +1138,7 @@
   var poiAt=0, poiLL=null, poiOn=true, favs=[];
   var radarLayer=null, radarAt=0, radarLL=null, radarOn=true, radars=[], radarSaid={};
   var incLayer=null, incAt=0, incLL=null, incidents=[];
+  var trafficLayer=null;
   try{ favs=JSON.parse(localStorage.getItem('practiceFavs')||'[]'); }catch(e){ favs=[]; }
   /* ---------- persistent memory (the app remembers you) ---------- */
   var Mem; try{ Mem=JSON.parse(localStorage.getItem('practiceMem')||'{}'); }catch(e){ Mem={}; }
@@ -1189,6 +1190,7 @@
     routeLine=L.polyline([],{color:t==='dark'?'#fff':'#111',weight:6,opacity:.92,lineJoin:'round'}).addTo(map);
     accCircle=L.circle([46.6,2.4],{radius:0,color:'#888',weight:1,opacity:.3,fillOpacity:.05}).addTo(map);
     poiLayer=L.layerGroup().addTo(map);
+    trafficLayer=L.layerGroup().addTo(map);
     radarLayer=L.layerGroup().addTo(map);
     incLayer=L.layerGroup().addTo(map);
     var icon=L.divIcon({className:'',html:'<div class="me-wrap"><div class="me-arrow" id="meArrow"></div><div class="me-dot"></div></div>',iconSize:[20,20],iconAnchor:[10,10]});
@@ -1312,6 +1314,19 @@
           var cat=(it.properties&&it.properties.iconCategory)||0, info=evtInfo(cat); incidents.push({lat:c[1],lon:c[0],cat:cat});
           var ic=L.divIcon({className:'',html:'<div class="evt '+info.c+'">'+info.i+'</div>',iconSize:[30,30],iconAnchor:[15,15]});
           L.marker([c[1],c[0]],{icon:ic}).bindTooltip(info.l,{direction:'top',offset:[0,-12]}).addTo(incLayer); });
+      }).catch(function(){});
+  }
+  /* ---------- Waze-style traffic-coloured route (real TomTom traffic sections) ---------- */
+  function magColor(m){ return m>=4?'#ff3b46':m>=3?'#ff8c1a':m>=2?'#f5a623':m>=1?'#c9d645':'#2ec28a'; }
+  function colorRouteTraffic(from,to){ if(!trafficLayer||typeof TT_KEY==='undefined'||!TT_KEY||!from||!to) return;
+    fetch('https://api.tomtom.com/routing/1/calculateRoute/'+from.lat+','+from.lon+':'+to.lat+','+to.lon+'/json?key='+encodeURIComponent(TT_KEY)+'&traffic=true&sectionType=traffic&routeRepresentation=polyline&travelMode=car')
+      .then(function(r){return r.json();}).then(function(j){ var rt=j&&j.routes&&j.routes[0]; if(!rt||!trafficLayer)return; trafficLayer.clearLayers();
+        var pts=[]; (rt.legs||[]).forEach(function(l){ (l.points||[]).forEach(function(p){ pts.push([p.latitude,p.longitude]); }); });
+        if(pts.length<2)return;
+        L.polyline(pts,{color:'#2ec28a',weight:7,opacity:.92,lineCap:'round',lineJoin:'round'}).addTo(trafficLayer); // fluid base
+        (rt.sections||[]).forEach(function(s){ if(s.sectionType&&s.sectionType!=='TRAFFIC')return; var a=s.startPointIndex||0,b=(s.endPointIndex!=null?s.endPointIndex:a); var seg=pts.slice(a,b+1); if(seg.length<2)return;
+          L.polyline(seg,{color:magColor(s.magnitudeOfDelay||0),weight:7.5,opacity:.97,lineCap:'round',lineJoin:'round'}).addTo(trafficLayer); });
+        if(routeLine)routeLine.setStyle({opacity:0}); // colored line replaces the plain one
       }).catch(function(){});
   }
   /* proximity voice alert when approaching a radar ahead */
@@ -1515,7 +1530,7 @@
     routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); }
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
     currentDest=to;hideSuggest();hideFavs();addFav(to);setNavContext(to);rememberPlace(to,($('dest').value||to.name));setUiMode('active');setMsg(T().reroute,'');requestWake();
-    getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);setMsg(T().ready,'');return;} setRouteData(rt);
+    getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);setMsg(T().ready,'');return;} setRouteData(rt); colorRouteTraffic(from,to);
       if(destMarker)map.removeLayer(destMarker); destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
       try{map.fitBounds(routeLine.getBounds().pad(0.2));}catch(e){} follow=true;$('followBtn').textContent='⊙';
       var km=(rt.dist/1000).toFixed(1),min=Math.round(rt.dur/60); $('routeInfo').innerHTML='<b>'+km+' km</b> · '+min+' min';
@@ -1523,9 +1538,9 @@
       setState('safe');setMsg(T().go,km+' km · '+min+' min');Voice.say(T().calc(km,min),2);
       updateTraffic(); setTimeout(announceTraffic,4200);
     }).catch(function(){toast(T().netErr);setMsg(T().ready,'');}); }
-  function stopNav(){ navActive=false;route=null;currentDest=null;routeLine.setLatLngs([]); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
+  function stopNav(){ navActive=false;route=null;currentDest=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
   function reroute(pos){ if(!currentDest)return; rerouting=true;setState('attention');toast(T().reroute);Voice.say(T().reroute,1);
-    getRoute(pos,currentDest).then(function(rt){rerouting=false;if(rt){setRouteData(rt);setState('safe');}}).catch(function(){rerouting=false;}); }
+    getRoute(pos,currentDest).then(function(rt){rerouting=false;if(rt){setRouteData(rt);colorRouteTraffic(pos,currentDest);setState('safe');}}).catch(function(){rerouting=false;}); }
   function maneuverText(step){ var m=step.maneuver||{},mod=m.modifier||'',t=m.type||'',tr=T().turns;
     if(t==='arrive')return tr.arrive; if(t==='roundabout'||t==='rotary')return tr.roundabout(m.exit||1); if(t==='merge')return tr.merge;
     if(t==='fork')return mod.indexOf('left')>=0?tr.keepleft:tr.keepright;
@@ -1583,7 +1598,7 @@
   var startGeo = beginLocate;
   function startDemo(){ hideGate();Voice.pick(); var from={lat:48.8584,lon:2.2945},to={lat:48.8738,lon:2.2950};
     pts=[from];meMarker.setLatLng([from.lat,from.lon]).setOpacity(1);map.setView([from.lat,from.lon],15);setMsg(T().reroute,'démo');maybeWeather(from.lat,from.lon);
-    getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);return;} currentDest=to;setRouteData(rt);
+    getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);return;} currentDest=to;setRouteData(rt);colorRouteTraffic(from,to);
       destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
       var km=(rt.dist/1000).toFixed(1),min=Math.round(rt.dur/60);$('routeInfo').innerHTML='<b>'+km+' km</b> · '+min+' min';$('navEta').textContent=min+' min';$('navSub').textContent=km+' km';$('navState').textContent='Démo';
       Voice.say(T().calc(km,min),2);updateTraffic();setTimeout(announceTraffic,4200);follow=true;$('followBtn').textContent='⊙'; var co=rt.coords,i=0;
