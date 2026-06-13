@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"/>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
 <style>
@@ -17,6 +19,11 @@
   html,body{height:100%;background:#050506;color:#F2F3F5;font-family:'Inter',sans-serif;overflow:hidden;}
   #wrap{position:fixed;inset:0;}
   canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  #map3d{position:absolute;inset:0;z-index:0;}
+  body[data-view="3d"] #cv{display:none;}
+  body[data-view="3d"] #warm{opacity:.35;}
+  body:not([data-view="3d"]) #map3d{display:none;}
+  .maplibregl-ctrl-attrib,.maplibregl-ctrl-logo{display:none!important;}
   /* breathing accent — shifts with risk level */
   /* Apple-CarPlay-like warm ambient wash */
   #warm{position:absolute;inset:0;pointer-events:none;z-index:1;background:
@@ -123,6 +130,7 @@
 </head>
 <body data-lvl="SAFE">
 <div id="wrap">
+  <div id="map3d"></div>
   <canvas id="cv"></canvas>
   <div id="warm"></div>
   <div id="vig"></div>
@@ -176,6 +184,7 @@
     <div class="sep"></div>
     <button id="bGps">📍 GPS réel</button>
     <button id="bObd">🔌 OBD2</button>
+    <button id="b3d" class="on">🛰 3D satellite</button>
     <button id="bFull">⛶ Plein écran</button>
     <div class="sep"></div>
     <div id="hz"><span>Horizon</span><input id="hzR" type="range" min="1" max="5" step="1" value="3"/><span id="hzV">3s</span></div>
@@ -476,7 +485,8 @@
     if(hdg!=null&&!isNaN(hdg)) $('hdg').textContent=Math.round(hdg)+'°';
     if(acc!=null) $('gpsAcc').textContent='±'+Math.round(acc)+' m';
     $('bGps').classList.add('on');
-    if(lat!=null){ egoLL={lat:lat,lon:lon}; if(hdg!=null&&!isNaN(hdg))egoHdg=hdg; loadSurroundings(lat,lon); }
+    if(lat!=null){ egoLL={lat:lat,lon:lon}; if(hdg!=null&&!isNaN(hdg))egoHdg=hdg; loadSurroundings(lat,lon);
+      if(view3d&&map3d&&b3dReady){ map3d.easeTo({center:[lon,lat],bearing:(hdg!=null&&!isNaN(hdg))?hdg:map3d.getBearing(),pitch:64,zoom:17,duration:900}); load3DBuildings(lat,lon); } }
     if(map&&lat!=null){ meMarker.setLatLng([lat,lon]); map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true}); loadHudRadars(lat,lon); checkHudRadars(lat,lon,hdg); }
     // reverse geocode locality (throttled, every 25s)
     if(lat!=null && Date.now()-geoAt>25000){ geoAt=Date.now();
@@ -522,6 +532,34 @@
   $('bGps').addEventListener('click',function(){ if(this.classList.contains('on'))stopGPS(); else startGPS(); });
   $('bObd').addEventListener('click',function(){ if(obd.on&&obd.gatt){obd.gatt.disconnect();} else obdConnect(); });
   $('bFull').addEventListener('click',toggleFull);
+
+  /* ---- REAL 3D environment from satellite (MapLibre GL + Esri imagery + OSM 3D buildings) ---- */
+  var map3d=null, b3dReady=false, view3d=true, b3dLL=null, b3dAt=0;
+  function initMap3D(){ if(map3d||typeof maplibregl==='undefined')return;
+    map3d=new maplibregl.Map({ container:'map3d', attributionControl:false, interactive:false, maxPitch:80,
+      style:{ version:8, sources:{ sat:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'© Esri'} }, layers:[{id:'sat',type:'raster',source:'sat'}] },
+      center: egoLL?[egoLL.lon,egoLL.lat]:[2.3522,48.8566], zoom:16.8, pitch:64, bearing:egoHdg||0 });
+    map3d.on('load',function(){ b3dReady=true;
+      map3d.addSource('bldg',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+      map3d.addLayer({id:'bldg3d',type:'fill-extrusion',source:'bldg',paint:{
+        'fill-extrusion-color':['interpolate',['linear'],['get','h'],3,'#a7abb6',25,'#cdd1da',70,'#eef0f6'],
+        'fill-extrusion-height':['get','h'],'fill-extrusion-base':0,'fill-extrusion-opacity':0.92}});
+      try{ map3d.setLight&&map3d.setLight({anchor:'viewport',intensity:0.4}); }catch(e){}
+      if(egoLL){ load3DBuildings(egoLL.lat,egoLL.lon); }
+    });
+  }
+  function load3DBuildings(lat,lon){ if(!map3d||!b3dReady)return; var now=Date.now(); if(b3dLL&&Math.abs(lat-b3dLL.lat)<0.003&&Math.abs(lon-b3dLL.lon)<0.003&&now-b3dAt<60000)return; b3dAt=now; b3dLL={lat:lat,lon:lon};
+    var q='[out:json][timeout:25];(way["building"](around:520,'+lat+','+lon+'););out geom 450;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){ var fts=[];
+      (j.elements||[]).forEach(function(e){ if(!e.geometry||e.geometry.length<3)return; var t=e.tags||{}; var h=t.height?parseFloat(t.height):(t['building:levels']?parseFloat(t['building:levels'])*3.1:9); if(isNaN(h)||h<3)h=9;
+        var ring=e.geometry.map(function(p){return [p.lon,p.lat];}); var a=ring[0],b=ring[ring.length-1]; if(a[0]!==b[0]||a[1]!==b[1])ring.push(a);
+        fts.push({type:'Feature',properties:{h:h},geometry:{type:'Polygon',coordinates:[ring]}}); });
+      if(map3d.getSource('bldg'))map3d.getSource('bldg').setData({type:'FeatureCollection',features:fts}); }).catch(function(){});
+  }
+  function set3D(on){ view3d=on; document.body.setAttribute('data-view',on?'3d':'sim'); $('b3d').classList.toggle('on',on);
+    if(on){ initMap3D(); setTimeout(function(){ if(map3d)map3d.resize(); if(egoLL&&map3d&&b3dReady){map3d.jumpTo({center:[egoLL.lon,egoLL.lat],bearing:egoHdg});load3DBuildings(egoLL.lat,egoLL.lon);} },150); } }
+  $('b3d').addEventListener('click',function(){ set3D(!view3d); });
+  set3D(true);
 
   // seed cognitive traffic layer
   for(var i=0;i<3;i++)spawnCar();
