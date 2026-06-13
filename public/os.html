@@ -1902,7 +1902,86 @@
   function handleClaudeAction(verb,arg){ if(verb==='navigate'){ geocode(arg).then(function(d){ if(d){$('dest').value=arg;startRouteTo(d);} }); }
     else if(verb==='mode'){ runCmd('mode '+arg); } else if(verb==='theme'){ runCmd('thème '+arg); } else if(verb==='nearby'){ for(var i=0;i<POITYPES.length;i++){ if(POITYPES[i].re.test(arg)){ nearestPOI(POITYPES[i]); break; } } }
     else if(verb==='media'){ runCmd(arg); } else if(verb==='view'){ if(typeof setView==='function')setView(arg); } }
+  /* ===== Dictionnaire de reconnaissance vocale : synonymes -> intentions ===== */
+  var LEX={
+    here:/(j'?y vais|jy vais|on y va|vas[- ]?y|emm[eè]ne[- ]?moi (l[aà]|y)|conduis[- ]?moi l[aà]|am[eè]ne[- ]?moi l[aà]|je veux m'?y rendre|rends[- ]?y[- ]?moi|c'?est parti|go there|take me there|drive me there|allons[- ]?y|let'?s go)/i,
+    nearby:/(o[uù] (est|sont|se trouve|y a|puis[- ]?je|peut[- ]?on|je peux|trouver)|la plus proche|le plus proche|plus proche|pr[eè]s d'?ici|pres d'?ici|[aà] proximit[eé]|autour de moi|dans le coin|aux alentours|trouve[- ]?moi|trouve|trouver|cherche|chercher|y a[- ]?t[- ]?il|il y a|nearest|closest|where('?s| is| can| are)|find( me)?|locate)/i,
+    theme:/(th[eè]me|theme|fond d'?[eé]cran|interface|apparence|couleur de l'?[eé]cran)/i,
+    voiceoff:/((coupe|d[eé]sactive|baisse|silence|mute|tais|chut|arr[eê]te)[^.]{0,18}(voix|son|parler|toi|micro)|tais[- ]?toi|reste silencieux|plus un mot)/i,
+    voiceon:/((active|remets|rallume|reprends?)[^.]{0,18}(voix|son|parler|micro)|tu peux parler|parle[- ]?moi)/i,
+    fav:/(favori|favoris|j'?aime|j'?adore|like|kiffe|enregistre|sauvegarde|garde|m[eé]morise|note ce|ajoute aux)/i,
+    play:/(joue|jouer|lance la musique|lance un son|reprend|reprends|remets? (la )?musique|mets? (de la |la |un peu de )?musique|[eé]couter de la musique|lecture|^play|music on|de la musique)/i,
+    pause:/(pause|stoppe la musique|arr[eê]te la musique|coupe la musique|mets? sur pause|pause la|stop music)/i,
+    next:/(suivant|suivante|prochaine?|morceau d'?apr[eè]s|chanson suivante|change de (son|titre|musique|chanson)|passe (au|la|le|à)|skip|next( track| song)?|une autre)/i,
+    prev:/(pr[eé]c[eé]dent|pr[eé]c[eé]dente|d'?avant|reviens|morceau d'?avant|chanson d'?avant|previous|reviens en arri[eè]re|le son d'?avant)/i,
+    openmedia:/((ouvre|montre|affiche|d[eé]ploie|lance)[^.]{0,14}(m[eé]dia|musique|lecteur|playlist|titres))/i,
+    stopnav:/((arr[eê]te|stop|annule|termine|fin de|coupe|quitte|enl[eè]ve)[^.]{0,16}(nav|itin|trajet|route|guidage|gps|destination)|annule (la route|le trajet|tout)|stop nav)/i,
+    vhud:/(\bhud\b|vision|practice vision|vue (avant|cockpit|3d)|r[eé]alit[eé] augment)/i,
+    vpulse:/(\bpulse\b|mode pulse|vue pulse|battement)/i,
+    vnormal:/(vue normale|mode normal|retour (carte|cockpit|normal)|revient[- ]?[aà] la carte|carte normale|vue carte)/i,
+    radar:/(radar|radars|contr[oô]le (de )?vitesse|flash|zone de danger)/i,
+    qtraffic:/(trafic|circulation|bouchon|embouteillage|[çc]a roule|c'?est charg[eé]|y a du monde|fluide|route charg)/i,
+    qeta:/(quand[^.]{0,14}arriv|arriv[^.]{0,14}quand|combien de temps|temps (de|du) trajet|dur[eé]e( du trajet)?|^eta|reste[^.]{0,10}temps|on arrive (quand|dans)|j'?arrive quand|heure d'?arriv)/i,
+    qdist:/(distance|combien[^.]{0,10}km|combien[^.]{0,14}kilom|reste[^.]{0,10}km|c'?est (encore )?loin|encore loin|il reste combien)/i,
+    qweather:/(m[eé]t[eé]o|temp[eé]rature|il fait (combien|quel|chaud|froid|beau|mauvais)|quel temps|fait[- ]?il (chaud|froid|beau)|il pleut|temps qu'?il fait)/i,
+    qloc:/(o[uù] (je |on |suis|sommes|est[- ]?ce|je suis|on est)|ma position|on est o[uù]|je suis o[uù]|quel endroit|quel quartier|quelle ville|c'?est quoi ici|where am i)/i,
+    qtime:/(quelle heure|l'?heure (qu'?il est|est)|il est quelle heure|donne[- ]?moi l'?heure|what time)/i,
+    qnow:/(quel (titre|morceau|son|chanson)|c'?est quoi (ce|cette|le|la) (titre|son|musique|morceau|chanson)|qui chante|qu'?est[- ]?ce qu'?on [eé]coute|c'?est quoi cette musique|now playing)/i,
+    qspeed:/(ma vitesse|je roule [aà]|je vais [aà] combien|combien[^.]{0,10}roule|[aà] combien (je|on)|on roule [aà]|quelle vitesse|how fast)/i,
+    hello:/(bonjour|bonsoir|salut|coucou|hello|^hi\b|^hey|good (morning|evening)|yo\b|wesh|hola)/i,
+    howru:/([çc]a va|comment vas|comment tu vas|how are you|tu vas bien|how'?s it going|la forme|tu p[eè]tes la forme|tout va bien)/i,
+    whoru:/(qui es[- ]?tu|comment tu t'?appelles|ton nom|who are you|what'?s your name|tu es qui|t'?es qui|c'?est qui practice|tu sers [aà] quoi|que sais[- ]?tu faire|tes capacit)/i,
+    thanks:/(merci|thank you|thanks|nickel|parfait|g[eé]nial|super|top|excellent|bravo|bien jou[eé])/i,
+    joke:/(blague|joke|fais[- ]?moi rire|raconte (une|moi|quelque)|histoire dr[oô]le|un truc dr[oô]le|fais de l'?humour)/i,
+    day:/(quel jour|on est quel jour|what day|on est quel|la date|quelle date|c'?est quel jour)/i,
+    media_genre:/(mets? (du|de la|un peu de) (rock|jazz|rap|classique|[eé]lectro|techno|pop|lofi|chill|reggae|funk|soul|hip[- ]?hop)|joue (du|de la) )/i
+  };
+  function L(t,k){ return LEX[k].test(t); }
+  var MODETRIG=/\b(mode|passe|active|activer|mets?|met[s]?[- ]?moi|bascule|enclenche|enclencher|en mode|on passe|je veux (le |du )?mode|switch|set)\b/i;
+  var MODEWORDS=[
+    {id:'ultra',re:/(ultra|hypersport|hyper[- ]?sport|hypercar|course|racing|race|piste|circuit|comp[eé]tition|extr[eê]me|maximum|[aà] fond)/i},
+    {id:'performance',re:/(performance|perf\b|sportif|sportive|\bsport\b|rapide|nerveux|dynamique|attaque|agressif|pied au plancher|fonce)/i},
+    {id:'gt',re:/(grand touring|\bgt\b|tourisme|voyage|autoroute|crois[ie]re|longue route|d[eé]tente|tranquille|balade|relax|relaxe|cool|zen|paisible)/i},
+    {id:'night',re:/(nuit|night|nocturne|conduite de nuit)/i},
+    {id:'learning',re:/(learning|apprentissage|apprends|apprentie?|d[eé]butant|novice|p[eé]dago|coach|[eé]cole de conduite|formation|progresse|j'?apprends)/i},
+    {id:'copilot',re:/(copilot|copilote|normal|classique|standard|par d[eé]faut|[eé]quilibr|confiance|habituel|de base)/i}
+  ];
+  /* primary dictionary-driven matcher — returns true when it handled the utterance */
+  function vocabRun(t){
+    if(L(t,'here')&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return true; }
+    if(L(t,'nearby')){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return true; } } }
+    if(L(t,'theme')){ themeMode=/nuit|sombre|noir|dark/.test(t)?'dark':(/jour|clair|blanc|lumi|light/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return true; }
+    for(var mi=0;mi<MODEWORDS.length;mi++){ if(MODEWORDS[mi].re.test(t)&&(MODETRIG.test(t)||MODEWORDS[mi].re.source.length<14)){ setMode(MODEWORDS[mi].id); sayVA('Mode '+MODES[MODEWORDS[mi].id].name+'.'); return true; } }
+    if(L(t,'voiceoff')){ Voice.on=false; Voice.flush(); syncPanel(); Mem.prefs.voice=false; saveMem(); sayVA('Voix coupée.'); return true; }
+    if(L(t,'voiceon')){ Voice.on=true; syncPanel(); Mem.prefs.voice=true; saveMem(); sayVA('Voix activée.'); return true; }
+    if(L(t,'fav')){ if(typeof mediaSource!=='undefined'&&mediaSource==='sc'&&typeof scWidget!=='undefined'&&scWidget&&/titre|musique|chanson|son|morceau|[çc]a|ce truc/.test(t)){ scWidget.getCurrentSound(function(s){ if(s&&typeof toggleLike==='function')toggleLike(s); }); sayVA('Titre ajouté aux favoris.'); return true; } if(typeof currentDest!=='undefined'&&currentDest){ addFav(currentDest); rememberPlace(currentDest); sayVA('Lieu ajouté aux favoris.'); return true; } if(lastRef){ rememberPlace&&rememberPlace(lastRef); sayVA(lastRef.name+' ajouté aux favoris.'); return true; } sayVA('Rien à ajouter pour l\'instant.'); return true; }
+    if(L(t,'next')&&typeof mediaNext==='function'){ mediaNext(); sayVA('Titre suivant.'); return true; }
+    if(L(t,'prev')&&typeof mediaPrev==='function'){ mediaPrev(); sayVA('Titre précédent.'); return true; }
+    if(L(t,'openmedia')&&typeof openMedia==='function'){ openMedia(); sayVA('Média ouvert.'); return true; }
+    if((L(t,'play')||L(t,'media_genre')||L(t,'pause'))&&typeof mediaToggle==='function'){ mediaToggle(); sayVA('Musique.'); return true; }
+    if(L(t,'stopnav')){ stopNav(); setMsg(T().ready,''); sayVA('Navigation arrêtée.'); return true; }
+    if(L(t,'vpulse')&&typeof setView==='function'){ setView('pulse'); sayVA('Vue Pulse.'); return true; }
+    if(L(t,'vhud')&&typeof setView==='function'){ setView('hud'); sayVA('Vue Practice Vision.'); return true; }
+    if(L(t,'vnormal')&&typeof setView==='function'){ setView('normal'); sayVA('Vue normale.'); return true; }
+    if(L(t,'radar')){ if($('radarBtn'))$('radarBtn').click(); sayVA('Radars affichés.'); return true; }
+    if(L(t,'qtraffic')){ var lv=$('trLvl')?($('trLvl').textContent||'').trim():''; var dl=$('trDelay')?($('trDelay').textContent||'').trim():''; sayVA('Trafic '+(lv||'inconnu').toLowerCase()+(dl?', '+dl:'')+'.'); return true; }
+    if(L(t,'qeta')){ var et=$('navEta')?($('navEta').textContent||'').replace(/\s*[0-9]+%/,'').trim():''; sayVA(et&&et!=='—'?('Arrivée dans '+et+'.'):'Aucun trajet en cours.'); return true; }
+    if(L(t,'qdist')){ var sb=$('navSub')?($('navSub').textContent||'').trim():''; sayVA(sb&&sb.indexOf('km')>=0?('Il reste '+sb+'.'):'Aucun trajet en cours.'); return true; }
+    if(L(t,'qweather')){ var tp=$('wxTemp')?($('wxTemp').textContent||'').trim():'', de=$('wxDesc')?($('wxDesc').textContent||'').trim():''; sayVA('Il fait '+(tp||'—')+' degrés'+(de&&de!=='—'?', '+de.toLowerCase():'')+'.'); return true; }
+    if(L(t,'qloc')){ var lo=$('wxLoc')?($('wxLoc').textContent||'').trim():''; sayVA(lo&&lo!=='—'?('Tu es vers '+lo+'.'):'Position inconnue pour l\'instant.'); return true; }
+    if(L(t,'qtime')){ var cl=$('clock')?($('clock').textContent||'').trim():''; sayVA('Il est '+cl.replace(':',' heures ')+'.'); return true; }
+    if(L(t,'qnow')){ var ti=$('plTitle')?($('plTitle').textContent||'').trim():'', ar=$('plArtist')?($('plArtist').textContent||'').trim():''; sayVA(ti?(ti+(ar?', par '+ar:'')+'.'):'Aucune lecture en cours.'); return true; }
+    if(L(t,'qspeed')){ sayVA('Tu roules à '+(Math.round(liveSpd||0))+' kilomètres heure.'); return true; }
+    if(L(t,'whoru')){ sayVA(pickL(['Je suis Practice, ton copilote. Je gère la nav, les modes, la musique, je réponds à tes questions et je cherche des lieux autour de toi.'],['I\'m Practice, your co-pilot — navigation, modes, music, questions and nearby places.'])); return true; }
+    if(L(t,'howru')){ sayVA(pickL(['Je veille sur la route, tout roule. Et toi ?','En pleine forme, prêt à t\'assister.'],['All good, watching the road. You?','Doing great, ready to help.'])); return true; }
+    if(L(t,'hello')){ sayVA(pickL(['Bonjour '+vaName()+', je suis là.','Salut '+vaName()+' !','Hey '+vaName()+', à ton écoute.'],['Hi '+vaName()+', I\'m here.','Hey '+vaName()+'!'])); return true; }
+    if(L(t,'thanks')){ sayVA(pickL(['Avec plaisir.','Quand tu veux '+vaName()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return true; }
+    if(L(t,'joke')){ sayVA(pickL(['Pourquoi la voiture électrique reste zen ? Zéro émission de stress.','Un GPS entre dans un bar… puis recalcule l\'itinéraire.'],['Why was the EV so calm? Zero stress emissions.'])); return true; }
+    if(L(t,'day')){ try{ sayVA('On est '+new Date().toLocaleDateString(LANG==='en'?'en-US':(LANG==='ja'?'ja-JP':'fr-FR'),{weekday:'long',day:'numeric',month:'long'})+'.'); }catch(e){} return true; }
+    return false;
+  }
   function runCmd(t){ t=t.toLowerCase().trim(); if(!t)return;
+    if(vocabRun(t))return;
     var modes={copilot:'copilot',learning:'learning',apprentissage:'learning',performance:'performance',ultra:'ultra',course:'ultra','grand touring':'gt',tourisme:'gt',nuit:'night',night:'night'};
     if(/(mode|passe|active|mets|met|bascule)/.test(t)){ for(var k in modes){ if(t.indexOf(k)>=0){ setMode(modes[k]); sayVA('Mode '+MODES[modes[k]].name+'.'); return; } } }
     if(/th[eè]me/.test(t)){ themeMode=/nuit|sombre|noir/.test(t)?'dark':(/jour|clair|blanc/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'auto')+'.'); return; }
