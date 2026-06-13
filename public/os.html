@@ -1893,13 +1893,23 @@
       sayVA(nm+', à '+dtxt+' vers le '+dir+'. Dis « j\'y vais » pour t\'y emmener.');
     }).catch(function(){ sayVA('Recherche impossible.'); }); }
   /* ---- Claude-backed free conversation (needs ANTHROPIC_API_KEY on Vercel) ---- */
+  /* repli quand rien ne matche : on évite « je n'ai pas compris » sec. 1) phrase courte ressemblant à un lieu -> on propose la navigation. 2) sinon relance variée avec exemples. */
+  var missN=0;
+  function localMiss(t){ var clean=(t||'').replace(/[?!.,]/g,' ').replace(/\s+/g,' ').trim(); var words=clean.split(' ').filter(Boolean);
+    if(words.length>=1&&words.length<=4&&clean.length>2&&!/\b(quoi|comment|pourquoi|qui|quand|combien|merci|oui|non|ok|bonjour|bonsoir|salut|hello|hey|ca va|ça va|aide|help)\b/.test(clean)){
+      geocode(clean).then(function(d){ if(d){ lastRef={name:clean,lat:d.lat,lon:d.lon}; sayVA(cap(clean)+', je connais. Dis « j\'y vais » pour lancer l\'itinéraire.'); } else miss2(); }).catch(function(){ miss2(); }); return; }
+    miss2(); }
+  function miss2(){ missN++;
+    var fr=['Désolé, je n\'ai pas bien saisi. Tu peux reformuler ?','Pardon, je n\'ai pas tout compris.','Hmm, je n\'ai pas capté, réessaie ?','Je n\'ai pas compris — je peux naviguer, changer de mode, gérer la musique, ou répondre sur le trafic et la météo.','Dis-moi par exemple « emmène-moi à… », « trouve une pharmacie » ou « mets le mode sport ».'];
+    var en=['Sorry, I didn\'t catch that — try again?','Didn\'t get that. Try « take me to… », « find a pharmacy » or « play music ».'];
+    sayVA(pickL([fr[missN%fr.length]],en)); }
   var vaHist=[];
   function askClaude(t){ var ctx={ speed:Math.round(liveSpd||0), loc:($('wxLoc')?($('wxLoc').textContent||'').trim():''), nav:(navActive?($('navEta')?$('navEta').textContent:''):'aucune'), mode:(typeof mode!=='undefined'?mode:''), temp:($('wxTemp')?$('wxTemp').textContent:'') };
     vaHist.push({role:'user',content:t}); vaHist=vaHist.slice(-8);
     fetch('/api/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:vaHist,ctx:ctx,lang:LANG,name:vaName()})}).then(function(r){return r.json();}).then(function(j){
-      if(!j||!j.reply){ sayVA(vaTxt('nocmd')); return; } var rep=j.reply; var am=rep.match(/ACTION:\s*([a-z_]+)\s*[:=]\s*([^\n]+)/i); if(am){ rep=rep.replace(am[0],'').trim(); handleClaudeAction(am[1].toLowerCase(),am[2].trim()); }
+      if(!j||!j.reply){ localMiss(t); return; } var rep=j.reply; var am=rep.match(/ACTION:\s*([a-z_]+)\s*[:=]\s*([^\n]+)/i); if(am){ rep=rep.replace(am[0],'').trim(); handleClaudeAction(am[1].toLowerCase(),am[2].trim()); }
       vaHist.push({role:'assistant',content:j.reply}); if(rep)sayVA(rep);
-    }).catch(function(){ sayVA(vaTxt('nocmd')); }); }
+    }).catch(function(){ localMiss(t); }); }
   function handleClaudeAction(verb,arg){ if(verb==='navigate'){ geocode(arg).then(function(d){ if(d){$('dest').value=arg;startRouteTo(d);} }); }
     else if(verb==='mode'){ runCmd('mode '+arg); } else if(verb==='theme'){ runCmd('thème '+arg); } else if(verb==='nearby'){ for(var i=0;i<POITYPES.length;i++){ if(POITYPES[i].re.test(arg)){ nearestPOI(POITYPES[i]); break; } } }
     else if(verb==='media'){ runCmd(arg); } else if(verb==='view'){ if(typeof setView==='function')setView(arg); } }
@@ -1929,6 +1939,11 @@
     qtime:/(quelle heure|l'?heure (qu'?il est|est)|il est quelle heure|donne[- ]?moi l'?heure|what time)/i,
     qnow:/(quel (titre|morceau|son|chanson)|c'?est quoi (ce|cette|le|la) (titre|son|musique|morceau|chanson)|qui chante|qu'?est[- ]?ce qu'?on [eé]coute|c'?est quoi cette musique|now playing)/i,
     qspeed:/(ma vitesse|je roule [aà]|je vais [aà] combien|combien[^.]{0,10}roule|[aà] combien (je|on)|on roule [aà]|quelle vitesse|how fast)/i,
+    /* humeurs / besoins au volant -> action utile */
+    hungry:/(j'?ai faim|on (mange|d[eé]jeune|d[iî]ne)|un (resto|restaurant)|envie de manger|je veux manger|affam|i'?m hungry|food|where can i eat)/i,
+    thirsty:/(j'?ai soif|un caf[eé]|envie d'?un caf[eé]|boire un (coup|verre|caf[eé])|pause caf[eé]|i'?m thirsty|coffee|a drink)/i,
+    tired:/(je suis (fatigu|crev|[eé]puis|mort)|j'?ai sommeil|envie de dormir|besoin d'?une pause|faire une pause|je m'?endors|i'?m tired|sleepy|need a break)/i,
+    bored:/(je m'?ennuie|c'?est (long|ennuyeux)|distrais[- ]?moi|occupe[- ]?moi|i'?m bored|entertain me)/i,
     hello:/(bonjour|bonsoir|salut|coucou|hello|^hi\b|^hey|good (morning|evening)|yo\b|wesh|hola)/i,
     howru:/([çc]a va|comment vas|comment tu vas|how are you|tu vas bien|how'?s it going|la forme|tu p[eè]tes la forme|tout va bien)/i,
     whoru:/(qui es[- ]?tu|comment tu t'?appelles|ton nom|who are you|what'?s your name|tu es qui|t'?es qui|c'?est qui practice|tu sers [aà] quoi|que sais[- ]?tu faire|tes capacit)/i,
@@ -2027,6 +2042,11 @@
     if(lx(t,'repeat')){ sayVA(lastSpoken?lastSpoken:'Je n\'ai rien dit récemment.'); return true; }
     if(lx(t,'help')){ sayVA('Je peux lancer un itinéraire, trouver un lieu proche, changer de mode ou de thème, gérer la musique et le volume, zoomer ou recentrer la carte, et te renseigner sur le trafic, la météo, l\'heure ou ta vitesse. Dis-moi simplement ce que tu veux.'); return true; }
     if(lx(t,'compliment')){ sayVA(pickL(['Merci '+vaName()+', ça me touche.','Trop sympa, je reste à ton service.'],['Thanks '+vaName()+'!','Much appreciated.'])); return true; }
+    /* ---- humeurs / besoins -> action concrète ---- */
+    if(lx(t,'hungry')){ sayVA('Bonne idée, je cherche un restaurant près de toi.'); for(var hi=0;hi<POITYPES.length;hi++){ if(/restaurant/.test(POITYPES[hi].n)){ nearestPOI(POITYPES[hi]); return true; } } return true; }
+    if(lx(t,'thirsty')){ sayVA('Je te trouve un café tout près.'); for(var ci=0;ci<POITYPES.length;ci++){ if(/caf[eé]/.test(POITYPES[ci].n)){ nearestPOI(POITYPES[ci]); return true; } } return true; }
+    if(lx(t,'tired')){ sayVA(pickL(['Pense à faire une pause si tu sens la fatigue. Je peux te trouver un café — dis « j\'ai soif ».','La sécurité d\'abord : une pause toutes les deux heures. Je cherche un arrêt si tu veux.'],['Take a break if you feel tired. I can find a café nearby.'])); return true; }
+    if(lx(t,'bored')){ sayVA('Je te mets un peu de musique.'); if(typeof mediaToggle==='function')mediaToggle(); return true; }
     /* ---- lieux : carburant/recharge, maison/travail, enregistrer ---- */
     if(lx(t,'fuel')){ var fb=/borne|recharge|charg/.test(t); for(var fi=0;fi<POITYPES.length;fi++){ if((fb?/borne|recharge/:/station/).test(POITYPES[fi].n)){ nearestPOI(POITYPES[fi]); return true; } } sayVA('Je cherche une station.'); return true; }
     if(lx(t,'home')||lx(t,'work')){ var isHome=lx(t,'home'); var key=isHome?/(maison|home|domicile|chez)/i:/(travail|boulot|bureau|taf|work|office)/i; var hit=(typeof favs!=='undefined'?favs:[]).filter(function(x){return key.test((x.name||'').toLowerCase());})[0]; if(hit){ sayVA('On y va'+(isHome?', direction la maison.':', direction le travail.')); $('dest').value=hit.name; startRouteTo(hit); } else { sayVA('Tu n\'as pas encore enregistré '+(isHome?'ta maison':'ton travail')+'. Sur place, dis « ajoute aux favoris » pour la mémoriser.'); } return true; }
@@ -2076,16 +2096,21 @@
     askClaude(t); /* free conversation via Claude (falls back to "didn't understand" if no backend) */
   }
   function pickL(fr,en){ var a=(LANG==='en'&&en)?en:fr; return a[Math.floor((Date.now()/900)%a.length)]; }
+  /* multi-hypothèses : on essaie chaque transcription proposée par le moteur, on retient la 1re qui mappe une intention connue. Compense fortement les erreurs de reconnaissance vocale. */
+  function handleSpeech(alts){ alts=(alts||[]).filter(Boolean); if(!alts.length)return;
+    for(var i=0;i<alts.length;i++){ if(vocabRun(alts[i])){ showHeard(alts[i]); return; } }
+    showHeard(alts[0]); runCmd(alts[0]); }
   function startVA(greet){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — utilise Chrome / Android.'); $('vaSeg')&&[].forEach.call($('vaSeg').children,function(b){b.classList.toggle('on',b.dataset.va==='off');}); return; }
-    if(!recog){ recog=new SR(); recog.continuous=true; recog.interimResults=false; recog.lang=T().code;
-      recog.onresult=function(e){ for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var tx=(e.results[i][0].transcript||'').toLowerCase().trim(); if(!tx)continue;
-        var wake=/practi[sc]e?|pratis|practi[sz]|プラクティス/.test(tx);
+    if(!recog){ recog=new SR(); recog.continuous=true; recog.interimResults=false; recog.maxAlternatives=5; recog.lang=T().code;
+      recog.onresult=function(e){ for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var res=e.results[i];
+        var alts=[]; for(var a=0;a<res.length&&a<5;a++){ var s=(res[a].transcript||'').toLowerCase().trim(); if(s&&alts.indexOf(s)<0)alts.push(s); } if(!alts.length)continue;
+        var wakeRe=/practi[sc]e?|pratis|practi[sz]|プラクティス/, anyWake=alts.some(function(s){return wakeRe.test(s);});
         if(!awake){ /* asleep: only the wake word activates Practice */
-          if(wake){ var cmd=tx.replace(/^.*?(practi[sc]e?|pratis|practi[sz])\s*/,'').trim(); wakeVA(); if(cmd){ showHeard(cmd); runCmd(cmd); } else { showHeard(vaTxt('yes')); sayVA(vaTxt('yes')); } resetAwake(); }
+          if(anyWake){ var cmdAlts=alts.map(function(s){return s.replace(/^.*?(practi[sc]e?|pratis|practi[sz])\s*/,'').trim();}).filter(Boolean); wakeVA(); if(cmdAlts.length){ handleSpeech(cmdAlts); } else { showHeard(vaTxt('yes')); sayVA(vaTxt('yes')); } resetAwake(); }
         } else { /* awake: hold a conversation, no wake word needed; end politely closes the session */
-          var c2=tx.replace(/^(practi[sc]e?|pratis|practi[sz])\s*/,'').trim();
+          var c2alts=alts.map(function(s){return s.replace(/^(practi[sc]e?|pratis|practi[sz])\s*/,'').trim();}).filter(Boolean), c2=c2alts[0]||'';
           if(/^(merci|c'?est (tout|bon)|au revoir|arr[eê]te d'?[eé]couter|stop|dors|tais[- ]toi|thanks?|that'?s all|bye|stop listening|go to sleep)\b/.test(c2)){ sayVA(vaTxt('bye')); sleepVA_(); }
-          else if(c2){ showHeard(c2); runCmd(c2); resetAwake(); }
+          else if(c2alts.length){ handleSpeech(c2alts); resetAwake(); }
         }
       } };
       recog.onend=function(){ if(vaOn){ try{recog.start();}catch(e){} } };
@@ -2101,13 +2126,13 @@
   function pushToTalk(){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — Chrome / Android.'); return; }
     if(pttBusy)return; pttBusy=true;
     if(recog&&vaOn){ try{recog.stop();}catch(e){} } /* pause continuous VA during direct listen */
-    var p=new SR(); p.continuous=false; p.interimResults=false; p.lang=T().code;
+    var p=new SR(); p.continuous=false; p.interimResults=false; p.maxAlternatives=5; p.lang=T().code;
     if($('micDot')){ $('micDot').classList.add('on','hear'); } if($('micTxt'))$('micTxt').textContent='Je t\'écoute…';
     document.body.setAttribute('data-listening','1'); /* orb animates */
     var vb=$('voiceBtn'); if(vb)vb.classList.add('on'); try{ if(Voice.supported)speechSynthesis.cancel(); }catch(e){}
     var done=false; var finish=function(){ if(done)return; done=true; pttBusy=false; document.body.removeAttribute('data-listening'); if(vb)vb.classList.remove('on'); if($('micDot')){ $('micDot').classList.remove('hear'); if(!vaOn)$('micDot').classList.remove('on'); else $('micTxt').textContent='Dis « Practice… »'; } if(vaOn){ try{recog.start();}catch(e){} } };
     p.onspeechstart=function(){ document.body.setAttribute('data-listening','hear'); };
-    p.onresult=function(e){ var tx=''; for(var i=0;i<e.results.length;i++)tx+=e.results[i][0].transcript; tx=tx.toLowerCase().trim().replace(/^ok\s+/,'').replace(/^practi[sc]e?\s*/,''); if($('micTxt'))$('micTxt').textContent='« '+tx+' »'; if(tx)runCmd(tx); else sayVA('Je n\'ai rien entendu.'); };
+    p.onresult=function(e){ var alts=[], r0=e.results[0]; if(r0){ for(var a=0;a<r0.length&&a<5;a++){ var s=(r0[a].transcript||'').toLowerCase().trim().replace(/^ok\s+/,'').replace(/^practi[sc]e?\s*/,''); if(s&&alts.indexOf(s)<0)alts.push(s); } } if($('micTxt'))$('micTxt').textContent=alts[0]?('« '+alts[0]+' »'):'…'; if(alts.length)handleSpeech(alts); else sayVA('Je n\'ai rien entendu.'); };
     p.onend=finish; p.onerror=function(ev){ if(ev.error==='not-allowed')toast('Micro refusé.'); finish(); };
     try{p.start();}catch(e){ finish(); }
     setTimeout(function(){ if(!done){ try{p.stop();}catch(e){} } },7000);
