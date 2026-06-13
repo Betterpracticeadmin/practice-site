@@ -187,6 +187,12 @@
   .view-seg{display:flex;gap:3px;background:var(--card);border:.5px solid var(--border);border-radius:13px;padding:3px;margin-top:6px;}
   .view-seg button{flex:1;background:none;border:none;color:var(--dim);font-size:11px;font-family:var(--mono);letter-spacing:.04em;padding:9px 4px;border-radius:10px;cursor:pointer;transition:.15s;}
   .view-seg button.on{background:var(--acc);color:#000;font-weight:600;}
+  /* voice assistant mic indicator */
+  .mic-dot{position:fixed;z-index:50;bottom:calc(92px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:none;align-items:center;gap:9px;background:var(--card);backdrop-filter:blur(20px);border:.5px solid var(--border);border-radius:24px;padding:9px 16px;font-size:12px;color:var(--txt);box-shadow:0 10px 28px rgba(0,0,0,.45);white-space:nowrap;max-width:84vw;overflow:hidden;text-overflow:ellipsis;}
+  .mic-dot.on{display:flex;}
+  .mic-dot .md-led{width:9px;height:9px;border-radius:50%;background:#ff3b46;box-shadow:0 0 8px #ff3b46;animation:micpulse 1.5s ease-in-out infinite;flex-shrink:0;}
+  .mic-dot.hear .md-led{animation-duration:.45s;background:#39d98a;box-shadow:0 0 11px #39d98a;}
+  @keyframes micpulse{0%,100%{opacity:.45;transform:scale(.82)}50%{opacity:1;transform:scale(1.18)}}
   .home-conn{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
   .home-conn .diag-open{margin-top:0;padding:9px;font-size:12px;}
   .diag-open:hover{border-color:var(--acc);}
@@ -1022,6 +1028,7 @@
 <div class="fx" id="fx"></div>
 
 <div class="toast" id="toast"></div>
+<div class="mic-dot" id="micDot"><span class="md-led"></span><span id="micTxt">Dis « Practice… »</span></div>
 
 <div class="gate" id="gate">
   <div class="gate-inner">
@@ -1847,20 +1854,33 @@
     if(/\bhud\b|vision/.test(t)&&typeof setView==='function'){ setView('hud'); sayVA('Vue HUD.'); return; }
     if(/pulse/.test(t)&&typeof setView==='function'){ setView('pulse'); sayVA('Vue Pulse.'); return; }
     if(/radar/.test(t)){ if($('radarBtn'))$('radarBtn').click(); return; }
+    if(/(ouvre|montre|affiche).*(m[eé]dia|musique|lecteur)/.test(t)&&typeof openMedia==='function'){ openMedia(); sayVA('Média.'); return; }
+    /* ---- questions: spoken answers ---- */
+    if(/(trafic|circulation|bouchon|ça roule|ca roule)/.test(t)){ var lv=$('trLvl')?($('trLvl').textContent||'').trim():''; var dl=$('trDelay')?($('trDelay').textContent||'').trim():''; sayVA('Trafic '+(lv||'inconnu').toLowerCase()+(dl?', '+dl:'')+'.'); return; }
+    if(/(quand.*arriv|arriv.*quand|combien de temps|temps de trajet|dur[eé]e|^eta|reste.*temps)/.test(t)){ var et=$('navEta')?($('navEta').textContent||'').replace(/\s*[0-9]+%/,'').trim():''; sayVA(et&&et!=='—'?('Arrivée dans '+et+'.'):'Aucun trajet en cours.'); return; }
+    if(/(distance|combien.*km|reste.*km|c'?est loin|encore loin)/.test(t)){ var sb=$('navSub')?($('navSub').textContent||'').trim():''; sayVA(sb&&sb.indexOf('km')>=0?('Il reste '+sb+'.'):'Aucun trajet en cours.'); return; }
+    if(/(m[eé]t[eé]o|temp[eé]rature|il fait (combien|quel|chaud|froid|beau)|quel temps)/.test(t)){ var tp=$('wxTemp')?($('wxTemp').textContent||'').trim():'', de=$('wxDesc')?($('wxDesc').textContent||'').trim():''; sayVA('Il fait '+(tp||'—')+' degrés'+(de&&de!=='—'?', '+de.toLowerCase():'')+'.'); return; }
+    if(/(o[uù] (je |on |suis|sommes|est-ce)|ma position|quel endroit|quel quartier|je suis o[uù])/.test(t)){ var lo=$('wxLoc')?($('wxLoc').textContent||'').trim():''; sayVA(lo&&lo!=='—'?('Tu es vers '+lo+'.'):'Position inconnue.'); return; }
+    if(/(quelle heure|l'?heure|il est quelle)/.test(t)){ var cl=$('clock')?($('clock').textContent||'').trim():''; sayVA('Il est '+cl.replace(':',' heures ')+'.'); return; }
+    if(/(quel (titre|morceau|son|chanson)|c'?est quoi (ce|cette|le|la)|qui chante|qu'?est-ce qu)/.test(t)){ var ti=$('plTitle')?($('plTitle').textContent||'').trim():'', ar=$('plArtist')?($('plArtist').textContent||'').trim():''; sayVA(ti?(ti+(ar?', par '+ar:'')+'.'):'Aucune lecture en cours.'); return; }
+    if(/(ma vitesse|je roule (à|a| )|combien.*roule|à combien)/.test(t)){ sayVA('Tu roules à '+(Math.round(liveSpd||0))+' kilomètres heure.'); return; }
+    if(/(bonjour|salut|coucou|hey|ça va|ca va|comment vas)/.test(t)){ sayVA('Bonjour '+vaName()+', je suis là. Que veux-tu ?'); return; }
     var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|navigue|itin[eé]raire|va|aller|allons|direction|lance|go|trajet)\s+(?:à|a|au|aux|vers|jusqu'?à|jusqu'?au|en|sur|to|chez|le|la|les|l')?\s*(.+)/);
     if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=m[1].trim(); sayVA('Je calcule l\'itinéraire vers '+q+'.'); geocode(q).then(function(d){ if(d){ $('dest').value=q; startRouteTo(d); } else sayVA('Adresse introuvable.'); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
     sayVA('Désolé, je n\'ai pas compris.');
   }
   function startVA(greet){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — utilise Chrome / Android.'); $('vaSeg')&&[].forEach.call($('vaSeg').children,function(b){b.classList.toggle('on',b.dataset.va==='off');}); return; }
     if(!recog){ recog=new SR(); recog.continuous=true; recog.interimResults=false; recog.lang=T().code;
-      recog.onresult=function(e){ for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var tx=(e.results[i][0].transcript||'').toLowerCase(); var idx=tx.indexOf('practice'); if(idx<0)idx=tx.indexOf('practis'); if(idx>=0){ var cmd=tx.slice(idx).replace(/practi[sc]e?/,'').trim(); if(cmd)runCmd(cmd); } } };
+      recog.onresult=function(e){ var md=$('micDot'); if(md){ md.classList.add('hear'); clearTimeout(md._h); md._h=setTimeout(function(){md.classList.remove('hear');},700); }
+        for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var tx=(e.results[i][0].transcript||'').toLowerCase(); var idx=tx.indexOf('practice'); if(idx<0)idx=tx.indexOf('practis'); if(idx>=0){ var cmd=tx.slice(idx).replace(/practi[sc]e?/,'').trim(); if(cmd){ if($('micTxt'))$('micTxt').textContent='« '+cmd+' »'; runCmd(cmd); setTimeout(function(){ if($('micTxt')&&vaOn)$('micTxt').textContent='Dis « Practice… »'; },3200); } } } };
       recog.onend=function(){ if(vaOn){ try{recog.start();}catch(e){} } };
       recog.onerror=function(ev){ if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){ vaOn=false; toast('Micro refusé.'); } };
     }
     vaOn=true; recog.lang=T().code; try{recog.start();}catch(e){}
+    if($('micDot'))$('micDot').classList.add('on'); if($('micTxt'))$('micTxt').textContent='Dis « Practice… »';
     if(greet) sayVA('Practice activé, bonjour '+vaName()+'.');
   }
-  function stopVA(){ vaOn=false; if(recog){ try{recog.stop();}catch(e){} } }
+  function stopVA(){ vaOn=false; if(recog){ try{recog.stop();}catch(e){} } if($('micDot'))$('micDot').classList.remove('on'); }
   if($('vaSeg'))$('vaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var on=(b.dataset.va==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Mem.prefs.va=on; saveMem(); if(on)startVA(true); else stopVA(); });
   if($('vaName'))$('vaName').addEventListener('change',function(){ Mem.prefs.name=this.value.trim()||'Aldo'; saveMem(); });
 
