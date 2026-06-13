@@ -1909,15 +1909,17 @@
       setTimeout(function(){ try{foundMarker.openPopup();}catch(e){} },450);
     }catch(e){} }
   function clearFound(){ if(foundMarker&&typeof map!=='undefined'&&map){ try{map.removeLayer(foundMarker);}catch(e){} } foundMarker=null; }
-  function nearestPOI(def){ var pos=pts.length?pts[pts.length-1]:null; if(!pos){ sayVA('Active d\'abord ta position pour que je cherche autour de toi.'); return; }
+  function nearestPOI(def,auto){ var pos=pts.length?pts[pts.length-1]:null; if(!pos){ sayVA('Active d\'abord ta position pour que je cherche autour de toi.'); return; }
     sayVA('Je cherche la '+def.n+' la plus proche…');
     var q='[out:json][timeout:20];('+def.q+'(around:8000,'+pos.lat+','+pos.lon+'););out center 90;';
     fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){ var best=null,bd=1e12,bla,blo;
       (j.elements||[]).forEach(function(e){ var la=e.lat||(e.center&&e.center.lat), lo=e.lon||(e.center&&e.center.lon); if(la==null||lo==null)return; var d=haversine(pos,{lat:la,lon:lo}); if(d<bd){bd=d;best=e;bla=la;blo=lo;} });
       if(!best){ sayVA('Je ne trouve pas de '+def.n+' à proximité.'); return; }
-      var nm=(best.tags&&(best.tags.name||best.tags.brand||best.tags.operator))||def.n; lastRef={name:nm,lat:bla,lon:blo}; pendingNav={name:nm,lat:bla,lon:blo};
-      showFoundOnMap(nm,bla,blo);
+      var nm=(best.tags&&(best.tags.name||best.tags.brand||best.tags.operator))||def.n; lastRef={name:nm,lat:bla,lon:blo};
       var dtxt=bd<1000?(Math.round(bd/10)*10+' mètres'):((bd/1000).toFixed(1)+' kilomètres'); var dir=cardinal(bearing(pos,{lat:bla,lon:blo}));
+      showFoundOnMap(nm,bla,blo);
+      if(auto){ pendingNav=null; $('dest').value=nm; sayVA('Je t\'emmène à '+nm+', à '+dtxt+' vers le '+dir+'. C\'est parti.'); startRouteTo({name:nm,lat:bla,lon:blo}); return; }
+      pendingNav={name:nm,lat:bla,lon:blo};
       sayVA(nm+', à '+dtxt+' vers le '+dir+'. Je l\'ai placée sur la carte. Tu veux que je lance le trajet ?');
     }).catch(function(){ sayVA('Recherche impossible pour le moment.'); }); }
   /* ---- Claude-backed free conversation (needs ANTHROPIC_API_KEY on Vercel) ---- */
@@ -2055,6 +2057,9 @@
       pendingNav=null; /* tu passes à autre chose -> on abandonne la proposition et on continue */
     }
     if(lx(t,'here')&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return true; }
+    /* "emmène-moi à la plage / pharmacie / station la plus proche" -> trouve le lieu ET lance le trajet directement (pas de confirmation) */
+    if(/(emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|d[eé]pose[- ]?moi|je veux aller|j'?aimerais aller|on va\b|direction\b|take me|drive me|bring me|go to|\bva (à|a|au|aux|vers)|\bvas (à|a|au|aux|vers))/i.test(t)){
+      for(var gi=0;gi<POITYPES.length;gi++){ if(POITYPES[gi].re.test(t)){ nearestPOI(POITYPES[gi],true); return true; } } }
     if(lx(t,'nearby')){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return true; } } }
     /* ---- sécurité d'abord ---- */
     if(lx(t,'emergency')){ sayVA('En cas d\'urgence appelle le 112 — police 17, SAMU 15. Je ne peux pas passer l\'appel depuis le cockpit ; mets-toi en sécurité et arrête-toi dès que possible.'); return true; }
