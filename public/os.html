@@ -1848,7 +1848,8 @@
   /* ===== voice assistant — "Practice …" wake word + command engine (Web Speech API) ===== */
   var recog=null, vaOn=false, vaPrimed=false;
   function vaName(){ return (Mem.prefs.name||'Aldo'); }
-  function sayVA(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice)u.voice=Voice.voice; u.rate=Voice.rate||1; speechSynthesis.speak(u);} }catch(e){} toast('🎙 '+t); }
+  var lastSpoken='';
+  function sayVA(t){ lastSpoken=t; try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice)u.voice=Voice.voice; u.rate=Voice.rate||1; speechSynthesis.speak(u);} }catch(e){} toast('🎙 '+t); }
   /* ---- wake-word conversation state machine (sleeps until "Practice") ---- */
   var awake=false, awakeTimer=null;
   function vaTxt(k){ var D={
@@ -1934,8 +1935,41 @@
     thanks:/(merci|thank you|thanks|nickel|parfait|g[eé]nial|super|top|excellent|bravo|bien jou[eé])/i,
     joke:/(blague|joke|fais[- ]?moi rire|raconte (une|moi|quelque)|histoire dr[oô]le|un truc dr[oô]le|fais de l'?humour)/i,
     day:/(quel jour|on est quel jour|what day|on est quel|la date|quelle date|c'?est quel jour)/i,
-    media_genre:/(mets? (du|de la|un peu de) (rock|jazz|rap|classique|[eé]lectro|techno|pop|lofi|chill|reggae|funk|soul|hip[- ]?hop)|joue (du|de la) )/i
+    media_genre:/(mets? (du|de la|un peu de) (rock|jazz|rap|classique|[eé]lectro|techno|pop|lofi|chill|reggae|funk|soul|hip[- ]?hop)|joue (du|de la) )/i,
+    /* ---- nouvelles intentions branchées aux vraies capacités ---- */
+    volup:/(monte|augmente|plus fort|plus haut|monter|augmenter)[^.]{0,16}(volume|son|musique)|(volume|son|musique)[^.]{0,10}(plus fort|plus haut|au max|à fond)|turn it up|louder|monte le son|augmente le son/i,
+    voldown:/(baisse|diminue|moins fort|plus bas|baisser|r[eé]duis)[^.]{0,16}(volume|son|musique)|(volume|son|musique)[^.]{0,10}(plus bas|moins fort)|turn it down|quieter|baisse le son/i,
+    mutemusic:/(coupe|mute|silence|stoppe|[eé]teins|arr[eê]te)[^.]{0,10}(la musique|le son de la musique)|mute (the )?music/i,
+    zoomin:/(zoom(e|er)?( avant| in)?|rapproche|agrandis|plus pr[eè]s|grossis)|zoom in/i,
+    zoomout:/(d[eé]zoom(e|er)?|zoom (arri[eè]re|out)|[eé]loigne|recule la carte|vue d'?ensemble|plus large)|zoom out/i,
+    recenter:/(recentre|recentrer|centre (la carte|sur moi)|reviens sur moi|suis[- ]?moi|ma position sur la carte|follow me|center( on me)?|o[uù] je suis sur la carte)/i,
+    repeat:/(r[eé]p[eè]te|r[eé]p[eé]ter|tu (as dit|disais) quoi|quoi\?|pardon\?|comment\?|redis|encore une fois|say (that )?again|what did you say)/i,
+    help:/(aide|au secours|à l'?aide|que (peux|sais)[- ]?tu faire|tes commandes|quelles commandes|qu'?est[- ]?ce que tu sais faire|comment [çc]a marche|tes fonctions|help|what can you do|liste des commandes)/i,
+    cancel:/(annule|laisse tomber|oublie|non rien|stop tout|cancel|never ?mind|c'?est bon laisse)/i,
+    yes:/(^oui|^ok\b|^okay|^d'?accord|^vas[- ]?y$|^c'?est bon$|^parfait$|^yes\b|^yep|^carr[eé]ment|^ouais)/i,
+    no:/(^non|^pas (maintenant|la|là)|^nope|^laisse|^surtout pas)/i,
+    home:/(maison|chez moi|[aà] la maison|rentre|rentrer|ramène[- ]?moi|home|domicile)/i,
+    work:/(travail|boulot|bureau|au taf|work|office|mon job)/i,
+    fuel:/(essence|carburant|plein|station[- ]?service|faire le plein|borne|recharge|recharger|charger la voiture|fuel|gas station|charging)/i,
+    save:/(sauve|sauvegarde|enregistre|garde) (ce|cette|l'?endroit|ici|ma position|ce lieu|cet endroit)|m[eé]morise (ce|cette|l'?endroit|ici)|retiens (cet|ce) endroit/i,
+    brightup:/([eé]claire|[eé]claircis|plus lumineux|plus clair|monte la luminosit|brighter)/i,
+    brightdown:/(assombris|plus sombre|baisse la luminosit|moins lumineux|dimmer)/i,
+    quieter_voice:/(parle (moins|plus lentement|doucement)|moins vite|ralentis (ta voix|ton d[eé]bit))/i,
+    faster_voice:/(parle plus (vite|rapidement)|acc[eé]l[eè]re ta voix|plus vite (à parler|pour parler))/i,
+    goodnight:/(bonne nuit|bonne route|à bient[oô]t|au revoir|good night|bye|ciao|à plus|salut practice|tais[- ]?toi maintenant|dors)/i,
+    compliment:/(tu es (g[eé]nial|super|le meilleur|incroyable|top|trop fort)|je t'?aime|t'?es le meilleur|bravo practice|you'?re (the best|great|awesome))/i,
+    /* ---- intentions pertinentes mais non connectées (réponse honnête) ---- */
+    unwired_call:/(appelle|appeler|t[eé]l[eé]phone|passe un appel|compose le|call )/i,
+    unwired_climate:/(clim|climatisation|chauffage|temp[eé]rature (de l'?habitacle|dans la voiture)|monte le chauffage|baisse la clim|air conditionn|d[eé]givr|ventilation|si[eè]ge chauffant)/i,
+    unwired_window:/(ouvre la (fen[eê]tre|vitre|porti[eè]re)|ferme la (fen[eê]tre|vitre)|baisse la vitre|monte la vitre|toit ouvrant|coffre)/i,
+    unwired_msg:/(envoie un (message|sms|texto)|[eé]cris [aà]|pr[eé]viens|texte [aà]|send a (message|text))/i,
+    unwired_park:/(gare[- ]?toi|stationne|fais le cr[eé]neau|park (the car|yourself)|autopilot|conduis toute seule|conduite autonome)/i
   };
+  var UNWIRED={ unwired_call:"Je ne peux pas encore passer d'appel depuis le cockpit web — il faut l'app native connectée au téléphone.",
+    unwired_climate:"La climatisation n'est pas reliée au cockpit web. Sur un vrai véhicule connecté (CarPlay/Android Auto natif), je pourrais la piloter.",
+    unwired_window:"Je ne contrôle pas les vitres ni les ouvrants depuis le web — ça demande l'intégration véhicule native.",
+    unwired_msg:"Envoyer un message demande l'app native liée au téléphone ; je ne peux pas le faire depuis le cockpit web.",
+    unwired_park:"Je ne conduis pas le véhicule — Practice est un copilote d'information, pas un système de conduite autonome." };
   function L(t,k){ return LEX[k].test(t); }
   var MODETRIG=/\b(mode|passe|active|activer|mets?|met[s]?[- ]?moi|bascule|enclenche|enclencher|en mode|on passe|je veux (le |du )?mode|switch|set)\b/i;
   var MODEWORDS=[
@@ -1978,6 +2012,27 @@
     if(L(t,'thanks')){ sayVA(pickL(['Avec plaisir.','Quand tu veux '+vaName()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return true; }
     if(L(t,'joke')){ sayVA(pickL(['Pourquoi la voiture électrique reste zen ? Zéro émission de stress.','Un GPS entre dans un bar… puis recalcule l\'itinéraire.'],['Why was the EV so calm? Zero stress emissions.'])); return true; }
     if(L(t,'day')){ try{ sayVA('On est '+new Date().toLocaleDateString(LANG==='en'?'en-US':(LANG==='ja'?'ja-JP':'fr-FR'),{weekday:'long',day:'numeric',month:'long'})+'.'); }catch(e){} return true; }
+    /* ---- contrôles : volume, carte, luminosité, voix ---- */
+    if(L(t,'mutemusic')&&typeof scWidget!=='undefined'&&scWidget){ try{scWidget.pause();}catch(e){} sayVA('Musique coupée.'); return true; }
+    if(L(t,'volup')){ if(typeof scWidget!=='undefined'&&scWidget){ scWidget.getVolume(function(v){ scWidget.setVolume(Math.min(100,(v||60)+15)); }); } sayVA('Plus fort.'); return true; }
+    if(L(t,'voldown')){ if(typeof scWidget!=='undefined'&&scWidget){ scWidget.getVolume(function(v){ scWidget.setVolume(Math.max(0,(v||60)-15)); }); } sayVA('Moins fort.'); return true; }
+    if(L(t,'zoomin')&&map){ map.setZoom(Math.min(19,map.getZoom()+1)); sayVA('Je zoome.'); return true; }
+    if(L(t,'zoomout')&&map){ map.setZoom(Math.max(3,map.getZoom()-1)); sayVA('Vue plus large.'); return true; }
+    if(L(t,'recenter')){ if(map&&pts&&pts.length){ follow=true; if($('followBtn'))$('followBtn').textContent='⊙'; map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],Math.max(map.getZoom(),16),{animate:true}); sayVA('Je te recentre sur la carte.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
+    if(L(t,'brightup')){ themeMode='light'; applyTheme(); syncPanel(); Mem.prefs.theme='light'; saveMem(); sayVA('Écran plus clair.'); return true; }
+    if(L(t,'brightdown')){ themeMode='dark'; applyTheme(); syncPanel(); Mem.prefs.theme='dark'; saveMem(); sayVA('Écran plus sombre.'); return true; }
+    if(L(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.15); sayVA('Je parle plus vite.'); return true; }
+    if(L(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.15); sayVA('Je ralentis mon débit.'); return true; }
+    /* ---- méta : répète, aide, compliment ---- */
+    if(L(t,'repeat')){ sayVA(lastSpoken?lastSpoken:'Je n\'ai rien dit récemment.'); return true; }
+    if(L(t,'help')){ sayVA('Je peux lancer un itinéraire, trouver un lieu proche, changer de mode ou de thème, gérer la musique et le volume, zoomer ou recentrer la carte, et te renseigner sur le trafic, la météo, l\'heure ou ta vitesse. Dis-moi simplement ce que tu veux.'); return true; }
+    if(L(t,'compliment')){ sayVA(pickL(['Merci '+vaName()+', ça me touche.','Trop sympa, je reste à ton service.'],['Thanks '+vaName()+'!','Much appreciated.'])); return true; }
+    /* ---- lieux : carburant/recharge, maison/travail, enregistrer ---- */
+    if(L(t,'fuel')){ var fb=/borne|recharge|charg/.test(t); for(var fi=0;fi<POITYPES.length;fi++){ if((fb?/borne|recharge/:/station/).test(POITYPES[fi].n)){ nearestPOI(POITYPES[fi]); return true; } } sayVA('Je cherche une station.'); return true; }
+    if(L(t,'home')||L(t,'work')){ var isHome=L(t,'home'); var key=isHome?/(maison|home|domicile|chez)/i:/(travail|boulot|bureau|taf|work|office)/i; var hit=(typeof favs!=='undefined'?favs:[]).filter(function(x){return key.test((x.name||'').toLowerCase());})[0]; if(hit){ sayVA('On y va'+(isHome?', direction la maison.':', direction le travail.')); $('dest').value=hit.name; startRouteTo(hit); } else { sayVA('Tu n\'as pas encore enregistré '+(isHome?'ta maison':'ton travail')+'. Sur place, dis « ajoute aux favoris » pour la mémoriser.'); } return true; }
+    if(L(t,'save')){ var sp=(typeof pts!=='undefined'&&pts.length)?pts[pts.length-1]:null; if(sp){ var snm=($('wxLoc')&&$('wxLoc').textContent&&$('wxLoc').textContent!=='—')?$('wxLoc').textContent.trim():'Lieu enregistré'; addFav({name:snm,lat:sp.lat,lon:sp.lon}); rememberPlace({name:snm,lat:sp.lat,lon:sp.lon}); sayVA(snm+' enregistré dans tes favoris.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
+    /* ---- honnêteté : actions non connectées au cockpit web ---- */
+    for(var uk in UNWIRED){ if(L(t,uk)){ sayVA(UNWIRED[uk]); return true; } }
     return false;
   }
   function runCmd(t){ t=t.toLowerCase().trim(); if(!t)return;
