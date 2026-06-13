@@ -1184,16 +1184,25 @@
 
   /* ---------- voice ---------- */
   var Voice = {
-    on:true, rate:0.98, supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
-    pick:function(){ if(!this.supported) return; var all=speechSynthesis.getVoices()||[]; var base=T().code.slice(0,2);
+    on:true, rate:0.98, sayRate:0.9, pitch:0.97, gender:'female', supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
+    pick:function(){ if(!this.supported) return; var all=speechSynthesis.getVoices()||[]; var base=T().code.slice(0,2); var self=this;
       var m=all.filter(function(v){return (v.lang||'').toLowerCase().indexOf(base)===0;});
       m.sort(function(a,b){return s(b)-s(a);}); this.voice=m[0]||null;
-      function s(v){var n=(v.name+'').toLowerCase();var x=0;if(/natural|neural/.test(n))x+=60;if(/online/.test(n))x+=30;if(v.localService===false)x+=15;if(/google/.test(n))x+=25;return x;} },
+      function s(v){ var n=(v.name+'').toLowerCase(); var x=0;
+        /* qualité : on veut le plus humain/naturel possible */
+        if(/natural|neural|premium|enhanced|siri/.test(n))x+=90;
+        if(/online|cloud/.test(n))x+=30; if(v.localService===false)x+=15; if(/google/.test(n))x+=45;
+        /* voix chaudes et humaines, par genre (FR + EN) */
+        var fem=/(am[eé]lie|audrey|aur[eé]lie|marie|l[eé]a|c[eé]line|julie|chlo[eé]|charlotte|virginie|denise|jos[eé]phine|sophie|[eé]lise|manon|clara|[eé]lo[iï]se|jacqueline|samantha|ava|allison|susan|zira|aria|jenny|joanna|emma|sonia|libby|natasha|serena|kate|fiona|nicky)/;
+        var male=/(thomas|nicolas|henri|\bpaul\b|antoine|guillaume|mathieu|\balex\b|\bfred\b|daniel|david|mark|\bguy\b|ryan|liam|george|james|arthur|brian)/;
+        if(self.gender==='male'){ if(male.test(n))x+=75; if(fem.test(n))x-=25; }
+        else { if(fem.test(n))x+=75; if(male.test(n))x-=25; }
+        return x; } },
     say:function(t,p){ if(!this.on||!t) return; if(this.busy){ if(!this.queue.length)this.queue.push({t:t,p:p}); else if(p>this.queue[0].p)this.queue[0]={t:t,p:p}; return;} this._speak(t,p); },
     _speak:function(t){ this.busy=true; var self=this,called=false; var done=function(){if(called)return;called=true;clearTimeout(self.safety);self.busy=false;if(self.queue.length){var n=self.queue.shift();self._speak(n.t,n.p);}};
       if(!this.supported){setTimeout(done,300);return;}
       var u=new SpeechSynthesisUtterance(t); if(this.voice){u.voice=this.voice;u.lang=this.voice.lang;}else u.lang=T().code;
-      u.rate=this.rate||0.98;u.pitch=1; u.onend=done;u.onerror=done; clearTimeout(this.safety); this.safety=setTimeout(done,1400+t.length*80);
+      u.rate=this.rate||0.98;u.pitch=this.pitch||0.97; u.onend=done;u.onerror=done; clearTimeout(this.safety); this.safety=setTimeout(done,1400+t.length*80);
       try{speechSynthesis.speak(u);}catch(e){done();} },
     flush:function(){ this.queue=[];this.busy=false;clearTimeout(this.safety); if(this.supported)speechSynthesis.cancel(); }
   };
@@ -1853,7 +1862,7 @@
   var recog=null, vaOn=false, vaPrimed=false;
   function vaName(){ return (Mem.prefs.name||'Aldo'); }
   var lastSpoken='';
-  function sayVA(t){ lastSpoken=t; try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice)u.voice=Voice.voice; u.rate=Voice.rate||1; speechSynthesis.speak(u);} }catch(e){} toast('🎙 '+t); }
+  function sayVA(t){ lastSpoken=t; try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice){u.voice=Voice.voice;u.lang=Voice.voice.lang;} u.rate=Voice.sayRate||0.9; u.pitch=Voice.pitch||0.97; speechSynthesis.speak(u);} }catch(e){} toast('🎙 '+t); }
   /* ---- wake-word conversation state machine (sleeps until "Practice") ---- */
   var awake=false, awakeTimer=null;
   function vaTxt(k){ var D={
@@ -2117,7 +2126,9 @@
     save:/(sauve|sauvegarde|enregistre|garde) (ce|cette|l'?endroit|ici|ma position|ce lieu|cet endroit)|m[eé]morise (ce|cette|l'?endroit|ici)|retiens (cet|ce) endroit/i,
     brightup:/([eé]claire|[eé]claircis|plus lumineux|plus clair|monte la luminosit|brighter)/i,
     brightdown:/(assombris|plus sombre|baisse la luminosit|moins lumineux|dimmer)/i,
-    quieter_voice:/(parle (moins|plus lentement|doucement)|moins vite|ralentis (ta voix|ton d[eé]bit))/i,
+    quieter_voice:/(parle (moins|plus lentement)|moins vite|ralentis (ta voix|ton d[eé]bit))/i,
+    voicegender:/(voix (d'?homme|masculine|d'?un (homme|mec)|f[eé]minine|de femme|d'?une femme)|change[- ]?(moi |de )?(ta )?voix|une (autre|nouvelle) voix|prends une voix|voix plus (masculine|f[eé]minine))/i,
+    seducevoice:/(voix (plus )?(s[eé]duisante|sensuelle|sexy|chaude|caline|charmeuse|douce)|sois (plus )?(s[eé]duisant|sensuel|charmeur|doux)|parle[- ]?moi (gentiment|doucement|tendrement)|murmure)/i,
     faster_voice:/(parle plus (vite|rapidement)|acc[eé]l[eè]re ta voix|plus vite (à parler|pour parler))/i,
     goodnight:/(bonne nuit|bonne route|à bient[oô]t|au revoir|good night|bye|ciao|à plus|salut practice|tais[- ]?toi maintenant|dors)/i,
     compliment:/(tu es (g[eé]nial|super|le meilleur|incroyable|top|trop fort)|je t'?aime|t'?es le meilleur|bravo practice|you'?re (the best|great|awesome))/i,
@@ -2215,8 +2226,10 @@
     if(lx(t,'recenter')){ if(map&&pts&&pts.length){ follow=true; if($('followBtn'))$('followBtn').textContent='⊙'; map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],Math.max(map.getZoom(),16),{animate:true}); sayVA('Je te recentre sur la carte.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
     if(lx(t,'brightup')){ themeMode='light'; applyTheme(); syncPanel(); Mem.prefs.theme='light'; saveMem(); sayVA('Écran plus clair.'); return true; }
     if(lx(t,'brightdown')){ themeMode='dark'; applyTheme(); syncPanel(); Mem.prefs.theme='dark'; saveMem(); sayVA('Écran plus sombre.'); return true; }
-    if(lx(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.15); sayVA('Je parle plus vite.'); return true; }
-    if(lx(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.15); sayVA('Je ralentis mon débit.'); return true; }
+    if(lx(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.12); Voice.sayRate=Math.min(1.4,(Voice.sayRate||0.9)+0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je parle plus vite.'); return true; }
+    if(lx(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.12); Voice.sayRate=Math.max(0.62,(Voice.sayRate||0.9)-0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je ralentis mon débit.'); return true; }
+    if(lx(t,'voicegender')){ Voice.gender=/(homme|masculin|grave|d'?un (mec|homme)|male)/i.test(t)?'male':'female'; Voice.pick(); if(Mem.prefs)Mem.prefs.voiceGender=Voice.gender; saveMem(); sayVA(Voice.gender==='female'?'Voilà, une voix plus douce et féminine. Ça te plaît ?':'Très bien, je passe sur une voix masculine.'); return true; }
+    if(lx(t,'seducevoice')){ Voice.sayRate=0.85; Voice.pitch=0.95; if(Mem.prefs){Mem.prefs.sayRate=Voice.sayRate;Mem.prefs.pitch=Voice.pitch;} saveMem(); sayVA(pickL(['Comme ça… c\'est mieux pour toi ?','Je baisse d\'un ton, rien que pour toi.','Voilà, tout en douceur.'],['Like this… better?'])); return true; }
     /* ---- méta : répète, aide, compliment ---- */
     if(lx(t,'repeat')){ sayVA(lastSpoken?lastSpoken:'Je n\'ai rien dit récemment.'); return true; }
     if(lx(t,'help')){ sayVA('Je peux lancer un itinéraire, trouver un lieu proche, changer de mode ou de thème, gérer la musique et le volume, zoomer ou recentrer la carte, et te renseigner sur le trafic, la météo, l\'heure ou ta vitesse. Dis-moi simplement ce que tu veux.'); return true; }
@@ -2523,6 +2536,7 @@
     if(p.lang)LANG=p.lang; if(p.theme)themeMode=p.theme;
     if(typeof p.poi==='boolean')poiOn=p.poi; if(typeof p.radar==='boolean')radarOn=p.radar;
     if(typeof p.voice==='boolean')Voice.on=p.voice;
+    if(p.voiceGender)Voice.gender=p.voiceGender; if(p.sayRate)Voice.sayRate=p.sayRate; if(p.pitch)Voice.pitch=p.pitch;
     setMode(p.mode||'copilot',true); applyTheme(); Voice.pick();
     if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
     var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); if(typeof reflectMute==='function')reflectMute();
