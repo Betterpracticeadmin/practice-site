@@ -1863,6 +1863,45 @@
   function wakeVA(){ awake=true; document.body.setAttribute('data-listening','1'); if($('micDot'))$('micDot').classList.add('on'); if($('micTxt'))$('micTxt').textContent=vaTxt('imListening'); }
   function sleepVA_(){ awake=false; clearTimeout(awakeTimer); document.body.removeAttribute('data-listening'); if($('micDot'))$('micDot').classList.remove('hear'); if($('micTxt')&&vaOn)$('micTxt').textContent=vaTxt('asleep'); }
   function resetAwake(){ clearTimeout(awakeTimer); awakeTimer=setTimeout(sleepVA_,14000); }
+  /* ---- nearby places ("où est la X la plus proche") + conversational referent ---- */
+  var lastRef=null;
+  var POITYPES=[
+    {re:/station|essence|carburant|fuel|gas/,q:'node["amenity"="fuel"]',n:'station-service'},
+    {re:/borne|recharge|charg|[eé]lectri/,q:'node["amenity"="charging_station"]',n:'borne de recharge'},
+    {re:/pharmaci/,q:'node["amenity"="pharmacy"]',n:'pharmacie'},
+    {re:/restaurant|manger|resto|d[eî]ner|d[eî]jeuner/,q:'node["amenity"="restaurant"]',n:'restaurant'},
+    {re:/caf[eé]|coffee|starbucks/,q:'node["amenity"="cafe"]',n:'café'},
+    {re:/parking|me garer|stationn|garer/,q:'node["amenity"="parking"]',n:'parking'},
+    {re:/supermarch|courses|supermarket|[eé]picerie/,q:'node["shop"~"supermarket|convenience"]',n:'supermarché'},
+    {re:/h[oô]tel|dormir|hotel/,q:'node["tourism"="hotel"]',n:'hôtel'},
+    {re:/h[oô]pital|urgence|hospital/,q:'node["amenity"="hospital"]',n:'hôpital'},
+    {re:/boulang|pain|bakery|croissant/,q:'node["shop"="bakery"]',n:'boulangerie'},
+    {re:/distributeur|atm|banque|bank|retirer/,q:'node["amenity"~"atm|bank"]',n:'distributeur'},
+    {re:/toilet|wc|pisser/,q:'node["amenity"="toilets"]',n:'toilettes'},
+    {re:/bar\b|boire|pub/,q:'node["amenity"="bar"]',n:'bar'}
+  ];
+  function cardinal(b){ var d=['nord','nord-est','est','sud-est','sud','sud-ouest','ouest','nord-ouest']; return d[Math.round(b/45)%8]; }
+  function nearestPOI(def){ var pos=pts.length?pts[pts.length-1]:null; if(!pos){ sayVA('Active d\'abord ta position.'); return; }
+    sayVA('Je cherche la '+def.n+' la plus proche…');
+    var q='[out:json][timeout:20];('+def.q+'(around:3500,'+pos.lat+','+pos.lon+'););out 80;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){ var best=null,bd=1e12;
+      (j.elements||[]).forEach(function(e){ if(!e.lat||!e.lon)return; var d=haversine(pos,{lat:e.lat,lon:e.lon}); if(d<bd){bd=d;best=e;} });
+      if(!best){ sayVA('Aucune '+def.n+' trouvée à proximité.'); return; }
+      var nm=(best.tags&&(best.tags.name||best.tags.brand||best.tags.operator))||def.n; lastRef={name:nm,lat:best.lat,lon:best.lon};
+      var dtxt=bd<1000?(Math.round(bd/10)*10+' mètres'):((bd/1000).toFixed(1)+' kilomètres'); var dir=cardinal(bearing(pos,{lat:best.lat,lon:best.lon}));
+      sayVA(nm+', à '+dtxt+' vers le '+dir+'. Dis « j\'y vais » pour t\'y emmener.');
+    }).catch(function(){ sayVA('Recherche impossible.'); }); }
+  /* ---- Claude-backed free conversation (needs ANTHROPIC_API_KEY on Vercel) ---- */
+  var vaHist=[];
+  function askClaude(t){ var ctx={ speed:Math.round(liveSpd||0), loc:($('wxLoc')?($('wxLoc').textContent||'').trim():''), nav:(navActive?($('navEta')?$('navEta').textContent:''):'aucune'), mode:(typeof mode!=='undefined'?mode:''), temp:($('wxTemp')?$('wxTemp').textContent:'') };
+    vaHist.push({role:'user',content:t}); vaHist=vaHist.slice(-8);
+    fetch('/api/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:vaHist,ctx:ctx,lang:LANG,name:vaName()})}).then(function(r){return r.json();}).then(function(j){
+      if(!j||!j.reply){ sayVA(vaTxt('nocmd')); return; } var rep=j.reply; var am=rep.match(/ACTION:\s*([a-z_]+)\s*[:=]\s*([^\n]+)/i); if(am){ rep=rep.replace(am[0],'').trim(); handleClaudeAction(am[1].toLowerCase(),am[2].trim()); }
+      vaHist.push({role:'assistant',content:j.reply}); if(rep)sayVA(rep);
+    }).catch(function(){ sayVA(vaTxt('nocmd')); }); }
+  function handleClaudeAction(verb,arg){ if(verb==='navigate'){ geocode(arg).then(function(d){ if(d){$('dest').value=arg;startRouteTo(d);} }); }
+    else if(verb==='mode'){ runCmd('mode '+arg); } else if(verb==='theme'){ runCmd('thème '+arg); } else if(verb==='nearby'){ for(var i=0;i<POITYPES.length;i++){ if(POITYPES[i].re.test(arg)){ nearestPOI(POITYPES[i]); break; } } }
+    else if(verb==='media'){ runCmd(arg); } else if(verb==='view'){ if(typeof setView==='function')setView(arg); } }
   function runCmd(t){ t=t.toLowerCase().trim(); if(!t)return;
     var modes={copilot:'copilot',learning:'learning',apprentissage:'learning',performance:'performance',ultra:'ultra',course:'ultra','grand touring':'gt',tourisme:'gt',nuit:'night',night:'night'};
     if(/(mode|passe|active|mets|met|bascule)/.test(t)){ for(var k in modes){ if(t.indexOf(k)>=0){ setMode(modes[k]); sayVA('Mode '+MODES[modes[k]].name+'.'); return; } } }
@@ -1894,9 +1933,13 @@
     if(/(merci|thank you|thanks|nickel|parfait|g[eé]nial)/.test(t)){ sayVA(pickL(['Avec plaisir.','Quand tu veux '+vaName()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return; }
     if(/(blague|joke|fais[- ]moi rire|raconte)/.test(t)){ sayVA(pickL(['Pourquoi la voiture électrique reste zen ? Zéro émission de stress.','Un GPS entre dans un bar… puis recalcule l\'itinéraire.'],['Why was the EV so calm? Zero stress emissions.'])); return; }
     if(/(quel jour|what day|on est quel)/.test(t)){ try{ sayVA(new Date().toLocaleDateString(LANG==='en'?'en-US':(LANG==='ja'?'ja-JP':'fr-FR'),{weekday:'long',day:'numeric',month:'long'})); }catch(e){} return; }
+    /* "j'y vais" / "emmène-moi là" → navigate to the last place we talked about */
+    if(/(j'?y vais|on y va|vas[- ]?y|emm[eè]ne[- ]?moi (là|y)|je veux m'?y rendre|rends[- ]?y moi|go there|take me there|allons[- ]?y)/.test(t)&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return; }
+    /* nearby places: "où est la station la plus proche", "trouve une pharmacie" */
+    if(/(o[uù] (est|sont|se trouve|y a)|la plus proche|le plus proche|près d'?ici|trouve|cherche|y a[- ]?t[- ]?il|il y a|where('?s| is)|nearest|find)/.test(t)){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return; } } }
     var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|navigue|itin[eé]raire|va|aller|allons|direction|lance|go|trajet|take me|drive me|navigate|go to)\s+(?:à|a|au|aux|vers|jusqu'?à|jusqu'?au|en|sur|to|chez|le|la|les|l')?\s*(.+)/);
-    if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=m[1].trim(); sayVA(pickL(['Je calcule l\'itinéraire vers '+q+'.'],['Routing to '+q+'.'])); geocode(q).then(function(d){ if(d){ $('dest').value=q; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
-    sayVA(vaTxt('nocmd'));
+    if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=m[1].trim(); lastRef=null; sayVA(pickL(['Je calcule l\'itinéraire vers '+q+'.'],['Routing to '+q+'.'])); geocode(q).then(function(d){ if(d){ $('dest').value=q; lastRef={name:q,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
+    askClaude(t); /* free conversation via Claude (falls back to "didn't understand" if no backend) */
   }
   function pickL(fr,en){ var a=(LANG==='en'&&en)?en:fr; return a[Math.floor((Date.now()/900)%a.length)]; }
   function startVA(greet){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — utilise Chrome / Android.'); $('vaSeg')&&[].forEach.call($('vaSeg').children,function(b){b.classList.toggle('on',b.dataset.va==='off');}); return; }
