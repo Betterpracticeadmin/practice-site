@@ -257,6 +257,14 @@
   .tsc-h{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.08em;}
   .tsc-bar{height:6px;background:var(--border);border-radius:4px;overflow:hidden;}
   .tsc-bar i{display:block;height:100%;width:2%;border-radius:4px;transition:width .6s ease,background .4s;}
+  .vitals{display:flex;align-items:center;gap:14px;background:var(--card);border:.5px solid var(--border);border-radius:16px;padding:13px 15px;margin-bottom:14px;}
+  .vt-hr{display:flex;align-items:baseline;gap:5px;flex-shrink:0;}
+  .vt-heart{color:#ff5a5f;font-size:22px;line-height:1;}
+  .vt-hr.live .vt-heart{animation:hrbeat 1s ease-in-out infinite;}
+  @keyframes hrbeat{0%,100%{transform:scale(1)}28%{transform:scale(1.32)}}
+  .vt-bpm{font-size:30px;font-weight:200;font-family:var(--mono);} .vt-hr small{color:var(--dim);font-size:11px;}
+  .vt-meta{flex:1;min-width:0;} .vt-zone{font-size:13px;} .vt-sub{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .vt-btn{background:var(--acc);color:#000;border:none;border-radius:11px;padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;}
   .twin-learn{margin-top:16px;}
   .tl-item{font-size:11.5px;color:var(--dim);padding:8px 0;border-bottom:.5px solid var(--border);display:flex;gap:9px;align-items:flex-start;}
   .tl-item::before{content:'◇';color:var(--acc);flex-shrink:0;}
@@ -1043,7 +1051,12 @@
     <h3>Jumeau du conducteur — modèle temps réel</h3>
     <div class="twin-top">
       <div class="twin-blob blob" id="twinBlob"></div>
-      <div><div class="lbl">État estimé</div><div class="veh-big" id="twinStateLbl">Calme</div><div class="nav-sub" style="margin-top:4px">d'après ta dynamique de conduite</div></div>
+      <div><div class="lbl">État estimé</div><div class="veh-big" id="twinStateLbl">Calme</div><div class="nav-sub" style="margin-top:4px">conduite + biométrie</div></div>
+    </div>
+    <div class="vitals">
+      <div class="vt-hr" id="vtHr"><span class="vt-heart">♥</span><span class="vt-bpm" id="vtBpm">—</span><small>bpm</small></div>
+      <div class="vt-meta"><div class="vt-zone" id="vtZone">Cardio non connecté</div><div class="vt-sub" id="vtStress">Ceinture / capteur BLE</div></div>
+      <button class="vt-btn" id="hrBtn">Connecter ♥</button>
     </div>
     <div class="twin-scores">
       <div><div class="tsc-h"><span>Fluidité</span><span id="tvSmooth">—</span></div><div class="tsc-bar"><i id="tbSmooth"></i></div></div>
@@ -1052,7 +1065,7 @@
       <div><div class="tsc-h"><span>Fatigue cognitive</span><span id="tvFat">—</span></div><div class="tsc-bar"><i id="tbFat"></i></div></div>
     </div>
     <div class="twin-learn"><div class="dc-head"><span>Ce que j'ai appris de toi</span></div><div id="twinLearn"></div></div>
-    <div class="diag-foot">Estimation logicielle à partir du GPS, de l'accélération et du cap — sans capteur biométrique. Plus tu roules, plus le modèle s'affine.</div>
+    <div class="diag-foot">Modèle nourri par le GPS, l'accélération et le cap — <b>enrichi par ton rythme cardiaque</b> dès qu'un capteur cardio Bluetooth (ceinture, Wear OS) est connecté. L'<b>Apple Watch</b> verrouille ses données santé : elle nécessite l'app native (HealthKit), documentée dans practice-native/.</div>
   </div>
 </div>
 
@@ -1508,6 +1521,11 @@
     else if(Twin.fatigue>62) st='fatigued';
     else if(Twin.aggr>34||spdK>110) st='stressed';
     else if(spdK>30&&Twin.smooth>72) st='focused';
+    /* real biometric: heart rate raises the stress read & cross-checks drowsiness */
+    if(hrBpm!=null){ Twin.hr=hrBpm; if(Twin.hrBase==null||hrBpm<Twin.hrBase)Twin.hrBase=hrBpm;
+      var hs=Math.max(0,Math.min(1,(hrBpm-(Twin.hrBase||hrBpm)-14)/42)); Twin.hrStress=hs;
+      if(hs>0.78)st='aggressive'; else if(hs>0.5&&(st==='calm'||st==='focused'))st='stressed';
+      if(hrBpm<(Twin.hrBase||60)+4 && Twin.fatigue>50 && (h>=22||h<6))st='fatigued'; } /* low HR + long night drive = drowsiness */
     Twin.state=st;
   }
   function setActiveAgents(list){ var s=$('agents'); if(!s)return;
@@ -1547,6 +1565,20 @@
     else setMsg($('cpMsg').textContent||T().go,Math.round(spdK)+' km/h');
   }
   function proactiveFatigue(){ var now=Date.now(); if(Twin.state==='fatigued'&&now-lastAgentMsg>45000){ lastAgentMsg=now; applyCalm(true); learn('Fatigue en navigation après ~'+Math.round((now-Twin.tStart)/60000)+' min'+nightCtx()); if(Voice.on)Voice.say('Signes de fatigue détectés. Prévois une pause.',2); } }
+  /* ---- heart rate via Web Bluetooth (standard Heart Rate Service 0x180D) ---- */
+  var hrBpm=null, hrDev=null, hrChar=null;
+  function hrZone(bpm){ var base=Twin.hrBase||bpm; if(bpm<base+12)return['Calme','#46C28E']; if(bpm<base+30)return['Élevé','#f5a623']; return['Stress','#ff5a5f']; }
+  function updateVitals(){ if(hrBpm==null)return; if($('vtBpm'))$('vtBpm').textContent=hrBpm; var z=hrZone(hrBpm); if($('vtZone')){$('vtZone').textContent='FC '+z[0];$('vtZone').style.color=z[1];}
+    if($('vtStress'))$('vtStress').textContent='Stress '+Math.round((Twin.hrStress||0)*100)+'% · repos ~'+(Twin.hrBase||hrBpm)+' bpm';
+    if($('vtHr')){$('vtHr').classList.add('live'); var hb=document.querySelector('#vtHr .vt-heart'); if(hb)hb.style.animationDuration=(60/Math.max(40,Math.min(200,hrBpm)))+'s';} }
+  function onHR(ev){ var v=ev.target.value; var flags=v.getUint8(0); var bpm=(flags&1)?v.getUint16(1,true):v.getUint8(1); if(bpm>0){ hrBpm=bpm; updateVitals(); if($('twinOv')&&$('twinOv').classList.contains('show'))renderTwin(); } }
+  async function connectHR(){ if(!navigator.bluetooth){ if($('vtZone'))$('vtZone').textContent='Bluetooth web indispo (Android Chrome / Bluefy iOS)'; return; }
+    try{ $('hrBtn').textContent='…'; hrDev=await navigator.bluetooth.requestDevice({filters:[{services:['heart_rate']}],optionalServices:['battery_service']});
+      hrDev.addEventListener('gattserverdisconnected',function(){ hrBpm=null; $('hrBtn').textContent='Connecter ♥'; if($('vtHr'))$('vtHr').classList.remove('live'); if($('vtZone'))$('vtZone').textContent='Cardio déconnecté'; });
+      var g=await hrDev.gatt.connect(); var s=await g.getPrimaryService('heart_rate'); hrChar=await s.getCharacteristic('heart_rate_measurement');
+      await hrChar.startNotifications(); hrChar.addEventListener('characteristicvaluechanged',onHR); $('hrBtn').textContent='♥ Lié'; toast('Cardio connecté.');
+    }catch(e){ $('hrBtn').textContent='Connecter ♥'; if((''+e).indexOf('cancel')<0&&$('vtZone'))$('vtZone').textContent='Connexion cardio échouée'; } }
+  if($('hrBtn'))$('hrBtn').addEventListener('click',connectHR);
   $('twinBtn').addEventListener('click',function(){ renderTwin(); $('twinOv').classList.add('show'); });
   $('twinX').addEventListener('click',function(){ $('twinOv').classList.remove('show'); });
   $('twinOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
