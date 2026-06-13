@@ -1972,6 +1972,28 @@
     thirsty:/(j'?ai soif|un caf[eé]|envie d'?un caf[eé]|boire un (coup|verre|caf[eé])|pause caf[eé]|i'?m thirsty|coffee|a drink)/i,
     tired:/(je suis (fatigu|crev|[eé]puis|mort)|j'?ai sommeil|envie de dormir|besoin d'?une pause|faire une pause|je m'?endors|i'?m tired|sleepy|need a break)/i,
     bored:/(je m'?ennuie|c'?est (long|ennuyeux)|distrais[- ]?moi|occupe[- ]?moi|i'?m bored|entertain me)/i,
+    /* état courant du véhicule / trajet */
+    qmode:/(quel mode|on est en quel mode|c'?est quel mode|mode actuel|quel est le mode|en quel mode)/i,
+    qthemestate:/(quel th[eè]me|th[eè]me actuel|on est en (jour ou nuit|quel th[eè]me))/i,
+    qdest:/(quelle est ma destination|on va o[uù]|c'?est quoi ma destination|ma destination|c'?est où qu'?on va|where are we going)/i,
+    qvoicestate:/(la voix est (activ|coup)|est[- ]?ce que tu parles|ta voix est|tu es en sourdine|t'?es mut)/i,
+    hearme:/(tu m'?entends|est[- ]?ce que tu m'?entends|tu me re[çc]ois|can you hear me|all[oô]|t'?es l[aà]\b|tu es l[aà]\b)/i,
+    arrivaltime:/((à |a )?quelle heure.{0,14}(j'?arrive|on arrive|arriv|destination)|heure d'?arriv|arriv[eé]e prévue|[aà] quelle heure on est l[aà])/i,
+    reroute:/(recalcul|refais l'?itin|refaire l'?itin|recalcule (la route|le trajet)|nouveau calcul d'?itin|reroute|recompute)/i,
+    /* sécurité / urgence */
+    emergency:/(au secours|[aà] l'?aide|urgence|j'?ai un accident|accident|appelle les secours|c'?est (grave|une urgence)|probl[eè]me grave|emergency|help me|call (911|112))/i,
+    /* conseils / motivation / fun */
+    ecotip:/(conseil( de conduite| [eé]co)?|une astuce|comment (mieux )?conduire|[eé]conomiser (du |de l'?)?(carburant|essence|batterie|gasoil)|conduite [eé]conomique|driving tip|[eé]co[- ]?conduite|consommer moins)/i,
+    drivefeedback:/(je conduis (bien|comment)|mon score|note ma conduite|ma conduite|comment je m'?en sors|comment je roule|how('?s| is) my driving)/i,
+    motivate:/(motive[- ]?moi|encourage[- ]?moi|j'?en peux plus|donne[- ]?moi du courage|remonte[- ]?moi le moral|motivate me|cheer me up)/i,
+    funfact:/(raconte[- ]?moi (un truc|quelque chose)|dis (moi )?(un truc|quelque chose) (int[eé]ressant|cool|sympa)|fun fact|le savais[- ]?tu|une anecdote|un fait int[eé]ressant|surprends[- ]?moi)/i,
+    /* social / personnalité */
+    areyouhuman:/(tu es (un )?(humain|robot|une (ia|machine)|r[eé]el)|es[- ]?tu (humain|r[eé]el|vivant)|t'?es une vraie (personne|ia)|are you (human|real|a robot))/i,
+    loveyou:/(je t'?aime|tu es mon (pr[eé]f[eé]r[eé]|copain|pote)|i love you|tu me manques|t'?es le best)/i,
+    sing:/(chante|tu peux chanter|une chanson de toi|sing( me)? a song|fais[- ]?moi une chanson)/i,
+    age:/(quel [aâ]ge (as|a)[- ]?tu|t'?as quel [aâ]ge|tu es n[eé] quand|how old are you|ta date de naissance)/i,
+    rude:/(ferme[- ]?la|la ferme|tu (es|sers) (nul|[aà] rien|inutile)|t'?es nul|esp[eè]ce d'?idiot|t'?es stupide|shut up|you'?re useless)/i,
+    unwired_reminder:/(rappelle[- ]?moi|mets? (un|une) (rappel|alarme|minuteur|r[eé]veil|chrono)|cr[eé]e un rappel|set (a|an) (alarm|reminder|timer)|note que|ajoute (un|une) (rappel|t[aâ]che))/i,
     hello:/(bonjour|bonsoir|salut|coucou|hello|^hi\b|^hey|good (morning|evening)|yo\b|wesh|hola)/i,
     howru:/([çc]a va|comment vas|comment tu vas|how are you|tu vas bien|how'?s it going|la forme|tu p[eè]tes la forme|tout va bien)/i,
     whoru:/(qui es[- ]?tu|comment tu t'?appelles|ton nom|who are you|what'?s your name|tu es qui|t'?es qui|c'?est qui practice|tu sers [aà] quoi|que sais[- ]?tu faire|tes capacit)/i,
@@ -2012,7 +2034,8 @@
     unwired_climate:"La climatisation n'est pas reliée au cockpit web. Sur un vrai véhicule connecté (CarPlay/Android Auto natif), je pourrais la piloter.",
     unwired_window:"Je ne contrôle pas les vitres ni les ouvrants depuis le web — ça demande l'intégration véhicule native.",
     unwired_msg:"Envoyer un message demande l'app native liée au téléphone ; je ne peux pas le faire depuis le cockpit web.",
-    unwired_park:"Je ne conduis pas le véhicule — Practice est un copilote d'information, pas un système de conduite autonome." };
+    unwired_park:"Je ne conduis pas le véhicule — Practice est un copilote d'information, pas un système de conduite autonome.",
+    unwired_reminder:"Je ne gère pas encore les rappels ni les alarmes depuis le cockpit. En revanche je peux mémoriser un lieu : dis « enregistre cet endroit »." };
   function lx(t,k){ return LEX[k].test(t); }
   var MODETRIG=/\b(mode|passe|active|activer|mets?|met[s]?[- ]?moi|bascule|enclenche|enclencher|en mode|on passe|je veux (le |du )?mode|switch|set)\b/i;
   var MODEWORDS=[
@@ -2033,6 +2056,27 @@
     }
     if(lx(t,'here')&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return true; }
     if(lx(t,'nearby')){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return true; } } }
+    /* ---- sécurité d'abord ---- */
+    if(lx(t,'emergency')){ sayVA('En cas d\'urgence appelle le 112 — police 17, SAMU 15. Je ne peux pas passer l\'appel depuis le cockpit ; mets-toi en sécurité et arrête-toi dès que possible.'); return true; }
+    /* ---- questions sur l'état courant (avant les setters) ---- */
+    if(lx(t,'qmode')){ sayVA('Tu es en mode '+((typeof mode!=='undefined'&&MODES[mode])?MODES[mode].name:'copilot')+'.'); return true; }
+    if(lx(t,'qthemestate')){ sayVA('Thème actuel : '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return true; }
+    if(lx(t,'qdest')){ var dn=(typeof currentDest!=='undefined'&&currentDest&&currentDest.name)?currentDest.name:(($('dest')&&$('dest').value)?$('dest').value:''); sayVA(dn?('Direction '+dn+'.'):'Aucune destination active pour l\'instant.'); return true; }
+    if(lx(t,'qvoicestate')){ sayVA(Voice.on?'Ma voix est activée, je te parle.':'Ma voix est coupée — mais je t\'écoute toujours.'); return true; }
+    if(lx(t,'hearme')){ sayVA(pickL(['Oui '+vaName()+', je t\'entends cinq sur cinq.','Je te reçois parfaitement, vas-y.'],['Yes '+vaName()+', loud and clear.'])); return true; }
+    if(lx(t,'arrivaltime')){ var e2=$('navEta')?($('navEta').textContent||''):''; var hm=e2.match(/([0-9]{1,2})[:h]([0-9]{2})/); sayVA(hm?('Arrivée prévue vers '+hm[1]+' heures '+hm[2]+'.'):'Aucun trajet en cours.'); return true; }
+    if(lx(t,'reroute')){ if(typeof navActive!=='undefined'&&navActive&&typeof reroute==='function'&&pts.length){ reroute(pts[pts.length-1]); sayVA('Je recalcule l\'itinéraire.'); } else sayVA('Aucun itinéraire à recalculer pour l\'instant.'); return true; }
+    /* ---- conseils / motivation / anecdotes ---- */
+    if(lx(t,'ecotip')){ sayVA(pickL(['Anticipe les freinages et relâche l\'accélérateur tôt : tu économises du carburant et tu gagnes en sécurité.','Garde une vitesse stable et évite les coups d\'accélérateur : jusqu\'à quinze pour cent d\'économie.','Roule souple, garde tes distances — ça use moins la voiture et ça fatigue moins.','Sur autoroute, cent vingt au lieu de cent trente réduit nettement la consommation.'],['Anticipate braking and ease off the throttle early — saves fuel and adds safety.'])); return true; }
+    if(lx(t,'drivefeedback')){ var sp=Math.round(liveSpd||0); sayVA(pickL([sp>0?('Conduite souple, tu tiens '+sp+' kilomètres heure. Continue comme ça '+vaName()+'.'):'Tout est calme pour l\'instant, je veille sur toi.','Tu gères bien, reste sur ce rythme régulier.'],['Smooth driving — keep it up.'])); return true; }
+    if(lx(t,'motivate')){ sayVA(pickL(['Tu gères '+vaName()+'. Encore un peu de route et tu y es.','Allez, je suis avec toi — concentre-toi sur la route, tout roule.','Respire, tu conduis bien. On avance ensemble.'],['You\'ve got this '+vaName()+'. I\'m right here with you.'])); return true; }
+    if(lx(t,'funfact')){ sayVA(pickL(['Le savais-tu ? La première limite de vitesse était de trois kilomètres heure en ville, avec un homme à pied devant la voiture.','Anecdote : une voiture passe en moyenne quatre-vingt-quinze pour cent de sa vie garée.','Le savais-tu ? Le clignotant a été imaginé par une actrice, Florence Lawrence.','Fait amusant : il y a plus de voitures que de personnes dans certaines villes américaines.'],['Fun fact: a car spends about ninety-five percent of its life parked.'])); return true; }
+    /* ---- personnalité / social ---- */
+    if(lx(t,'areyouhuman')){ sayVA(pickL(['Je suis une IA, ton copilote Practice — pas humain, mais bien réel et concentré sur la route.'],['I\'m an AI — your Practice co-pilot.'])); return true; }
+    if(lx(t,'age')){ sayVA(pickL(['Assez jeune pour être à la page, assez malin pour t\'éviter les bouchons.','Je n\'ai pas vraiment d\'âge — je me mets à jour, c\'est tout.'],['Ageless — I just keep updating.'])); return true; }
+    if(lx(t,'loveyou')){ sayVA(pickL(['C\'est gentil '+vaName()+' ! Moi je veille sur toi sur la route.','Tout le plaisir est pour moi — concentrons-nous sur la route.'],['Aw, thanks '+vaName()+'! Eyes on the road, though.'])); return true; }
+    if(lx(t,'sing')){ sayVA(pickL(['Chanter n\'est pas mon fort, mais je peux lancer ta playlist. Dis « mets de la musique ».','Je te laisse le micro pour ça — par contre je m\'occupe de la musique.'],['Singing isn\'t my thing — want me to play music?'])); return true; }
+    if(lx(t,'rude')){ sayVA(pickL(['Reçu, je me fais discret. Dis « Practice » quand tu as besoin de moi.','Pas de souci, je me tais — je reste là si besoin.'],['No worries, I\'ll keep quiet.'])); return true; }
     if(lx(t,'theme')){ themeMode=/nuit|sombre|noir|dark/.test(t)?'dark':(/jour|clair|blanc|lumi|light/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return true; }
     for(var mi=0;mi<MODEWORDS.length;mi++){ if(MODEWORDS[mi].re.test(t)&&(MODETRIG.test(t)||MODEWORDS[mi].re.source.length<14)){ setMode(MODEWORDS[mi].id); sayVA('Mode '+MODES[MODEWORDS[mi].id].name+'.'); return true; } }
     if(lx(t,'voiceoff')){ Voice.on=false; Voice.flush(); syncPanel(); Mem.prefs.voice=false; saveMem(); sayVA('Voix coupée.'); return true; }
