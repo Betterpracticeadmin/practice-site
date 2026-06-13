@@ -193,6 +193,12 @@
   .mic-dot .md-led{width:9px;height:9px;border-radius:50%;background:#ff3b46;box-shadow:0 0 8px #ff3b46;animation:micpulse 1.5s ease-in-out infinite;flex-shrink:0;}
   .mic-dot.hear .md-led{animation-duration:.45s;background:#39d98a;box-shadow:0 0 11px #39d98a;}
   @keyframes micpulse{0%,100%{opacity:.45;transform:scale(.82)}50%{opacity:1;transform:scale(1.18)}}
+  /* AI orb reacts while the voice assistant is listening */
+  body[data-listening] .orb{animation:orbListen 1.1s ease-in-out infinite;}
+  body[data-listening] .orb::before{animation-duration:2.2s;}
+  body[data-listening] .wave span{animation-duration:.5s;background:var(--acc);}
+  body[data-listening="hear"] .orb{animation-duration:.5s;}
+  @keyframes orbListen{0%,100%{box-shadow:inset 0 0 0 1px var(--acc),0 0 16px 0 var(--acc);transform:scale(1);}50%{box-shadow:inset 0 0 0 2px var(--acc),0 0 34px 6px var(--acc);transform:scale(1.08);}}
   .home-conn{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
   .home-conn .diag-open{margin-top:0;padding:9px;font-size:12px;}
   .diag-open:hover{border-color:var(--acc);}
@@ -1875,6 +1881,7 @@
   function startVA(greet){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — utilise Chrome / Android.'); $('vaSeg')&&[].forEach.call($('vaSeg').children,function(b){b.classList.toggle('on',b.dataset.va==='off');}); return; }
     if(!recog){ recog=new SR(); recog.continuous=true; recog.interimResults=false; recog.lang=T().code;
       recog.onresult=function(e){ var md=$('micDot'); if(md){ md.classList.add('hear'); clearTimeout(md._h); md._h=setTimeout(function(){md.classList.remove('hear');},700); }
+        document.body.setAttribute('data-listening','hear'); clearTimeout(window._orbT); window._orbT=setTimeout(function(){ if(!pttBusy)document.body.removeAttribute('data-listening'); },1600);
         for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var tx=(e.results[i][0].transcript||'').toLowerCase(); var idx=tx.indexOf('practice'); if(idx<0)idx=tx.indexOf('practis'); if(idx>=0){ var cmd=tx.slice(idx).replace(/practi[sc]e?/,'').trim(); if(cmd){ if($('micTxt'))$('micTxt').textContent='« '+cmd+' »'; runCmd(cmd); setTimeout(function(){ if($('micTxt')&&vaOn)$('micTxt').textContent='Dis « Practice… »'; },3200); } } } };
       recog.onend=function(){ if(vaOn){ try{recog.start();}catch(e){} } };
       recog.onerror=function(ev){ if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){ vaOn=false; toast('Micro refusé.'); } };
@@ -1891,8 +1898,10 @@
     if(recog&&vaOn){ try{recog.stop();}catch(e){} } /* pause continuous VA during direct listen */
     var p=new SR(); p.continuous=false; p.interimResults=false; p.lang=T().code;
     if($('micDot')){ $('micDot').classList.add('on','hear'); } if($('micTxt'))$('micTxt').textContent='Je t\'écoute…';
+    document.body.setAttribute('data-listening','1'); /* orb animates */
     var vb=$('voiceBtn'); if(vb)vb.classList.add('on'); try{ if(Voice.supported)speechSynthesis.cancel(); }catch(e){}
-    var done=false; var finish=function(){ if(done)return; done=true; pttBusy=false; if(vb)vb.classList.remove('on'); if($('micDot')){ $('micDot').classList.remove('hear'); if(!vaOn)$('micDot').classList.remove('on'); else $('micTxt').textContent='Dis « Practice… »'; } if(vaOn){ try{recog.start();}catch(e){} } };
+    var done=false; var finish=function(){ if(done)return; done=true; pttBusy=false; document.body.removeAttribute('data-listening'); if(vb)vb.classList.remove('on'); if($('micDot')){ $('micDot').classList.remove('hear'); if(!vaOn)$('micDot').classList.remove('on'); else $('micTxt').textContent='Dis « Practice… »'; } if(vaOn){ try{recog.start();}catch(e){} } };
+    p.onspeechstart=function(){ document.body.setAttribute('data-listening','hear'); };
     p.onresult=function(e){ var tx=''; for(var i=0;i<e.results.length;i++)tx+=e.results[i][0].transcript; tx=tx.toLowerCase().trim().replace(/^ok\s+/,'').replace(/^practi[sc]e?\s*/,''); if($('micTxt'))$('micTxt').textContent='« '+tx+' »'; if(tx)runCmd(tx); else sayVA('Je n\'ai rien entendu.'); };
     p.onend=finish; p.onerror=function(ev){ if(ev.error==='not-allowed')toast('Micro refusé.'); finish(); };
     try{p.start();}catch(e){ finish(); }
