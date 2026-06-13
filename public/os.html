@@ -1278,21 +1278,27 @@
     else if(!night && (code===0||code===1)) fx='sun';
     if(fx) document.body.setAttribute('data-wx',fx); else document.body.removeAttribute('data-wx');
   }
+  /* ---------- corridor declutter: while navigating, show only markers on/near the route ---------- */
+  function nearRoute(lat,lon,m){ if(!route||!route.coords)return false; var p={lat:lat,lon:lon}; for(var i=0;i<route.coords.length;i+=3){ var c=route.coords[i]; if(haversine(p,{lat:c[1],lon:c[0]})<m)return true; } return false; }
+  function filterMarkers(data,corridor,cap){ if(navActive&&route&&route.coords){ return data.filter(function(p){return nearRoute(p.lat,p.lon,corridor);}); }
+    var pos=pts.length?pts[pts.length-1]:null; if(!pos)return data.slice(0,cap);
+    return data.map(function(p){return {p:p,d:haversine(pos,p)};}).sort(function(a,b){return a.d-b.d;}).slice(0,cap).map(function(x){return x.p;}); }
+  function refilterMarkers(){ renderPOI(); renderRadars(); renderIncidents(); }
   /* ---------- POI: real charging stations + fuel (Overpass / OSM, no key) ---------- */
+  var poiData=[];
   function loadPOI(lat,lon){
     if(!poiOn||!poiLayer) return; var now=Date.now();
     if(poiLL && haversine(poiLL,{lat:lat,lon:lon})<1200 && (now-poiAt)<300000) return;
     poiAt=now; poiLL={lat:lat,lon:lon};
     var q='[out:json][timeout:20];(node["amenity"="charging_station"](around:2600,'+lat+','+lon+');node["amenity"="fuel"](around:2600,'+lat+','+lon+'););out 70;';
     fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
-      if(!poiLayer)return; poiLayer.clearLayers();
-      (j.elements||[]).forEach(function(e){ if(!e.lat||!e.lon)return; var ch=e.tags&&e.tags.amenity==='charging_station';
-        var ic=L.divIcon({className:'',html:'<div class="poi '+(ch?'poi-c':'poi-f')+'">'+(ch?'⚡':'⛽')+'</div>',iconSize:[26,26],iconAnchor:[13,13]});
-        var nm=(e.tags&&(e.tags.name||e.tags.brand||e.tags.operator))||(ch?'Recharge':'Station');
-        L.marker([e.lat,e.lon],{icon:ic}).bindTooltip(nm,{direction:'top',offset:[0,-8]}).addTo(poiLayer);
-      });
+      poiData=(j.elements||[]).filter(function(e){return e.lat&&e.lon;}).map(function(e){ var ch=e.tags&&e.tags.amenity==='charging_station'; return {lat:e.lat,lon:e.lon,ch:ch,nm:(e.tags&&(e.tags.name||e.tags.brand||e.tags.operator))||(ch?'Recharge':'Station')}; });
+      renderPOI();
     }).catch(function(){});
   }
+  function renderPOI(){ if(!poiLayer)return; poiLayer.clearLayers(); if(!poiOn)return;
+    filterMarkers(poiData,260,26).forEach(function(p){ var ic=L.divIcon({className:'',html:'<div class="poi '+(p.ch?'poi-c':'poi-f')+'">'+(p.ch?'⚡':'⛽')+'</div>',iconSize:[26,26],iconAnchor:[13,13]});
+      L.marker([p.lat,p.lon],{icon:ic}).bindTooltip(p.nm,{direction:'top',offset:[0,-8]}).addTo(poiLayer); }); }
   /* ---------- radars (real speed cameras from OpenStreetMap) ---------- */
   function loadRadars(lat,lon){
     if(!radarOn||!radarLayer) return; var now=Date.now();
@@ -1300,14 +1306,13 @@
     radarAt=now; radarLL={lat:lat,lon:lon};
     var q='[out:json][timeout:25];(node["highway"="speed_camera"](around:6000,'+lat+','+lon+');node["enforcement"="maxspeed"](around:6000,'+lat+','+lon+'););out 120;';
     fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
-      if(!radarLayer)return; radarLayer.clearLayers(); radars=[];
-      (j.elements||[]).forEach(function(e){ if(!e.lat||!e.lon)return; radars.push({lat:e.lat,lon:e.lon,id:e.id});
-        var mx=e.tags&&(e.tags.maxspeed||e.tags['maxspeed:forward']); var lbl=mx?(''+mx).replace(/[^0-9]/g,''):'';
-        var ic=L.divIcon({className:'',html:'<div class="radar">📷'+(lbl?'<b>'+lbl+'</b>':'')+'</div>',iconSize:[28,28],iconAnchor:[14,14]});
-        L.marker([e.lat,e.lon],{icon:ic}).bindTooltip('Radar'+(lbl?' '+lbl:''),{direction:'top',offset:[0,-8]}).addTo(radarLayer);
-      });
+      radars=(j.elements||[]).filter(function(e){return e.lat&&e.lon;}).map(function(e){ var mx=e.tags&&(e.tags.maxspeed||e.tags['maxspeed:forward']); return {lat:e.lat,lon:e.lon,id:e.id,lbl:mx?(''+mx).replace(/[^0-9]/g,''):''}; });
+      renderRadars();
     }).catch(function(){});
   }
+  function renderRadars(){ if(!radarLayer)return; radarLayer.clearLayers(); if(!radarOn)return;
+    filterMarkers(radars,300,28).forEach(function(r){ var ic=L.divIcon({className:'',html:'<div class="radar">📷'+(r.lbl?'<b>'+r.lbl+'</b>':'')+'</div>',iconSize:[28,28],iconAnchor:[14,14]});
+      L.marker([r.lat,r.lon],{icon:ic}).bindTooltip('Radar'+(r.lbl?' '+r.lbl:''),{direction:'top',offset:[0,-8]}).addTo(radarLayer); }); }
   /* ---------- risk layer: real TomTom traffic incidents (event bubbles) ---------- */
   function evtInfo(cat){ if(cat===1)return{i:'!',c:'evt-acc',l:'Accident'}; if(cat===6)return{i:'≈',c:'evt-jam',l:'Bouchon'}; if(cat===9)return{i:'⚒',c:'evt-works',l:'Travaux'}; if(cat===7)return{i:'┊',c:'evt-works',l:'Voie fermée'}; if(cat===8)return{i:'⛔',c:'evt-closed',l:'Route fermée'}; if(cat===14)return{i:'⛐',c:'evt-jam',l:'Véhicule en panne'}; return{i:'!',c:'evt-jam',l:'Incident'}; }
   function loadIncidents(lat,lon){
@@ -1316,15 +1321,16 @@
     var d=0.06, bbox=(lon-d)+','+(lat-d)+','+(lon+d)+','+(lat+d);
     var fields=encodeURIComponent('{incidents{type,geometry{type,coordinates},properties{iconCategory,magnitudeOfDelay}}}');
     fetch('https://api.tomtom.com/traffic/services/5/incidentDetails?key='+encodeURIComponent(TT_KEY)+'&bbox='+bbox+'&fields='+fields+'&language=fr-FR&timeValidityFilter=present')
-      .then(function(r){return r.json();}).then(function(j){ if(!incLayer)return; incLayer.clearLayers(); incidents=[];
-        var list=(j.incidents||[]).filter(function(it){ var p=it.properties||{}, cat=p.iconCategory||0, mag=p.magnitudeOfDelay||0; return cat===1||cat===8||mag>=2; }).slice(0,55);
-        list.forEach(function(it){ var g=it.geometry; if(!g||!g.coordinates)return; var c=(g.type==='Point')?g.coordinates:g.coordinates[Math.floor(g.coordinates.length/2)]; if(!c||c.length<2)return;
-          var cat=(it.properties&&it.properties.iconCategory)||0, info=evtInfo(cat); incidents.push({lat:c[1],lon:c[0],cat:cat});
-          var ic=L.divIcon({className:'',html:'<div class="evt '+info.c+'">'+info.i+'</div>',iconSize:[30,30],iconAnchor:[15,15]});
-          L.marker([c[1],c[0]],{icon:ic}).bindTooltip(info.l,{direction:'top',offset:[0,-12]}).addTo(incLayer); });
-        if(navActive&&typeof compareRoutes==='function')compareRoutes();
+      .then(function(r){return r.json();}).then(function(j){ incidents=[];
+        (j.incidents||[]).filter(function(it){ var p=it.properties||{}, cat=p.iconCategory||0, mag=p.magnitudeOfDelay||0; return cat===1||cat===8||mag>=2; }).slice(0,120)
+          .forEach(function(it){ var g=it.geometry; if(!g||!g.coordinates)return; var c=(g.type==='Point')?g.coordinates:g.coordinates[Math.floor(g.coordinates.length/2)]; if(!c||c.length<2)return;
+            incidents.push({lat:c[1],lon:c[0],cat:(it.properties&&it.properties.iconCategory)||0}); });
+        renderIncidents(); if(navActive&&typeof compareRoutes==='function')compareRoutes();
       }).catch(function(){});
   }
+  function renderIncidents(){ if(!incLayer)return; incLayer.clearLayers();
+    filterMarkers(incidents,320,30).forEach(function(it){ var info=evtInfo(it.cat); var ic=L.divIcon({className:'',html:'<div class="evt '+info.c+'">'+info.i+'</div>',iconSize:[30,30],iconAnchor:[15,15]});
+      L.marker([it.lat,it.lon],{icon:ic}).bindTooltip(info.l,{direction:'top',offset:[0,-12]}).addTo(incLayer); }); }
   /* ---------- Waze-style traffic-coloured route (real TomTom traffic sections) ---------- */
   function magColor(m){ return m>=4?'#ff3b46':m>=3?'#ff8c1a':m>=2?'#f5a623':m>=1?'#c9d645':'#2ec28a'; }
   function colorRouteTraffic(from,to){ if(!trafficLayer||typeof TT_KEY==='undefined'||!TT_KEY||!from||!to) return;
@@ -1553,7 +1559,7 @@
     if(!j.routes||!j.routes.length)return null; return j.routes.map(osrmRt); }); }
   function setRouteData(rt){ route=rt;stepIdx=0;stepAnnounced=false;navActive=true;offCount=0;stepMinD=Infinity;
     rt.cum=[0];rt.total=0; for(var i=1;i<rt.coords.length;i++){var a=rt.coords[i-1],b=rt.coords[i];rt.total+=haversine({lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]});rt.cum[i]=rt.total;}
-    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); }
+    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); refilterMarkers(); }
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
     currentDest=to;hideSuggest();hideFavs();addFav(to);setNavContext(to);rememberPlace(to,($('dest').value||to.name));setUiMode('active');setMsg(T().reroute,'');requestWake();
     getRoutes(from,to).then(function(rts){ if(!rts||!rts.length){toast(T().netErr);setMsg(T().ready,'');return;} var rt=rts[0]; altRoute=rts[1]||null; setRouteData(rt); colorRouteTraffic(from,to); drawGhost(altRoute); setTimeout(compareRoutes,1600);
@@ -1564,7 +1570,7 @@
       setState('safe');setMsg(T().go,km+' km · '+min+' min');Voice.say(T().calc(km,min),2);
       updateTraffic(); setTimeout(announceTraffic,4200);
     }).catch(function(){toast(T().netErr);setMsg(T().ready,'');}); }
-  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
+  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); refilterMarkers(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
   function reroute(pos){ if(!currentDest)return; rerouting=true;setState('attention');toast(T().reroute);Voice.say(T().reroute,1);
     getRoute(pos,currentDest).then(function(rt){rerouting=false;if(rt){setRouteData(rt);colorRouteTraffic(pos,currentDest);setState('safe');}}).catch(function(){rerouting=false;}); }
   function maneuverText(step){ var m=step.maneuver||{},mod=m.modifier||'',t=m.type||'',tr=T().turns;
