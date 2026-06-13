@@ -212,6 +212,28 @@
   var VIEW_M=95;            // metres of road shown ahead
   function laneX(lane){ var roadW=Math.min(W*0.52,360), x0=W/2-roadW/2, lw=roadW/world.lanes; return x0+lw*(lane+0.5); }
   function roadGeom(){ var roadW=Math.min(W*0.52,360); return {roadW:roadW, x0:W/2-roadW/2, lw:roadW/world.lanes, egoY:H-130, topY:60}; }
+
+  /* ---- real surroundings (buildings / parks / rivers) projected into the HUD ---- */
+  var egoLL=null, egoHdg=0, surrLL=null, surrAt=0, surr={b:[],g:[],w:[],wl:[]};
+  function loadSurroundings(lat,lon){ var now=Date.now(); if(surrLL && Math.abs(lat-surrLL.lat)<0.002 && Math.abs(lon-surrLL.lon)<0.002 && now-surrAt<60000)return; surrAt=now; surrLL={lat:lat,lon:lon};
+    var q='[out:json][timeout:25];(way["building"](around:300,'+lat+','+lon+');way["leisure"="park"](around:380,'+lat+','+lon+');way["landuse"~"grass|forest|meadow|recreation_ground|cemetery"](around:380,'+lat+','+lon+');way["natural"="wood"](around:380,'+lat+','+lon+');way["natural"="water"](around:430,'+lat+','+lon+');way["waterway"~"river|stream|canal"](around:430,'+lat+','+lon+'););out geom 260;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){ var b=[],g=[],w=[],wl=[];
+      (j.elements||[]).forEach(function(e){ if(!e.geometry||e.geometry.length<2)return; var t=e.tags||{};
+        if(t.building){ if(b.length<170)b.push(e.geometry); } else if(t.natural==='water'){ w.push(e.geometry); } else if(t.waterway){ wl.push(e.geometry); } else { g.push(e.geometry); } });
+      surr={b:b,g:g,w:w,wl:wl}; }).catch(function(){}); }
+  function projGround(lat,lon){ if(!egoLL)return null;
+    var dx=(lon-egoLL.lon)*111320*Math.cos(egoLL.lat*Math.PI/180), dy=(lat-egoLL.lat)*110540;
+    var hr=egoHdg*Math.PI/180, fwd=dy*Math.cos(hr)+dx*Math.sin(hr), lt=dx*Math.cos(hr)-dy*Math.sin(hr);
+    if(fwd<-25||fwd>VIEW_M*1.25)return null; var t=Math.max(0,fwd/VIEW_M);
+    var g=roadGeom(); return {x:W/2+lt*((W/120)*(1-t*0.74)), y:g.egoY-t*(g.egoY-g.topY), t:t}; }
+  function fillRing(ring,fill){ var pr=[]; for(var i=0;i<ring.length;i++){var p=projGround(ring[i].lat,ring[i].lon);if(p)pr.push(p);} if(pr.length<3)return; ctx.beginPath(); ctx.moveTo(pr[0].x,pr[0].y); for(var j=1;j<pr.length;j++)ctx.lineTo(pr[j].x,pr[j].y); ctx.closePath(); ctx.fillStyle=fill; ctx.fill(); }
+  function strokeRing(ring,col,wd){ var pr=[]; for(var i=0;i<ring.length;i++){var p=projGround(ring[i].lat,ring[i].lon);if(p)pr.push(p);} if(pr.length<2)return; ctx.beginPath(); ctx.moveTo(pr[0].x,pr[0].y); for(var j=1;j<pr.length;j++)ctx.lineTo(pr[j].x,pr[j].y); ctx.strokeStyle=col; ctx.lineWidth=wd; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke(); }
+  function drawSurroundings(){ if(!egoLL)return; var n=world.night;
+    surr.g.forEach(function(r){fillRing(r, n?'rgba(50,140,90,.4)':'rgba(74,176,108,.5)');});
+    surr.w.forEach(function(r){fillRing(r,'rgba(64,132,214,.58)');});
+    surr.wl.forEach(function(r){strokeRing(r,'rgba(74,150,224,.7)',6);});
+    surr.b.forEach(function(r){ fillRing(r, n?'rgba(140,144,165,.4)':'rgba(168,170,186,.46)'); strokeRing(r, n?'rgba(180,186,210,.4)':'rgba(120,122,138,.45)',1); });
+  }
   function mToY(dist){ var g=roadGeom(); return g.egoY-(dist/VIEW_M)*(g.egoY-g.topY); }
 
   function spawnCar(){ var lane=(Math.random()*world.lanes)|0; var v=Math.max(3,world.egoV+(Math.random()*10-6));
@@ -297,6 +319,9 @@
     // background
     var bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,world.night?'#0a0407':'#0d0509'); bg.addColorStop(1,'#16090f');
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+    // real surroundings (buildings / parks / rivers) projected on the ground
+    drawSurroundings();
 
     // road (perspective trapezoid)
     var topW=g.roadW*0.42;
@@ -437,6 +462,7 @@
     if(hdg!=null&&!isNaN(hdg)) $('hdg').textContent=Math.round(hdg)+'°';
     if(acc!=null) $('gpsAcc').textContent='±'+Math.round(acc)+' m';
     $('bGps').classList.add('on');
+    if(lat!=null){ egoLL={lat:lat,lon:lon}; if(hdg!=null&&!isNaN(hdg))egoHdg=hdg; loadSurroundings(lat,lon); }
     if(map&&lat!=null){ meMarker.setLatLng([lat,lon]); map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true}); loadHudRadars(lat,lon); checkHudRadars(lat,lon,hdg); }
     // reverse geocode locality (throttled, every 25s)
     if(lat!=null && Date.now()-geoAt>25000){ geoAt=Date.now();
