@@ -98,6 +98,12 @@
   .mv-then{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:5px;line-height:1.6;}
   .mv-then b{color:var(--txt);font-weight:500;} .mv-then i{color:var(--faint);font-style:normal;}
   .eta-conf{font-family:var(--mono);font-size:11px;color:var(--faint);}
+  /* ghost route prompt */
+  .ghost-prompt{position:absolute;left:12px;top:166px;z-index:15;display:none;align-items:center;gap:8px;background:#46C28E;color:#06281c;border:none;border-radius:14px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 8px 26px rgba(70,194,142,.45);font-family:'Inter';}
+  .ghost-prompt.show{display:flex;animation:gpIn .3s ease;}
+  .ghost-prompt b{font-weight:700;} .ghost-prompt .gp-ic{font-size:16px;}
+  @keyframes gpIn{from{transform:translateY(-6px);opacity:0}to{transform:translateY(0);opacity:1}}
+  @media(max-width:760px){ .ghost-prompt{left:8px;right:8px;justify-content:center;top:calc(200px + env(safe-area-inset-top));} }
   /* event bubbles (real TomTom incidents) — Waze-style risk layer */
   .evt{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:#fff;border:1.5px solid rgba(255,255,255,.65);box-shadow:0 3px 12px rgba(0,0,0,.45);font-family:var(--mono);}
   .evt-acc{background:#ff3b46;} .evt-jam{background:#f5a623;color:#1a1205;} .evt-works{background:#ff8c1a;color:#1a1205;} .evt-closed{background:#c0211b;}
@@ -762,6 +768,7 @@
         <div class="mv-meta"><div class="mv-eta" id="routeInfo">—</div><button class="mv-stop" id="routeCancel">✕</button></div>
       </div>
     </div>
+    <button class="ghost-prompt" id="ghostPrompt"><span class="gp-ic">⤳</span>Itinéraire plus rapide · <b id="ghostSave">−3 min</b> · Prendre</button>
   </div>
 
   <!-- RIGHT WIDGETS -->
@@ -1138,7 +1145,7 @@
   var poiAt=0, poiLL=null, poiOn=true, favs=[];
   var radarLayer=null, radarAt=0, radarLL=null, radarOn=true, radars=[], radarSaid={};
   var incLayer=null, incAt=0, incLL=null, incidents=[];
-  var trafficLayer=null;
+  var trafficLayer=null, ghostLayer=null, altRoute=null;
   try{ favs=JSON.parse(localStorage.getItem('practiceFavs')||'[]'); }catch(e){ favs=[]; }
   /* ---------- persistent memory (the app remembers you) ---------- */
   var Mem; try{ Mem=JSON.parse(localStorage.getItem('practiceMem')||'{}'); }catch(e){ Mem={}; }
@@ -1190,6 +1197,7 @@
     routeLine=L.polyline([],{color:t==='dark'?'#fff':'#111',weight:6,opacity:.92,lineJoin:'round'}).addTo(map);
     accCircle=L.circle([46.6,2.4],{radius:0,color:'#888',weight:1,opacity:.3,fillOpacity:.05}).addTo(map);
     poiLayer=L.layerGroup().addTo(map);
+    ghostLayer=L.layerGroup().addTo(map);
     trafficLayer=L.layerGroup().addTo(map);
     radarLayer=L.layerGroup().addTo(map);
     incLayer=L.layerGroup().addTo(map);
@@ -1314,6 +1322,7 @@
           var cat=(it.properties&&it.properties.iconCategory)||0, info=evtInfo(cat); incidents.push({lat:c[1],lon:c[0],cat:cat});
           var ic=L.divIcon({className:'',html:'<div class="evt '+info.c+'">'+info.i+'</div>',iconSize:[30,30],iconAnchor:[15,15]});
           L.marker([c[1],c[0]],{icon:ic}).bindTooltip(info.l,{direction:'top',offset:[0,-12]}).addTo(incLayer); });
+        if(navActive&&typeof compareRoutes==='function')compareRoutes();
       }).catch(function(){});
   }
   /* ---------- Waze-style traffic-coloured route (real TomTom traffic sections) ---------- */
@@ -1329,6 +1338,20 @@
         if(routeLine)routeLine.setStyle({opacity:0}); // colored line replaces the plain one
       }).catch(function(){});
   }
+  /* ---------- Ghost Route: faint alternative, lights up when traffic makes it faster ---------- */
+  function drawGhost(alt){ if(!ghostLayer)return; ghostLayer.clearLayers(); if(!alt||!alt.coords)return;
+    L.polyline(alt.coords.map(function(c){return [c[1],c[0]];}),{color:'#9aa0a8',weight:5,opacity:.4,dashArray:'1,11',lineCap:'round',lineJoin:'round'}).addTo(ghostLayer); }
+  function incidentsNear(coords){ if(!incidents.length||!coords)return 0; var n=0; for(var i=0;i<coords.length;i+=8){ var p={lat:coords[i][1],lon:coords[i][0]};
+      for(var k=0;k<incidents.length;k++){ if(haversine(p,incidents[k])<160){ n++; break; } } } return n; }
+  function effTime(rt){ if(!rt)return Infinity; var cong=1; try{cong=congestion(new Date());}catch(e){} return rt.dur*cong + incidentsNear(rt.coords)*75; } // sec, incident = +75s
+  function compareRoutes(){ var pr=$('ghostPrompt'); if(!pr)return; if(!route||!altRoute||!navActive){ pr.classList.remove('show'); return; }
+    var save=Math.round((effTime(route)-effTime(altRoute))/60);
+    if(save>=2){ $('ghostSave').textContent='−'+save+' min'; pr.classList.add('show'); ghostLayer.eachLayer(function(l){l.setStyle({opacity:.85,dashArray:null,color:'#46C28E',weight:6});}); }
+    else { pr.classList.remove('show'); ghostLayer.eachLayer(function(l){l.setStyle({opacity:.4,dashArray:'1,11',color:'#9aa0a8',weight:5});}); } }
+  function takeGhost(){ if(!altRoute)return; var old=route; setRouteData(altRoute); altRoute=old; drawGhost(altRoute);
+    var from=pts.length?pts[pts.length-1]:null; if(from&&currentDest)colorRouteTraffic(from,currentDest);
+    try{map.fitBounds(routeLine.getBounds().pad(0.2));}catch(e){} $('ghostPrompt').classList.remove('show');
+    if(Voice.on)Voice.say('Nouvel itinéraire, plus rapide.',2); toast('Itinéraire alternatif adopté.'); compareRoutes(); }
   /* proximity voice alert when approaching a radar ahead */
   function checkRadars(pos,hdg,spdK){
     if(!radarOn||!radars.length||spdK<15) return;
@@ -1382,6 +1405,7 @@
       $('trAdvice').textContent=(cf>1.25?'Trafic chargé en ce moment ('+lv[0].toLowerCase()+'). ':'Trafic '+lv[0].toLowerCase()+'. ')+'Lance un itinéraire pour le meilleur départ.';
     }
     if(TT_KEY) liveTraffic();
+    if(navActive&&typeof compareRoutes==='function')compareRoutes();
   }
   function liveTraffic(){ if(!TT_KEY||!route||!currentDest||!pts.length) return; var f=pts[pts.length-1], t=currentDest;
     fetch('https://api.tomtom.com/routing/1/calculateRoute/'+f.lat+','+f.lon+':'+t.lat+','+t.lon+'/json?key='+encodeURIComponent(TT_KEY)+'&traffic=true&travelMode=car')
@@ -1522,15 +1546,17 @@
         d.addEventListener('mousedown',function(e){e.preventDefault();$('dest').value=p[0];hideSuggest();startRouteTo({lat:+r.lat,lon:+r.lon});}); box.appendChild(d); });
       box.className='suggest show';
     }).catch(function(){hideSuggest();}); }
+  function osrmRt(rt){ var steps=[]; (rt.legs||[]).forEach(function(l){(l.steps||[]).forEach(function(s){steps.push(s);});}); return {coords:rt.geometry.coordinates,dist:rt.distance,dur:rt.duration,steps:steps}; }
   function getRoute(from,to){ return fetchJSON('https://router.project-osrm.org/route/v1/driving/'+from.lon+','+from.lat+';'+to.lon+','+to.lat+'?overview=full&geometries=geojson&steps=true').then(function(j){
-    if(!j.routes||!j.routes.length)return null; var rt=j.routes[0]; var steps=[]; (rt.legs||[]).forEach(function(l){(l.steps||[]).forEach(function(s){steps.push(s);});});
-    return {coords:rt.geometry.coordinates,dist:rt.distance,dur:rt.duration,steps:steps}; }); }
+    if(!j.routes||!j.routes.length)return null; return osrmRt(j.routes[0]); }); }
+  function getRoutes(from,to){ return fetchJSON('https://router.project-osrm.org/route/v1/driving/'+from.lon+','+from.lat+';'+to.lon+','+to.lat+'?overview=full&geometries=geojson&steps=true&alternatives=2').then(function(j){
+    if(!j.routes||!j.routes.length)return null; return j.routes.map(osrmRt); }); }
   function setRouteData(rt){ route=rt;stepIdx=0;stepAnnounced=false;navActive=true;offCount=0;stepMinD=Infinity;
     rt.cum=[0];rt.total=0; for(var i=1;i<rt.coords.length;i++){var a=rt.coords[i-1],b=rt.coords[i];rt.total+=haversine({lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]});rt.cum[i]=rt.total;}
     routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); }
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
     currentDest=to;hideSuggest();hideFavs();addFav(to);setNavContext(to);rememberPlace(to,($('dest').value||to.name));setUiMode('active');setMsg(T().reroute,'');requestWake();
-    getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);setMsg(T().ready,'');return;} setRouteData(rt); colorRouteTraffic(from,to);
+    getRoutes(from,to).then(function(rts){ if(!rts||!rts.length){toast(T().netErr);setMsg(T().ready,'');return;} var rt=rts[0]; altRoute=rts[1]||null; setRouteData(rt); colorRouteTraffic(from,to); drawGhost(altRoute); setTimeout(compareRoutes,1600);
       if(destMarker)map.removeLayer(destMarker); destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
       try{map.fitBounds(routeLine.getBounds().pad(0.2));}catch(e){} follow=true;$('followBtn').textContent='⊙';
       var km=(rt.dist/1000).toFixed(1),min=Math.round(rt.dur/60); $('routeInfo').innerHTML='<b>'+km+' km</b> · '+min+' min';
@@ -1538,7 +1564,7 @@
       setState('safe');setMsg(T().go,km+' km · '+min+' min');Voice.say(T().calc(km,min),2);
       updateTraffic(); setTimeout(announceTraffic,4200);
     }).catch(function(){toast(T().netErr);setMsg(T().ready,'');}); }
-  function stopNav(){ navActive=false;route=null;currentDest=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
+  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
   function reroute(pos){ if(!currentDest)return; rerouting=true;setState('attention');toast(T().reroute);Voice.say(T().reroute,1);
     getRoute(pos,currentDest).then(function(rt){rerouting=false;if(rt){setRouteData(rt);colorRouteTraffic(pos,currentDest);setState('safe');}}).catch(function(){rerouting=false;}); }
   function maneuverText(step){ var m=step.maneuver||{},mod=m.modifier||'',t=m.type||'',tr=T().turns;
@@ -1623,6 +1649,7 @@
   $('poiBtn').addEventListener('click',function(){ poiOn=!poiOn; this.classList.toggle('on',poiOn); if(!poiOn){ if(poiLayer)poiLayer.clearLayers(); } else { poiLL=null; if(pts.length)loadPOI(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(poiOn?'Bornes & stations affichées':'POI masqués'); Mem.prefs.poi=poiOn;saveMem(); });
   $('radarBtn').addEventListener('click',function(){ radarOn=!radarOn; this.classList.toggle('on',radarOn); if(!radarOn){ if(radarLayer)radarLayer.clearLayers(); radars=[]; } else { radarLL=null; if(pts.length)loadRadars(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(radarOn?'Radars affichés & alertes vocales':'Radars masqués'); Mem.prefs.radar=radarOn;saveMem(); });
   $('routeCancel').addEventListener('click',function(){if(demoTimer){clearInterval(demoTimer);demoTimer=null;}stopNav();setMsg(T().ready,'');});
+  if($('ghostPrompt'))$('ghostPrompt').addEventListener('click',takeGhost);
   $('followBtn').addEventListener('click',function(){follow=!follow;this.textContent=follow?'⊙':'⊕';});
   $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();Mem.prefs.theme=themeMode;saveMem();});
   /* TomTom live-traffic key + refresh loop */
