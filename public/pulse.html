@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060607">
+<title>Practice Pulse</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Inter',-apple-system,sans-serif;background:#060607;color:#fff;overflow:hidden;-webkit-font-smoothing:antialiased;user-select:none;}
+:root{--bg:#060607;--surface:rgba(255,255,255,0.04);--surface2:rgba(255,255,255,0.07);--border:rgba(255,255,255,0.08);--txt:#fff;--txt2:#888780;--txt3:#5F5E5A;--mono:'SF Mono','Courier New',monospace;--yellow:#FAC775;--amber:#EF9F27;--orange:#D85A30;--red:#E24B4A;--teal:#5DCAA5;--teal-dim:#9FE1CB;}
+.cockpit{width:100%;height:100vh;display:flex;flex-direction:column;position:relative;transition:background 0.6s ease;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;flex-shrink:0;}
+.top-left{display:flex;align-items:center;gap:10px;}
+.clock{font-family:var(--mono);font-size:15px;font-weight:500;}
+.brand{font-family:var(--mono);font-size:10px;letter-spacing:.34em;color:var(--txt3);}
+.brand b{color:#fff;}
+.mode-pill{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;padding:4px 10px;border-radius:6px;background:var(--surface2);color:var(--txt2);transition:all 0.4s ease;}
+.top-right{display:flex;align-items:center;gap:14px;}
+.attention-dot{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--txt3);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--txt3);transition:background 0.4s ease;}
+.main{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;padding:0 20px;min-height:0;}
+.map-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%, rgba(93,202,165,0.04) 0%, transparent 50%),repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px),repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px);opacity:1;transition:opacity 0.5s ease;}
+.nav-zone{width:100%;max-width:420px;text-align:center;position:relative;z-index:2;transition:all 0.5s ease;}
+.nav-zone.hidden{opacity:0;transform:translateY(-12px);pointer-events:none;height:0;overflow:hidden;}
+.nav-arrow{font-size:48px;color:var(--teal);margin-bottom:8px;transition:all 0.4s ease;display:inline-block;}
+.nav-zone.critical .nav-arrow{font-size:88px;animation:pulse-arrow 0.8s ease-in-out infinite;}
+@keyframes pulse-arrow{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.nav-dist{font-family:var(--mono);font-weight:300;letter-spacing:-0.02em;color:var(--txt);transition:font-size 0.4s ease;font-size:36px;}
+.nav-zone.critical .nav-dist{font-size:64px;}
+.nav-instr{font-size:14px;color:var(--txt2);margin-top:6px;font-weight:400;}
+.nav-zone.critical .nav-instr{font-size:20px;color:var(--txt);font-weight:500;}
+.nav-then{margin-top:16px;font-size:11px;color:var(--txt3);line-height:1.9;font-family:var(--mono);transition:opacity 0.4s ease;}
+.nav-then div{display:flex;align-items:center;gap:8px;justify-content:center;}
+.nav-then .arr{color:var(--txt3);}
+.conf-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;transition:opacity 0.4s ease;}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;padding:4px 10px;border-radius:6px;background:var(--surface2);color:var(--txt2);transition:all 0.3s ease;}
+.badge.eta{background:rgba(93,202,165,0.12);color:var(--teal-dim);}
+.badge.risk-low{background:rgba(93,202,165,0.1);color:var(--teal-dim);}
+.badge.risk-med{background:rgba(239,159,39,0.15);color:var(--yellow);}
+.badge.risk-high{background:rgba(226,75,74,0.18);color:#F09595;}
+.context-line{margin-top:10px;font-size:10px;color:var(--txt3);font-family:var(--mono);letter-spacing:0.04em;transition:opacity 0.4s ease;}
+.speed-zone{text-align:center;z-index:2;transition:all 0.5s ease;}
+.speed-val{font-family:var(--mono);font-weight:300;letter-spacing:-0.03em;transition:all 0.4s ease;font-size:64px;}
+.speed-unit{font-size:12px;color:var(--txt3);letter-spacing:0.16em;margin-top:2px;}
+.parking-zone{display:none;text-align:center;z-index:2;}
+.parking-zone.show{display:block;}
+.park-title{font-size:15px;color:var(--txt);margin-bottom:8px;font-weight:500;}
+.park-sub{font-size:11px;color:var(--txt2);font-family:var(--mono);}
+.park-sensors{display:flex;gap:6px;justify-content:center;margin-top:20px;}
+.sensor-bar{width:6px;height:32px;border-radius:3px;background:var(--surface2);transition:background 0.3s ease;}
+.bottom-zone{flex-shrink:0;padding:16px 20px calc(20px + env(safe-area-inset-bottom));border-top:0.5px solid var(--border);background:rgba(255,255,255,0.015);transition:all 0.4s ease;}
+.eq-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+.eq-label{font-family:var(--mono);font-size:10px;color:var(--txt3);letter-spacing:0.14em;}
+.eq-state{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;color:var(--yellow);transition:color 0.3s ease;}
+.eq-bars{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:44px;margin-bottom:14px;}
+.eq-bar{width:5px;border-radius:2.5px;background:var(--yellow);transition:height 0.12s ease,background 0.3s ease;}
+.telemetry-row{display:flex;justify-content:space-around;border-top:0.5px solid var(--border);padding-top:12px;}
+.tel-item{text-align:center;}
+.tel-label{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:0.12em;margin-bottom:4px;}
+.tel-val{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--txt);transition:color 0.3s ease;}
+</style>
+</head>
+<body>
+<div class="cockpit" id="cockpit">
+  <div class="topbar">
+    <div class="top-left">
+      <span class="clock" id="clock">--:--</span>
+      <span class="brand"><b>PULSE</b></span>
+      <span class="mode-pill" id="mode-pill">UI_MODE: IDLE</span>
+    </div>
+    <div class="top-right">
+      <div class="attention-dot"><span class="dot" id="att-dot"></span><span id="att-text">LOW</span></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="map-bg" id="map-bg"></div>
+    <div class="nav-zone" id="nav-zone">
+      <div class="nav-arrow" id="nav-arrow">→</div>
+      <div class="nav-dist" id="nav-dist">620<span style="font-size:0.5em;color:var(--txt2);"> m</span></div>
+      <div class="nav-instr" id="nav-instr">serrer à droite</div>
+      <div class="nav-then" id="nav-then"></div>
+      <div class="conf-row" id="conf-row">
+        <span class="badge eta" id="eta-badge">ETA — </span>
+        <span class="badge risk-low" id="risk-badge">Trafic: faible</span>
+      </div>
+      <div class="context-line" id="context-line">En attente de navigation…</div>
+    </div>
+    <div class="speed-zone" id="speed-zone">
+      <div class="speed-val" id="speed-val">0</div>
+      <div class="speed-unit">KM/H</div>
+    </div>
+    <div class="parking-zone" id="parking-zone">
+      <div class="park-title">Mode parking</div>
+      <div class="park-sub">Capteurs de proximité actifs</div>
+      <div class="park-sensors"><div class="sensor-bar"></div><div class="sensor-bar"></div><div class="sensor-bar"></div><div class="sensor-bar"></div><div class="sensor-bar"></div></div>
+    </div>
+  </div>
+  <div class="bottom-zone" id="bottom-zone">
+    <div class="eq-header"><span class="eq-label">ENGINE</span><span class="eq-state" id="eq-state">CALM</span></div>
+    <div class="eq-bars" id="eq-bars"></div>
+    <div class="telemetry-row">
+      <div class="tel-item"><div class="tel-label">RPM</div><div class="tel-val" id="rpm-val">—</div></div>
+      <div class="tel-item"><div class="tel-label">VITESSE</div><div class="tel-val" id="spd2-val">0</div></div>
+      <div class="tel-item"><div class="tel-label">DELTA</div><div class="tel-val" id="delta-val" style="color:var(--teal);">-0.30s</div></div>
+      <div class="tel-item"><div class="tel-label">BATT</div><div class="tel-val" id="batt-val">78%</div></div>
+    </div>
+  </div>
+</div>
+<script>
+function updateClock(){ var d=new Date(); document.getElementById('clock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+updateClock(); setInterval(updateClock,10000);
+
+var modeConfig={
+  IDLE:{bg:'#060607',pillBg:'rgba(255,255,255,0.07)',pillColor:'#888780',navHidden:true,speedShow:true,parkShow:false,mapOpacity:'0.4',attention:'LOW',attColor:'#5F5E5A',bottomOpacity:'0.6'},
+  NAV_ACTIVE:{bg:'#060607',pillBg:'rgba(93,202,165,0.15)',pillColor:'#9FE1CB',navHidden:false,navCritical:false,speedShow:false,parkShow:false,mapOpacity:'1',attention:'MEDIUM',attColor:'#9FE1CB',riskClass:'risk-low',riskText:'Trafic: faible',confOpacity:'1',ctxOpacity:'1',thenOpacity:'1',bottomOpacity:'1'},
+  NAV_ASSISTED:{bg:'#0a0805',pillBg:'rgba(239,159,39,0.15)',pillColor:'#FAC775',navHidden:false,navCritical:false,speedShow:false,parkShow:false,mapOpacity:'1',attention:'HIGH',attColor:'#FAC775',riskClass:'risk-med',riskText:'Trafic fort — itinéraire ajusté',confOpacity:'1',ctxOpacity:'1',thenOpacity:'1',bottomOpacity:'1'},
+  NAV_CRITICAL:{bg:'#0a0606',pillBg:'rgba(226,75,74,0.18)',pillColor:'#F09595',navHidden:false,navCritical:true,speedShow:false,parkShow:false,mapOpacity:'0.5',attention:'CRITICAL',attColor:'#F09595',riskClass:'risk-high',riskText:'Manœuvre imminente',confOpacity:'0.4',ctxOpacity:'0',thenOpacity:'0',bottomOpacity:'0.4'},
+  PARKING_MODE:{bg:'#060607',pillBg:'rgba(127,119,221,0.15)',pillColor:'#AFA9EC',navHidden:true,speedShow:false,parkShow:true,mapOpacity:'0.25',attention:'LOW',attColor:'#AFA9EC',bottomOpacity:'0.4'}
+};
+var currentMode='IDLE';
+function setMode(mode){ if(!modeConfig[mode])return; currentMode=mode; var c=modeConfig[mode];
+  document.getElementById('cockpit').style.background=c.bg;
+  var pill=document.getElementById('mode-pill'); pill.textContent='UI_MODE: '+mode; pill.style.background=c.pillBg; pill.style.color=c.pillColor;
+  document.getElementById('att-dot').style.background=c.attColor; document.getElementById('att-text').textContent=c.attention; document.getElementById('att-text').style.color=c.attColor;
+  document.getElementById('map-bg').style.opacity=c.mapOpacity;
+  var navZone=document.getElementById('nav-zone'), speedZone=document.getElementById('speed-zone'), parkZone=document.getElementById('parking-zone');
+  if(c.navHidden){ navZone.classList.add('hidden'); } else { navZone.classList.remove('hidden'); if(c.navCritical)navZone.classList.add('critical'); else navZone.classList.remove('critical');
+    document.getElementById('conf-row').style.opacity=c.confOpacity; document.getElementById('context-line').style.opacity=c.ctxOpacity; document.getElementById('nav-then').style.opacity=c.thenOpacity;
+    var rb=document.getElementById('risk-badge'); rb.className='badge '+c.riskClass; rb.textContent=c.riskText; }
+  speedZone.style.display=c.speedShow?'block':'none'; parkZone.classList.toggle('show',c.parkShow);
+  document.getElementById('bottom-zone').style.opacity=c.bottomOpacity;
+}
+
+/* engine equalizer */
+var eqBars=document.getElementById('eq-bars'), NBARS=28, bars=[];
+for(var i=0;i<NBARS;i++){ var b=document.createElement('div'); b.className='eq-bar'; eqBars.appendChild(b); bars.push(b); }
+function colorFor(t){ if(t<0.35)return mix('#FAC775','#EF9F27',t/0.35); if(t<0.7)return mix('#EF9F27','#D85A30',(t-0.35)/0.35); return mix('#D85A30','#E24B4A',(t-0.7)/0.3); }
+function mix(c1,c2,t){ var a=hexToRgb(c1),b=hexToRgb(c2); return 'rgb('+Math.round(a[0]+(b[0]-a[0])*t)+','+Math.round(a[1]+(b[1]-a[1])*t)+','+Math.round(a[2]+(b[2]-a[2])*t)+')'; }
+function hexToRgb(h){ var v=h.replace('#',''); return [parseInt(v.substr(0,2),16),parseInt(v.substr(2,2),16),parseInt(v.substr(4,2),16)]; }
+var accel=0.15, phase=0; /* 0..1, driven by real speed */
+function animateEq(){ var intensity=0.12+accel*0.88, color=colorFor(accel);
+  var label='CALM'; if(accel>0.7)label='REDLINE'; else if(accel>0.4)label='BUILDING'; else if(accel>0.15)label='CRUISING';
+  var es=document.getElementById('eq-state'); es.textContent=label; es.style.color=color;
+  for(var i=0;i<NBARS;i++){ var wave=Math.sin(phase*(0.07+accel*0.22)+i*0.35)*0.5+0.5, noise=Math.random()*0.25*accel, h=(wave*0.6+noise)*intensity*44; h=Math.max(3,Math.min(44,h)); bars[i].style.height=h+'px'; bars[i].style.background=color; bars[i].style.opacity=(0.45+h/44*0.55).toFixed(2); }
+  phase++;
+  var rpm=Math.round(900+accel*7800); document.getElementById('rpm-val').textContent=rpm; document.getElementById('rpm-val').style.color=accel>0.85?'#F09595':'#fff';
+  requestAnimationFrame(animateEq);
+}
+animateEq();
+
+/* ============ live data from the cockpit (postMessage) ============ */
+var live=false; var UIMAP={idle:'IDLE',active:'NAV_ACTIVE',assisted:'NAV_ASSISTED',critical:'NAV_CRITICAL',parking:'PARKING_MODE'};
+function setSpeed(kmh){ kmh=Math.max(0,Math.round(kmh)); document.getElementById('speed-val').textContent=kmh; document.getElementById('spd2-val').textContent=kmh; accel=Math.max(0.05,Math.min(1,kmh/210)); }
+window.addEventListener('message',function(e){ var d=e.data; if(!d)return;
+  if(d.type==='gps'&&typeof d.speed==='number'){ live=true; setSpeed(d.speed*3.6); }
+  else if(d.type==='nav'){ live=true;
+    if(d.uimode&&UIMAP[d.uimode])setMode(UIMAP[d.uimode]);
+    if(d.dist!=null)document.getElementById('nav-dist').innerHTML=d.dist+'<span style="font-size:0.5em;color:var(--txt2);"> '+(d.distUnit||'m')+'</span>';
+    if(d.instr!=null)document.getElementById('nav-instr').textContent=d.instr;
+    if(d.then!=null)document.getElementById('nav-then').innerHTML=d.then;
+    if(d.eta!=null)document.getElementById('eta-badge').textContent='ETA '+d.eta+(d.conf!=null?' ('+d.conf+'%)':'');
+    if(d.ctx!=null)document.getElementById('context-line').textContent=d.ctx;
+    var arrow=document.getElementById('nav-arrow'); if(d.arrow)arrow.textContent=d.arrow;
+  } else if(d.type==='mode'){ /* drive-mode id, optional */ }
+});
+/* gentle idle demo until real data arrives */
+var demoIdx=0, demoSeq=['IDLE','NAV_ACTIVE','NAV_ASSISTED','NAV_CRITICAL','NAV_ACTIVE','PARKING_MODE'];
+setMode('IDLE');
+var demoTimer=setInterval(function(){ if(live){clearInterval(demoTimer);return;} setMode(demoSeq[demoIdx++%demoSeq.length]); accel=0.15+Math.random()*0.5; },5000);
+</script>
+</body>
+</html>

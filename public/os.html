@@ -184,6 +184,9 @@
 
   /* diagnostics (Carly-style) */
   .diag-open{width:100%;margin-top:12px;background:var(--card);border:.5px solid var(--border);color:var(--txt);border-radius:14px;padding:13px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px);transition:.2s;}
+  .view-seg{display:flex;gap:3px;background:var(--card);border:.5px solid var(--border);border-radius:13px;padding:3px;margin-top:6px;}
+  .view-seg button{flex:1;background:none;border:none;color:var(--dim);font-size:11px;font-family:var(--mono);letter-spacing:.04em;padding:9px 4px;border-radius:10px;cursor:pointer;transition:.15s;}
+  .view-seg button.on{background:var(--acc);color:#000;font-weight:600;}
   .home-conn{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
   .home-conn .diag-open{margin-top:0;padding:9px;font-size:12px;}
   .diag-open:hover{border-color:var(--acc);}
@@ -818,7 +821,7 @@
         <div class="agent" data-a="infotainment"><span class="ad"></span>Inf</div>
       </div>
       <button class="diag-open" id="twinBtn" style="margin-top:4px;padding:9px;font-size:12px;">◍ Jumeau du conducteur</button>
-      <button class="diag-open" id="hudOpenBtn" style="margin-top:6px;padding:10px;font-size:12px;background:var(--acc);color:#000;border-color:var(--acc);font-weight:600;">◈ HUD · Practice Vision</button>
+      <div class="view-seg" id="viewSeg"><button class="on" data-v="normal">⬚ Normal</button><button data-v="hud">◈ HUD</button><button data-v="pulse">◉ Pulse</button></div>
       <div class="home-conn">
         <button class="diag-open" id="obdHomeBtn">🔌 OBD2</button>
         <button class="diag-open" id="carModeBtn">🚗 Mode Voiture</button>
@@ -1126,6 +1129,11 @@
 <div class="hud-ov" id="hudOv">
   <button class="hud-close" id="hudClose"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Cockpit</button>
   <iframe id="hudFrame" allow="autoplay; geolocation; bluetooth; fullscreen" title="Practice HUD"></iframe>
+</div>
+<!-- PULSE — cognitive/engine cockpit view -->
+<div class="hud-ov" id="pulseOv">
+  <button class="hud-close" id="pulseClose"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Cockpit</button>
+  <iframe id="pulseFrame" allow="autoplay" title="Practice Pulse"></iframe>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1742,12 +1750,28 @@
   $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();Mem.prefs.theme=themeMode;saveMem();});
   /* TomTom live-traffic key + refresh loop */
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
+  /* ---- three navigation views: Normal (map) · HUD (Practice Vision) · Pulse ---- */
+  var currentView='normal';
   function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(postHudMode,500); }
   function postHudMode(){ var f=$('hudFrame'); if(f&&f.contentWindow&&$('hudOv')&&$('hudOv').classList.contains('show')){ try{f.contentWindow.postMessage({type:'mode',mode:mode},'*');}catch(e){} } }
   function closeHud(){ $('hudOv').classList.remove('show'); var f=$('hudFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
-  if($('navHud'))$('navHud').addEventListener('click',openHud);
-  if($('hudOpenBtn'))$('hudOpenBtn').addEventListener('click',openHud);
-  if($('hudClose'))$('hudClose').addEventListener('click',closeHud);
+  function openPulse(){ var f=$('pulseFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/pulse.html'); $('pulseOv').classList.add('show'); setTimeout(postPulseData,600); }
+  function closePulse(){ $('pulseOv').classList.remove('show'); var f=$('pulseFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
+  function postPulseData(){ var f=$('pulseFrame'); if(!f||!f.contentWindow||!$('pulseOv').classList.contains('show'))return;
+    var dist=($('mvDist').textContent||'').trim(), m=dist.match(/([0-9.]+)\s*(m|km)?/);
+    try{ f.contentWindow.postMessage({type:'nav', uimode:(typeof uiMode!=='undefined'?uiMode:'idle'),
+      dist:(m?m[1]:''), distUnit:(m&&m[2]?m[2]:'m'), instr:($('mvStreet').textContent||'—'), then:($('mvThen').innerHTML||''),
+      eta:($('navEta').textContent||'').replace(/\s*[0-9]+%\s*$/,'').trim(), conf:(typeof navConf==='function'?navConf():null),
+      ctx:($('nvCtx').textContent||'—'), arrow:($('mvArrow').textContent||'→') },'*');
+      f.contentWindow.postMessage({type:'gps',speed:(liveSpd||0)/3.6},'*'); }catch(e){}
+  }
+  function setView(v){ currentView=v; [].forEach.call($('viewSeg').children,function(b){b.classList.toggle('on',b.dataset.v===v);});
+    if(v==='hud'){ closePulse(); openHud(); } else if(v==='pulse'){ closeHud(); openPulse(); } else { closeHud(); closePulse(); } }
+  $('viewSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b)setView(b.dataset.v); });
+  if($('navHud'))$('navHud').addEventListener('click',function(){ setView('hud'); });
+  if($('hudClose'))$('hudClose').addEventListener('click',function(){ setView('normal'); });
+  if($('pulseClose'))$('pulseClose').addEventListener('click',function(){ setView('normal'); });
+  setInterval(function(){ if($('pulseOv').classList.contains('show'))postPulseData(); },1000);
   if($('sheetHandle'))$('sheetHandle').addEventListener('click',function(){ document.body.toggleAttribute('data-sheet'); });
   if($('obdHomeBtn'))$('obdHomeBtn').addEventListener('click',function(){ window.location.href='/obd.html'; });
   if($('carModeBtn'))$('carModeBtn').addEventListener('click',function(){ $('carOv').classList.add('show'); });
