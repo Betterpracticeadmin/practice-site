@@ -1970,7 +1970,7 @@
     unwired_window:"Je ne contrôle pas les vitres ni les ouvrants depuis le web — ça demande l'intégration véhicule native.",
     unwired_msg:"Envoyer un message demande l'app native liée au téléphone ; je ne peux pas le faire depuis le cockpit web.",
     unwired_park:"Je ne conduis pas le véhicule — Practice est un copilote d'information, pas un système de conduite autonome." };
-  function L(t,k){ return LEX[k].test(t); }
+  function lx(t,k){ return LEX[k].test(t); }
   var MODETRIG=/\b(mode|passe|active|activer|mets?|met[s]?[- ]?moi|bascule|enclenche|enclencher|en mode|on passe|je veux (le |du )?mode|switch|set)\b/i;
   var MODEWORDS=[
     {id:'ultra',re:/(ultra|hypersport|hyper[- ]?sport|hypercar|course|racing|race|piste|circuit|comp[eé]tition|extr[eê]me|maximum|[aà] fond)/i},
@@ -1982,57 +1982,57 @@
   ];
   /* primary dictionary-driven matcher — returns true when it handled the utterance */
   function vocabRun(t){
-    if(L(t,'here')&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return true; }
-    if(L(t,'nearby')){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return true; } } }
-    if(L(t,'theme')){ themeMode=/nuit|sombre|noir|dark/.test(t)?'dark':(/jour|clair|blanc|lumi|light/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return true; }
+    if(lx(t,'here')&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return true; }
+    if(lx(t,'nearby')){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return true; } } }
+    if(lx(t,'theme')){ themeMode=/nuit|sombre|noir|dark/.test(t)?'dark':(/jour|clair|blanc|lumi|light/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return true; }
     for(var mi=0;mi<MODEWORDS.length;mi++){ if(MODEWORDS[mi].re.test(t)&&(MODETRIG.test(t)||MODEWORDS[mi].re.source.length<14)){ setMode(MODEWORDS[mi].id); sayVA('Mode '+MODES[MODEWORDS[mi].id].name+'.'); return true; } }
-    if(L(t,'voiceoff')){ Voice.on=false; Voice.flush(); syncPanel(); Mem.prefs.voice=false; saveMem(); sayVA('Voix coupée.'); return true; }
-    if(L(t,'voiceon')){ Voice.on=true; syncPanel(); Mem.prefs.voice=true; saveMem(); sayVA('Voix activée.'); return true; }
-    if(L(t,'fav')){ if(typeof mediaSource!=='undefined'&&mediaSource==='sc'&&typeof scWidget!=='undefined'&&scWidget&&/titre|musique|chanson|son|morceau|[çc]a|ce truc/.test(t)){ scWidget.getCurrentSound(function(s){ if(s&&typeof toggleLike==='function')toggleLike(s); }); sayVA('Titre ajouté aux favoris.'); return true; } if(typeof currentDest!=='undefined'&&currentDest){ addFav(currentDest); rememberPlace(currentDest); sayVA('Lieu ajouté aux favoris.'); return true; } if(lastRef){ rememberPlace&&rememberPlace(lastRef); sayVA(lastRef.name+' ajouté aux favoris.'); return true; } sayVA('Rien à ajouter pour l\'instant.'); return true; }
-    if(L(t,'next')&&typeof mediaNext==='function'){ mediaNext(); sayVA('Titre suivant.'); return true; }
-    if(L(t,'prev')&&typeof mediaPrev==='function'){ mediaPrev(); sayVA('Titre précédent.'); return true; }
-    if(L(t,'openmedia')&&typeof openMedia==='function'){ openMedia(); sayVA('Média ouvert.'); return true; }
-    if((L(t,'play')||L(t,'media_genre')||L(t,'pause'))&&typeof mediaToggle==='function'){ mediaToggle(); sayVA('Musique.'); return true; }
-    if(L(t,'stopnav')){ stopNav(); setMsg(T().ready,''); sayVA('Navigation arrêtée.'); return true; }
-    if(L(t,'vpulse')&&typeof setView==='function'){ setView('pulse'); sayVA('Vue Pulse.'); return true; }
-    if(L(t,'vhud')&&typeof setView==='function'){ setView('hud'); sayVA('Vue Practice Vision.'); return true; }
-    if(L(t,'vnormal')&&typeof setView==='function'){ setView('normal'); sayVA('Vue normale.'); return true; }
-    if(L(t,'radar')){ if($('radarBtn'))$('radarBtn').click(); sayVA('Radars affichés.'); return true; }
-    if(L(t,'qtraffic')){ var lv=$('trLvl')?($('trLvl').textContent||'').trim():''; var dl=$('trDelay')?($('trDelay').textContent||'').trim():''; sayVA('Trafic '+(lv||'inconnu').toLowerCase()+(dl?', '+dl:'')+'.'); return true; }
-    if(L(t,'qeta')){ var et=$('navEta')?($('navEta').textContent||'').replace(/\s*[0-9]+%/,'').trim():''; sayVA(et&&et!=='—'?('Arrivée dans '+et+'.'):'Aucun trajet en cours.'); return true; }
-    if(L(t,'qdist')){ var sb=$('navSub')?($('navSub').textContent||'').trim():''; sayVA(sb&&sb.indexOf('km')>=0?('Il reste '+sb+'.'):'Aucun trajet en cours.'); return true; }
-    if(L(t,'qweather')){ var tp=$('wxTemp')?($('wxTemp').textContent||'').trim():'', de=$('wxDesc')?($('wxDesc').textContent||'').trim():''; sayVA('Il fait '+(tp||'—')+' degrés'+(de&&de!=='—'?', '+de.toLowerCase():'')+'.'); return true; }
-    if(L(t,'qloc')){ var lo=$('wxLoc')?($('wxLoc').textContent||'').trim():''; sayVA(lo&&lo!=='—'?('Tu es vers '+lo+'.'):'Position inconnue pour l\'instant.'); return true; }
-    if(L(t,'qtime')){ var cl=$('clock')?($('clock').textContent||'').trim():''; sayVA('Il est '+cl.replace(':',' heures ')+'.'); return true; }
-    if(L(t,'qnow')){ var ti=$('plTitle')?($('plTitle').textContent||'').trim():'', ar=$('plArtist')?($('plArtist').textContent||'').trim():''; sayVA(ti?(ti+(ar?', par '+ar:'')+'.'):'Aucune lecture en cours.'); return true; }
-    if(L(t,'qspeed')){ sayVA('Tu roules à '+(Math.round(liveSpd||0))+' kilomètres heure.'); return true; }
-    if(L(t,'whoru')){ sayVA(pickL(['Je suis Practice, ton copilote. Je gère la nav, les modes, la musique, je réponds à tes questions et je cherche des lieux autour de toi.'],['I\'m Practice, your co-pilot — navigation, modes, music, questions and nearby places.'])); return true; }
-    if(L(t,'howru')){ sayVA(pickL(['Je veille sur la route, tout roule. Et toi ?','En pleine forme, prêt à t\'assister.'],['All good, watching the road. You?','Doing great, ready to help.'])); return true; }
-    if(L(t,'hello')){ sayVA(pickL(['Bonjour '+vaName()+', je suis là.','Salut '+vaName()+' !','Hey '+vaName()+', à ton écoute.'],['Hi '+vaName()+', I\'m here.','Hey '+vaName()+'!'])); return true; }
-    if(L(t,'thanks')){ sayVA(pickL(['Avec plaisir.','Quand tu veux '+vaName()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return true; }
-    if(L(t,'joke')){ sayVA(pickL(['Pourquoi la voiture électrique reste zen ? Zéro émission de stress.','Un GPS entre dans un bar… puis recalcule l\'itinéraire.'],['Why was the EV so calm? Zero stress emissions.'])); return true; }
-    if(L(t,'day')){ try{ sayVA('On est '+new Date().toLocaleDateString(LANG==='en'?'en-US':(LANG==='ja'?'ja-JP':'fr-FR'),{weekday:'long',day:'numeric',month:'long'})+'.'); }catch(e){} return true; }
+    if(lx(t,'voiceoff')){ Voice.on=false; Voice.flush(); syncPanel(); Mem.prefs.voice=false; saveMem(); sayVA('Voix coupée.'); return true; }
+    if(lx(t,'voiceon')){ Voice.on=true; syncPanel(); Mem.prefs.voice=true; saveMem(); sayVA('Voix activée.'); return true; }
+    if(lx(t,'fav')){ if(typeof mediaSource!=='undefined'&&mediaSource==='sc'&&typeof scWidget!=='undefined'&&scWidget&&/titre|musique|chanson|son|morceau|[çc]a|ce truc/.test(t)){ scWidget.getCurrentSound(function(s){ if(s&&typeof toggleLike==='function')toggleLike(s); }); sayVA('Titre ajouté aux favoris.'); return true; } if(typeof currentDest!=='undefined'&&currentDest){ addFav(currentDest); rememberPlace(currentDest); sayVA('Lieu ajouté aux favoris.'); return true; } if(lastRef){ rememberPlace&&rememberPlace(lastRef); sayVA(lastRef.name+' ajouté aux favoris.'); return true; } sayVA('Rien à ajouter pour l\'instant.'); return true; }
+    if(lx(t,'next')&&typeof mediaNext==='function'){ mediaNext(); sayVA('Titre suivant.'); return true; }
+    if(lx(t,'prev')&&typeof mediaPrev==='function'){ mediaPrev(); sayVA('Titre précédent.'); return true; }
+    if(lx(t,'openmedia')&&typeof openMedia==='function'){ openMedia(); sayVA('Média ouvert.'); return true; }
+    if((lx(t,'play')||lx(t,'media_genre')||lx(t,'pause'))&&typeof mediaToggle==='function'){ mediaToggle(); sayVA('Musique.'); return true; }
+    if(lx(t,'stopnav')){ stopNav(); setMsg(T().ready,''); sayVA('Navigation arrêtée.'); return true; }
+    if(lx(t,'vpulse')&&typeof setView==='function'){ setView('pulse'); sayVA('Vue Pulse.'); return true; }
+    if(lx(t,'vhud')&&typeof setView==='function'){ setView('hud'); sayVA('Vue Practice Vision.'); return true; }
+    if(lx(t,'vnormal')&&typeof setView==='function'){ setView('normal'); sayVA('Vue normale.'); return true; }
+    if(lx(t,'radar')){ if($('radarBtn'))$('radarBtn').click(); sayVA('Radars affichés.'); return true; }
+    if(lx(t,'qtraffic')){ var lv=$('trLvl')?($('trLvl').textContent||'').trim():''; var dl=$('trDelay')?($('trDelay').textContent||'').trim():''; sayVA('Trafic '+(lv||'inconnu').toLowerCase()+(dl?', '+dl:'')+'.'); return true; }
+    if(lx(t,'qeta')){ var et=$('navEta')?($('navEta').textContent||'').replace(/\s*[0-9]+%/,'').trim():''; sayVA(et&&et!=='—'?('Arrivée dans '+et+'.'):'Aucun trajet en cours.'); return true; }
+    if(lx(t,'qdist')){ var sb=$('navSub')?($('navSub').textContent||'').trim():''; sayVA(sb&&sb.indexOf('km')>=0?('Il reste '+sb+'.'):'Aucun trajet en cours.'); return true; }
+    if(lx(t,'qweather')){ var tp=$('wxTemp')?($('wxTemp').textContent||'').trim():'', de=$('wxDesc')?($('wxDesc').textContent||'').trim():''; sayVA('Il fait '+(tp||'—')+' degrés'+(de&&de!=='—'?', '+de.toLowerCase():'')+'.'); return true; }
+    if(lx(t,'qloc')){ var lo=$('wxLoc')?($('wxLoc').textContent||'').trim():''; sayVA(lo&&lo!=='—'?('Tu es vers '+lo+'.'):'Position inconnue pour l\'instant.'); return true; }
+    if(lx(t,'qtime')){ var cl=$('clock')?($('clock').textContent||'').trim():''; sayVA('Il est '+cl.replace(':',' heures ')+'.'); return true; }
+    if(lx(t,'qnow')){ var ti=$('plTitle')?($('plTitle').textContent||'').trim():'', ar=$('plArtist')?($('plArtist').textContent||'').trim():''; sayVA(ti?(ti+(ar?', par '+ar:'')+'.'):'Aucune lecture en cours.'); return true; }
+    if(lx(t,'qspeed')){ sayVA('Tu roules à '+(Math.round(liveSpd||0))+' kilomètres heure.'); return true; }
+    if(lx(t,'whoru')){ sayVA(pickL(['Je suis Practice, ton copilote. Je gère la nav, les modes, la musique, je réponds à tes questions et je cherche des lieux autour de toi.'],['I\'m Practice, your co-pilot — navigation, modes, music, questions and nearby places.'])); return true; }
+    if(lx(t,'howru')){ sayVA(pickL(['Je veille sur la route, tout roule. Et toi ?','En pleine forme, prêt à t\'assister.'],['All good, watching the road. You?','Doing great, ready to help.'])); return true; }
+    if(lx(t,'hello')){ sayVA(pickL(['Bonjour '+vaName()+', je suis là.','Salut '+vaName()+' !','Hey '+vaName()+', à ton écoute.'],['Hi '+vaName()+', I\'m here.','Hey '+vaName()+'!'])); return true; }
+    if(lx(t,'thanks')){ sayVA(pickL(['Avec plaisir.','Quand tu veux '+vaName()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return true; }
+    if(lx(t,'joke')){ sayVA(pickL(['Pourquoi la voiture électrique reste zen ? Zéro émission de stress.','Un GPS entre dans un bar… puis recalcule l\'itinéraire.'],['Why was the EV so calm? Zero stress emissions.'])); return true; }
+    if(lx(t,'day')){ try{ sayVA('On est '+new Date().toLocaleDateString(LANG==='en'?'en-US':(LANG==='ja'?'ja-JP':'fr-FR'),{weekday:'long',day:'numeric',month:'long'})+'.'); }catch(e){} return true; }
     /* ---- contrôles : volume, carte, luminosité, voix ---- */
-    if(L(t,'mutemusic')&&typeof scWidget!=='undefined'&&scWidget){ try{scWidget.pause();}catch(e){} sayVA('Musique coupée.'); return true; }
-    if(L(t,'volup')){ if(typeof scWidget!=='undefined'&&scWidget){ scWidget.getVolume(function(v){ scWidget.setVolume(Math.min(100,(v||60)+15)); }); } sayVA('Plus fort.'); return true; }
-    if(L(t,'voldown')){ if(typeof scWidget!=='undefined'&&scWidget){ scWidget.getVolume(function(v){ scWidget.setVolume(Math.max(0,(v||60)-15)); }); } sayVA('Moins fort.'); return true; }
-    if(L(t,'zoomin')&&map){ map.setZoom(Math.min(19,map.getZoom()+1)); sayVA('Je zoome.'); return true; }
-    if(L(t,'zoomout')&&map){ map.setZoom(Math.max(3,map.getZoom()-1)); sayVA('Vue plus large.'); return true; }
-    if(L(t,'recenter')){ if(map&&pts&&pts.length){ follow=true; if($('followBtn'))$('followBtn').textContent='⊙'; map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],Math.max(map.getZoom(),16),{animate:true}); sayVA('Je te recentre sur la carte.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
-    if(L(t,'brightup')){ themeMode='light'; applyTheme(); syncPanel(); Mem.prefs.theme='light'; saveMem(); sayVA('Écran plus clair.'); return true; }
-    if(L(t,'brightdown')){ themeMode='dark'; applyTheme(); syncPanel(); Mem.prefs.theme='dark'; saveMem(); sayVA('Écran plus sombre.'); return true; }
-    if(L(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.15); sayVA('Je parle plus vite.'); return true; }
-    if(L(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.15); sayVA('Je ralentis mon débit.'); return true; }
+    if(lx(t,'mutemusic')&&typeof scWidget!=='undefined'&&scWidget){ try{scWidget.pause();}catch(e){} sayVA('Musique coupée.'); return true; }
+    if(lx(t,'volup')){ if(typeof scWidget!=='undefined'&&scWidget){ scWidget.getVolume(function(v){ scWidget.setVolume(Math.min(100,(v||60)+15)); }); } sayVA('Plus fort.'); return true; }
+    if(lx(t,'voldown')){ if(typeof scWidget!=='undefined'&&scWidget){ scWidget.getVolume(function(v){ scWidget.setVolume(Math.max(0,(v||60)-15)); }); } sayVA('Moins fort.'); return true; }
+    if(lx(t,'zoomin')&&map){ map.setZoom(Math.min(19,map.getZoom()+1)); sayVA('Je zoome.'); return true; }
+    if(lx(t,'zoomout')&&map){ map.setZoom(Math.max(3,map.getZoom()-1)); sayVA('Vue plus large.'); return true; }
+    if(lx(t,'recenter')){ if(map&&pts&&pts.length){ follow=true; if($('followBtn'))$('followBtn').textContent='⊙'; map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],Math.max(map.getZoom(),16),{animate:true}); sayVA('Je te recentre sur la carte.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
+    if(lx(t,'brightup')){ themeMode='light'; applyTheme(); syncPanel(); Mem.prefs.theme='light'; saveMem(); sayVA('Écran plus clair.'); return true; }
+    if(lx(t,'brightdown')){ themeMode='dark'; applyTheme(); syncPanel(); Mem.prefs.theme='dark'; saveMem(); sayVA('Écran plus sombre.'); return true; }
+    if(lx(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.15); sayVA('Je parle plus vite.'); return true; }
+    if(lx(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.15); sayVA('Je ralentis mon débit.'); return true; }
     /* ---- méta : répète, aide, compliment ---- */
-    if(L(t,'repeat')){ sayVA(lastSpoken?lastSpoken:'Je n\'ai rien dit récemment.'); return true; }
-    if(L(t,'help')){ sayVA('Je peux lancer un itinéraire, trouver un lieu proche, changer de mode ou de thème, gérer la musique et le volume, zoomer ou recentrer la carte, et te renseigner sur le trafic, la météo, l\'heure ou ta vitesse. Dis-moi simplement ce que tu veux.'); return true; }
-    if(L(t,'compliment')){ sayVA(pickL(['Merci '+vaName()+', ça me touche.','Trop sympa, je reste à ton service.'],['Thanks '+vaName()+'!','Much appreciated.'])); return true; }
+    if(lx(t,'repeat')){ sayVA(lastSpoken?lastSpoken:'Je n\'ai rien dit récemment.'); return true; }
+    if(lx(t,'help')){ sayVA('Je peux lancer un itinéraire, trouver un lieu proche, changer de mode ou de thème, gérer la musique et le volume, zoomer ou recentrer la carte, et te renseigner sur le trafic, la météo, l\'heure ou ta vitesse. Dis-moi simplement ce que tu veux.'); return true; }
+    if(lx(t,'compliment')){ sayVA(pickL(['Merci '+vaName()+', ça me touche.','Trop sympa, je reste à ton service.'],['Thanks '+vaName()+'!','Much appreciated.'])); return true; }
     /* ---- lieux : carburant/recharge, maison/travail, enregistrer ---- */
-    if(L(t,'fuel')){ var fb=/borne|recharge|charg/.test(t); for(var fi=0;fi<POITYPES.length;fi++){ if((fb?/borne|recharge/:/station/).test(POITYPES[fi].n)){ nearestPOI(POITYPES[fi]); return true; } } sayVA('Je cherche une station.'); return true; }
-    if(L(t,'home')||L(t,'work')){ var isHome=L(t,'home'); var key=isHome?/(maison|home|domicile|chez)/i:/(travail|boulot|bureau|taf|work|office)/i; var hit=(typeof favs!=='undefined'?favs:[]).filter(function(x){return key.test((x.name||'').toLowerCase());})[0]; if(hit){ sayVA('On y va'+(isHome?', direction la maison.':', direction le travail.')); $('dest').value=hit.name; startRouteTo(hit); } else { sayVA('Tu n\'as pas encore enregistré '+(isHome?'ta maison':'ton travail')+'. Sur place, dis « ajoute aux favoris » pour la mémoriser.'); } return true; }
-    if(L(t,'save')){ var sp=(typeof pts!=='undefined'&&pts.length)?pts[pts.length-1]:null; if(sp){ var snm=($('wxLoc')&&$('wxLoc').textContent&&$('wxLoc').textContent!=='—')?$('wxLoc').textContent.trim():'Lieu enregistré'; addFav({name:snm,lat:sp.lat,lon:sp.lon}); rememberPlace({name:snm,lat:sp.lat,lon:sp.lon}); sayVA(snm+' enregistré dans tes favoris.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
+    if(lx(t,'fuel')){ var fb=/borne|recharge|charg/.test(t); for(var fi=0;fi<POITYPES.length;fi++){ if((fb?/borne|recharge/:/station/).test(POITYPES[fi].n)){ nearestPOI(POITYPES[fi]); return true; } } sayVA('Je cherche une station.'); return true; }
+    if(lx(t,'home')||lx(t,'work')){ var isHome=lx(t,'home'); var key=isHome?/(maison|home|domicile|chez)/i:/(travail|boulot|bureau|taf|work|office)/i; var hit=(typeof favs!=='undefined'?favs:[]).filter(function(x){return key.test((x.name||'').toLowerCase());})[0]; if(hit){ sayVA('On y va'+(isHome?', direction la maison.':', direction le travail.')); $('dest').value=hit.name; startRouteTo(hit); } else { sayVA('Tu n\'as pas encore enregistré '+(isHome?'ta maison':'ton travail')+'. Sur place, dis « ajoute aux favoris » pour la mémoriser.'); } return true; }
+    if(lx(t,'save')){ var sp=(typeof pts!=='undefined'&&pts.length)?pts[pts.length-1]:null; if(sp){ var snm=($('wxLoc')&&$('wxLoc').textContent&&$('wxLoc').textContent!=='—')?$('wxLoc').textContent.trim():'Lieu enregistré'; addFav({name:snm,lat:sp.lat,lon:sp.lon}); rememberPlace({name:snm,lat:sp.lat,lon:sp.lon}); sayVA(snm+' enregistré dans tes favoris.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
     /* ---- honnêteté : actions non connectées au cockpit web ---- */
-    for(var uk in UNWIRED){ if(L(t,uk)){ sayVA(UNWIRED[uk]); return true; } }
+    for(var uk in UNWIRED){ if(lx(t,uk)){ sayVA(UNWIRED[uk]); return true; } }
     return false;
   }
   function runCmd(t){ t=t.toLowerCase().trim(); if(!t)return;
