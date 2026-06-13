@@ -25,8 +25,9 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         text: text,
         model_id: 'eleven_multilingual_v2',
-        // stabilité basse + style = plus d'émotion / plus charnel ; similarity haute = voix fidèle
-        voice_settings: { stability: 0.38, similarity_boost: 0.85, style: 0.45, use_speaker_boost: true }
+        // profil "Joi" (Blade Runner) : douce, chaude, intime, expressive.
+        // stabilité basse = émotion/souffle ; style haut = présence ; similarity haute = voix fidèle.
+        voice_settings: { stability: 0.30, similarity_boost: 0.92, style: 0.55, use_speaker_boost: true }
       })
     });
     if (!r.ok) { const tx = await r.text(); res.status(200).json({ error: 'tts', status: r.status, detail: tx.slice(0, 200) }); return; }
