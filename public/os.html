@@ -898,6 +898,10 @@
     <div class="seg" id="langSeg2"><button data-l="fr">Français</button><button data-l="en">English</button><button data-l="ja">日本語</button></div>
     <h3>Voix</h3>
     <div class="seg" id="voiceSeg"><button data-v="on">Activée</button><button data-v="off">Coupée</button></div>
+    <h3>Assistant vocal — commande « Practice… »</h3>
+    <input id="vaName" class="key-in" type="text" placeholder="Ton prénom (ex. Aldo)" autocomplete="off" style="margin-bottom:8px;"/>
+    <div class="seg" id="vaSeg"><button data-va="on">Micro activé</button><button data-va="off" class="on">Coupé</button></div>
+    <div class="key-note">Dis « <b>Practice</b> » suivi de l'ordre : <i>« Practice mode performance »</i>, <i>« Practice emmène-moi à la Tour Eiffel »</i>, <i>« Practice ajoute aux favoris »</i>, <i>« Practice thème nuit »</i>, <i>« Practice ouvre le HUD »</i>, <i>« Practice titre suivant »</i>. Au lancement : « Practice activé, bonjour [prénom] ». Fonctionne sur <b>Chrome / Android</b> (iOS Safari ne gère pas la reconnaissance vocale web).</div>
     <h3>Trafic temps réel (optionnel)</h3>
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
     <div class="key-note">Sans clé : estimation honnête selon les heures de pointe (jour/heure). Avec une clé <b>TomTom</b> gratuite (2 500 req/jour), le niveau de trafic, le retard et l'ETA deviennent <b>live</b>, comme Waze.</div>
@@ -1825,6 +1829,41 @@
   $('langSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; LANG=b.dataset.l; Voice.pick(); syncPanel(); Mem.prefs.lang=LANG;saveMem(); });
   $('voiceSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; Voice.on=(b.dataset.v==='on'); if(!Voice.on)Voice.flush(); var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); syncPanel(); Mem.prefs.voice=Voice.on;saveMem(); });
 
+  /* ===== voice assistant — "Practice …" wake word + command engine (Web Speech API) ===== */
+  var recog=null, vaOn=false, vaPrimed=false;
+  function vaName(){ return (Mem.prefs.name||'Aldo'); }
+  function sayVA(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice)u.voice=Voice.voice; u.rate=Voice.rate||1; speechSynthesis.speak(u);} }catch(e){} toast('🎙 '+t); }
+  function runCmd(t){ t=t.toLowerCase().trim(); if(!t)return;
+    var modes={copilot:'copilot',learning:'learning',apprentissage:'learning',performance:'performance',ultra:'ultra',course:'ultra','grand touring':'gt',tourisme:'gt',nuit:'night',night:'night'};
+    if(/(mode|passe|active|mets|met|bascule)/.test(t)){ for(var k in modes){ if(t.indexOf(k)>=0){ setMode(modes[k]); sayVA('Mode '+MODES[modes[k]].name+'.'); return; } } }
+    if(/th[eè]me/.test(t)){ themeMode=/nuit|sombre|noir/.test(t)?'dark':(/jour|clair|blanc/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'auto')+'.'); return; }
+    if(/(coupe|d[eé]sactive|baisse|silence).*(voix|son|toi)/.test(t)){ Voice.on=false; Voice.flush(); syncPanel(); Mem.prefs.voice=false;saveMem(); sayVA('Voix coupée.'); return; }
+    if(/(active|remets).*(voix)/.test(t)){ Voice.on=true; syncPanel(); Mem.prefs.voice=true;saveMem(); sayVA('Voix activée.'); return; }
+    if(/favori/.test(t)){ if(typeof mediaSource!=='undefined'&&mediaSource==='sc'&&typeof scWidget!=='undefined'&&scWidget&&/titre|musique|chanson|son|morceau/.test(t)){ scWidget.getCurrentSound(function(s){ if(s&&typeof toggleLike==='function')toggleLike(s); }); sayVA('Titre ajouté aux favoris.'); return; } if(currentDest){ addFav(currentDest); rememberPlace(currentDest); sayVA('Lieu ajouté aux favoris.'); return; } sayVA('Rien à ajouter.'); return; }
+    if(/(pause|lecture|joue|musique|play|reprend)/.test(t)&&typeof mediaToggle==='function'){ mediaToggle(); sayVA('Musique.'); return; }
+    if(/(suivant|next|prochaine|suivante)/.test(t)&&typeof mediaNext==='function'){ mediaNext(); sayVA('Titre suivant.'); return; }
+    if(/(pr[eé]c[eé]dent|previous)/.test(t)&&typeof mediaPrev==='function'){ mediaPrev(); sayVA('Titre précédent.'); return; }
+    if(/(arr[eê]te|stop|annule|termine).*(nav|itin|trajet|route|guidage)/.test(t)){ stopNav(); setMsg(T().ready,''); sayVA('Navigation arrêtée.'); return; }
+    if(/\bhud\b|vision/.test(t)&&typeof setView==='function'){ setView('hud'); sayVA('Vue HUD.'); return; }
+    if(/pulse/.test(t)&&typeof setView==='function'){ setView('pulse'); sayVA('Vue Pulse.'); return; }
+    if(/radar/.test(t)){ if($('radarBtn'))$('radarBtn').click(); return; }
+    var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|navigue|itin[eé]raire|va|aller|allons|direction|lance|go|trajet)\s+(?:à|a|au|aux|vers|jusqu'?à|jusqu'?au|en|sur|to|chez|le|la|les|l')?\s*(.+)/);
+    if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=m[1].trim(); sayVA('Je calcule l\'itinéraire vers '+q+'.'); geocode(q).then(function(d){ if(d){ $('dest').value=q; startRouteTo(d); } else sayVA('Adresse introuvable.'); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
+    sayVA('Désolé, je n\'ai pas compris.');
+  }
+  function startVA(greet){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — utilise Chrome / Android.'); $('vaSeg')&&[].forEach.call($('vaSeg').children,function(b){b.classList.toggle('on',b.dataset.va==='off');}); return; }
+    if(!recog){ recog=new SR(); recog.continuous=true; recog.interimResults=false; recog.lang=T().code;
+      recog.onresult=function(e){ for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var tx=(e.results[i][0].transcript||'').toLowerCase(); var idx=tx.indexOf('practice'); if(idx<0)idx=tx.indexOf('practis'); if(idx>=0){ var cmd=tx.slice(idx).replace(/practi[sc]e?/,'').trim(); if(cmd)runCmd(cmd); } } };
+      recog.onend=function(){ if(vaOn){ try{recog.start();}catch(e){} } };
+      recog.onerror=function(ev){ if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){ vaOn=false; toast('Micro refusé.'); } };
+    }
+    vaOn=true; recog.lang=T().code; try{recog.start();}catch(e){}
+    if(greet) sayVA('Practice activé, bonjour '+vaName()+'.');
+  }
+  function stopVA(){ vaOn=false; if(recog){ try{recog.stop();}catch(e){} } }
+  if($('vaSeg'))$('vaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var on=(b.dataset.va==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Mem.prefs.va=on; saveMem(); if(on)startVA(true); else stopVA(); });
+  if($('vaName'))$('vaName').addEventListener('change',function(){ Mem.prefs.name=this.value.trim()||'Aldo'; saveMem(); });
+
   /* ---------- SoundCloud real controls (Widget API) ---------- */
   var scWidget=null;
   var mPlaying=false, mDur=0, mQueue=[], mIdx=-1, mLikes=[];
@@ -2033,6 +2072,9 @@
     if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
     var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on);
     [].forEach.call(document.querySelectorAll('#langSeg button'),function(x){x.classList.toggle('on',x.dataset.lang===LANG);});
+    if($('vaName'))$('vaName').value=p.name||'Aldo';
+    [].forEach.call(document.querySelectorAll('#vaSeg button'),function(x){x.classList.toggle('on',(x.dataset.va==='on')===(p.va===true));});
+    if(p.va){ vaPrimed=true; var prime=function(){ if(!vaPrimed)return; vaPrimed=false; startVA(true); document.removeEventListener('pointerdown',prime,true); }; document.addEventListener('pointerdown',prime,true); }
     syncPanel();
   })();
   if(/[?&]demo/.test(location.search)) setTimeout(function(){$('gateDemo').click();},700);
