@@ -197,6 +197,16 @@
   /* ---------- world (Unreal-lite truth layer) ---------- */
   var world={ egoV:14, egoLane:1, lanes:3, t:0, weather:'clear', night:false, cars:[], peds:[], spawnAt:0, pedAt:0 };
   var auto=true, voiceOn=true, horizon=3;
+  /* racing-line chevrons adapt to the AI mode's identity */
+  var hudMode='copilot';
+  var MODESTYLE={
+    copilot:{base:'#6AA1FF', n:7, speed:0.50, pulse:false, calm:true, dim:0.9},   /* confiance · calme · bleu */
+    learning:{base:'#46C28E', n:7, speed:0.55, pulse:false, calm:true, dim:0.95}, /* encourage · vert */
+    performance:{base:'#39d98a', n:9, speed:0.95, pulse:false, calm:false, dim:1},/* precision · racing vert→rouge */
+    ultra:{base:'#39d98a', n:12, speed:1.5, pulse:true, calm:false, dim:1},        /* hypercar · agressif · pulse */
+    gt:{base:'#E0A33A', n:5, speed:0.32, pulse:false, calm:true, dim:0.85},        /* voyage · contemplatif · ambre */
+    night:{base:'#B98BFF', n:6, speed:0.40, pulse:false, calm:true, dim:0.7}       /* nuit · discret · violet */
+  };
   var real={speed:null,rpm:null,cool:null,src:null,at:0};   // real speed source (OBD/GPS)
   var gpsWatch=null;
   var VIEW_M=95;            // metres of road shown ahead
@@ -303,10 +313,13 @@
     var elx=laneX(world.egoLane); var fg=ctx.createLinearGradient(0,g.topY,0,g.egoY); fg.addColorStop(0,'rgba(106,161,255,0)'); fg.addColorStop(1,'rgba(106,161,255,.10)');
     ctx.fillStyle=fg; ctx.fillRect(elx-g.lw/2,g.topY,g.lw,g.egoY-g.topY+40);
 
-    // RACING LINE: colour-shifting chevrons flowing along the ego lane (green=go, red=brake)
-    var rlc = S.override?'#ff3b46':(S.risk>0.45?'#ff8c1a':(S.risk>0.18?'#f5d020':'#39d98a'));
-    var NCH=8; for(var ci=0;ci<NCH;ci++){ var f=((ci/NCH)+((world.t*0.6)%1))%1; var yy=g.topY+f*(g.egoY-g.topY); var sz=3+f*11;
-      ctx.globalAlpha=0.2+f*0.7; ctx.fillStyle=rlc; ctx.beginPath(); ctx.moveTo(elx,yy-sz); ctx.lineTo(elx-sz*0.85,yy+sz*0.55); ctx.lineTo(elx+sz*0.85,yy+sz*0.55); ctx.closePath(); ctx.fill(); }
+    // RACING LINE: chevrons whose colour & behaviour follow the AI mode's identity
+    var ms=MODESTYLE[hudMode]||MODESTYLE.copilot;
+    // calm modes stay on the mode's signature colour and only flag real danger; sport modes run the full green→red racing gradient
+    var rlc = S.override?'#ff3b46' : (ms.calm ? (S.risk>0.5?'#ff5a3c':(S.risk>0.32?'#f5d020':ms.base)) : (S.risk>0.45?'#ff8c1a':(S.risk>0.18?'#f5d020':'#39d98a')));
+    var pul = ms.pulse ? (0.78+0.22*Math.sin(world.t*7)) : 1;
+    for(var ci=0;ci<ms.n;ci++){ var f=((ci/ms.n)+((world.t*ms.speed)%1))%1; var yy=g.topY+f*(g.egoY-g.topY); var sz=3+f*11;
+      ctx.globalAlpha=(0.18+f*0.7)*ms.dim*pul; ctx.fillStyle=rlc; ctx.beginPath(); ctx.moveTo(elx,yy-sz); ctx.lineTo(elx-sz*0.85,yy+sz*0.55); ctx.lineTo(elx+sz*0.85,yy+sz*0.55); ctx.closePath(); ctx.fill(); }
     ctx.globalAlpha=1;
 
     // LAYER3: prediction ghosts (future positions) + LAYER2 risk bubbles on cars
@@ -435,7 +448,8 @@
       function(e){ log('GPS: '+(e.message||'refusé')); $('bGps').classList.remove('on'); },{enableHighAccuracy:true,maximumAge:1000,timeout:20000}); }
   function stopGPS(){ if(gpsWatch!=null){navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;} $('bGps').classList.remove('on'); if(real.src==='GPS'){real.speed=null;real.src=null;} }
   // embedded in cockpit: accept full GPS (lat/lon/speed/heading) from parent (no 2nd prompt)
-  window.addEventListener('message',function(e){ var d=e.data; if(d&&d.type==='gps'){ onGeo(d.lat,d.lon,d.speed,d.heading,d.acc); } });
+  window.addEventListener('message',function(e){ var d=e.data; if(!d)return; if(d.type==='gps'){ onGeo(d.lat,d.lon,d.speed,d.heading,d.acc); } else if(d.type==='mode'&&d.mode&&MODESTYLE[d.mode]){ hudMode=d.mode; document.body.setAttribute('data-hudmode',d.mode); } });
+  if(/[?&]mode=/.test(location.search)){ var mm=(location.search.match(/[?&]mode=([a-z]+)/)||[])[1]; if(mm&&MODESTYLE[mm]){hudMode=mm;document.body.setAttribute('data-hudmode',mm);} }
   function toggleFull(){ var el=document.documentElement; try{ if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el);$('bFull').classList.add('on'); } else { (document.exitFullscreen||function(){}).call(document);$('bFull').classList.remove('on'); } }catch(e){} }
 
   /* ---- OBD-II via Web Bluetooth (compact ELM327) ---- */
