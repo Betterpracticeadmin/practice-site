@@ -1355,7 +1355,7 @@
       L.marker([it.lat,it.lon],{icon:ic}).bindTooltip(info.l,{direction:'top',offset:[0,-12]}).addTo(incLayer); }); }
   /* ---------- Waze-style traffic-coloured route (real TomTom traffic sections) ---------- */
   function magColor(m){ return m>=4?'#ff3b46':m>=3?'#ff8c1a':m>=2?'#f5a623':m>=1?'#c9d645':'#2ec28a'; }
-  function colorRouteTraffic(from,to){ if(sportMode())return; if(!trafficLayer||typeof TT_KEY==='undefined'||!TT_KEY||!from||!to) return;
+  function colorRouteTraffic(from,to){ if(!trafficLayer||typeof TT_KEY==='undefined'||!TT_KEY||!from||!to) return;
     fetch('https://api.tomtom.com/routing/1/calculateRoute/'+from.lat+','+from.lon+':'+to.lat+','+to.lon+'/json?key='+encodeURIComponent(TT_KEY)+'&traffic=true&sectionType=traffic&routeRepresentation=polyline&travelMode=car')
       .then(function(r){return r.json();}).then(function(j){ var rt=j&&j.routes&&j.routes[0]; if(!rt||!trafficLayer)return; trafficLayer.clearLayers();
         var pts=[]; (rt.legs||[]).forEach(function(l){ (l.points||[]).forEach(function(p){ pts.push([p.latitude,p.longitude]); }); });
@@ -1384,7 +1384,7 @@
       L.marker([samp[k].p.lat,samp[k].p.lon],{icon:L.divIcon({className:'',html:'<div class="rl-arrow" style="color:'+col+';transform:rotate('+brg+'deg)">▲</div>',iconSize:[18,18],iconAnchor:[9,9]}),interactive:false,keyboard:false}).addTo(raceLayer); }
     if(routeLine)routeLine.setStyle({opacity:0});
   }
-  function renderRouteOverlay(){ if(!navActive||!route||!route.coords)return; if(sportMode()){ if(trafficLayer)trafficLayer.clearLayers(); drawRacingLine(route.coords); } else { clearRace(); var from=pts.length?pts[pts.length-1]:null; if(from&&currentDest)colorRouteTraffic(from,currentDest); } }
+  function renderRouteOverlay(){ if(!navActive||!route||!route.coords)return; if(raceLayer)raceLayer.clearLayers(); if(routeLine)routeLine.setStyle({opacity:.92}); var from=pts.length?pts[pts.length-1]:null; if(from&&currentDest)colorRouteTraffic(from,currentDest); }
   /* ---------- Ghost Route: faint alternative, lights up when traffic makes it faster ---------- */
   function drawGhost(alt){ if(!ghostLayer)return; ghostLayer.clearLayers(); if(!alt||!alt.coords)return;
     L.polyline(alt.coords.map(function(c){return [c[1],c[0]];}),{color:'#9aa0a8',weight:5,opacity:.4,dashArray:'1,11',lineCap:'round',lineJoin:'round'}).addTo(ghostLayer); }
@@ -1605,7 +1605,7 @@
     if(!j.routes||!j.routes.length)return null; return j.routes.map(osrmRt); }); }
   function setRouteData(rt){ route=rt;stepIdx=0;stepAnnounced=false;navActive=true;offCount=0;stepMinD=Infinity;
     rt.cum=[0];rt.total=0; for(var i=1;i<rt.coords.length;i++){var a=rt.coords[i-1],b=rt.coords[i];rt.total+=haversine({lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]});rt.cum[i]=rt.total;}
-    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); refilterMarkers(); if(sportMode())drawRacingLine(rt.coords); else if(raceLayer)raceLayer.clearLayers(); }
+    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); refilterMarkers(); if(raceLayer)raceLayer.clearLayers(); }
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
     currentDest=to;hideSuggest();hideFavs();addFav(to);setNavContext(to);rememberPlace(to,($('dest').value||to.name));setUiMode('active');setMsg(T().reroute,'');requestWake();
     getRoutes(from,to).then(function(rts){ if(!rts||!rts.length){toast(T().netErr);setMsg(T().ready,'');return;} var rt=rts[0]; altRoute=rts[1]||null; setRouteData(rt); colorRouteTraffic(from,to); drawGhost(altRoute); setTimeout(compareRoutes,1600);
