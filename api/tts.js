@@ -14,9 +14,8 @@ export default async function handler(req, res) {
   const text = (body.text || '').toString().slice(0, 800);
   if (!text) { res.status(200).json({ error: 'no_text' }); return; }
 
-  // Voix par défaut : "Charlotte" — féminine, douce et sensuelle, multilingue (FR ok).
-  // Autres options chaudes : Rachel 21m00Tcm4TlvDq8ikWAM, Matilda XrExE9yKIg1WjnnlVkGX, Lily pFZP5JQG7iQjIQuC4Bku.
-  const voice = body.voice || 'XB0fDUnXU5powFXDhCwa';
+  // Voix par défaut : celle choisie par l'utilisateur (Voice ID ElevenLabs).
+  const voice = body.voice || 'FvmvwvObRqIHojkEGh5N';
 
   try {
     const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?optimize_streaming_latency=2', {
