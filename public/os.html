@@ -1249,7 +1249,7 @@
   function toast(m){var t=$('toast');if(!m){t.className='toast';return;}t.textContent=m;t.className='toast show';setTimeout(function(){t.className='toast';},3500);}
 
   /* ---------- theme ---------- */
-  function effectiveTheme(){ if(mode==='ultra'||mode==='night'||mode==='performance'||mode==='gt') return 'dark'; if(themeMode!=='auto') return themeMode; var h=new Date().getHours(); return (h>=7&&h<19)?'light':'dark'; }
+  function effectiveTheme(){ if(mode==='ultra'||mode==='night'||mode==='performance'||mode==='gt') return 'dark'; if(mode==='copilot'||mode==='learning') return themeMode==='dark'?'dark':'light'; if(themeMode!=='auto') return themeMode; var h=new Date().getHours(); return (h>=7&&h<19)?'light':'dark'; }
   function applyTheme(){
     var t=effectiveTheme(); document.body.setAttribute('data-theme',t);
     $('themeBtn').textContent = themeMode==='auto'?'◐ Auto':(themeMode==='dark'?'● Nuit':'○ Jour');
