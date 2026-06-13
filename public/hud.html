@@ -303,6 +303,12 @@
     var elx=laneX(world.egoLane); var fg=ctx.createLinearGradient(0,g.topY,0,g.egoY); fg.addColorStop(0,'rgba(106,161,255,0)'); fg.addColorStop(1,'rgba(106,161,255,.10)');
     ctx.fillStyle=fg; ctx.fillRect(elx-g.lw/2,g.topY,g.lw,g.egoY-g.topY+40);
 
+    // RACING LINE: colour-shifting chevrons flowing along the ego lane (green=go, red=brake)
+    var rlc = S.override?'#ff3b46':(S.risk>0.45?'#ff8c1a':(S.risk>0.18?'#f5d020':'#39d98a'));
+    var NCH=8; for(var ci=0;ci<NCH;ci++){ var f=((ci/NCH)+((world.t*0.6)%1))%1; var yy=g.topY+f*(g.egoY-g.topY); var sz=3+f*11;
+      ctx.globalAlpha=0.2+f*0.7; ctx.fillStyle=rlc; ctx.beginPath(); ctx.moveTo(elx,yy-sz); ctx.lineTo(elx-sz*0.85,yy+sz*0.55); ctx.lineTo(elx+sz*0.85,yy+sz*0.55); ctx.closePath(); ctx.fill(); }
+    ctx.globalAlpha=1;
+
     // LAYER3: prediction ghosts (future positions) + LAYER2 risk bubbles on cars
     world.cars.forEach(function(c){ var cx=laneX(c.lane), cy=mToY(c.dist); var w=Math.max(20,34-(c.dist/VIEW_M)*12), h=w*1.7;
       // ghosts 1..horizon s

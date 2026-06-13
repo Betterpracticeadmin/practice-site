@@ -116,6 +116,10 @@
   /* event bubbles (real TomTom incidents) — Waze-style risk layer */
   .evt{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:#fff;border:1.5px solid rgba(255,255,255,.65);box-shadow:0 3px 12px rgba(0,0,0,.45);font-family:var(--mono);}
   .evt-acc{background:#ff3b46;} .evt-jam{background:#f5a623;color:#1a1205;} .evt-works{background:#ff8c1a;color:#1a1205;} .evt-closed{background:#c0211b;}
+  /* racing-line arrows (Performance / Ultra) */
+  .rl-arrow{font-size:16px;line-height:1;text-shadow:0 0 6px currentColor,0 1px 3px rgba(0,0,0,.7);transform-origin:50% 50%;will-change:transform;}
+  body[data-mode="ultra"] .rl-arrow{animation:rlpulse 1.1s ease-in-out infinite;}
+  @keyframes rlpulse{0%,100%{opacity:.78}50%{opacity:1}}
   body[data-uimode="assisted"] .nv-mode{color:#f5a623;}
   body[data-uimode="critical"] .nv-mode{color:#ff5a5f;}
   body[data-uimode="parking"] .nv-mode{color:#46C28E;}
@@ -1161,7 +1165,8 @@
   var poiAt=0, poiLL=null, poiOn=true, favs=[];
   var radarLayer=null, radarAt=0, radarLL=null, radarOn=true, radars=[], radarSaid={};
   var incLayer=null, incAt=0, incLL=null, incidents=[];
-  var trafficLayer=null, ghostLayer=null, altRoute=null;
+  var trafficLayer=null, ghostLayer=null, altRoute=null, raceLayer=null;
+  function sportMode(){ return mode==='ultra'||mode==='performance'; }
   try{ favs=JSON.parse(localStorage.getItem('practiceFavs')||'[]'); }catch(e){ favs=[]; }
   /* ---------- persistent memory (the app remembers you) ---------- */
   var Mem; try{ Mem=JSON.parse(localStorage.getItem('practiceMem')||'{}'); }catch(e){ Mem={}; }
@@ -1187,7 +1192,7 @@
     night:{name:'Night',rate:0.9,say:'Mode nuit. Tout est calme.'}
   };
   function tileStyle(){ if(mode==='gt')return 'rastertiles/voyager_nolabels'; return 'rastertiles/voyager'; /* coloured Voyager everywhere; per-mode tint via CSS filter on .leaflet-tile-pane */ }
-  function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; applyTheme(); syncPanel(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} if(!silent){Mem.prefs.mode=m;saveMem();} }
+  function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; applyTheme(); syncPanel(); if(typeof renderRouteOverlay==='function'&&navActive)renderRouteOverlay(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} if(!silent){Mem.prefs.mode=m;saveMem();} }
 
   function haversine(a,b){var R=6371000,r=Math.PI/180;var dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;var s=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(s)));}
   function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
@@ -1215,6 +1220,7 @@
     poiLayer=L.layerGroup().addTo(map);
     ghostLayer=L.layerGroup().addTo(map);
     trafficLayer=L.layerGroup().addTo(map);
+    raceLayer=L.layerGroup().addTo(map);
     radarLayer=L.layerGroup().addTo(map);
     incLayer=L.layerGroup().addTo(map);
     var icon=L.divIcon({className:'',html:'<div class="me-wrap"><div class="me-arrow" id="meArrow"></div><div class="me-dot"></div></div>',iconSize:[20,20],iconAnchor:[10,10]});
@@ -1349,7 +1355,7 @@
       L.marker([it.lat,it.lon],{icon:ic}).bindTooltip(info.l,{direction:'top',offset:[0,-12]}).addTo(incLayer); }); }
   /* ---------- Waze-style traffic-coloured route (real TomTom traffic sections) ---------- */
   function magColor(m){ return m>=4?'#ff3b46':m>=3?'#ff8c1a':m>=2?'#f5a623':m>=1?'#c9d645':'#2ec28a'; }
-  function colorRouteTraffic(from,to){ if(!trafficLayer||typeof TT_KEY==='undefined'||!TT_KEY||!from||!to) return;
+  function colorRouteTraffic(from,to){ if(sportMode())return; if(!trafficLayer||typeof TT_KEY==='undefined'||!TT_KEY||!from||!to) return;
     fetch('https://api.tomtom.com/routing/1/calculateRoute/'+from.lat+','+from.lon+':'+to.lat+','+to.lon+'/json?key='+encodeURIComponent(TT_KEY)+'&traffic=true&sectionType=traffic&routeRepresentation=polyline&travelMode=car')
       .then(function(r){return r.json();}).then(function(j){ var rt=j&&j.routes&&j.routes[0]; if(!rt||!trafficLayer)return; trafficLayer.clearLayers();
         var pts=[]; (rt.legs||[]).forEach(function(l){ (l.points||[]).forEach(function(p){ pts.push([p.latitude,p.longitude]); }); });
@@ -1360,6 +1366,25 @@
         if(routeLine)routeLine.setStyle({opacity:0}); // colored line replaces the plain one
       }).catch(function(){});
   }
+  /* ---------- racing line (Performance / Ultra): optimal trajectory as colour-shifting arrows ---------- */
+  function turnAngle(a,b,c){ var d=Math.abs(bearing(b,c)-bearing(a,b)); if(d>180)d=360-d; return d; }
+  function rlColor(sev){ return sev<7?'#39d98a':sev<16?'#b6e63a':sev<28?'#f5d020':sev<45?'#ff8c1a':'#ff3b46'; } /* green→lime→yellow→orange→red */
+  function clearRace(){ if(raceLayer)raceLayer.clearLayers(); if(routeLine&&!sportMode())routeLine.setStyle({opacity:.92}); }
+  function drawRacingLine(coords){ if(!raceLayer)return; raceLayer.clearLayers(); if(!coords||coords.length<3){return;}
+    var P=coords.map(function(c){return {lat:c[1],lon:c[0]};});
+    var cum=[0]; for(var i=1;i<P.length;i++)cum[i]=cum[i-1]+haversine(P[i-1],P[i]); var total=cum[P.length-1]; if(total<1)return;
+    function sevAt(idx){ var base=cum[idx],mx=0; for(var j=idx+1;j<P.length-1 && cum[j]-base<150; j++){ var a=turnAngle(P[j-1],P[j],P[j+1]); if(a>mx)mx=a; } return mx; } /* anticipate corner ahead = brake zone */
+    var STEP=Math.max(38,total/150); /* ~150 arrows max whatever the length */
+    var samp=[{p:P[0],i:0}], d=STEP, idx=1;
+    while(d<total){ while(idx<P.length-1 && cum[idx]<d)idx++; samp.push({p:P[idx],i:idx}); d+=STEP; }
+    samp.push({p:P[P.length-1],i:P.length-1});
+    for(var k=1;k<samp.length;k++){ var sev=sevAt(samp[k-1].i), col=rlColor(sev);
+      L.polyline([[samp[k-1].p.lat,samp[k-1].p.lon],[samp[k].p.lat,samp[k].p.lon]],{color:col,weight:7,opacity:.96,lineCap:'round',lineJoin:'round'}).addTo(raceLayer);
+      var brg=bearing(samp[k-1].p,samp[k].p);
+      L.marker([samp[k].p.lat,samp[k].p.lon],{icon:L.divIcon({className:'',html:'<div class="rl-arrow" style="color:'+col+';transform:rotate('+brg+'deg)">▲</div>',iconSize:[18,18],iconAnchor:[9,9]}),interactive:false,keyboard:false}).addTo(raceLayer); }
+    if(routeLine)routeLine.setStyle({opacity:0});
+  }
+  function renderRouteOverlay(){ if(!navActive||!route||!route.coords)return; if(sportMode()){ if(trafficLayer)trafficLayer.clearLayers(); drawRacingLine(route.coords); } else { clearRace(); var from=pts.length?pts[pts.length-1]:null; if(from&&currentDest)colorRouteTraffic(from,currentDest); } }
   /* ---------- Ghost Route: faint alternative, lights up when traffic makes it faster ---------- */
   function drawGhost(alt){ if(!ghostLayer)return; ghostLayer.clearLayers(); if(!alt||!alt.coords)return;
     L.polyline(alt.coords.map(function(c){return [c[1],c[0]];}),{color:'#9aa0a8',weight:5,opacity:.4,dashArray:'1,11',lineCap:'round',lineJoin:'round'}).addTo(ghostLayer); }
@@ -1580,7 +1605,7 @@
     if(!j.routes||!j.routes.length)return null; return j.routes.map(osrmRt); }); }
   function setRouteData(rt){ route=rt;stepIdx=0;stepAnnounced=false;navActive=true;offCount=0;stepMinD=Infinity;
     rt.cum=[0];rt.total=0; for(var i=1;i<rt.coords.length;i++){var a=rt.coords[i-1],b=rt.coords[i];rt.total+=haversine({lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]});rt.cum[i]=rt.total;}
-    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); refilterMarkers(); }
+    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); refilterMarkers(); if(sportMode())drawRacingLine(rt.coords); else if(raceLayer)raceLayer.clearLayers(); }
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
     currentDest=to;hideSuggest();hideFavs();addFav(to);setNavContext(to);rememberPlace(to,($('dest').value||to.name));setUiMode('active');setMsg(T().reroute,'');requestWake();
     getRoutes(from,to).then(function(rts){ if(!rts||!rts.length){toast(T().netErr);setMsg(T().ready,'');return;} var rt=rts[0]; altRoute=rts[1]||null; setRouteData(rt); colorRouteTraffic(from,to); drawGhost(altRoute); setTimeout(compareRoutes,1600);
@@ -1591,7 +1616,7 @@
       setState('safe');setMsg(T().go,km+' km · '+min+' min');Voice.say(T().calc(km,min),2);
       updateTraffic(); setTimeout(announceTraffic,4200);
     }).catch(function(){toast(T().netErr);setMsg(T().ready,'');}); }
-  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); refilterMarkers(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
+  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if(raceLayer)raceLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); refilterMarkers(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
   function reroute(pos){ if(!currentDest)return; rerouting=true;setState('attention');toast(T().reroute);Voice.say(T().reroute,1);
     getRoute(pos,currentDest).then(function(rt){rerouting=false;if(rt){setRouteData(rt);colorRouteTraffic(pos,currentDest);setState('safe');}}).catch(function(){rerouting=false;}); }
   function maneuverText(step){ var m=step.maneuver||{},mod=m.modifier||'',t=m.type||'',tr=T().turns;
