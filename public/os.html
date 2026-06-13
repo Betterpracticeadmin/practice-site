@@ -1184,7 +1184,7 @@
 
   /* ---------- voice ---------- */
   var Voice = {
-    on:true, rate:0.98, sayRate:0.85, sayPitch:0.92, pitch:0.97, volume:0.96, gender:'female', neural:true, ttsVoice:'FvmvwvObRqIHojkEGh5N', supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
+    on:true, rate:0.98, sayRate:0.85, sayPitch:0.92, pitch:0.97, volume:0.96, gender:'male', neural:true, ttsVoice:'CwhRBWXzGAHq8TQ4Fs17', supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
     pick:function(){ if(!this.supported) return; var all=speechSynthesis.getVoices()||[]; var base=T().code.slice(0,2); var self=this;
       var m=all.filter(function(v){return (v.lang||'').toLowerCase().indexOf(base)===0;});
       m.sort(function(a,b){return s(b)-s(a);}); this.voice=m[0]||null;
@@ -2236,7 +2236,7 @@
     if(lx(t,'brightdown')){ themeMode='dark'; applyTheme(); syncPanel(); Mem.prefs.theme='dark'; saveMem(); sayVA('Écran plus sombre.'); return true; }
     if(lx(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.12); Voice.sayRate=Math.min(1.4,(Voice.sayRate||0.9)+0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je parle plus vite.'); return true; }
     if(lx(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.12); Voice.sayRate=Math.max(0.62,(Voice.sayRate||0.9)-0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je ralentis mon débit.'); return true; }
-    if(lx(t,'voicegender')){ Voice.gender=/(homme|masculin|grave|d'?un (mec|homme)|male)/i.test(t)?'male':'female'; Voice.ttsVoice=(Voice.gender==='male')?'JBFqnCBsd6RMkjVDRZzb':'FvmvwvObRqIHojkEGh5N'; neuralTTS=true; Voice.pick(); if(Mem.prefs){Mem.prefs.voiceGender=Voice.gender;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(Voice.gender==='female'?'Voilà, une voix plus douce et féminine. Ça te plaît ?':'Très bien, je passe sur une voix masculine.'); return true; }
+    if(lx(t,'voicegender')){ Voice.gender=/(homme|masculin|grave|d'?un (mec|homme)|male)/i.test(t)?'male':'female'; Voice.ttsVoice=(Voice.gender==='male')?'CwhRBWXzGAHq8TQ4Fs17':'FvmvwvObRqIHojkEGh5N'; neuralTTS=true; Voice.pick(); if(Mem.prefs){Mem.prefs.voiceGender=Voice.gender;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(Voice.gender==='female'?'Voilà, une voix plus douce et féminine. Ça te plaît ?':'Très bien, je passe sur une voix masculine.'); return true; }
     if(lx(t,'seducevoice')){ Voice.sayRate=0.8; Voice.sayPitch=0.88; Voice.volume=0.92; Voice.gender='female'; Voice.ttsVoice='FvmvwvObRqIHojkEGh5N'; neuralTTS=true; if(Mem.prefs){Mem.prefs.sayRate=Voice.sayRate;Mem.prefs.sayPitch=Voice.sayPitch;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(pickL(['Comme ça… c\'est mieux pour toi ?','Je baisse d\'un ton, rien que pour toi.','Voilà, tout en douceur.'],['Like this… better?'])); return true; }
     /* ---- méta : répète, aide, compliment ---- */
     if(lx(t,'repeat')){ sayVA(lastSpoken?lastSpoken:'Je n\'ai rien dit récemment.'); return true; }
