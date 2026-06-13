@@ -914,7 +914,7 @@
     <h3>Assistant vocal — commande « Practice… »</h3>
     <input id="vaName" class="key-in" type="text" placeholder="Ton prénom (ex. Aldo)" autocomplete="off" style="margin-bottom:8px;"/>
     <div class="seg" id="vaSeg"><button data-va="on">Micro activé</button><button data-va="off" class="on">Coupé</button></div>
-    <div class="key-note">Dis « <b>Practice</b> » suivi de l'ordre : <i>« Practice mode performance »</i>, <i>« Practice emmène-moi à la Tour Eiffel »</i>, <i>« Practice ajoute aux favoris »</i>, <i>« Practice thème nuit »</i>, <i>« Practice ouvre le HUD »</i>, <i>« Practice titre suivant »</i>. Au lancement : « Practice activé, bonjour [prénom] ». Fonctionne sur <b>Chrome / Android</b> (iOS Safari ne gère pas la reconnaissance vocale web).</div>
+    <div class="key-note">Practice <b>dort</b> et ne répond que quand tu dis son nom : « <b>Practice</b> » + ton ordre. Après, tu peux <b>enchaîner sans répéter « Practice »</b> pendant ~14 s (mode conversation), puis il se <b>rendort</b> jusqu'au prochain « Practice ». Dis « merci / au revoir » pour le rendormir tout de suite. Comprend le <b>français et l'anglais</b>, tient une petite conversation, et exécute : mode, thème, destination, favoris, média, HUD/Pulse, radar… ainsi que des questions (trafic, ETA, météo, position, heure, titre). Fonctionne sur <b>Chrome / Android</b> (iOS Safari ne gère pas la reconnaissance vocale web).</div>
     <h3>Trafic temps réel (optionnel)</h3>
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
     <div class="key-note">Sans clé : estimation honnête selon les heures de pointe (jour/heure). Avec une clé <b>TomTom</b> gratuite (2 500 req/jour), le niveau de trafic, le retard et l'ETA deviennent <b>live</b>, comme Waze.</div>
@@ -1849,6 +1849,20 @@
   var recog=null, vaOn=false, vaPrimed=false;
   function vaName(){ return (Mem.prefs.name||'Aldo'); }
   function sayVA(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice)u.voice=Voice.voice; u.rate=Voice.rate||1; speechSynthesis.speak(u);} }catch(e){} toast('🎙 '+t); }
+  /* ---- wake-word conversation state machine (sleeps until "Practice") ---- */
+  var awake=false, awakeTimer=null;
+  function vaTxt(k){ var D={
+    asleep:{fr:'Endormi · dis « Practice »',en:'Asleep · say "Practice"',ja:'休止 ·「Practice」と言って'},
+    imListening:{fr:'Je t\'écoute…',en:'Listening…',ja:'聞いています…'},
+    yes:{fr:'Oui ?',en:'Yes?',ja:'はい？'},
+    bye:{fr:'À tout de suite.',en:'Talk soon.',ja:'また後で。'},
+    greet:{fr:'Practice activé, bonjour '+vaName()+'.',en:'Practice on. Hi '+vaName()+'.',ja:'Practice 起動。'+vaName()+'さん、こんにちは。'},
+    nocmd:{fr:'Je n\'ai pas compris, tu peux reformuler ?',en:'I didn\'t catch that, can you rephrase?',ja:'うまく聞き取れませんでした。'}
+  }; return (D[k]&&(D[k][LANG]||D[k].fr))||''; }
+  function showHeard(t){ if($('micTxt'))$('micTxt').textContent='« '+t+' »'; var md=$('micDot'); if(md){md.classList.add('hear');clearTimeout(md._h);md._h=setTimeout(function(){md.classList.remove('hear');},900);} document.body.setAttribute('data-listening','hear'); }
+  function wakeVA(){ awake=true; document.body.setAttribute('data-listening','1'); if($('micDot'))$('micDot').classList.add('on'); if($('micTxt'))$('micTxt').textContent=vaTxt('imListening'); }
+  function sleepVA_(){ awake=false; clearTimeout(awakeTimer); document.body.removeAttribute('data-listening'); if($('micDot'))$('micDot').classList.remove('hear'); if($('micTxt')&&vaOn)$('micTxt').textContent=vaTxt('asleep'); }
+  function resetAwake(){ clearTimeout(awakeTimer); awakeTimer=setTimeout(sleepVA_,14000); }
   function runCmd(t){ t=t.toLowerCase().trim(); if(!t)return;
     var modes={copilot:'copilot',learning:'learning',apprentissage:'learning',performance:'performance',ultra:'ultra',course:'ultra','grand touring':'gt',tourisme:'gt',nuit:'night',night:'night'};
     if(/(mode|passe|active|mets|met|bascule)/.test(t)){ for(var k in modes){ if(t.indexOf(k)>=0){ setMode(modes[k]); sayVA('Mode '+MODES[modes[k]].name+'.'); return; } } }
@@ -1873,24 +1887,38 @@
     if(/(quelle heure|l'?heure|il est quelle)/.test(t)){ var cl=$('clock')?($('clock').textContent||'').trim():''; sayVA('Il est '+cl.replace(':',' heures ')+'.'); return; }
     if(/(quel (titre|morceau|son|chanson)|c'?est quoi (ce|cette|le|la)|qui chante|qu'?est-ce qu)/.test(t)){ var ti=$('plTitle')?($('plTitle').textContent||'').trim():'', ar=$('plArtist')?($('plArtist').textContent||'').trim():''; sayVA(ti?(ti+(ar?', par '+ar:'')+'.'):'Aucune lecture en cours.'); return; }
     if(/(ma vitesse|je roule (à|a| )|combien.*roule|à combien)/.test(t)){ sayVA('Tu roules à '+(Math.round(liveSpd||0))+' kilomètres heure.'); return; }
-    if(/(bonjour|salut|coucou|hey|ça va|ca va|comment vas)/.test(t)){ sayVA('Bonjour '+vaName()+', je suis là. Que veux-tu ?'); return; }
-    var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|navigue|itin[eé]raire|va|aller|allons|direction|lance|go|trajet)\s+(?:à|a|au|aux|vers|jusqu'?à|jusqu'?au|en|sur|to|chez|le|la|les|l')?\s*(.+)/);
-    if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=m[1].trim(); sayVA('Je calcule l\'itinéraire vers '+q+'.'); geocode(q).then(function(d){ if(d){ $('dest').value=q; startRouteTo(d); } else sayVA('Adresse introuvable.'); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
-    sayVA('Désolé, je n\'ai pas compris.');
+    /* ---- small talk / conversation (FR + EN) ---- */
+    if(/(bonjour|bonsoir|salut|coucou|hello|^hi\b|hey|good morning)/.test(t)){ sayVA(pickL(['Bonjour '+vaName()+', je suis là.','Salut '+vaName()+' !','Hey '+vaName()+', à ton écoute.'],['Hi '+vaName()+', I\'m here.','Hey '+vaName()+'!'])); return; }
+    if(/(ça va|ca va|comment vas|how are you|tu vas bien|how'?s it going)/.test(t)){ sayVA(pickL(['Je veille sur la route, tout roule. Et toi ?','En pleine forme, prêt à t\'assister.'],['All good, watching the road. You?','Doing great, ready to help.'])); return; }
+    if(/(qui es[- ]?tu|comment tu t'?appelles|ton nom|who are you|what'?s your name|tu es qui)/.test(t)){ sayVA(pickL(['Je suis Practice, ton copilote intelligent.'],['I\'m Practice, your AI co-pilot.'])); return; }
+    if(/(merci|thank you|thanks|nickel|parfait|g[eé]nial)/.test(t)){ sayVA(pickL(['Avec plaisir.','Quand tu veux '+vaName()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return; }
+    if(/(blague|joke|fais[- ]moi rire|raconte)/.test(t)){ sayVA(pickL(['Pourquoi la voiture électrique reste zen ? Zéro émission de stress.','Un GPS entre dans un bar… puis recalcule l\'itinéraire.'],['Why was the EV so calm? Zero stress emissions.'])); return; }
+    if(/(quel jour|what day|on est quel)/.test(t)){ try{ sayVA(new Date().toLocaleDateString(LANG==='en'?'en-US':(LANG==='ja'?'ja-JP':'fr-FR'),{weekday:'long',day:'numeric',month:'long'})); }catch(e){} return; }
+    var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|navigue|itin[eé]raire|va|aller|allons|direction|lance|go|trajet|take me|drive me|navigate|go to)\s+(?:à|a|au|aux|vers|jusqu'?à|jusqu'?au|en|sur|to|chez|le|la|les|l')?\s*(.+)/);
+    if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=m[1].trim(); sayVA(pickL(['Je calcule l\'itinéraire vers '+q+'.'],['Routing to '+q+'.'])); geocode(q).then(function(d){ if(d){ $('dest').value=q; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
+    sayVA(vaTxt('nocmd'));
   }
+  function pickL(fr,en){ var a=(LANG==='en'&&en)?en:fr; return a[Math.floor((Date.now()/900)%a.length)]; }
   function startVA(greet){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — utilise Chrome / Android.'); $('vaSeg')&&[].forEach.call($('vaSeg').children,function(b){b.classList.toggle('on',b.dataset.va==='off');}); return; }
     if(!recog){ recog=new SR(); recog.continuous=true; recog.interimResults=false; recog.lang=T().code;
-      recog.onresult=function(e){ var md=$('micDot'); if(md){ md.classList.add('hear'); clearTimeout(md._h); md._h=setTimeout(function(){md.classList.remove('hear');},700); }
-        document.body.setAttribute('data-listening','hear'); clearTimeout(window._orbT); window._orbT=setTimeout(function(){ if(!pttBusy)document.body.removeAttribute('data-listening'); },1600);
-        for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var tx=(e.results[i][0].transcript||'').toLowerCase(); var idx=tx.indexOf('practice'); if(idx<0)idx=tx.indexOf('practis'); if(idx>=0){ var cmd=tx.slice(idx).replace(/practi[sc]e?/,'').trim(); if(cmd){ if($('micTxt'))$('micTxt').textContent='« '+cmd+' »'; runCmd(cmd); setTimeout(function(){ if($('micTxt')&&vaOn)$('micTxt').textContent='Dis « Practice… »'; },3200); } } } };
+      recog.onresult=function(e){ for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var tx=(e.results[i][0].transcript||'').toLowerCase().trim(); if(!tx)continue;
+        var wake=/practi[sc]e?|pratis|practi[sz]|プラクティス/.test(tx);
+        if(!awake){ /* asleep: only the wake word activates Practice */
+          if(wake){ var cmd=tx.replace(/^.*?(practi[sc]e?|pratis|practi[sz])\s*/,'').trim(); wakeVA(); if(cmd){ showHeard(cmd); runCmd(cmd); } else { showHeard(vaTxt('yes')); sayVA(vaTxt('yes')); } resetAwake(); }
+        } else { /* awake: hold a conversation, no wake word needed; end politely closes the session */
+          var c2=tx.replace(/^(practi[sc]e?|pratis|practi[sz])\s*/,'').trim();
+          if(/^(merci|c'?est (tout|bon)|au revoir|arr[eê]te d'?[eé]couter|stop|dors|tais[- ]toi|thanks?|that'?s all|bye|stop listening|go to sleep)\b/.test(c2)){ sayVA(vaTxt('bye')); sleepVA_(); }
+          else if(c2){ showHeard(c2); runCmd(c2); resetAwake(); }
+        }
+      } };
       recog.onend=function(){ if(vaOn){ try{recog.start();}catch(e){} } };
       recog.onerror=function(ev){ if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){ vaOn=false; toast('Micro refusé.'); } };
     }
     vaOn=true; recog.lang=T().code; try{recog.start();}catch(e){}
-    if($('micDot'))$('micDot').classList.add('on'); if($('micTxt'))$('micTxt').textContent='Dis « Practice… »';
-    if(greet) sayVA('Practice activé, bonjour '+vaName()+'.');
+    if($('micDot'))$('micDot').classList.add('on'); awake=false; if($('micTxt'))$('micTxt').textContent=vaTxt('asleep');
+    if(greet) sayVA(vaTxt('greet'));
   }
-  function stopVA(){ vaOn=false; if(recog){ try{recog.stop();}catch(e){} } if($('micDot'))$('micDot').classList.remove('on'); }
+  function stopVA(){ vaOn=false; awake=false; clearTimeout(awakeTimer); document.body.removeAttribute('data-listening'); if(recog){ try{recog.stop();}catch(e){} } if($('micDot'))$('micDot').classList.remove('on'); }
   /* push-to-talk: tap the Voix button → Practice listens to one request (no wake word needed) */
   var pttBusy=false;
   function pushToTalk(){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — Chrome / Android.'); return; }
