@@ -633,7 +633,14 @@
   .media-ctl .sec svg{width:36px;height:36px;fill:currentColor;}
   .media-ctl .play{width:78px;height:78px;border-radius:50%;background:var(--acc);color:#000;box-shadow:0 14px 36px rgba(255,80,0,.42);}
   .media-ctl .play svg{width:30px;height:30px;fill:currentColor;}
-  .media-ctl .like.on{color:var(--acc);}
+  .media-ctl .like svg path{fill:none;stroke:currentColor;stroke-width:2;transition:fill .15s;}
+  .media-ctl .like.on{color:var(--acc);animation:likePop .32s ease;}
+  .media-ctl .like.on svg path{fill:var(--acc);stroke:var(--acc);}
+  @keyframes likePop{0%{transform:scale(1)}40%{transform:scale(1.28)}100%{transform:scale(1)}}
+  .mq-like{background:none;border:none;cursor:pointer;color:var(--faint);padding:6px;flex-shrink:0;display:grid;place-items:center;}
+  .mq-like svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;transition:.15s;}
+  .mq-like:hover{color:var(--dim);}
+  .mq-like.on{color:var(--acc);} .mq-like.on svg{fill:var(--acc);stroke:var(--acc);}
   .media-queue{flex:1;min-width:0;max-width:470px;display:flex;flex-direction:column;min-height:0;}
   .media-queue h4{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 12px;}
   .mq-list{overflow-y:auto;display:flex;flex-direction:column;gap:3px;-webkit-overflow-scrolling:touch;padding-right:4px;}
@@ -1052,7 +1059,7 @@
 <div class="media-ov" id="mediaOv">
   <div class="media-screen">
     <div class="media-head">
-      <div class="media-seg" id="mediaSeg"><button class="on" data-s="sc">Playlist</button><button data-s="radio">Radio</button><button data-s="podcast">Podcasts</button></div>
+      <div class="media-seg" id="mediaSeg"><button class="on" data-s="sc">Playlist</button><button data-s="radio">Radio</button><button data-s="podcast">Podcasts</button><button data-s="liked">♥ Favoris</button></div>
       <button class="media-x" id="mediaX">✕</button>
     </div>
     <input class="media-search" id="mediaSearch" type="text" placeholder="Rechercher une station…" autocomplete="off" style="display:none"/>
@@ -1065,7 +1072,7 @@
           <div class="media-time"><span id="mCur">0:00</span><span id="mDur">0:00</span></div>
         </div>
         <div class="media-ctl">
-          <button class="like" id="mLike" title="Favori"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 21s-7.5-4.6-10-9.3C.2 8.1 2 4.5 5.4 4.5c2 0 3.4 1.1 4.6 2.6 1.2-1.5 2.6-2.6 4.6-2.6 3.4 0 5.2 3.6 3.4 7.2C19.5 16.4 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+          <button class="like" id="mLike" title="Aimer ce titre"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.77-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
           <button class="sec" id="mPrev"><svg viewBox="0 0 24 24"><path d="M7 6v12M20 6l-9 6 9 6z"/></svg></button>
           <button class="play" id="mPlay"><svg viewBox="0 0 24 24" id="mPlayIc"><path d="M8 5v14l11-7z"/></svg></button>
           <button class="sec" id="mNext"><svg viewBox="0 0 24 24"><path d="M17 6v12M4 6l9 6-9 6z"/></svg></button>
@@ -1728,6 +1735,21 @@
   var mPlaying=false, mDur=0, mQueue=[], mIdx=-1, mLikes=[];
   try{ mLikes=JSON.parse(localStorage.getItem('practiceLikes')||'[]'); }catch(e){ mLikes=[]; }
   function art(s,sz){ var a=(s&&(s.artwork_url||(s.user&&s.user.avatar_url)))||''; return a?a.replace('-large','-t'+(sz||'120x120')):''; }
+  var HEART='<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.77-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+  function likedIdx(id){ for(var i=0;i<mLikes.length;i++){ var x=mLikes[i]; if((x&&x.id!=null?x.id:x)===id)return i; } return -1; }
+  function saveLikes(){ try{localStorage.setItem('practiceLikes',JSON.stringify(mLikes.slice(0,300)));}catch(e){} }
+  function toggleLike(s){ if(!s||s.id==null)return false; var i=likedIdx(s.id); if(i>=0)mLikes.splice(i,1); else mLikes.unshift({id:s.id,title:s.title||'—',artist:(s.user&&s.user.username)||'SoundCloud',art:s.artwork_url?art(s,'120x120'):(s.art||'')}); saveLikes(); if(mediaSource==='liked')renderLiked(); return likedIdx(s.id)>=0; }
+  function updateRowLike(id,on){ var L=$('mQueue'); if(!L||mediaSource!=='sc')return; [].forEach.call(L.querySelectorAll('.mq-row'),function(r){ var i=+r.dataset.i; if(mQueue[i]&&mQueue[i].id===id){ var h=r.querySelector('.mq-like'); if(h)h.classList.toggle('on',on); } }); }
+  function renderLiked(){ var L=$('mQueue'); if(!L)return; L.innerHTML=''; if(!mLikes.length){ L.innerHTML='<div style="color:var(--dim);font-size:12px;padding:10px 4px">Aucun favori. Touche le ♥ sur un titre pour l\'ajouter ici.</div>'; return; }
+    mLikes.forEach(function(s){ var row=document.createElement('div'); row.className='mq-row';
+      row.innerHTML='<span class="c" style="background-image:'+(s.art?'url('+s.art+')':'none')+'"></span><span class="x"><span class="a">'+(s.title||'—')+'</span><span class="b">'+(s.artist||'')+'</span></span><button class="mq-like on" title="Retirer">'+HEART+'</button>';
+      row.addEventListener('click',function(){ playLiked(s); });
+      row.querySelector('.mq-like').addEventListener('click',function(e){ e.stopPropagation(); var idx=likedIdx(s.id); if(idx>=0){mLikes.splice(idx,1);saveLikes();} renderLiked(); });
+      L.appendChild(row); }); }
+  function playLiked(s){ if(typeof s.id==='string'&&/^https?:/.test(s.id)){ try{if(scWidget)scWidget.pause();}catch(e){} rpAudio.src=s.id; rpAudio.play().catch(function(){}); mediaSource='podcast';
+      ['mTitle','mdTitle'].forEach(function(id){var e=$(id);if(e)e.textContent=s.title;}); ['mArtist','mdArtist'].forEach(function(id){var e=$(id);if(e)e.textContent=s.artist||'';}); if($('mCover'))$('mCover').style.backgroundImage=s.art?'url('+s.art+')':''; if($('mdCover'))$('mdCover').style.backgroundImage=s.art?'url('+s.art+')':'';
+      document.body.setAttribute('data-dock','1'); $('miniDock').classList.add('show'); return; }
+    if(!scWidget)return; scWidget.getSounds(function(list){ for(var i=0;i<(list||[]).length;i++){ if(list[i].id===s.id){ scWidget.skip(i); mediaSource='sc'; [].forEach.call($('mediaSeg').children,function(b){b.classList.toggle('on',b.dataset.s==='sc');}); $('mqLabel').textContent='File d\'attente'; setTimeout(function(){updateTrack();buildQueue();},400); return; } } toast('Indisponible dans la playlist actuelle.'); }); }
   function setPlayIcon(p){ mPlaying=p; var pa='<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>', pl='<path d="M8 5v14l11-7z"/>';
     [['plPlayIc',p],['mPlayIc',p],['mdPlayIc',p]].forEach(function(x){ var e=$(x[0]); if(e)e.innerHTML=x[1]?pa:pl; }); }
   function fmtT(ms){ ms=ms||0; var s=Math.floor(ms/1000); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
@@ -1737,14 +1759,16 @@
       if($('mTitle'))$('mTitle').textContent=t; if($('mArtist'))$('mArtist').textContent=ar; if($('mCover'))$('mCover').style.backgroundImage=a300?'url('+a300+')':'';
       if($('mDur'))$('mDur').textContent=fmtT(mDur);
       if($('mdTitle'))$('mdTitle').textContent=t; if($('mdArtist'))$('mdArtist').textContent=ar; if($('mdCover'))$('mdCover').style.backgroundImage=a120?'url('+a120+')':'';
-      if($('mLike'))$('mLike').classList.toggle('on',s.id&&mLikes.indexOf(s.id)>=0);
+      if($('mLike'))$('mLike').classList.toggle('on',s.id&&likedIdx(s.id)>=0);
       document.body.setAttribute('data-dock','1'); $('miniDock').classList.add('show');
     });
     scWidget.getCurrentSoundIndex(function(i){ mIdx=i; highlightQueue(); }); }
   function buildQueue(){ if(!scWidget||!$('mQueue'))return; scWidget.getSounds(function(list){ mQueue=list||[]; var L=$('mQueue'); L.innerHTML='';
       mQueue.forEach(function(s,i){ var row=document.createElement('div'); row.className='mq-row'+(i===mIdx?' on':''); row.dataset.i=i;
-        var a=art(s,'120x120'); row.innerHTML='<span class="n">'+(i+1)+'</span><span class="c" style="background-image:'+(a?'url('+a+')':'none')+'"></span><span class="x"><span class="a">'+(s.title||'—')+'</span><span class="b">'+((s.user&&s.user.username)||'')+'</span></span>';
-        row.addEventListener('click',function(){ scWidget.skip(i); setTimeout(updateTrack,400); }); L.appendChild(row); }); }); }
+        var a=art(s,'120x120'); row.innerHTML='<span class="n">'+(i+1)+'</span><span class="c" style="background-image:'+(a?'url('+a+')':'none')+'"></span><span class="x"><span class="a">'+(s.title||'—')+'</span><span class="b">'+((s.user&&s.user.username)||'')+'</span></span><button class="mq-like'+(likedIdx(s.id)>=0?' on':'')+'" title="Aimer">'+HEART+'</button>';
+        row.addEventListener('click',function(){ scWidget.skip(i); setTimeout(updateTrack,400); });
+        row.querySelector('.mq-like').addEventListener('click',function(e){ e.stopPropagation(); var on=toggleLike(s); this.classList.toggle('on',on); if($('mLike')&&i===mIdx)$('mLike').classList.toggle('on',on); });
+        L.appendChild(row); }); }); }
   function highlightQueue(){ var L=$('mQueue'); if(!L)return; [].forEach.call(L.children,function(r){ r.classList.toggle('on',+r.dataset.i===mIdx); var on=+r.dataset.i===mIdx; if(on)r.scrollIntoView({block:'nearest'}); }); }
   function initPlayer(){ if(typeof SC==='undefined'||!$('scFrame'))return; try{
     scWidget=SC.Widget($('scFrame'));
@@ -1768,7 +1792,8 @@
   $('mNext').addEventListener('click',mediaNext);
   $('mShuffle').addEventListener('click',function(){ if(mediaSource==='sc'&&scWidget&&mQueue.length){ var r=Math.floor((Date.now()/97)%mQueue.length); scWidget.skip(r); setTimeout(updateTrack,400);} else if(rpList.length){ playAudioItem(Math.floor((Date.now()/97)%rpList.length)); } });
   $('mTrack').addEventListener('click',function(e){ var r=e.offsetX/this.clientWidth; r=Math.max(0,Math.min(1,r)); if(mediaSource==='sc'){ if(scWidget&&mDur)scWidget.seekTo(r*mDur); } else if(mediaSource==='podcast'&&rpAudio.duration){ rpAudio.currentTime=r*rpAudio.duration; } });
-  $('mLike').addEventListener('click',function(){ if(mediaSource!=='sc'||!scWidget)return; scWidget.getCurrentSound(function(s){ if(!s||!s.id)return; var i=mLikes.indexOf(s.id); if(i>=0)mLikes.splice(i,1); else mLikes.unshift(s.id); try{localStorage.setItem('practiceLikes',JSON.stringify(mLikes.slice(0,200)));}catch(e){} $('mLike').classList.toggle('on',mLikes.indexOf(s.id)>=0); }); });
+  $('mLike').addEventListener('click',function(){ if(mediaSource==='sc'&&scWidget){ scWidget.getCurrentSound(function(s){ if(!s)return; var on=toggleLike(s); $('mLike').classList.toggle('on',on); updateRowLike(s.id,on); }); }
+    else { var cur=rpList[rpIdx]; if(!cur)return; var on=toggleLike({id:cur.url,title:cur.title,user:{username:cur.artist},art:cur.art}); $('mLike').classList.toggle('on',on); } });
   $('mdPlay').addEventListener('click',function(e){ e.stopPropagation(); mediaToggle(); });
   $('mdNext').addEventListener('click',function(e){ e.stopPropagation(); mediaNext(); });
   $('miniDock').addEventListener('click',openMedia);
@@ -1792,6 +1817,7 @@
   function setMediaSource(src){ mediaSource=src; [].forEach.call($('mediaSeg').children,function(b){b.classList.toggle('on',b.dataset.s===src);}); var sr=$('mediaSearch');
     if(src==='sc'){ sr.style.display='none'; $('mqLabel').textContent='File d\'attente'; buildQueue(); }
     else if(src==='radio'){ sr.style.display='block'; sr.placeholder='Rechercher une station…'; sr.value=''; $('mqLabel').textContent='Stations'; rpList=RADIOS.map(function(s){return {title:s.n,artist:s.d,url:s.u,art:'',live:true};}); fillRows(rpList,true); }
+    else if(src==='liked'){ sr.style.display='none'; $('mqLabel').textContent='Mes favoris ♥'; renderLiked(); }
     else { sr.style.display='block'; sr.placeholder='Rechercher un podcast…'; sr.value=''; $('mqLabel').textContent='Épisodes'; $('mQueue').innerHTML='<div style="color:var(--dim);font-size:12px;padding:10px 4px">Tape le nom d\'un podcast ci-dessus.</div>'; } }
   function searchRadio(q){ fetch('https://de1.api.radio-browser.info/json/stations/search?limit=40&hidebroken=true&order=clickcount&reverse=true&name='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(a){
       rpList=(a||[]).filter(function(s){return /^https:/.test(s.url_resolved||s.url||'');}).slice(0,30).map(function(s){return {title:s.name,artist:(s.country||'')+(s.bitrate?' · '+s.bitrate+'k':''),url:s.url_resolved||s.url,art:s.favicon||'',live:true};});
