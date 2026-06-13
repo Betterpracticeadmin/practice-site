@@ -254,6 +254,29 @@
     var bl=[]; for(var i=0;i<surr.b.length;i++){ var d=ringDepth(surr.b[i]); if(d!=null)bl.push({r:surr.b[i],d:d}); }
     bl.sort(function(a,b){return b.d-a.d;}); bl.forEach(function(x){ drawBuilding(x.r,x.d,n); });
   }
+
+  /* ---- decorative roadside scenery for the demo (buildings, parked cars, parking spots) ---- */
+  var scenery=[];
+  function rnd(){ return Math.random(); }
+  function newScene(side,dist){ var r=rnd(); if(r<0.5)return {side:side,dist:dist,type:'b',w:9+rnd()*16,h:18+rnd()*46,off:46+rnd()*46};
+    if(r<0.85)return {side:side,dist:dist,type:'p',off:26+rnd()*10};
+    return {side:side,dist:dist,type:'park',off:26+rnd()*8}; }
+  function seedScenery(){ scenery=[]; for(var s=-1;s<=1;s+=2){ var d=10; while(d<VIEW_M*1.25){ scenery.push(newScene(s,d)); d+=11+rnd()*15; } } }
+  function scrollScenery(dt){ if(!scenery.length)return; for(var i=0;i<scenery.length;i++){ var o=scenery[i]; o.dist-=world.egoV*dt; if(o.dist<2){ var no=newScene(o.side, o.dist+VIEW_M*1.25); scenery[i]=no; } } }
+  function drawScenery(SC){ if(!scenery.length)return; var g=roadGeom(), n=world.night;
+    var list=scenery.slice().sort(function(a,b){return b.dist-a.dist;});
+    for(var k=0;k<list.length;k++){ var o=list[k]; var t=o.dist/VIEW_M; if(t<0||t>=1)continue; var sc=(1-t*0.8); var y=g.egoY-t*(g.egoY-g.topY);
+      var x=W/2 + o.side*((g.roadW/2)+o.off)*sc;
+      if(o.type==='b'){ var bw=Math.max(7,o.w*sc), bh=Math.max(9,o.h*sc), dep=bw*0.22;
+        ctx.fillStyle=n?'rgba(96,102,124,.5)':'rgba(150,156,176,.62)'; ctx.beginPath(); ctx.moveTo(x+bw/2,y-bh); ctx.lineTo(x+bw/2+dep,y-bh-dep); ctx.lineTo(x+bw/2+dep,y-dep); ctx.lineTo(x+bw/2,y); ctx.closePath(); ctx.fill(); /* side */
+        ctx.fillStyle=n?'rgba(124,130,154,.55)':'rgba(180,186,202,.72)'; ctx.fillRect(x-bw/2,y-bh,bw,bh); /* front */
+        ctx.fillStyle=n?'rgba(154,162,190,.62)':'rgba(206,212,226,.82)'; ctx.beginPath(); ctx.moveTo(x-bw/2,y-bh); ctx.lineTo(x-bw/2+dep,y-bh-dep); ctx.lineTo(x+bw/2+dep,y-bh-dep); ctx.lineTo(x+bw/2,y-bh); ctx.closePath(); ctx.fill(); /* roof */
+      } else if(o.type==='park'){ var pw=14*sc, ph=pw*1.9; /* highlighted empty parking spot */
+        ctx.save(); ctx.strokeStyle='rgba(90,150,255,'+(0.5+0.2*Math.sin(world.t*4))+')'; ctx.lineWidth=Math.max(1,2*sc); ctx.setLineDash([5*sc,4*sc]); ctx.strokeRect(x-pw/2,y-ph/2,pw,ph); ctx.setLineDash([]);
+        ctx.fillStyle='rgba(90,150,255,.14)'; ctx.fillRect(x-pw/2,y-ph/2,pw,ph); ctx.fillStyle='rgba(120,170,255,.9)'; ctx.font=(10*sc|0)+'px JetBrains Mono'; ctx.textAlign='center'; ctx.fillText('P',x,y+3*sc); ctx.restore();
+      } else { var cw=Math.max(8,15*sc), ch=cw*1.8; ctx.save(); ctx.shadowColor='rgba(20,24,40,.2)';ctx.shadowBlur=6;ctx.shadowOffsetY=2; ctx.fillStyle=SC.car; rr(x-cw/2,y-ch/2,cw,ch,cw*0.32); ctx.fill(); ctx.restore(); ctx.fillStyle=SC.glass; rr(x-cw*0.3,y-ch*0.26,cw*0.6,ch*0.3,2); ctx.fill(); }
+    }
+  }
   function mToY(dist){ var g=roadGeom(); return g.egoY-(dist/VIEW_M)*(g.egoY-g.topY); }
 
   function spawnCar(){ var lane=(Math.random()*world.lanes)|0; var v=Math.max(3,world.egoV+(Math.random()*10-6));
@@ -274,6 +297,7 @@
 
     /* move world by ego speed; update entities (closing) */
     world.cars.forEach(function(c){ c.dist-=(world.egoV-c.v)*dt; });
+    scrollScenery(dt);
     world.cars=world.cars.filter(function(c){return c.dist>-6 && c.dist<VIEW_M*1.1;});
     world.peds.forEach(function(p){ p.dist-=world.egoV*dt; if(p.intent)p.prog+=dt*0.35; });
     world.peds=world.peds.filter(function(p){return p.dist>-4 && p.prog<1.2;});
@@ -345,8 +369,8 @@
     var bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,SC.bgTop); bg.addColorStop(1,SC.bgBot);
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
-    // real surroundings (buildings / parks / rivers) projected on the ground
-    drawSurroundings();
+    // real surroundings if we have GPS, else decorative roadside scenery (buildings / parking) for the demo
+    if(egoLL) drawSurroundings(); else drawScenery(SC);
 
     // road (perspective trapezoid)
     var topW=g.roadW*0.42;
@@ -562,8 +586,9 @@
   $('b3d').addEventListener('click',function(){ set3D(!view3d); });
   set3D(false); /* default = clean Vision sim with arrows; 3D satellite is opt-in */
 
-  // seed cognitive traffic layer
+  // seed cognitive traffic layer + roadside scenery
   for(var i=0;i<3;i++)spawnCar();
+  seedScenery();
 
   /* ---- REAL MODE by default: live map + auto GPS ---- */
   initMap();
