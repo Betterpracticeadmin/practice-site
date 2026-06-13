@@ -1184,7 +1184,7 @@
 
   /* ---------- voice ---------- */
   var Voice = {
-    on:true, rate:0.98, sayRate:0.9, pitch:0.97, gender:'female', neural:true, ttsVoice:null, supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
+    on:true, rate:0.98, sayRate:0.85, sayPitch:0.92, pitch:0.97, volume:0.96, gender:'female', neural:true, ttsVoice:null, supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
     pick:function(){ if(!this.supported) return; var all=speechSynthesis.getVoices()||[]; var base=T().code.slice(0,2); var self=this;
       var m=all.filter(function(v){return (v.lang||'').toLowerCase().indexOf(base)===0;});
       m.sort(function(a,b){return s(b)-s(a);}); this.voice=m[0]||null;
@@ -1865,7 +1865,7 @@
   /* Voix de Practice : 1) TTS neuronal ElevenLabs (vraiment humain, façon Joi) si une clé existe sur Vercel ; 2) sinon repli sur la voix du navigateur. */
   var neuralAudio=null, neuralTTS=true;
   function stopNeural(){ try{ if(neuralAudio){ neuralAudio.pause(); neuralAudio.src=''; neuralAudio=null; } }catch(e){} }
-  function webSpeak(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice){u.voice=Voice.voice;u.lang=Voice.voice.lang;} u.rate=Voice.sayRate||0.9; u.pitch=Voice.pitch||0.97; speechSynthesis.speak(u);} }catch(e){} }
+  function webSpeak(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice){u.voice=Voice.voice;u.lang=Voice.voice.lang;} u.rate=Voice.sayRate||0.85; u.pitch=Voice.sayPitch||0.92; u.volume=Voice.volume||0.96; speechSynthesis.speak(u);} }catch(e){} }
   function speakNeural(t){ stopNeural(); try{speechSynthesis.cancel();}catch(e){}
     return fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t,lang:LANG,voice:Voice.ttsVoice})}).then(function(r){ if(!r.ok)throw 0; var ct=r.headers.get('content-type')||''; if(ct.indexOf('audio')<0)throw 'nokey'; return r.blob(); }).then(function(b){ var url=URL.createObjectURL(b); neuralAudio=new Audio(url); neuralAudio.onended=function(){try{URL.revokeObjectURL(url);}catch(e){}}; return neuralAudio.play(); }); }
   function sayVA(t){ lastSpoken=t; toast('🎙 '+t); if(!Voice.on)return;
@@ -2237,7 +2237,7 @@
     if(lx(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.12); Voice.sayRate=Math.min(1.4,(Voice.sayRate||0.9)+0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je parle plus vite.'); return true; }
     if(lx(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.12); Voice.sayRate=Math.max(0.62,(Voice.sayRate||0.9)-0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je ralentis mon débit.'); return true; }
     if(lx(t,'voicegender')){ Voice.gender=/(homme|masculin|grave|d'?un (mec|homme)|male)/i.test(t)?'male':'female'; Voice.ttsVoice=(Voice.gender==='male')?'JBFqnCBsd6RMkjVDRZzb':'XB0fDUnXU5powFXDhCwa'; neuralTTS=true; Voice.pick(); if(Mem.prefs){Mem.prefs.voiceGender=Voice.gender;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(Voice.gender==='female'?'Voilà, une voix plus douce et féminine. Ça te plaît ?':'Très bien, je passe sur une voix masculine.'); return true; }
-    if(lx(t,'seducevoice')){ Voice.sayRate=0.85; Voice.pitch=0.95; Voice.gender='female'; Voice.ttsVoice='XB0fDUnXU5powFXDhCwa'; neuralTTS=true; if(Mem.prefs){Mem.prefs.sayRate=Voice.sayRate;Mem.prefs.pitch=Voice.pitch;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(pickL(['Comme ça… c\'est mieux pour toi ?','Je baisse d\'un ton, rien que pour toi.','Voilà, tout en douceur.'],['Like this… better?'])); return true; }
+    if(lx(t,'seducevoice')){ Voice.sayRate=0.8; Voice.sayPitch=0.88; Voice.volume=0.92; Voice.gender='female'; Voice.ttsVoice='XB0fDUnXU5powFXDhCwa'; neuralTTS=true; if(Mem.prefs){Mem.prefs.sayRate=Voice.sayRate;Mem.prefs.sayPitch=Voice.sayPitch;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(pickL(['Comme ça… c\'est mieux pour toi ?','Je baisse d\'un ton, rien que pour toi.','Voilà, tout en douceur.'],['Like this… better?'])); return true; }
     /* ---- méta : répète, aide, compliment ---- */
     if(lx(t,'repeat')){ sayVA(lastSpoken?lastSpoken:'Je n\'ai rien dit récemment.'); return true; }
     if(lx(t,'help')){ sayVA('Je peux lancer un itinéraire, trouver un lieu proche, changer de mode ou de thème, gérer la musique et le volume, zoomer ou recentrer la carte, et te renseigner sur le trafic, la météo, l\'heure ou ta vitesse. Dis-moi simplement ce que tu veux.'); return true; }
@@ -2544,7 +2544,7 @@
     if(p.lang)LANG=p.lang; if(p.theme)themeMode=p.theme;
     if(typeof p.poi==='boolean')poiOn=p.poi; if(typeof p.radar==='boolean')radarOn=p.radar;
     if(typeof p.voice==='boolean')Voice.on=p.voice;
-    if(p.voiceGender)Voice.gender=p.voiceGender; if(p.sayRate)Voice.sayRate=p.sayRate; if(p.pitch)Voice.pitch=p.pitch; if(p.ttsVoice)Voice.ttsVoice=p.ttsVoice;
+    if(p.voiceGender)Voice.gender=p.voiceGender; if(p.sayRate)Voice.sayRate=p.sayRate; if(p.sayPitch)Voice.sayPitch=p.sayPitch; if(p.pitch)Voice.pitch=p.pitch; if(p.ttsVoice)Voice.ttsVoice=p.ttsVoice;
     setMode(p.mode||'copilot',true); applyTheme(); Voice.pick();
     if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
     var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); if(typeof reflectMute==='function')reflectMute();
