@@ -1862,7 +1862,7 @@
   }; return (D[k]&&(D[k][LANG]||D[k].fr))||''; }
   function showHeard(t){ if($('micTxt'))$('micTxt').textContent='« '+t+' »'; var md=$('micDot'); if(md){md.classList.add('hear');clearTimeout(md._h);md._h=setTimeout(function(){md.classList.remove('hear');},900);} document.body.setAttribute('data-listening','hear'); }
   function wakeVA(){ awake=true; document.body.setAttribute('data-listening','1'); if($('micDot'))$('micDot').classList.add('on'); if($('micTxt'))$('micTxt').textContent=vaTxt('imListening'); }
-  function sleepVA_(){ awake=false; clearTimeout(awakeTimer); document.body.removeAttribute('data-listening'); if($('micDot'))$('micDot').classList.remove('hear'); if($('micTxt')&&vaOn)$('micTxt').textContent=vaTxt('asleep'); }
+  function sleepVA_(){ awake=false; pendingNav=null; clearTimeout(awakeTimer); document.body.removeAttribute('data-listening'); if($('micDot'))$('micDot').classList.remove('hear'); if($('micTxt')&&vaOn)$('micTxt').textContent=vaTxt('asleep'); }
   function resetAwake(){ clearTimeout(awakeTimer); awakeTimer=setTimeout(sleepVA_,14000); }
   /* ---- nearby places ("où est la X la plus proche") + conversational referent ---- */
   var lastRef=null;
@@ -1879,25 +1879,53 @@
     {re:/boulang|pain|bakery|croissant/,q:'node["shop"="bakery"]',n:'boulangerie'},
     {re:/distributeur|atm|banque|bank|retirer/,q:'node["amenity"~"atm|bank"]',n:'distributeur'},
     {re:/toilet|wc|pisser/,q:'node["amenity"="toilets"]',n:'toilettes'},
-    {re:/bar\b|boire|pub/,q:'node["amenity"="bar"]',n:'bar'}
+    {re:/bar\b|boire|pub/,q:'node["amenity"="bar"]',n:'bar'},
+    {re:/plage|beach|bord de mer|\bla mer\b|baignade/,q:'nwr["natural"="beach"]',n:'plage'},
+    {re:/\bparc\b|jardin|\bpark\b|espace vert|verdure|nature/,q:'nwr["leisure"~"park|garden"]',n:'parc'},
+    {re:/gare|train|sncf|station de train/,q:'nwr["railway"="station"]',n:'gare'},
+    {re:/a[eé]roport|airport|avion/,q:'nwr["aeroway"="aerodrome"]',n:'aéroport'},
+    {re:/cin[eé]ma|cinema|\bfilm\b|movie/,q:'nwr["amenity"="cinema"]',n:'cinéma'},
+    {re:/mus[eé]e|museum/,q:'nwr["tourism"="museum"]',n:'musée'},
+    {re:/garage|m[eé]cano|r[eé]parer la voiture|car repair/,q:'nwr["shop"="car_repair"]',n:'garage'},
+    {re:/lavage|laver la voiture|car wash/,q:'nwr["amenity"="car_wash"]',n:'station de lavage'},
+    {re:/coiffeur|hairdresser|salon de coiffure/,q:'nwr["shop"="hairdresser"]',n:'coiffeur'},
+    {re:/(bureau de )?poste\b|post office/,q:'nwr["amenity"="post_office"]',n:'bureau de poste'},
+    {re:/m[eé]decin|docteur|doctor|g[eé]n[eé]raliste|clinique/,q:'nwr["amenity"~"doctors|clinic"]',n:'cabinet médical'},
+    {re:/centre commercial|centre co|mall|shopping/,q:'nwr["shop"="mall"]',n:'centre commercial'},
+    {re:/cimeti[eè]re|cemetery/,q:'nwr["landuse"="cemetery"]',n:'cimetière'},
+    {re:/[eé]glise|church|cath[eé]drale/,q:'nwr["amenity"="place_of_worship"]',n:'lieu de culte'},
+    {re:/biblioth[eè]que|library/,q:'nwr["amenity"="library"]',n:'bibliothèque'},
+    {re:/salle de sport|gym|fitness|muscu/,q:'nwr["leisure"="fitness_centre"]',n:'salle de sport'}
   ];
   function cardinal(b){ var d=['nord','nord-est','est','sud-est','sud','sud-ouest','ouest','nord-ouest']; return d[Math.round(b/45)%8]; }
-  function nearestPOI(def){ var pos=pts.length?pts[pts.length-1]:null; if(!pos){ sayVA('Active d\'abord ta position.'); return; }
+  /* nav proposée en attente de confirmation ("tu veux que je lance le trajet ?" -> "oui") */
+  var pendingNav=null, foundMarker=null;
+  function showFoundOnMap(name,lat,lon){ if(typeof map==='undefined'||!map)return; try{
+      if(foundMarker)map.removeLayer(foundMarker);
+      var ic=L.divIcon({className:'',html:'<div style="width:16px;height:16px;border-radius:50%;background:#ff3b30;border:2px solid #fff;box-shadow:0 0 0 7px rgba(255,59,48,.28),0 2px 8px rgba(0,0,0,.45)"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+      foundMarker=L.marker([lat,lon],{icon:ic,interactive:true}).addTo(map); foundMarker.bindPopup(name);
+      follow=false; if($('followBtn'))$('followBtn').textContent='⊕';
+      map.setView([lat,lon],Math.max(map.getZoom(),15),{animate:true});
+      setTimeout(function(){ try{foundMarker.openPopup();}catch(e){} },450);
+    }catch(e){} }
+  function clearFound(){ if(foundMarker&&typeof map!=='undefined'&&map){ try{map.removeLayer(foundMarker);}catch(e){} } foundMarker=null; }
+  function nearestPOI(def){ var pos=pts.length?pts[pts.length-1]:null; if(!pos){ sayVA('Active d\'abord ta position pour que je cherche autour de toi.'); return; }
     sayVA('Je cherche la '+def.n+' la plus proche…');
-    var q='[out:json][timeout:20];('+def.q+'(around:3500,'+pos.lat+','+pos.lon+'););out 80;';
-    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){ var best=null,bd=1e12;
-      (j.elements||[]).forEach(function(e){ if(!e.lat||!e.lon)return; var d=haversine(pos,{lat:e.lat,lon:e.lon}); if(d<bd){bd=d;best=e;} });
-      if(!best){ sayVA('Aucune '+def.n+' trouvée à proximité.'); return; }
-      var nm=(best.tags&&(best.tags.name||best.tags.brand||best.tags.operator))||def.n; lastRef={name:nm,lat:best.lat,lon:best.lon};
-      var dtxt=bd<1000?(Math.round(bd/10)*10+' mètres'):((bd/1000).toFixed(1)+' kilomètres'); var dir=cardinal(bearing(pos,{lat:best.lat,lon:best.lon}));
-      sayVA(nm+', à '+dtxt+' vers le '+dir+'. Dis « j\'y vais » pour t\'y emmener.');
-    }).catch(function(){ sayVA('Recherche impossible.'); }); }
+    var q='[out:json][timeout:20];('+def.q+'(around:8000,'+pos.lat+','+pos.lon+'););out center 90;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){ var best=null,bd=1e12,bla,blo;
+      (j.elements||[]).forEach(function(e){ var la=e.lat||(e.center&&e.center.lat), lo=e.lon||(e.center&&e.center.lon); if(la==null||lo==null)return; var d=haversine(pos,{lat:la,lon:lo}); if(d<bd){bd=d;best=e;bla=la;blo=lo;} });
+      if(!best){ sayVA('Je ne trouve pas de '+def.n+' à proximité.'); return; }
+      var nm=(best.tags&&(best.tags.name||best.tags.brand||best.tags.operator))||def.n; lastRef={name:nm,lat:bla,lon:blo}; pendingNav={name:nm,lat:bla,lon:blo};
+      showFoundOnMap(nm,bla,blo);
+      var dtxt=bd<1000?(Math.round(bd/10)*10+' mètres'):((bd/1000).toFixed(1)+' kilomètres'); var dir=cardinal(bearing(pos,{lat:bla,lon:blo}));
+      sayVA(nm+', à '+dtxt+' vers le '+dir+'. Je l\'ai placée sur la carte. Tu veux que je lance le trajet ?');
+    }).catch(function(){ sayVA('Recherche impossible pour le moment.'); }); }
   /* ---- Claude-backed free conversation (needs ANTHROPIC_API_KEY on Vercel) ---- */
   /* repli quand rien ne matche : on évite « je n'ai pas compris » sec. 1) phrase courte ressemblant à un lieu -> on propose la navigation. 2) sinon relance variée avec exemples. */
   var missN=0;
   function localMiss(t){ var clean=(t||'').replace(/[?!.,]/g,' ').replace(/\s+/g,' ').trim(); var words=clean.split(' ').filter(Boolean);
     if(words.length>=1&&words.length<=4&&clean.length>2&&!/\b(quoi|comment|pourquoi|qui|quand|combien|merci|oui|non|ok|bonjour|bonsoir|salut|hello|hey|ca va|ça va|aide|help)\b/.test(clean)){
-      geocode(clean).then(function(d){ if(d){ lastRef={name:clean,lat:d.lat,lon:d.lon}; sayVA(cap(clean)+', je connais. Dis « j\'y vais » pour lancer l\'itinéraire.'); } else miss2(); }).catch(function(){ miss2(); }); return; }
+      geocode(clean).then(function(d){ if(d){ lastRef={name:clean,lat:d.lat,lon:d.lon}; pendingNav={name:clean,lat:d.lat,lon:d.lon}; showFoundOnMap(cap(clean),d.lat,d.lon); sayVA(cap(clean)+', je l\'ai trouvé et placé sur la carte. Tu veux que je lance le trajet ?'); } else miss2(); }).catch(function(){ miss2(); }); return; }
     miss2(); }
   function miss2(){ missN++;
     var fr=['Désolé, je n\'ai pas bien saisi. Tu peux reformuler ?','Pardon, je n\'ai pas tout compris.','Hmm, je n\'ai pas capté, réessaie ?','Je n\'ai pas compris — je peux naviguer, changer de mode, gérer la musique, ou répondre sur le trafic et la météo.','Dis-moi par exemple « emmène-moi à… », « trouve une pharmacie » ou « mets le mode sport ».'];
@@ -1997,6 +2025,12 @@
   ];
   /* primary dictionary-driven matcher — returns true when it handled the utterance */
   function vocabRun(t){
+    /* une destination est proposée et on attend ton feu vert */
+    if(pendingNav){
+      if(/^\s*(oui|ouais|oui vas|ok|okay|d'?accord|vas[- ]?y|lance|c'?est parti|carr[eé]ment|bien s[uû]r|avec plaisir|parfait|go|yes|yep|yeah|let'?s go|j'?y vais|on y va|emm[eè]ne[- ]?moi|fonce|grave)\b/.test(t)){ var pn=pendingNav; pendingNav=null; clearFound(); sayVA('C\'est parti, je lance le trajet vers '+pn.name+'.'); $('dest').value=pn.name; startRouteTo(pn); return true; }
+      if(/^\s*(non|nan|nope|laisse|annule|pas (maintenant|tout de suite|l[aà]|encore)|surtout pas|c'?est bon|plus tard|oublie)\b/.test(t)){ pendingNav=null; clearFound(); sayVA('D\'accord, j\'annule.'); return true; }
+      pendingNav=null; /* tu passes à autre chose -> on abandonne la proposition et on continue */
+    }
     if(lx(t,'here')&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return true; }
     if(lx(t,'nearby')){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return true; } } }
     if(lx(t,'theme')){ themeMode=/nuit|sombre|noir|dark/.test(t)?'dark':(/jour|clair|blanc|lumi|light/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return true; }
