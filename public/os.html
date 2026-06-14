@@ -735,9 +735,27 @@
   .recents{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px;}
   .recents .rc{background:var(--card);border:.5px solid var(--border);border-radius:20px;padding:7px 12px;font-size:12px;font-family:var(--mono);color:var(--txt);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
   .recents .rc svg{width:11px;height:11px;fill:var(--acc);}
+  /* ===== Lot 1 : micro-interactions, UI adaptative vitesse, glow ambiant, mode Magma ===== */
+  button,.navtabs button,.mode-btn,.icon-btn,.theme-btn,.diag-open,.seg button,.view-seg button,.fav,.mem-place,.search button{transition:transform .16s cubic-bezier(.34,1.56,.64,1),background .3s,border-color .3s,box-shadow .3s,opacity .3s;}
+  button:active,.navtabs button:active,.mode-btn:active,.icon-btn:active,.theme-btn:active,.seg button:active,.view-seg button:active{transform:scale(.93);}
+  .card{transition:transform .28s cubic-bezier(.34,1.4,.64,1),background .5s,border-color .5s,box-shadow .5s;}
+  #amb{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;}
+  #amb::before{content:'';position:absolute;width:70vmax;height:70vmax;left:-10vmax;top:-15vmax;border-radius:50%;background:radial-gradient(circle, color-mix(in srgb, var(--acc,#6AA1FF) 16%, transparent), transparent 60%);animation:ambDrift 26s ease-in-out infinite alternate;will-change:transform;}
+  @keyframes ambDrift{0%{transform:translate(-4vw,-2vh) scale(1);opacity:.65;}50%{transform:translate(10vw,8vh) scale(1.18);opacity:1;}100%{transform:translate(2vw,14vh) scale(1.06);opacity:.8;}}
+  body[data-spd="fast"] #amb::before{animation-duration:11s;}
+  .speed-ov .v{transition:transform .5s cubic-bezier(.2,.8,.2,1);}
+  body[data-spd="fast"] .speed-ov .v{transform:scale(1.14);}
+  body[data-spd="fast"] #wxCard,body[data-spd="fast"] #mediaCard{opacity:.5;transition:opacity .6s;}
+  body[data-mode="magma"]{--acc:#FF5A1E;}
+  body[data-theme="dark"][data-mode="magma"]{--bg:#0a0604;--bg2:#140a06;--card:rgba(255,90,30,.06);--border:rgba(255,90,30,.18);--dotc:rgba(255,90,30,.06);}
+  body[data-mode="magma"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.84) sepia(.4) hue-rotate(-18deg) saturate(1.7);}
+  body[data-mode="magma"] .orb::before{animation-duration:3.4s;}
+  body[data-mode="magma"] .orb{box-shadow:inset 0 0 0 .5px rgba(255,90,30,.55),0 0 28px rgba(255,90,30,.36);}
+  @media(prefers-reduced-motion:reduce){#amb::before{animation:none;}.speed-ov .v{transition:none;}}
 </style>
 </head>
 <body data-theme="dark" class="safe">
+<div id="amb" aria-hidden="true"></div>
 
 <div class="os">
   <!-- TOP -->
@@ -908,6 +926,7 @@
       <button class="mode-btn" data-m="ultra"><span class="mn"><span class="dot" style="background:#FF1F1F"></span>Ultra Race</span><div class="md">Hypercar · nerveux · « Freine. Apex. »</div></button>
       <button class="mode-btn" data-m="gt"><span class="mn"><span class="dot" style="background:#E0A33A"></span>Grand Touring</span><div class="md">Voyage · contemplatif · conversation</div></button>
       <button class="mode-btn" data-m="night"><span class="mn"><span class="dot" style="background:#B98BFF"></span>Night</span><div class="md">Nuit · sombre · discret</div></button>
+      <button class="mode-btn" data-m="magma"><span class="mn"><span class="dot" style="background:#FF5A1E"></span>Magma</span><div class="md">Genesis Magma · orange incandescent · racing</div></button>
     </div>
     <h3>Thème</h3>
     <div class="seg" id="themeSeg2"><button data-t="auto">Auto</button><button data-t="dark">Nuit</button><button data-t="light">Jour</button></div>
@@ -1245,7 +1264,8 @@
     performance:{name:'Performance',rate:1.05,say:'Mode performance. Concentration.'},
     ultra:{name:'Ultra Race',rate:1.18,say:'Mode course. Attaque.'},
     gt:{name:'Grand Touring',rate:0.92,say:'Mode grand tourisme. Profite de la route.'},
-    night:{name:'Night',rate:0.9,say:'Mode nuit. Tout est calme.'}
+    night:{name:'Night',rate:0.9,say:'Mode nuit. Tout est calme.'},
+    magma:{name:'Magma',rate:1.08,say:'Mode Magma. Incandescent.'}
   };
   function tileStyle(){ if(mode==='gt')return 'rastertiles/voyager_nolabels'; return 'rastertiles/voyager'; /* coloured Voyager everywhere; per-mode tint via CSS filter on .leaflet-tile-pane */ }
   function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; applyTheme(); syncPanel(); if(typeof renderRouteOverlay==='function'&&navActive)renderRouteOverlay(); if(typeof postHudMode==='function')postHudMode(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} if(!silent){Mem.prefs.mode=m;saveMem();} }
@@ -1257,7 +1277,7 @@
   function toast(m){var t=$('toast');if(!m){t.className='toast';return;}t.textContent=m;t.className='toast show';setTimeout(function(){t.className='toast';},3500);}
 
   /* ---------- theme ---------- */
-  function effectiveTheme(){ if(mode==='ultra'||mode==='night'||mode==='performance'||mode==='gt') return 'dark'; if(mode==='copilot'||mode==='learning') return themeMode==='dark'?'dark':'light'; if(themeMode!=='auto') return themeMode; var h=new Date().getHours(); return (h>=7&&h<19)?'light':'dark'; }
+  function effectiveTheme(){ if(mode==='ultra'||mode==='night'||mode==='performance'||mode==='gt'||mode==='magma') return 'dark'; if(mode==='copilot'||mode==='learning') return themeMode==='dark'?'dark':'light'; if(themeMode!=='auto') return themeMode; var h=new Date().getHours(); return (h>=7&&h<19)?'light':'dark'; }
   function applyTheme(){
     var t=effectiveTheme(); document.body.setAttribute('data-theme',t);
     $('themeBtn').textContent = themeMode==='auto'?'◐ Auto':(themeMode==='dark'?'● Nuit':'○ Jour');
@@ -1295,6 +1315,7 @@
     if(follow) map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true});
     var spd=c.speed; if(spd==null||isNaN(spd)){ if(last){var dt=(ts-last.t)/1000;spd=dt>0?moved/dt:0;}else spd=0; }
     var spdK=Math.max(0,spd*3.6); if(spdK>maxSpd)maxSpd=spdK; liveSpd=spdK;
+    var spdTier=spdK<6?'idle':(spdK>=90?'fast':'city'); if(document.body.getAttribute('data-spd')!==spdTier)document.body.setAttribute('data-spd',spdTier);
     var hdg=c.heading; if((hdg==null||isNaN(hdg))&&last&&moved>0.5){var dy=lat-last.lat,dx=(lon-last.lon)*Math.cos(lat*Math.PI/180);hdg=(Math.atan2(dx,dy)*180/Math.PI+360)%360;}
     $('spd').textContent=spdK.toFixed(0);
     var arrow=$('meArrow'); if(arrow&&hdg!=null&&!isNaN(hdg))arrow.style.transform='translateX(-50%) rotate('+hdg+'deg)';
@@ -2172,6 +2193,7 @@
   function lx(t,k){ return LEX[k].test(t); }
   var MODETRIG=/\b(mode|passe|active|activer|mets?|met[s]?[- ]?moi|bascule|enclenche|enclencher|en mode|on passe|je veux (le |du )?mode|switch|set)\b/i;
   var MODEWORDS=[
+    {id:'magma',re:/(magma|incandescent|genesis|lave|braise)/i},
     {id:'ultra',re:/(ultra|hypersport|hyper[- ]?sport|hypercar|course|racing|race|piste|circuit|comp[eé]tition|extr[eê]me|maximum|[aà] fond)/i},
     {id:'performance',re:/(performance|perf\b|sportif|sportive|\bsport\b|rapide|nerveux|dynamique|attaque|agressif|pied au plancher|fonce)/i},
     {id:'gt',re:/(grand touring|\bgt\b|tourisme|voyage|autoroute|crois[ie]re|longue route|d[eé]tente|tranquille|balade|relax|relaxe|cool|zen|paisible)/i},
