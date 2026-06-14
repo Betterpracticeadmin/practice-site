@@ -964,7 +964,7 @@
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
     <div class="key-note">Sans clé : estimation honnête selon les heures de pointe (jour/heure). Avec une clé <b>TomTom</b> gratuite (2 500 req/jour), le niveau de trafic, le retard et l'ETA deviennent <b>live</b>, comme Waze.</div>
     <h3>Suggestions proactives</h3>
-    <div class="seg" id="paSeg"><button data-pa="on" class="on">Activées</button><button data-pa="off">Désactivées</button></div>
+    <div class="seg" id="paSeg"><button data-pa="on">Activées</button><button data-pa="off" class="on">Désactivées</button></div>
     <div class="key-note">Practice te propose au bon moment : <b>recalculer</b> en cas de bouchon, <b>un parking</b> à l'arrivée, <b>une pause</b> après 1h30 de route. Uniquement en conduite réelle (jamais en démo). Un tap accepte, la croix ignore.</div>
     <h3>Mémoire</h3>
     <div id="memBox" class="mem-box"></div>
@@ -2364,7 +2364,7 @@
   var safetyT=null;
   function safety(text,level,ms){ var el=$('safetyStrip'); if(!el)return; el.className=''; if(level)el.classList.add(level); var tx=el.querySelector('.ss-tx'); if(tx)tx.textContent=text; el.classList.add('show'); clearTimeout(safetyT); safetyT=setTimeout(function(){el.classList.remove('show');},ms||4200); }
   /* suggestions proactives (activables dans les reglages) */
-  var paActive=false,paFn=null,paKey='',paT=null,paCooldown=0,driveStart=Date.now(),paOn=true;
+  var paActive=false,paFn=null,paKey='',paT=null,paCooldown=0,driveStart=Date.now(),paOn=false;
   function proactiveShow(key,html,label,fn,ttl){ if(paActive||!paOn)return; paActive=true;paKey=key;paFn=fn; var el=$('proactive'); if(!el)return; el.querySelector('.pa-tx').innerHTML=html; el.querySelector('.pa-yes').textContent=label||'Oui'; el.classList.add('show'); clearTimeout(paT); paT=setTimeout(proactiveHide,ttl||13000); }
   function proactiveHide(){ paActive=false;paFn=null; var el=$('proactive'); if(el)el.classList.remove('show'); }
   if($('proactive')){ $('proactive').querySelector('.pa-yes').addEventListener('click',function(){ var f=paFn; proactiveHide(); paCooldown=Date.now()+120000; if(typeof f==='function')f(); }); $('proactive').querySelector('.pa-no').addEventListener('click',function(){ proactiveHide(); paCooldown=Date.now()+120000; }); }
