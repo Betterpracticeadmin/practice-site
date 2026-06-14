@@ -914,6 +914,10 @@
     <h3>Assistant vocal — commande « Practice… »</h3>
     <input id="vaName" class="key-in" type="text" placeholder="Ton prénom (ex. Aldo)" autocomplete="off" style="margin-bottom:8px;"/>
     <div class="seg" id="vaSeg"><button data-va="on">Micro activé</button><button data-va="off" class="on">Coupé</button></div>
+    <h3>Timbre de voix</h3>
+    <div class="seg" id="voiceKind"><button data-vk="neural" class="on">🎬 Réaliste (Roger)</button><button data-vk="web">Navigateur</button></div>
+    <button id="voiceTest" class="key-in" style="margin-top:8px;cursor:pointer;text-align:center;font-weight:600;background:var(--acc);color:#000;border:none;">🎧 Écouter un exemple</button>
+    <div class="key-note">La <b>voix réaliste</b> (ElevenLabs) sonne humaine, contrairement à la voix synthétique du navigateur. Touche « <b>Écouter un exemple</b> » pour la tester. Si tu n'entends rien : touche d'abord l'écran (déverrouillage audio), puis réessaie. Commandes : « <b>voix d'homme / voix féminine / voix plus douce</b> ».</div>
     <div class="key-note">Practice <b>dort</b> et ne répond que quand tu dis son nom : « <b>Practice</b> » + ton ordre. Après, tu peux <b>enchaîner sans répéter « Practice »</b> pendant ~14 s (mode conversation), puis il se <b>rendort</b> jusqu'au prochain « Practice ». Dis « merci / au revoir » pour le rendormir tout de suite. Comprend le <b>français et l'anglais</b>, tient une petite conversation, et exécute : mode, thème, destination, favoris, média, HUD/Pulse, radar… ainsi que des questions (trafic, ETA, météo, position, heure, titre). Fonctionne sur <b>Chrome / Android</b> (iOS Safari ne gère pas la reconnaissance vocale web).</div>
     <h3>Trafic temps réel (optionnel)</h3>
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
@@ -2346,6 +2350,14 @@
     setTimeout(function(){ if(!done){ try{p.stop();}catch(e){} } },7000);
   }
   if($('vaSeg'))$('vaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var on=(b.dataset.va==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Mem.prefs.va=on; saveMem(); if(on)startVA(true); else stopVA(); });
+  /* test direct de la voix réaliste : lecture dans le geste de clic (aucun blocage autoplay) */
+  function testVoice(){ unlockNeural(); if(Voice.neural===false){ toast('Active « Réaliste » d\'abord.'); webSpeak('Voix navigateur, bonjour '+vaName()+'.'); return; } toast('🎧 Chargement de la voix…');
+    fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:'Bonjour '+vaName()+'. Je suis Practice, ta voix embarquée. Ravi de faire la route avec toi.',lang:LANG,voice:Voice.ttsVoice})})
+    .then(function(r){ var ct=r.headers.get('content-type')||''; if(r.ok&&ct.indexOf('audio')>=0)return r.blob(); return r.json().then(function(j){throw ((j&&j.error)||'erreur')+' ('+r.status+')';},function(){throw 'reponse '+r.status;}); })
+    .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); neuralOff=false; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){ toast('🎙 Roger ('+Math.round(b.size/1024)+' Ko)'); }).catch(function(){ toast('🔈 lecture bloquée — touche l\'écran puis réessaie'); }); })
+    .catch(function(e){ toast('⚠️ voix indisponible : '+e); }); }
+  if($('voiceTest'))$('voiceTest').addEventListener('click',testVoice);
+  if($('voiceKind'))$('voiceKind').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Voice.neural=(b.dataset.vk==='neural'); neuralOff=false; if(Mem.prefs)Mem.prefs.neural=Voice.neural; saveMem(); toast(Voice.neural?'Voix réaliste activée':'Voix navigateur'); });
   if($('vaName'))$('vaName').addEventListener('change',function(){ Mem.prefs.name=this.value.trim()||'Aldo'; saveMem(); });
 
   /* ---------- SoundCloud real controls (Widget API) ---------- */
@@ -2552,7 +2564,8 @@
     if(p.lang)LANG=p.lang; if(p.theme)themeMode=p.theme;
     if(typeof p.poi==='boolean')poiOn=p.poi; if(typeof p.radar==='boolean')radarOn=p.radar;
     if(typeof p.voice==='boolean')Voice.on=p.voice;
-    if(p.voiceGender)Voice.gender=p.voiceGender; if(p.sayRate)Voice.sayRate=p.sayRate; if(p.sayPitch)Voice.sayPitch=p.sayPitch; if(p.pitch)Voice.pitch=p.pitch; if(p.ttsVoice)Voice.ttsVoice=p.ttsVoice;
+    if(p.voiceGender)Voice.gender=p.voiceGender; if(p.sayRate)Voice.sayRate=p.sayRate; if(p.sayPitch)Voice.sayPitch=p.sayPitch; if(p.pitch)Voice.pitch=p.pitch; if(p.ttsVoice)Voice.ttsVoice=p.ttsVoice; if(typeof p.neural==='boolean')Voice.neural=p.neural;
+    if($('voiceKind'))[].forEach.call($('voiceKind').children,function(x){x.classList.toggle('on',(x.dataset.vk==='neural')===(Voice.neural!==false));});
     setMode(p.mode||'copilot',true); applyTheme(); Voice.pick();
     if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
     var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); if(typeof reflectMute==='function')reflectMute();
