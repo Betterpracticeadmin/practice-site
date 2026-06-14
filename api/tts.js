@@ -6,14 +6,7 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).json({ error: 'method' }); return; }
   const key = process.env.ELEVENLABS_API_KEY;
-  if (!key) {
-    // diagnostic SÛR : on ne renvoie que les NOMS de variables proches (jamais les valeurs)
-    const seen = Object.keys(process.env).filter(function (k) { return /eleven|xi|tts|voice|11labs/i.test(k); });
-    res.status(200).json({ error: 'no_key', looked_for: 'ELEVENLABS_API_KEY', related_names_found: seen,
-      vercel_env: process.env.VERCEL_ENV || null, git_repo: process.env.VERCEL_GIT_REPO_SLUG || null,
-      custom_var_names: Object.keys(process.env).filter(function (k) { return !/^(VERCEL|AWS|NODE|PATH|HOME|LAMBDA|_|TZ|LANG|NX|PWD|SHLVL|HOSTNAME|TERM|NOW_|VC_)/i.test(k); }) });
-    return;
-  }
+  if (!key) { res.status(200).json({ error: 'no_key' }); return; }
 
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
