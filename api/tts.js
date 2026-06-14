@@ -6,7 +6,12 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).json({ error: 'method' }); return; }
   const key = process.env.ELEVENLABS_API_KEY;
-  if (!key) { res.status(200).json({ error: 'no_key' }); return; }
+  if (!key) {
+    // diagnostic SÛR : on ne renvoie que les NOMS de variables proches (jamais les valeurs)
+    const seen = Object.keys(process.env).filter(function (k) { return /eleven|xi|tts|voice|11labs/i.test(k); });
+    res.status(200).json({ error: 'no_key', looked_for: 'ELEVENLABS_API_KEY', related_names_found: seen, env_total: Object.keys(process.env).length });
+    return;
+  }
 
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
