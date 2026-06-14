@@ -764,6 +764,10 @@
   #proactive .pa-yes{background:var(--acc);color:#000;border:none;border-radius:11px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
   #proactive .pa-no{background:none;border:none;color:var(--dim);cursor:pointer;padding:5px 7px;font-size:15px;line-height:1;}
   @media(max-width:760px){ #proactive{bottom:calc(150px + env(safe-area-inset-bottom));} }
+  .pax-row{display:flex;gap:14px;align-items:center;margin-top:4px;}
+  .pax-qr{width:96px;height:96px;border-radius:10px;background:#fff;flex-shrink:0;object-fit:contain;}
+  .pax-txt{font-size:12px;color:var(--dim);line-height:1.5;}
+  .pax-copy{margin-top:8px;background:var(--card);border:.5px solid var(--border);color:var(--txt);border-radius:10px;padding:8px 12px;font-size:12px;cursor:pointer;}
 </style>
 </head>
 <body data-theme="dark" class="safe">
@@ -963,6 +967,9 @@
     <div id="memBox" class="mem-box"></div>
     <div class="seg" id="memActions"><button id="memResume">↻ Reprendre le dernier</button><button id="memClear">Effacer la mémoire</button></div>
     <div class="key-note">Practice se souvient de tes réglages (mode, thème, langue, voix) et de tes lieux fréquents — en local sur cet appareil, rien n'est envoyé.</div>
+    <h3>Mode passager · BYOD</h3>
+    <div class="pax-row"><img id="paxQR" class="pax-qr" alt="QR pour ouvrir Practice" loading="lazy"/><div class="pax-txt">Un passager <b>scanne ce QR</b> et ouvre Practice sur son propre téléphone — sans app à installer. Chacun son copilote.<br/><button id="paxCopy" class="pax-copy">📋 Copier le lien</button></div></div>
+    <div class="key-note">Onboarding zéro effort (façon Cinemo Connect). Le partage temps réel (ajouter à la file du conducteur, proposer une destination) nécessite un petit backend — dis-moi si tu veux qu'on l'ajoute.</div>
   </div>
 </div>
 
@@ -1878,6 +1885,7 @@
 
   /* ---------- mode / settings panel ---------- */
   function openPanel(){ syncPanel(); renderMem(); $('panelBg').classList.add('show'); }
+  (function paxInit(){ var url=location.origin+'/os.html'; var q=$('paxQR'); if(q)q.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&qzone=1&bgcolor=ffffff&data='+encodeURIComponent(url); var c=$('paxCopy'); if(c)c.addEventListener('click',function(){ try{ navigator.clipboard.writeText(url).then(function(){toast('Lien copié');},function(){toast(url);}); }catch(e){ toast(url); } }); })();
   function renderMem(){ var b=$('memBox'); if(!b)return; var h='';
     if(Mem.lastDest)h+='<div class="mem-line">Dernier trajet : <b>'+Mem.lastDest.name+'</b></div>';
     if(Mem.places.length){ h+='<div class="mem-sub">Lieux fréquents</div>'; Mem.places.slice(0,6).forEach(function(p){ h+='<button class="mem-place" data-lat="'+p.lat+'" data-lon="'+p.lon+'" data-n="'+(p.name||'').replace(/"/g,'&quot;')+'">📍 '+(p.name||'Lieu')+'<span>×'+p.count+'</span></button>'; }); }
