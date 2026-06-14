@@ -761,11 +761,19 @@
   .pax-qr{width:96px;height:96px;border-radius:10px;background:#fff;flex-shrink:0;object-fit:contain;}
   .pax-txt{font-size:12px;color:var(--dim);line-height:1.5;}
   .pax-copy{margin-top:8px;background:var(--card);border:.5px solid var(--border);color:var(--txt);border-radius:10px;padding:8px 12px;font-size:12px;cursor:pointer;}
+  #proactive{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,170%);z-index:47;display:flex;align-items:center;gap:10px;max-width:90vw;padding:10px 11px 10px 15px;border-radius:18px;background:var(--card);backdrop-filter:blur(22px);border:.5px solid var(--border);box-shadow:0 12px 34px rgba(0,0,0,.42);transition:transform .42s cubic-bezier(.34,1.45,.5,1);font-size:13px;color:var(--txt);}
+  #proactive.show{transform:translate(-50%,0);}
+  #proactive .pa-ic{color:var(--acc);font-size:15px;flex-shrink:0;}
+  #proactive .pa-tx b{font-weight:600;}
+  #proactive .pa-yes{background:var(--acc);color:#000;border:none;border-radius:11px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  #proactive .pa-no{background:none;border:none;color:var(--dim);cursor:pointer;padding:5px 7px;font-size:15px;line-height:1;}
+  @media(max-width:760px){ #proactive{bottom:calc(150px + env(safe-area-inset-bottom));} }
 </style>
 </head>
 <body data-theme="dark" class="safe">
 <div id="amb" aria-hidden="true"></div>
 <div id="safetyStrip" aria-live="assertive"><span class="ss-ic">⚠</span><span class="ss-tx"></span></div>
+<div id="proactive"><span class="pa-ic">✦</span><span class="pa-tx"></span><button class="pa-yes">Oui</button><button class="pa-no" aria-label="Ignorer">✕</button></div>
 
 <div class="os">
   <!-- TOP -->
@@ -955,6 +963,9 @@
     <h3>Trafic temps réel (optionnel)</h3>
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
     <div class="key-note">Sans clé : estimation honnête selon les heures de pointe (jour/heure). Avec une clé <b>TomTom</b> gratuite (2 500 req/jour), le niveau de trafic, le retard et l'ETA deviennent <b>live</b>, comme Waze.</div>
+    <h3>Suggestions proactives</h3>
+    <div class="seg" id="paSeg"><button data-pa="on" class="on">Activées</button><button data-pa="off">Désactivées</button></div>
+    <div class="key-note">Practice te propose au bon moment : <b>recalculer</b> en cas de bouchon, <b>un parking</b> à l'arrivée, <b>une pause</b> après 1h30 de route. Uniquement en conduite réelle (jamais en démo). Un tap accepte, la croix ignore.</div>
     <h3>Mémoire</h3>
     <div id="memBox" class="mem-box"></div>
     <div class="seg" id="memActions"><button id="memResume">↻ Reprendre le dernier</button><button id="memClear">Effacer la mémoire</button></div>
@@ -1877,6 +1888,7 @@
 
   /* ---------- mode / settings panel ---------- */
   function openPanel(){ syncPanel(); renderMem(); $('panelBg').classList.add('show'); }
+  if($('paSeg'))$('paSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; paOn=(b.dataset.pa==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); if(Mem.prefs)Mem.prefs.proactive=paOn; saveMem(); if(!paOn)proactiveHide(); });
   (function paxInit(){ var url=location.origin+'/os.html'; var q=$('paxQR'); if(q)q.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&qzone=1&bgcolor=ffffff&data='+encodeURIComponent(url); var c=$('paxCopy'); if(c)c.addEventListener('click',function(){ try{ navigator.clipboard.writeText(url).then(function(){toast('Lien copié');},function(){toast(url);}); }catch(e){ toast(url); } }); })();
   function renderMem(){ var b=$('memBox'); if(!b)return; var h='';
     if(Mem.lastDest)h+='<div class="mem-line">Dernier trajet : <b>'+Mem.lastDest.name+'</b></div>';
@@ -2351,6 +2363,22 @@
   /* ---- Lot 2 : couche securite persistante (au-dessus de toutes les vues) + suggestions proactives ---- */
   var safetyT=null;
   function safety(text,level,ms){ var el=$('safetyStrip'); if(!el)return; el.className=''; if(level)el.classList.add(level); var tx=el.querySelector('.ss-tx'); if(tx)tx.textContent=text; el.classList.add('show'); clearTimeout(safetyT); safetyT=setTimeout(function(){el.classList.remove('show');},ms||4200); }
+  /* suggestions proactives (activables dans les reglages) */
+  var paActive=false,paFn=null,paKey='',paT=null,paCooldown=0,driveStart=Date.now(),paOn=true;
+  function proactiveShow(key,html,label,fn,ttl){ if(paActive||!paOn)return; paActive=true;paKey=key;paFn=fn; var el=$('proactive'); if(!el)return; el.querySelector('.pa-tx').innerHTML=html; el.querySelector('.pa-yes').textContent=label||'Oui'; el.classList.add('show'); clearTimeout(paT); paT=setTimeout(proactiveHide,ttl||13000); }
+  function proactiveHide(){ paActive=false;paFn=null; var el=$('proactive'); if(el)el.classList.remove('show'); }
+  if($('proactive')){ $('proactive').querySelector('.pa-yes').addEventListener('click',function(){ var f=paFn; proactiveHide(); paCooldown=Date.now()+120000; if(typeof f==='function')f(); }); $('proactive').querySelector('.pa-no').addEventListener('click',function(){ proactiveHide(); paCooldown=Date.now()+120000; }); }
+  function findPOI(rx){ for(var i=0;i<POITYPES.length;i++){ if(rx.test(POITYPES[i].n))return POITYPES[i]; } return null; }
+  setInterval(function(){ if(paActive||!paOn)return; var now=Date.now(); if(now<paCooldown)return;
+    if(typeof demoMode!=='undefined'&&demoMode)return;
+    if(!(typeof pts!=='undefined'&&pts.length))return;
+    var navOn=(typeof navActive!=='undefined'&&navActive);
+    var dl=($('trDelay')&&$('trDelay').textContent)||''; var dm=dl.match(/\+\s*(\d+)\s*min/);
+    if(navOn&&dm&&+dm[1]>=8){ proactiveShow('traffic','Trafic dense devant, <b>+'+dm[1]+' min</b>. Recalculer ?','Recalculer',function(){ toast('Je recalcule l\'itinéraire…'); if(typeof reroute==='function'&&pts.length)reroute(pts[pts.length-1]); }); return; }
+    var sub=($('navSub')&&$('navSub').textContent)||''; var km=sub.match(/([\d.]+)\s*km/);
+    if(navOn&&km&&parseFloat(km[1])>0&&parseFloat(km[1])<1.3){ proactiveShow('arrive','Bientôt arrivé. <b>Trouver un parking ?</b>','Chercher',function(){ var d=findPOI(/parking/); if(d){toast('Recherche d\'un parking proche…');nearestPOI(d);}else toast('Parking indisponible.'); }); return; }
+    if((liveSpd||0)>20&&(now-driveStart)>90*60000){ proactiveShow('pause','Tu roules depuis 1h30. <b>Une pause ?</b>','Café proche',function(){ var d=findPOI(/caf/); if(d){toast('Je cherche un café…');nearestPOI(d);}else toast('Café indisponible.'); }); paCooldown=now+30*60000; return; }
+  },5000);
   /* multi-hypothèses : on essaie chaque transcription proposée par le moteur, on retient la 1re qui mappe une intention connue. Compense fortement les erreurs de reconnaissance vocale. */
   function handleSpeech(alts){ alts=(alts||[]).filter(Boolean); if(!alts.length)return;
     for(var i=0;i<alts.length;i++){ if(vocabRun(alts[i])){ showHeard(alts[i]); return; } }
@@ -2608,6 +2636,7 @@
     if(typeof p.poi==='boolean')poiOn=p.poi; if(typeof p.radar==='boolean')radarOn=p.radar;
     if(typeof p.voice==='boolean')Voice.on=p.voice;
     if(p.voiceGender)Voice.gender=p.voiceGender; if(p.sayRate)Voice.sayRate=p.sayRate; if(p.sayPitch)Voice.sayPitch=p.sayPitch; if(p.pitch)Voice.pitch=p.pitch; if(p.ttsVoice)Voice.ttsVoice=p.ttsVoice; if(typeof p.neural==='boolean')Voice.neural=p.neural;
+    if(typeof p.proactive==='boolean')paOn=p.proactive; if($('paSeg'))[].forEach.call($('paSeg').children,function(x){x.classList.toggle('on',(x.dataset.pa==='on')===(paOn!==false));});
     if($('voiceKind'))[].forEach.call($('voiceKind').children,function(x){x.classList.toggle('on',(x.dataset.vk==='neural')===(Voice.neural!==false));});
     setMode(p.mode||'copilot',true); applyTheme(); Voice.pick();
     if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
