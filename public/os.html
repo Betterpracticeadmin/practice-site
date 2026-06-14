@@ -366,10 +366,21 @@
   /* drive mode + car */
   .dm-mode{font-size:9.5px;font-family:var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint);}
   .dm-perf{font-size:18px;font-weight:300;letter-spacing:.08em;text-transform:uppercase;margin-top:3px;}
-  .car-img{position:relative;margin-top:10px;}
-  .car-img img{width:100%;display:block;border-radius:10px;-webkit-mask-image:radial-gradient(ellipse 78% 82% at 50% 48%,#000 52%,transparent 92%);mask-image:radial-gradient(ellipse 78% 82% at 50% 48%,#000 52%,transparent 92%);}
-  body[data-theme="light"] .car-img img{filter:brightness(1.15) contrast(.95);}
-  .car-svg{width:100%;height:auto;margin-top:10px;}
+  /* voiture futuriste cyber + glitch (SVG dessiné, libre de droit) */
+  .glitch-car{position:relative;margin-top:10px;border-radius:12px;overflow:hidden;}
+  .glitch-car .gc-svg{width:100%;height:auto;display:block;animation:gcGlitch 5.5s steps(1,end) infinite;}
+  @keyframes gcGlitch{
+    0%,88%,100%{transform:translate(0,0);filter:drop-shadow(0 0 7px var(--acc));}
+    89%{transform:translate(-2px,0) skewX(-1.2deg);filter:drop-shadow(-3px 0 0 #35e8ff) drop-shadow(3px 0 0 #ff3bd4) drop-shadow(0 0 7px var(--acc));}
+    91%{transform:translate(2px,-1px);filter:drop-shadow(3px 0 0 #35e8ff) drop-shadow(-3px 0 0 #ff3bd4);}
+    93%{transform:translate(-1px,0) skewX(1deg);filter:drop-shadow(-2px 0 0 #35e8ff) drop-shadow(2px 0 0 #ff3bd4);}
+    95%{transform:translate(1px,0);filter:none;}
+    96%{transform:translate(-1px,0);filter:drop-shadow(0 0 9px #35e8ff);}
+  }
+  .glitch-car::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.17) 0 1px,transparent 1px 3px);mix-blend-mode:overlay;}
+  .glitch-car::after{content:'';position:absolute;left:0;right:0;top:-34%;height:34%;z-index:3;pointer-events:none;background:linear-gradient(transparent,rgba(53,232,255,.12),transparent);animation:gcScan 3.6s linear infinite;}
+  @keyframes gcScan{0%{top:-34%;}100%{top:104%;}}
+  @media(prefers-reduced-motion:reduce){.glitch-car .gc-svg{animation:none;}.glitch-car::after{display:none;}}
   /* icons */
   .i svg,.k svg,.status-ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:block;}
   .k svg{width:15px;height:15px;}
@@ -426,7 +437,7 @@
   body[data-mode="ultra"] .col-l .card:first-child,body[data-mode="ultra"] #mediaCard,body[data-mode="ultra"] #wxCard{opacity:.18;filter:grayscale(.7);pointer-events:none;}
   body[data-mode="ultra"] .speed-ov .v{font-size:92px;}
   /* racing modes surface the data: hide the decorative car photo, keep the mode switch */
-  body[data-mode="performance"] #dmCard .car-img,body[data-mode="ultra"] #dmCard .car-img{display:none;}
+  body[data-mode="performance"] #dmCard .glitch-car,body[data-mode="ultra"] #dmCard .glitch-car{opacity:.6;}
   body[data-mode="performance"] .col-l,body[data-mode="ultra"] .col-l{gap:10px;}
   body[data-mode="night"]{filter:brightness(.84);}
   body[data-mode="performance"] .w,body[data-mode="ultra"] .w{padding:13px 15px;}
@@ -750,15 +761,22 @@
   <div class="col-l">
     <div class="card w" id="dmCard">
       <div class="w-head"><div><div class="dm-mode">Drive mode ▾</div><div class="dm-perf" id="dmMode">Copilot</div></div><span class="lbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span></div>
-      <div class="car-img">
-        <img src="/practice-car.jpg" alt="Practice car" loading="lazy" onerror="this.style.display='none';var s=this.parentNode.querySelector('svg');if(s)s.style.display='block';"/>
-      <svg class="car-svg" style="display:none" viewBox="0 0 220 78">
-        <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3d42"/><stop offset="1" stop-color="#0e0f12"/></linearGradient></defs>
-        <path d="M12,56 C16,42 30,40 44,39 C60,27 92,22 122,26 C146,29 168,37 196,45 C206,48 210,52 205,57 L188,57 A15,15 0 0 0 158,57 L74,57 A15,15 0 0 0 44,57 L14,57 Z" fill="url(#cg)" stroke="rgba(255,255,255,.14)" stroke-width=".5"/>
-        <path d="M58,38 C74,28 100,25 120,28 L140,40 Z" fill="rgba(255,255,255,.06)"/>
-        <circle cx="59" cy="57" r="13" fill="#111" stroke="rgba(255,255,255,.18)" stroke-width="1"/><circle cx="59" cy="57" r="5" fill="#2a2c30"/>
-        <circle cx="173" cy="57" r="13" fill="#111" stroke="rgba(255,255,255,.18)" stroke-width="1"/><circle cx="173" cy="57" r="5" fill="#2a2c30"/>
-      </svg>
+      <div class="glitch-car">
+        <svg class="gc-svg" viewBox="0 0 240 94" xmlns="http://www.w3.org/2000/svg" aria-label="Voiture futuriste Practice">
+          <defs>
+            <linearGradient id="gcBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1e26"/><stop offset=".55" stop-color="#0c0e13"/><stop offset="1" stop-color="#050608"/></linearGradient>
+            <linearGradient id="gcGlass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#35e8ff" stop-opacity=".5"/><stop offset="1" stop-color="#0a1018" stop-opacity=".92"/></linearGradient>
+            <radialGradient id="gcGlow" cx="50%" cy="62%" r="55%"><stop offset="0" stop-color="#35e8ff" stop-opacity=".5"/><stop offset="1" stop-color="#35e8ff" stop-opacity="0"/></radialGradient>
+          </defs>
+          <ellipse cx="120" cy="83" rx="102" ry="10" fill="url(#gcGlow)"/>
+          <path d="M10,66 L26,54 C42,41 62,33 90,31 L150,31 C173,32 197,41 225,53 C233,56 235,61 229,66 L206,68 A16,15 0 0 0 162,68 L86,68 A16,15 0 0 0 42,68 L12,68 Z" fill="url(#gcBody)" stroke="#35e8ff" stroke-width="1.1" stroke-opacity=".7"/>
+          <path d="M72,46 C88,34 106,31 128,32 L158,46 L150,54 L80,54 Z" fill="url(#gcGlass)" stroke="#35e8ff" stroke-opacity=".45" stroke-width=".6"/>
+          <line x1="32" y1="60" x2="208" y2="60" stroke="#35e8ff" stroke-width="1.5" stroke-linecap="round" opacity=".9"/>
+          <path d="M224,55 L235,59 L224,63 Z" fill="#9af6ff"/>
+          <rect x="11" y="56" width="7" height="7" rx="2.5" fill="#ff3bd4"/>
+          <circle cx="66" cy="68" r="15.5" fill="#08090c" stroke="#35e8ff" stroke-width="1.7" stroke-opacity=".75"/><circle cx="66" cy="68" r="6" fill="#181b22"/>
+          <circle cx="176" cy="68" r="15.5" fill="#08090c" stroke="#35e8ff" stroke-width="1.7" stroke-opacity=".75"/><circle cx="176" cy="68" r="6" fill="#181b22"/>
+        </svg>
       </div>
     </div>
     <div class="card w" id="vehCard">
