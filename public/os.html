@@ -1874,10 +1874,11 @@
   function speakNeural(t){ try{speechSynthesis.cancel();}catch(e){} stopNeural();
     return fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t,lang:LANG,voice:Voice.ttsVoice})})
       .then(function(r){ var ct=r.headers.get('content-type')||''; if(r.ok&&ct.indexOf('audio')>=0)return r.blob(); return r.json().then(function(j){throw (j&&j.error)||'noaudio';},function(){throw 'noaudio';}); })
-      .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); var p=neuralAudio.play(); if(p&&p.catch)p.catch(function(){ webSpeak(t); }); return true; }); }
-  function sayVA(t){ lastSpoken=t; toast('🎙 '+t); if(!Voice.on)return;
-    if(neuralOff||Voice.neural===false){ webSpeak(t); return; }
-    speakNeural(t).catch(function(err){ if(err==='no_key'||err==='no_text'||err==='tts'||err==='upstream'){ neuralOff=true; } webSpeak(t); }); }
+      .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); var p=neuralAudio.play(); if(p&&p.catch)p.catch(function(){ toast('🔈 lecture bloquée (touche l\'écran)'); webSpeak(t); }); return true; }); }
+  function sayVA(t){ lastSpoken=t; if(!Voice.on){toast('🔇 '+t);return;}
+    if(neuralOff||Voice.neural===false){ toast('🔈 voix navigateur · '+t); webSpeak(t); return; }
+    toast('🎙 Roger · '+t);
+    speakNeural(t).catch(function(err){ toast('🔈 repli ('+err+')'); if(err==='no_key'||err==='no_text'||err==='tts'||err==='upstream'){ neuralOff=true; } webSpeak(t); }); }
   /* ---- wake-word conversation state machine (sleeps until "Practice") ---- */
   var awake=false, awakeTimer=null;
   function vaTxt(k){ var D={
