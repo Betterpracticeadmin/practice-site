@@ -752,10 +752,24 @@
   body[data-mode="magma"] .orb::before{animation-duration:3.4s;}
   body[data-mode="magma"] .orb{box-shadow:inset 0 0 0 .5px rgba(255,90,30,.55),0 0 28px rgba(255,90,30,.36);}
   @media(prefers-reduced-motion:reduce){#amb::before{animation:none;}.speed-ov .v{transition:none;}}
+  /* ===== Lot 2 : couche securite persistante + suggestion proactive (Gemini-like) ===== */
+  #safetyStrip{position:fixed;top:0;left:50%;transform:translate(-50%,-130%);z-index:92;display:flex;align-items:center;gap:9px;max-width:92vw;padding:9px 17px;border-radius:0 0 16px 16px;font-family:var(--mono);font-size:13px;font-weight:500;color:#fff;background:rgba(226,60,60,.94);box-shadow:0 8px 26px rgba(0,0,0,.45);transition:transform .35s cubic-bezier(.34,1.4,.5,1);white-space:nowrap;pointer-events:none;}
+  #safetyStrip.show{transform:translate(-50%,env(safe-area-inset-top));}
+  #safetyStrip.warn{background:rgba(224,140,40,.95);} #safetyStrip.info{background:rgba(36,38,44,.94);}
+  #safetyStrip .ss-ic{font-size:15px;}
+  #proactive{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,170%);z-index:47;display:flex;align-items:center;gap:10px;max-width:90vw;padding:10px 11px 10px 15px;border-radius:18px;background:var(--card);backdrop-filter:blur(22px);border:.5px solid var(--border);box-shadow:0 12px 34px rgba(0,0,0,.42);transition:transform .42s cubic-bezier(.34,1.45,.5,1);font-size:13px;color:var(--txt);}
+  #proactive.show{transform:translate(-50%,0);}
+  #proactive .pa-ic{color:var(--acc);font-size:15px;}
+  #proactive .pa-tx b{font-weight:600;}
+  #proactive .pa-yes{background:var(--acc);color:#000;border:none;border-radius:11px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  #proactive .pa-no{background:none;border:none;color:var(--dim);cursor:pointer;padding:5px 7px;font-size:15px;line-height:1;}
+  @media(max-width:760px){ #proactive{bottom:calc(150px + env(safe-area-inset-bottom));} }
 </style>
 </head>
 <body data-theme="dark" class="safe">
 <div id="amb" aria-hidden="true"></div>
+<div id="safetyStrip" aria-live="assertive"><span class="ss-ic">⚠</span><span class="ss-tx"></span></div>
+<div id="proactive"><span class="pa-ic">✦</span><span class="pa-tx"></span><button class="pa-yes">Oui</button><button class="pa-no" aria-label="Ignorer">✕</button></div>
 
 <div class="os">
   <!-- TOP -->
@@ -1342,7 +1356,7 @@
   function reactive(spdK){
     if(spdK<2){ if(lastSpeedState!=='stop'){lastSpeedState='stop';setState('safe');setMsg(T().stop,'');Voice.say(T().stop,1);} $('navSub').textContent='—'; return; }
     lastSpeedState='move';
-    if(spdK>110){ setState('critical'); setMsg(T().fast,Math.round(spdK)+' km/h'); var n=Date.now(); if(n-lastCruise>8000){lastCruise=n;Voice.say(T().fast,2);} return; }
+    if(spdK>110){ setState('critical'); setMsg(T().fast,Math.round(spdK)+' km/h'); if(typeof safety==='function')safety(Math.round(spdK)+' km/h · '+T().fast); var n=Date.now(); if(n-lastCruise>8000){lastCruise=n;Voice.say(T().fast,2);} return; }
     setState('safe'); var nt=Date.now();
     if(nt-lastCruise>14000){ lastCruise=nt; var c=T().cruising[Math.floor((nt/1000)%T().cruising.length)]; setMsg(c,Math.round(spdK)+' km/h'); Voice.say(c,1); }
     else setMsg($('cpMsg').textContent||T().go,Math.round(spdK)+' km/h');
@@ -1482,7 +1496,7 @@
     for(var i=0;i<radars.length;i++){ var r=radars[i], d=haversine(pos,r);
       if(d<420){ if(hdg!=null&&!isNaN(hdg)){ var br=bearing(pos,r); var diff=Math.abs(((br-hdg+540)%360)-180); if(diff>70) continue; } // only radars ahead
         if(!radarSaid[r.id] || (Date.now()-radarSaid[r.id])>120000){ radarSaid[r.id]=Date.now();
-          var dd=Math.max(50,Math.round(d/50)*50); setState('attention'); setMsg('Radar à '+dd+' m','📷 prudence');
+          var dd=Math.max(50,Math.round(d/50)*50); setState('attention'); setMsg('Radar à '+dd+' m','📷 prudence'); if(typeof safety==='function')safety('Radar à '+dd+' m','warn');
           if(Voice.on)Voice.say(LANG==='en'?'Speed camera in '+dd+' metres.':LANG==='ja'?dd+'メートル先、速度取締り。':'Radar dans '+dd+' mètres.',2);
           setTimeout(function(){setState('safe');},4000); return; }
       }
@@ -2334,6 +2348,22 @@
     askClaude(t); /* free conversation via Claude (falls back to "didn't understand" if no backend) */
   }
   function pickL(fr,en){ var a=(LANG==='en'&&en)?en:fr; return a[Math.floor((Date.now()/900)%a.length)]; }
+  /* ---- Lot 2 : couche securite persistante (au-dessus de toutes les vues) + suggestions proactives ---- */
+  var safetyT=null;
+  function safety(text,level,ms){ var el=$('safetyStrip'); if(!el)return; el.className=''; if(level)el.classList.add(level); var tx=el.querySelector('.ss-tx'); if(tx)tx.textContent=text; el.classList.add('show'); clearTimeout(safetyT); safetyT=setTimeout(function(){el.classList.remove('show');},ms||4200); }
+  var paActive=false,paFn=null,paKey='',paT=null,paCooldown=0,driveStart=Date.now();
+  function proactiveShow(key,html,label,fn,ttl){ if(paActive)return; paActive=true;paKey=key;paFn=fn; var el=$('proactive'); if(!el)return; el.querySelector('.pa-tx').innerHTML=html; el.querySelector('.pa-yes').textContent=label||'Oui'; el.classList.add('show'); clearTimeout(paT); paT=setTimeout(proactiveHide,ttl||13000); }
+  function proactiveHide(){ paActive=false;paFn=null; var el=$('proactive'); if(el)el.classList.remove('show'); }
+  if($('proactive')){ $('proactive').querySelector('.pa-yes').addEventListener('click',function(){ var f=paFn; proactiveHide(); paCooldown=Date.now()+120000; if(typeof f==='function')f(); }); $('proactive').querySelector('.pa-no').addEventListener('click',function(){ proactiveHide(); paCooldown=Date.now()+120000; }); }
+  function findPOI(rx){ for(var i=0;i<POITYPES.length;i++){ if(rx.test(POITYPES[i].n))return POITYPES[i]; } return null; }
+  setInterval(function(){ if(paActive)return; var now=Date.now(); if(now<paCooldown)return;
+    var navOn=(typeof navActive!=='undefined'&&navActive);
+    var dl=($('trDelay')&&$('trDelay').textContent)||''; var dm=dl.match(/\+\s*(\d+)\s*min/);
+    if(navOn&&dm&&+dm[1]>=8){ proactiveShow('traffic','Trafic dense devant, <b>+'+dm[1]+' min</b>. Recalculer ?','Recalculer',function(){ if(typeof reroute==='function'&&pts.length)reroute(pts[pts.length-1]); }); return; }
+    var sub=($('navSub')&&$('navSub').textContent)||''; var km=sub.match(/([\d.]+)\s*km/);
+    if(navOn&&km&&parseFloat(km[1])>0&&parseFloat(km[1])<1.3){ proactiveShow('arrive','Bientôt arrivé. <b>Trouver un parking ?</b>','Chercher',function(){ var d=findPOI(/parking/); if(d)nearestPOI(d); }); return; }
+    if((liveSpd||0)>20&&(now-driveStart)>90*60000){ proactiveShow('pause','Tu roules depuis 1h30. <b>Une pause ?</b>','Café proche',function(){ var d=findPOI(/caf/); if(d)nearestPOI(d); }); paCooldown=now+30*60000; return; }
+  },5000);
   /* multi-hypothèses : on essaie chaque transcription proposée par le moteur, on retient la 1re qui mappe une intention connue. Compense fortement les erreurs de reconnaissance vocale. */
   function handleSpeech(alts){ alts=(alts||[]).filter(Boolean); if(!alts.length)return;
     for(var i=0;i<alts.length;i++){ if(vocabRun(alts[i])){ showHeard(alts[i]); return; } }
