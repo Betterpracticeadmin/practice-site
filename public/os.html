@@ -1863,14 +1863,21 @@
   function vaName(){ return (Mem.prefs.name||'Aldo'); }
   var lastSpoken='';
   /* Voix de Practice : 1) TTS neuronal ElevenLabs (vraiment humain, façon Joi) si une clé existe sur Vercel ; 2) sinon repli sur la voix du navigateur. */
-  var neuralAudio=null, neuralTTS=true;
-  function stopNeural(){ try{ if(neuralAudio){ neuralAudio.pause(); neuralAudio.src=''; neuralAudio=null; } }catch(e){} }
+  /* un seul élément audio, déverrouillé au 1er geste utilisateur (sinon iOS bloque la lecture auto) */
+  var SILENT_WAV='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+  var neuralAudio=new Audio(); try{neuralAudio.setAttribute('playsinline','');neuralAudio.preload='auto';}catch(e){}
+  var neuralOff=false, neuralUnlocked=false;
+  function unlockNeural(){ if(neuralUnlocked)return; neuralUnlocked=true; try{ neuralAudio.src=SILENT_WAV; var p=neuralAudio.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){} }
+  document.addEventListener('pointerdown',function _u(){ unlockNeural(); document.removeEventListener('pointerdown',_u,true); },true);
+  function stopNeural(){ try{ neuralAudio.pause(); }catch(e){} }
   function webSpeak(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice){u.voice=Voice.voice;u.lang=Voice.voice.lang;} u.rate=Voice.sayRate||0.85; u.pitch=Voice.sayPitch||0.92; u.volume=Voice.volume||0.96; speechSynthesis.speak(u);} }catch(e){} }
-  function speakNeural(t){ stopNeural(); try{speechSynthesis.cancel();}catch(e){}
-    return fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t,lang:LANG,voice:Voice.ttsVoice})}).then(function(r){ if(!r.ok)throw 0; var ct=r.headers.get('content-type')||''; if(ct.indexOf('audio')<0)throw 'nokey'; return r.blob(); }).then(function(b){ var url=URL.createObjectURL(b); neuralAudio=new Audio(url); neuralAudio.onended=function(){try{URL.revokeObjectURL(url);}catch(e){}}; return neuralAudio.play(); }); }
+  function speakNeural(t){ try{speechSynthesis.cancel();}catch(e){} stopNeural();
+    return fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t,lang:LANG,voice:Voice.ttsVoice})})
+      .then(function(r){ var ct=r.headers.get('content-type')||''; if(r.ok&&ct.indexOf('audio')>=0)return r.blob(); return r.json().then(function(j){throw (j&&j.error)||'noaudio';},function(){throw 'noaudio';}); })
+      .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); var p=neuralAudio.play(); if(p&&p.catch)p.catch(function(){ webSpeak(t); }); return true; }); }
   function sayVA(t){ lastSpoken=t; toast('🎙 '+t); if(!Voice.on)return;
-    if(neuralTTS&&Voice.neural!==false){ speakNeural(t).catch(function(){ neuralTTS=false; webSpeak(t); }); }
-    else webSpeak(t); }
+    if(neuralOff||Voice.neural===false){ webSpeak(t); return; }
+    speakNeural(t).catch(function(err){ if(err==='no_key'||err==='no_text'||err==='tts'||err==='upstream'){ neuralOff=true; } webSpeak(t); }); }
   /* ---- wake-word conversation state machine (sleeps until "Practice") ---- */
   var awake=false, awakeTimer=null;
   function vaTxt(k){ var D={
@@ -2236,8 +2243,8 @@
     if(lx(t,'brightdown')){ themeMode='dark'; applyTheme(); syncPanel(); Mem.prefs.theme='dark'; saveMem(); sayVA('Écran plus sombre.'); return true; }
     if(lx(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.12); Voice.sayRate=Math.min(1.4,(Voice.sayRate||0.9)+0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je parle plus vite.'); return true; }
     if(lx(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.12); Voice.sayRate=Math.max(0.62,(Voice.sayRate||0.9)-0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je ralentis mon débit.'); return true; }
-    if(lx(t,'voicegender')){ Voice.gender=/(homme|masculin|grave|d'?un (mec|homme)|male)/i.test(t)?'male':'female'; Voice.ttsVoice=(Voice.gender==='male')?'CwhRBWXzGAHq8TQ4Fs17':'FvmvwvObRqIHojkEGh5N'; neuralTTS=true; Voice.pick(); if(Mem.prefs){Mem.prefs.voiceGender=Voice.gender;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(Voice.gender==='female'?'Voilà, une voix plus douce et féminine. Ça te plaît ?':'Très bien, je passe sur une voix masculine.'); return true; }
-    if(lx(t,'seducevoice')){ Voice.sayRate=0.8; Voice.sayPitch=0.88; Voice.volume=0.92; Voice.gender='female'; Voice.ttsVoice='FvmvwvObRqIHojkEGh5N'; neuralTTS=true; if(Mem.prefs){Mem.prefs.sayRate=Voice.sayRate;Mem.prefs.sayPitch=Voice.sayPitch;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(pickL(['Comme ça… c\'est mieux pour toi ?','Je baisse d\'un ton, rien que pour toi.','Voilà, tout en douceur.'],['Like this… better?'])); return true; }
+    if(lx(t,'voicegender')){ Voice.gender=/(homme|masculin|grave|d'?un (mec|homme)|male)/i.test(t)?'male':'female'; Voice.ttsVoice=(Voice.gender==='male')?'CwhRBWXzGAHq8TQ4Fs17':'FvmvwvObRqIHojkEGh5N'; neuralOff=false; Voice.pick(); if(Mem.prefs){Mem.prefs.voiceGender=Voice.gender;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(Voice.gender==='female'?'Voilà, une voix plus douce et féminine. Ça te plaît ?':'Très bien, je passe sur une voix masculine.'); return true; }
+    if(lx(t,'seducevoice')){ Voice.sayRate=0.8; Voice.sayPitch=0.88; Voice.volume=0.92; Voice.gender='female'; Voice.ttsVoice='FvmvwvObRqIHojkEGh5N'; neuralOff=false; if(Mem.prefs){Mem.prefs.sayRate=Voice.sayRate;Mem.prefs.sayPitch=Voice.sayPitch;Mem.prefs.ttsVoice=Voice.ttsVoice;} saveMem(); sayVA(pickL(['Comme ça… c\'est mieux pour toi ?','Je baisse d\'un ton, rien que pour toi.','Voilà, tout en douceur.'],['Like this… better?'])); return true; }
     /* ---- méta : répète, aide, compliment ---- */
     if(lx(t,'repeat')){ sayVA(lastSpoken?lastSpoken:'Je n\'ai rien dit récemment.'); return true; }
     if(lx(t,'help')){ sayVA('Je peux lancer un itinéraire, trouver un lieu proche, changer de mode ou de thème, gérer la musique et le volume, zoomer ou recentrer la carte, et te renseigner sur le trafic, la météo, l\'heure ou ta vitesse. Dis-moi simplement ce que tu veux.'); return true; }
