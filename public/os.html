@@ -2365,12 +2365,14 @@
   if($('proactive')){ $('proactive').querySelector('.pa-yes').addEventListener('click',function(){ var f=paFn; proactiveHide(); paCooldown=Date.now()+120000; if(typeof f==='function')f(); }); $('proactive').querySelector('.pa-no').addEventListener('click',function(){ proactiveHide(); paCooldown=Date.now()+120000; }); }
   function findPOI(rx){ for(var i=0;i<POITYPES.length;i++){ if(rx.test(POITYPES[i].n))return POITYPES[i]; } return null; }
   setInterval(function(){ if(paActive)return; var now=Date.now(); if(now<paCooldown)return;
+    if(typeof demoMode!=='undefined'&&demoMode)return;            /* pas de suggestions pendant la démo */
+    if(!(typeof pts!=='undefined'&&pts.length))return;            /* seulement en vraie conduite (position réelle) */
     var navOn=(typeof navActive!=='undefined'&&navActive);
     var dl=($('trDelay')&&$('trDelay').textContent)||''; var dm=dl.match(/\+\s*(\d+)\s*min/);
-    if(navOn&&dm&&+dm[1]>=8){ proactiveShow('traffic','Trafic dense devant, <b>+'+dm[1]+' min</b>. Recalculer ?','Recalculer',function(){ if(typeof reroute==='function'&&pts.length)reroute(pts[pts.length-1]); }); return; }
+    if(navOn&&dm&&+dm[1]>=8){ proactiveShow('traffic','Trafic dense devant, <b>+'+dm[1]+' min</b>. Recalculer ?','Recalculer',function(){ toast('Je recalcule l\'itinéraire…'); if(typeof reroute==='function'&&pts.length)reroute(pts[pts.length-1]); }); return; }
     var sub=($('navSub')&&$('navSub').textContent)||''; var km=sub.match(/([\d.]+)\s*km/);
-    if(navOn&&km&&parseFloat(km[1])>0&&parseFloat(km[1])<1.3){ proactiveShow('arrive','Bientôt arrivé. <b>Trouver un parking ?</b>','Chercher',function(){ var d=findPOI(/parking/); if(d)nearestPOI(d); }); return; }
-    if((liveSpd||0)>20&&(now-driveStart)>90*60000){ proactiveShow('pause','Tu roules depuis 1h30. <b>Une pause ?</b>','Café proche',function(){ var d=findPOI(/caf/); if(d)nearestPOI(d); }); paCooldown=now+30*60000; return; }
+    if(navOn&&km&&parseFloat(km[1])>0&&parseFloat(km[1])<1.3){ proactiveShow('arrive','Bientôt arrivé. <b>Trouver un parking ?</b>','Chercher',function(){ var d=findPOI(/parking/); if(d){toast('Recherche d\'un parking proche…');nearestPOI(d);}else toast('Parking indisponible.'); }); return; }
+    if((liveSpd||0)>20&&(now-driveStart)>90*60000){ proactiveShow('pause','Tu roules depuis 1h30. <b>Une pause ?</b>','Café proche',function(){ var d=findPOI(/caf/); if(d){toast('Je cherche un café…');nearestPOI(d);}else toast('Café indisponible.'); }); paCooldown=now+30*60000; return; }
   },5000);
   /* multi-hypothèses : on essaie chaque transcription proposée par le moteur, on retient la 1re qui mappe une intention connue. Compense fortement les erreurs de reconnaissance vocale. */
   function handleSpeech(alts){ alts=(alts||[]).filter(Boolean); if(!alts.length)return;
