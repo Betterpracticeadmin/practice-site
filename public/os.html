@@ -588,7 +588,7 @@
     .wm{font-size:11px;}
     /* fixed, full-width bottom tab bar (iOS-style) */
     .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:45;grid-row:auto;justify-content:center;
-        padding:7px 10px calc(7px + env(safe-area-inset-bottom));background:linear-gradient(to top, var(--bg) 62%, transparent);}
+        padding:7px 10px calc(7px + env(safe-area-inset-bottom));background:var(--bg);border-top:.5px solid var(--border);box-shadow:0 -8px 22px rgba(0,0,0,.16);}
     .navtabs{width:100%;max-width:540px;justify-content:space-between;gap:2px;border-radius:18px;}
     .navtabs button{flex:1;min-width:0;padding:8px 2px;font-size:8px;letter-spacing:.05em;gap:3px;}
     .navtabs button .i{font-size:18px;}
@@ -619,7 +619,7 @@
     /* left column hidden — vehicle/telemetry reachable from the tabs & overlays */
     .col-l{display:none;}
     /* right column = draggable bottom sheet of glass cards floating over the map */
-    .col-r{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom));z-index:44;
+    .col-r{position:fixed;left:0;right:0;bottom:calc(74px + env(safe-area-inset-bottom));z-index:44;
         display:flex;flex-direction:column;gap:10px;align-items:stretch;
         max-height:72vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
         padding:0 12px 10px;background:none;
@@ -698,7 +698,7 @@
 
   /* mini now-playing dock (mobile, over the map) */
   .mini-dock{position:fixed;z-index:43;display:none;align-items:center;gap:11px;cursor:pointer;overflow:hidden;
-    left:8px;right:8px;bottom:calc(60px + env(safe-area-inset-bottom));border-radius:16px;padding:9px 11px;
+    left:8px;right:8px;bottom:calc(74px + env(safe-area-inset-bottom));border-radius:16px;padding:9px 11px;
     background:var(--card);backdrop-filter:blur(28px) saturate(1.2);border:.5px solid var(--border);box-shadow:0 12px 34px rgba(0,0,0,.4);}
   .mini-dock .c{width:42px;height:42px;border-radius:9px;background:#15171c 50%/cover no-repeat;flex-shrink:0;}
   .mini-dock .x{flex:1;min-width:0;}
@@ -709,7 +709,7 @@
   .mini-dock .pp{width:40px;height:40px;border-radius:50%;background:var(--acc);color:#000;flex-shrink:0;}
   .mini-dock .pp svg{width:15px;height:15px;}
   .mini-dock .mdfill{position:absolute;left:0;bottom:0;height:2px;background:var(--acc);width:0;}
-  @media(max-width:760px){ .mini-dock.show{display:flex;} body[data-dock] .col-r{bottom:calc(118px + env(safe-area-inset-bottom));} }
+  @media(max-width:760px){ .mini-dock.show{display:flex;} body[data-dock] .col-r{bottom:calc(132px + env(safe-area-inset-bottom));} }
 
   /* ===== phone dialer (real tel: calls) ===== */
   .dialer{margin-bottom:16px;}
@@ -1262,7 +1262,7 @@
   function initMap(){
     map=L.map('map',{zoomControl:true,attributionControl:true}).setView([46.6,2.4],5);
     var t=effectiveTheme();
-    tileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+THEMES[t]+'/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+    tileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+THEMES[t]+'/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',updateWhenIdle:false,updateWhenZooming:false,keepBuffer:4}).addTo(map);
     routeLine=L.polyline([],{color:t==='dark'?'#fff':'#111',weight:6,opacity:.92,lineJoin:'round'}).addTo(map);
     accCircle=L.circle([46.6,2.4],{radius:0,color:'#888',weight:1,opacity:.3,fillOpacity:.05}).addTo(map);
     poiLayer=L.layerGroup().addTo(map);
