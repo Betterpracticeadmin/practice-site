@@ -955,6 +955,9 @@
     <h3>Trafic temps réel (optionnel)</h3>
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
     <div class="key-note">Sans clé : estimation honnête selon les heures de pointe (jour/heure). Avec une clé <b>TomTom</b> gratuite (2 500 req/jour), le niveau de trafic, le retard et l'ETA deviennent <b>live</b>, comme Waze.</div>
+    <h3>Rappel de pause</h3>
+    <div class="seg" id="pauseSeg"><button data-ps="on" class="on">Activé</button><button data-ps="off">Désactivé</button></div>
+    <div class="key-note">Sur les longs trajets, Practice te suggère une <b>pause</b> après environ <b>2 h de conduite continue</b> (recommandation sécurité) : annonce vocale + bandeau discret en haut, <b>sans bouton</b>. Le compteur se remet à zéro après un vrai arrêt (plus de 4 min).</div>
     <h3>Mémoire</h3>
     <div id="memBox" class="mem-box"></div>
     <div class="seg" id="memActions"><button id="memResume">↻ Reprendre le dernier</button><button id="memClear">Effacer la mémoire</button></div>
@@ -1877,6 +1880,7 @@
 
   /* ---------- mode / settings panel ---------- */
   function openPanel(){ syncPanel(); renderMem(); $('panelBg').classList.add('show'); }
+  if($('pauseSeg'))$('pauseSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; pauseOn=(b.dataset.ps==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); if(Mem.prefs)Mem.prefs.pause=pauseOn; saveMem(); toast(pauseOn?'Rappel de pause activé':'Rappel de pause désactivé'); });
   (function paxInit(){ var url=location.origin+'/os.html'; var q=$('paxQR'); if(q)q.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&qzone=1&bgcolor=ffffff&data='+encodeURIComponent(url); var c=$('paxCopy'); if(c)c.addEventListener('click',function(){ try{ navigator.clipboard.writeText(url).then(function(){toast('Lien copié');},function(){toast(url);}); }catch(e){ toast(url); } }); })();
   function renderMem(){ var b=$('memBox'); if(!b)return; var h='';
     if(Mem.lastDest)h+='<div class="mem-line">Dernier trajet : <b>'+Mem.lastDest.name+'</b></div>';
@@ -2355,6 +2359,18 @@
   /* ---- Lot 2 : couche securite persistante (au-dessus de toutes les vues) + suggestions proactives ---- */
   var safetyT=null;
   function safety(text,level,ms){ var el=$('safetyStrip'); if(!el)return; el.className=''; if(level)el.classList.add(level); var tx=el.querySelector('.ss-tx'); if(tx)tx.textContent=text; el.classList.add('show'); clearTimeout(safetyT); safetyT=setTimeout(function(){el.classList.remove('show');},ms||4200); }
+  /* rappel de pause sur longs trajets (desactivable dans les reglages) — annonce vocale + bandeau discret, pas de bouton */
+  var pauseOn=true, driveMs=0, stoppedMs=0, lastPauseTick=Date.now(), lastPauseSugg=0, PAUSE_AFTER=2*60*60000;
+  setInterval(function(){ var now=Date.now(); var dt=now-lastPauseTick; lastPauseTick=now;
+    if(typeof demoMode!=='undefined'&&demoMode)return;
+    var spd=(typeof liveSpd!=='undefined'?liveSpd:0);
+    if(spd>8){ driveMs+=dt; stoppedMs=0; } else { stoppedMs+=dt; if(stoppedMs>4*60000)driveMs=0; }   /* vrai arret >4min => compteur a zero */
+    if(pauseOn && driveMs>=PAUSE_AFTER && now-lastPauseSugg>30*60000){ lastPauseSugg=now;
+      var mn=Math.round(driveMs/60000), hh=Math.floor(mn/60), mm=mn%60;
+      if(typeof safety==='function')safety('Pause conseillée · '+hh+'h'+(mm<10?'0':'')+mm+' de conduite','info',8000);
+      if(Voice.on&&typeof sayVA==='function')sayVA('Tu roules depuis '+hh+' heure'+(hh>1?'s':'')+'. Une pause serait bienvenue. Dis « Practice, trouve un café » quand tu veux.');
+    }
+  },30000);
   /* multi-hypothèses : on essaie chaque transcription proposée par le moteur, on retient la 1re qui mappe une intention connue. Compense fortement les erreurs de reconnaissance vocale. */
   function handleSpeech(alts){ alts=(alts||[]).filter(Boolean); if(!alts.length)return;
     for(var i=0;i<alts.length;i++){ if(vocabRun(alts[i])){ showHeard(alts[i]); return; } }
@@ -2617,6 +2633,7 @@
     if(typeof p.poi==='boolean')poiOn=p.poi; if(typeof p.radar==='boolean')radarOn=p.radar;
     if(typeof p.voice==='boolean')Voice.on=p.voice;
     if(p.voiceGender)Voice.gender=p.voiceGender; if(p.sayRate)Voice.sayRate=p.sayRate; if(p.sayPitch)Voice.sayPitch=p.sayPitch; if(p.pitch)Voice.pitch=p.pitch; if(p.ttsVoice)Voice.ttsVoice=p.ttsVoice; if(typeof p.neural==='boolean')Voice.neural=p.neural;
+    if(typeof p.pause==='boolean')pauseOn=p.pause; if($('pauseSeg'))[].forEach.call($('pauseSeg').children,function(x){x.classList.toggle('on',(x.dataset.ps==='on')===(pauseOn!==false));});
     if($('voiceKind'))[].forEach.call($('voiceKind').children,function(x){x.classList.toggle('on',(x.dataset.vk==='neural')===(Voice.neural!==false));});
     setMode(p.mode||'copilot',true); applyTheme(); Voice.pick();
     if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
