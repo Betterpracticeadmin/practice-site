@@ -1718,8 +1718,9 @@
     }).catch(function(){hideSuggest();}); }
   function osrmRt(rt){ var steps=[]; (rt.legs||[]).forEach(function(l){(l.steps||[]).forEach(function(s){steps.push(s);});}); return {coords:rt.geometry.coordinates,dist:rt.distance,dur:rt.duration,steps:steps}; }
   var OSRM=['https://router.project-osrm.org','https://routing.openstreetmap.de/routed-car'];
-  function osrmTry(path,i){ i=i||0; if(i>=OSRM.length)return Promise.resolve(null);
-    return fetchJSON(OSRM[i]+path,null,1).then(function(j){ if(j&&j.routes&&j.routes.length)return j; return osrmTry(path,i+1); }).catch(function(){ return osrmTry(path,i+1); }); }
+  function osrmTry(path){ return new Promise(function(resolve){ var n=OSRM.length, done=0, settled=false;
+    function fin(){ if(++done>=n&&!settled){settled=true;resolve(null);} }
+    OSRM.forEach(function(h){ fetchJSON(h+path,null,1).then(function(j){ if(!settled&&j&&j.routes&&j.routes.length){settled=true;resolve(j);} else fin(); },fin); }); }); }
   function getRoute(from,to){ return osrmTry('/route/v1/driving/'+from.lon+','+from.lat+';'+to.lon+','+to.lat+'?overview=full&geometries=geojson&steps=true').then(function(j){
     return (j&&j.routes&&j.routes.length)?osrmRt(j.routes[0]):null; }); }
   function getRoutes(from,to){ return osrmTry('/route/v1/driving/'+from.lon+','+from.lat+';'+to.lon+','+to.lat+'?overview=full&geometries=geojson&steps=true&alternatives=2').then(function(j){
@@ -2082,24 +2083,29 @@
   function isGo(t){ return GOCONF.test(t)||GOLAUNCH.test(t); }
   /* ---- recherche de lieu robuste : plusieurs serveurs Overpass + rayon croissant + repli texte (Photon). Ne dit jamais "impossible" si le lieu existe ; toujours trié par distance réelle. ---- */
   var OVPASS=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
-  function overpassTry(query,i){ i=i||0; if(i>=OVPASS.length)return Promise.reject('overpass');
-    return fetchJSON(OVPASS[i]+'?data='+encodeURIComponent(query),null,1).catch(function(){ return overpassTry(query,i+1); }); }
-  function poiSearch(def,radius){ var pos=pts[pts.length-1]; var q='[out:json][timeout:25];('+def.q+'(around:'+radius+','+pos.lat+','+pos.lon+'););out center 150;';
-    return overpassTry(q).then(function(j){ var best=null,bd=1e12,bla,blo; ((j&&j.elements)||[]).forEach(function(e){ var la=e.lat||(e.center&&e.center.lat),lo=e.lon||(e.center&&e.center.lon); if(la==null||lo==null)return; var d=haversine(pos,{lat:la,lon:lo}); if(d<bd){bd=d;best=e;bla=la;blo=lo;} }); return best?{el:best,d:bd,lat:bla,lon:blo}:null; }); }
-  function announcePOI(def,r,auto){ var pos=pts[pts.length-1]; var nm=(r.el&&r.el.tags&&(r.el.tags.name||r.el.tags.brand||r.el.tags.operator))||r.name||def.n; lastRef={name:nm,lat:r.lat,lon:r.lon};
+  var poiSearching=false;
+  /* "Google-Maps speed" : les 3 serveurs sont interrogés EN PARALLELE, le 1er qui répond gagne (au lieu d'essayer en série) */
+  function overpassRace(query){ return new Promise(function(resolve){ var n=OVPASS.length, done=0, settled=false;
+    function fin(){ if(++done>=n&&!settled){settled=true;resolve(null);} }
+    OVPASS.forEach(function(url){ fetchJSON(url+'?data='+encodeURIComponent(query),null,1).then(function(j){ if(!settled&&j){settled=true;resolve(j);} else fin(); },fin); }); }); }
+  function nearestOf(j,pos){ var best=null,bd=1e12,bla,blo; ((j&&j.elements)||[]).forEach(function(e){ var la=e.lat||(e.center&&e.center.lat),lo=e.lon||(e.center&&e.center.lon); if(la==null||lo==null)return; var d=haversine(pos,{lat:la,lon:lo}); if(d<bd){bd=d;best=e;bla=la;blo=lo;} }); return best?{el:best,d:bd,lat:bla,lon:blo}:null; }
+  function poiSearch(def,radius){ var pos=pts[pts.length-1]; var q='[out:json][timeout:12];('+def.q+'(around:'+radius+','+pos.lat+','+pos.lon+'););out center 80;';
+    return overpassRace(q).then(function(j){ return nearestOf(j,pos); }); }
+  function announcePOI(def,r,auto){ poiSearching=false; var pos=pts[pts.length-1]; var nm=(r.el&&r.el.tags&&(r.el.tags.name||r.el.tags.brand||r.el.tags.operator))||r.name||def.n; lastRef={name:nm,lat:r.lat,lon:r.lon};
     var dtxt=r.d<1000?(Math.round(r.d/10)*10+' mètres'):((r.d/1000).toFixed(1)+' kilomètres'); var dir=cardinal(bearing(pos,{lat:r.lat,lon:r.lon}));
     showFoundOnMap(nm,r.lat,r.lon);
     if(auto){ pendingNav=null; $('dest').value=nm; sayVA('Je t\'emmène à '+nm+', à '+dtxt+' vers le '+dir+'. C\'est parti.'); startRouteTo({name:nm,lat:r.lat,lon:r.lon}); return; }
     pendingNav={name:nm,lat:r.lat,lon:r.lon}; sayVA(nm+', à '+dtxt+' vers le '+dir+'. Je l\'ai placée sur la carte. Tu veux que je lance le trajet ?'); }
   function poiFallbackText(def,auto){ var pos=pts[pts.length-1];
-    fetchJSON('https://photon.komoot.io/api/?q='+encodeURIComponent(def.n)+'&lat='+pos.lat+'&lon='+pos.lon+'&limit=15&lang=fr',null,2).then(function(j){ var best=null,bd=1e12;
+    fetchJSON('https://photon.komoot.io/api/?q='+encodeURIComponent(def.n)+'&lat='+pos.lat+'&lon='+pos.lon+'&limit=15&lang=fr',null,1).then(function(j){ var best=null,bd=1e12;
       ((j&&j.features)||[]).forEach(function(f){ var c=f.geometry&&f.geometry.coordinates; if(!c)return; var d=haversine(pos,{lat:c[1],lon:c[0]}); if(d<bd){bd=d;best={lat:c[1],lon:c[0],d:d,name:(f.properties&&(f.properties.name))||def.n};} });
-      if(!best){ sayVA('Je ne trouve pas de '+def.n+' dans les environs, désolé.'); return; }
+      if(!best){ poiSearching=false; sayVA('Je ne trouve pas de '+def.n+' dans les environs, désolé.'); return; }
       announcePOI(def,best,auto);
-    }).catch(function(){ sayVA('La recherche est momentanément indisponible, réessaie dans un instant.'); }); }
+    },function(){ poiSearching=false; sayVA('La recherche est momentanément indisponible, réessaie dans un instant.'); }); }
   function nearestPOI(def,auto){ var pos=pts.length?pts[pts.length-1]:null; if(!pos){ sayVA('Active d\'abord ta position pour que je cherche autour de toi.'); return; }
-    sayVA('Je cherche la '+def.n+' la plus proche…');
-    poiSearch(def,3000).then(function(r){ return r||poiSearch(def,12000); }).then(function(r){ return r||poiSearch(def,40000); })
+    if(poiSearching)return;                                   /* deja une recherche en cours -> on ne ré-annonce pas */
+    poiSearching=true; sayVA('Je cherche la '+def.n+' la plus proche…');
+    poiSearch(def,7000).then(function(r){ return r||poiSearch(def,35000); })
       .then(function(r){ if(r)announcePOI(def,r,auto); else poiFallbackText(def,auto); })
       .catch(function(){ poiFallbackText(def,auto); }); }
   /* ---- Claude-backed free conversation (needs ANTHROPIC_API_KEY on Vercel) ---- */
