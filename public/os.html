@@ -1978,9 +1978,12 @@
   /* Practice ne doit pas s'écouter parler (sinon il coupe sa phrase) : on ignore le micro pendant qu'il parle, et on relance le minuteur de conversation quand il a fini */
   /* ===== verrou de réponse STRICT : une seule réponse active à la fois ; micro coupé pendant que Practice parle (impossible qu'il s'entende -> aucune récursion, aucune auto-réponse, aucun doublon) ===== */
   var vaSpeaking=false, vaSpeakEnd=0, speakSafety=null, responding=false, recogRunning=false, recogPaused=false, respondSafety=null, spkBusy=false, spkQ=null;
-  function startRecog(){ if(!recog||!vaOn||recogRunning||recogPaused||responding)return; try{ recog.start(); recogRunning=true; }catch(e){} }
-  function beginResponse(){ responding=true; recogPaused=true; if(recog&&recogRunning){ try{recog.stop();}catch(e){} } clearTimeout(respondSafety); respondSafety=setTimeout(endResponse, 12000); }
-  function endResponse(){ responding=false; recogPaused=false; clearTimeout(respondSafety); setTimeout(startRecog, 300); }
+  /* démarrage robuste : on ne se bloque PLUS sur recogRunning (qui peut se désynchroniser de l'état réel du moteur et tuer le micro). Si déjà démarré, recog.start() lève une erreur inoffensive qu'on avale. */
+  function startRecog(){ if(!recog||!vaOn||recogPaused||responding)return; try{ recog.start(); recogRunning=true; }catch(e){ recogRunning=true; } }
+  function beginResponse(){ responding=true; recogPaused=true; if(recog){ try{recog.stop();}catch(e){} } clearTimeout(respondSafety); respondSafety=setTimeout(endResponse, 10000); }
+  function endResponse(){ responding=false; recogPaused=false; clearTimeout(respondSafety); setTimeout(startRecog, 280); }
+  /* CHIEN DE GARDE : toutes les 3,5 s, si l'assistant est actif et que Practice ne parle pas, on s'assure que le micro tourne -> auto-réparation si le moteur s'est arrêté en silence (Practice ne réagit plus). */
+  setInterval(function(){ if(vaOn && !responding && !recogPaused && recog){ try{ recog.start(); recogRunning=true; }catch(e){} } }, 3500);
   function markSpeakEnd(){ vaSpeaking=false; vaSpeakEnd=Date.now(); clearTimeout(speakSafety); spkBusy=false; if(responding)endResponse(); if(typeof awake!=='undefined'&&awake&&vaOn&&typeof resetAwake==='function')resetAwake();
     if(spkQ){ var n=spkQ; spkQ=null; setTimeout(function(){ _emitSpeak(n.t,n.quiet); }, 130); } /* une annonce de guidage attendait la fin -> on l'enchaîne sans se couper la parole */ }
   function webSpeak(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice){u.voice=Voice.voice;u.lang=Voice.voice.lang;} u.rate=Voice.sayRate||0.85; u.pitch=Voice.sayPitch||0.92; u.volume=Voice.volume||0.96; u.onend=markSpeakEnd; u.onerror=markSpeakEnd; speechSynthesis.speak(u);} else markSpeakEnd(); }catch(e){ markSpeakEnd(); } }
