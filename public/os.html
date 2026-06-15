@@ -651,8 +651,9 @@
   @keyframes mediaIn{from{opacity:0;transform:scale(1.04);}to{opacity:1;transform:none;}}
   #mediaBlur{position:absolute;inset:-16%;z-index:0;background:#15171c 50%/cover no-repeat;filter:blur(70px) saturate(1.9) brightness(.58);transform:scale(1.3);transition:background-image .7s ease;}
   .media-ov::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom, rgba(10,8,12,.28), rgba(8,6,10,.5) 52%, rgba(5,4,7,.88));}
-  .media-seg{display:inline-flex;gap:2px;background:rgba(255,255,255,.14);border:.5px solid rgba(255,255,255,.12);border-radius:30px;padding:3px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);}
-  .media-seg button{background:none;border:none;color:rgba(255,255,255,.62);font-size:12px;font-weight:500;padding:7px 16px;border-radius:24px;cursor:pointer;transition:.2s cubic-bezier(.34,1.4,.5,1);}
+  .media-seg{display:inline-flex;gap:2px;background:rgba(255,255,255,.14);border:.5px solid rgba(255,255,255,.12);border-radius:30px;padding:3px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);max-width:100%;overflow-x:auto;scrollbar-width:none;}
+  .media-seg::-webkit-scrollbar{display:none;}
+  .media-seg button{background:none;border:none;color:rgba(255,255,255,.62);font-size:12px;font-weight:500;padding:7px 14px;border-radius:24px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:.2s cubic-bezier(.34,1.4,.5,1);}
   .media-seg button.on{background:rgba(255,255,255,.97);color:#101113;font-weight:600;box-shadow:0 3px 12px rgba(0,0,0,.28);}
   .media-search{width:100%;background:rgba(255,255,255,.12);border:.5px solid rgba(255,255,255,.14);border-radius:13px;padding:12px 16px;color:#fff;font-size:15px;margin-bottom:12px;outline:none;box-sizing:border-box;backdrop-filter:blur(20px);}
   .media-search::placeholder{color:rgba(255,255,255,.5);}
@@ -1174,8 +1175,7 @@
   <div id="mediaBlur"></div>
   <div class="media-screen">
     <div class="media-head">
-      <div class="media-seg" id="mediaSeg"><button class="on" data-s="sc">Playlist</button><button data-s="radio">Radio</button><button data-s="podcast">Podcasts</button><button data-s="liked">♥ Favoris</button></div>
-      <button class="media-x" id="paxOpen" title="Vidéo & sources passager">📺</button>
+      <div class="media-seg" id="mediaSeg"><button class="on" data-s="sc">Playlist</button><button data-s="radio">Radio</button><button data-s="podcast">Podcasts</button><button data-s="liked">♥ Favoris</button><button data-s="yt">📺 YouTube</button></div>
       <button class="media-x" id="mediaX">✕</button>
     </div>
     <input class="media-search" id="mediaSearch" type="text" placeholder="Rechercher une station…" autocomplete="off" style="display:none"/>
@@ -2774,7 +2774,7 @@
   rpAudio.addEventListener('pause',function(){ setPlayIcon(false); });
   rpAudio.addEventListener('ended',function(){ if(mediaSource==='podcast')mediaNext(); });
   rpAudio.addEventListener('timeupdate',function(){ if(mediaSource==='podcast'&&rpAudio.duration){ var pct=Math.round(rpAudio.currentTime/rpAudio.duration*100); ['mFill','mdFill','plFill'].forEach(function(id){var e=$(id);if(e)e.style.width=pct+'%';}); if($('mCur'))$('mCur').textContent=fmtT(rpAudio.currentTime*1000); if($('mDur'))$('mDur').textContent=fmtT(rpAudio.duration*1000); } });
-  $('mediaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b)setMediaSource(b.dataset.s); });
+  $('mediaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; if(b.dataset.s==='yt'){ openPaxMedia('yt'); return; } /* onglet Vidéo : ouvre l'interface YouTube/Spotify/Apple, sans changer la source audio */ setMediaSource(b.dataset.s); });
   $('mediaSearch').addEventListener('input',function(){ var q=this.value.trim(); clearTimeout(rpTimer); if(q.length<2)return; rpTimer=setTimeout(function(){ if(mediaSource==='radio')searchRadio(q); else if(mediaSource==='podcast')searchPodcast(q); },420); });
 
   /* ---------- phone (call screen) ---------- */
