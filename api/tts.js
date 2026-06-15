@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
   // Voix : 1) celle demandée par le front, 2) celle déposée en variable d'env (plusieurs noms possibles), 3) Sarah par défaut.
   const ENV_VOICE = process.env.ELEVENLABS_VOICE_ID || process.env.ELEVENLABS_VOICE || process.env.ELEVEN_VOICE_ID || process.env.VOICE_ID || process.env.TTS_VOICE || process.env.ELEVEN_VOICE || '';
-  const voice = body.voice || ENV_VOICE || 'EXAVITQu4vr4xnSDxMaL';
+  const voice = body.voice || ENV_VOICE || 'cgSgspJ2msm6clMCkdW9';
 
   try {
     const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?optimize_streaming_latency=2', {
