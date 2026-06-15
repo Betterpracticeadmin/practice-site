@@ -973,7 +973,19 @@
     <h3>Timbre de voix</h3>
     <div class="seg" id="voiceKind"><button data-vk="neural" class="on">🎬 Réaliste (Roger)</button><button data-vk="web">Navigateur</button></div>
     <button id="voiceTest" class="key-in" style="margin-top:8px;cursor:pointer;text-align:center;font-weight:600;background:var(--acc);color:#000;border:none;">🎧 Écouter un exemple</button>
-    <div class="key-note">La <b>voix réaliste</b> (ElevenLabs) sonne humaine, contrairement à la voix synthétique du navigateur. Touche « <b>Écouter un exemple</b> » pour la tester. Si tu n'entends rien : touche d'abord l'écran (déverrouillage audio), puis réessaie. Commandes : « <b>voix d'homme / voix féminine / voix plus douce</b> ».</div>
+    <div class="key-note">La <b>voix réaliste</b> (ElevenLabs) sonne humaine, contrairement à la voix synthétique du navigateur. Si tu n'entends rien : touche d'abord l'écran (déverrouillage audio), puis réessaie.</div>
+    <h3>Choix de la voix</h3>
+    <div class="seg" id="voicePick" style="flex-wrap:wrap;max-width:100%;">
+      <button data-voice="XrExE9yKIg1WjnnlVkGX">Matilda · chaude ♀</button>
+      <button data-voice="pFZP5JQG7iQjIQuC4Bku">Lily · douce ♀</button>
+      <button data-voice="Xb7hH8MSUJpSbSDYk0k2">Alice · posée ♀</button>
+      <button data-voice="EXAVITQu4vr4xnSDxMaL">Sarah · feutrée ♀</button>
+      <button data-voice="cgSgspJ2msm6clMCkdW9">Jessica · vive ♀</button>
+      <button data-voice="onwK4e9ZLuTAKqWW03F9">Daniel · grave ♂</button>
+      <button data-voice="JBFqnCBsd6RMkjVDRZzb">George · chaud ♂</button>
+      <button data-voice="nPczCjzI2devNBz1zQrb">Brian · profond ♂</button>
+    </div>
+    <div class="key-note">Touche une voix pour l'<b>écouter</b> et la <b>choisir</b> (gardée pour la suite). Pour un rendu <b>posé / sérieux / sensuel</b> : <b>Matilda</b>, <b>Sarah</b> ou <b>Daniel</b> (homme grave). Toutes sont anglophones à la base, donc l'accent français n'est pas parfait — choisis celle qui te plaît le plus à l'oreille.</div>
     <div class="key-note">Practice <b>dort</b> et ne répond que quand tu dis son nom : « <b>Practice</b> » + ton ordre. Après, tu peux <b>enchaîner sans répéter « Practice »</b> pendant ~14 s (mode conversation), puis il se <b>rendort</b> jusqu'au prochain « Practice ». Dis « merci / au revoir » pour le rendormir tout de suite. Comprend le <b>français et l'anglais</b>, tient une petite conversation, et exécute : mode, thème, destination, favoris, média, HUD/Pulse, radar… ainsi que des questions (trafic, ETA, météo, position, heure, titre). Fonctionne sur <b>Chrome / Android</b> (iOS Safari ne gère pas la reconnaissance vocale web).</div>
     <h3>Trafic temps réel (optionnel)</h3>
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
@@ -2638,6 +2650,13 @@
     .catch(function(e){ toast('⚠️ voix indisponible : '+e); }); }
   if($('voiceTest'))$('voiceTest').addEventListener('click',testVoice);
   if($('voiceKind'))$('voiceKind').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Voice.neural=(b.dataset.vk==='neural'); neuralOff=false; if(Mem.prefs)Mem.prefs.neural=Voice.neural;Mem.prefs.voiceVer='jessica1'; saveMem(); toast(Voice.neural?'Voix réaliste activée':'Voix navigateur'); });
+  /* sélecteur de voix : un tap choisit la voix, l'écoute et la mémorise */
+  function hlVoicePick(){ if($('voicePick'))[].forEach.call($('voicePick').children,function(x){x.classList.toggle('on',x.dataset.voice===Voice.ttsVoice);}); }
+  if($('voicePick'))$('voicePick').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return;
+    Voice.ttsVoice=b.dataset.voice; Voice.neural=true; neuralOff=false; hlVoicePick();
+    if(Mem.prefs){ Mem.prefs.ttsVoice=Voice.ttsVoice; Mem.prefs.neural=true; Mem.prefs.voiceVer='jessica1'; } saveMem();
+    unlockNeural(); toast('🎧 '+((b.textContent||'voix').split('·')[0].trim())+'…');
+    if(typeof speakNeural==='function'){ speakNeural('Bonjour '+vaName()+', je suis Practice. Voilà ma nouvelle voix. On prend la route ensemble ?').then(function(){ neuralPlayed=true; }).catch(function(){ toast('🔈 touche l\'écran puis re-touche la voix'); }); } });
   if($('vaName'))$('vaName').addEventListener('change',function(){ Mem.prefs.name=this.value.trim()||'Aldo'; saveMem(); });
 
   /* ---------- SoundCloud real controls (Widget API) ---------- */
@@ -2878,6 +2897,7 @@
     if(typeof p.pauseInterval==='number'){ pauseInterval=p.pauseInterval; nextPauseAt=pauseInterval*60000; if($('paIntSlider'))$('paIntSlider').value=pauseInterval; if($('paIntVal'))$('paIntVal').textContent=fmtDur(pauseInterval); }
     if(typeof p.pauseMax==='number'){ pauseMax=p.pauseMax; if($('paMaxSlider'))$('paMaxSlider').value=pauseMax; if($('paMaxVal'))$('paMaxVal').textContent=pauseMax; }
     if($('voiceKind'))[].forEach.call($('voiceKind').children,function(x){x.classList.toggle('on',(x.dataset.vk==='neural')===(Voice.neural!==false));});
+    if(typeof hlVoicePick==='function')hlVoicePick();
     setMode(p.mode||'copilot',true); applyTheme(); Voice.pick();
     if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
     var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); if(typeof reflectMute==='function')reflectMute();

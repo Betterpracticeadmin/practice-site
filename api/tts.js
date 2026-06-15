@@ -33,8 +33,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         text: text,
         model_id: 'eleven_multilingual_v2',
-        // réglages d'aperçu de l'utilisateur (Roger) : s50 / sb75 / se0 -> posé, naturel, résonant.
-        voice_settings: { stability: 0.45, similarity_boost: 0.9, style: 0.3, use_speaker_boost: true, speed: 0.9 }
+        // ton posé / sérieux / sensuel : plus stable et un peu plus lent -> articulation soignée, voix qui pose les mots.
+        voice_settings: { stability: 0.5, similarity_boost: 0.88, style: 0.32, use_speaker_boost: true, speed: 0.88 }
       })
     });
     if (!r.ok) { const tx = await r.text(); res.status(200).json({ error: 'tts', status: r.status, detail: tx.slice(0, 200) }); return; }
