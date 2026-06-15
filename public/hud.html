@@ -137,6 +137,7 @@
   .tac-bar{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;}
   .tac-bar i{display:block;height:100%;width:0;background:rgba(255,255,255,.28);border-radius:3px;transition:width .4s;}
   .tac-p{width:30px;text-align:right;font-family:var(--mono);color:#8b9298;}
+  .tac-behav{font-size:10px;color:#8b9298;margin-top:9px;line-height:1.45;}
   .tac-foot{font-size:8px;color:#3a3d42;margin-top:9px;font-family:var(--mono);letter-spacing:.04em;line-height:1.45;}
   @media(max-width:900px){ #tactic{width:185px;top:calc(238px + env(safe-area-inset-top));} }
   @media(max-width:760px){ #tactic{display:none;} }
@@ -187,6 +188,7 @@
     <div class="tac-action" id="tacAction">Analyse…</div>
     <div class="tac-why" id="tacWhy"></div>
     <div id="tacBars"></div>
+    <div class="tac-behav" id="tacBehav"></div>
     <div class="tac-foot">graphe ego + véhicules · symétrie G/D · inspiré de TacticAI (DeepMind)</div>
   </div>
 
@@ -302,7 +304,7 @@
   function spawnCar(){ var lane=(Math.random()*world.lanes)|0; var v=Math.max(3,world.egoV+(Math.random()*10-6));
     world.cars.push({lane:lane,dist:VIEW_M*0.92+Math.random()*14,v:v}); }
   function spawnPed(){ var side=Math.random()<0.5?-1:1; world.peds.push({dist:30+Math.random()*30,off:side,prog:0,intent:Math.random()<0.5}); }
-  function cutIn(){ world.cars.push({lane:world.egoLane,dist:11,v:Math.max(2,world.egoV-9)}); flashVoiceForce=true; }
+  function cutIn(){ world.cars.push({lane:world.egoLane,dist:11,v:Math.max(2,world.egoV-9),cut:true}); flashVoiceForce=true; }
   var flashVoiceForce=false;
 
   /* ---------- agent logic (ported from agent-os/nodes) ---------- */
@@ -317,6 +319,8 @@
 
     /* move world by ego speed; update entities (closing) */
     world.cars.forEach(function(c){ c.dist-=(world.egoV-c.v)*dt; });
+    /* comportement: certaines voitures déboîtent (à détecter) */
+    if(world.lanes>1 && world.cars.length && Math.random()<0.006){ var rc=world.cars[(Math.random()*world.cars.length)|0]; if(rc&&rc.dist>20&&rc.changedAt==null&&!rc.cut){ var nl=rc.lane+(Math.random()<0.5?-1:1); if(nl>=0&&nl<world.lanes){ rc.lane=nl; rc.changedAt=world.t; } } }
     scrollScenery(dt);
     world.cars=world.cars.filter(function(c){return c.dist>-6 && c.dist<VIEW_M*1.1;});
     world.peds.forEach(function(p){ p.dist-=world.egoV*dt; if(p.intent)p.prog+=dt*0.35; });
@@ -430,6 +434,7 @@
       ctx.fillStyle=SC.car; rr(cx-w/2,cy-h/2,w,h,rd); ctx.fill(); ctx.restore();
       ctx.fillStyle=SC.glass; rr(cx-w*0.3,cy-h*0.26,w*0.6,h*0.3,3); ctx.fill(); // windshield
       var pr=c._r||0; if(pr>0.32){ ctx.strokeStyle='rgba(255,59,70,'+(0.45+pr*0.4)+')'; ctx.lineWidth=2.2; rr(cx-w/2-1,cy-h/2-1,w+2,h+2,rd); ctx.stroke(); } // only flag a real threat
+      var bh=carBehavior(c); if(bh && c.dist<VIEW_M){ ctx.save(); ctx.globalAlpha=Math.min(1,1.3-c.dist/VIEW_M); ctx.fillStyle=bh.col; ctx.font='600 9px JetBrains Mono, monospace'; ctx.textAlign='center'; ctx.fillText(bh.label,cx,cy-h/2-6); ctx.restore(); } // comportement détecté
     });
 
     // pedestrians + intent arrows
@@ -484,13 +489,23 @@
     return {ego:ego,best:best,action:action,why:why,sorted:sorted};
   }
   function getTactic(now){ if(!tacState||now-tacAt>500){ tacState=tacticAI(); tacAt=now; } return tacState; }
+  /* détection de comportements des véhicules autour */
+  function carBehavior(c){ var rel=c.v-world.egoV, inEgo=c.lane===world.egoLane;
+    if(c.cut) return {label:'CUT-IN',col:'#ff3b46'};
+    if(c.changedAt!=null && world.t-c.changedAt<2.6) return {label:'DÉBOÎTE',col:'#f5a623'};
+    if(inEgo && c.dist<13) return {label:'SERRÉ',col:'#ff8c1a'};
+    if(inEgo && c.dist<40 && rel<-4) return {label:'LENT',col:'#f5d020'};
+    if(rel>9) return {label:'RAPIDE',col:'#6AA1FF'};
+    return null; }
   function paintTactic(){ var r=getTactic(Date.now()); if(!r)return;
     if($('tacAction'))$('tacAction').textContent=r.action;
     if($('tacWhy'))$('tacWhy').textContent=r.why;
     if($('tacConf'))$('tacConf').textContent=Math.round(r.best.prob*100)+'%';
     if($('tacBars')){ var html=''; r.sorted.forEach(function(o){ var pct=Math.round(o.prob*100), me=o.lane===r.ego, isb=o.lane===r.best.lane;
       html+='<div class="tac-row"><span class="tac-l">Voie '+(o.lane+1)+(me?' ·toi':'')+'</span><div class="tac-bar"><i style="width:'+pct+'%;'+(isb?'background:#39d98a':'')+'"></i></div><span class="tac-p">'+pct+'%</span></div>'; });
-      $('tacBars').innerHTML=html; } }
+      $('tacBars').innerHTML=html; }
+    if($('tacBehav')){ var uniq={}; world.cars.forEach(function(c){ var b=carBehavior(c); if(b)uniq[b.label]=(uniq[b.label]||0)+1; }); var keys=Object.keys(uniq);
+      $('tacBehav').textContent='Comportements : '+(keys.length?keys.map(function(k){return uniq[k]+'× '+k;}).join(' · '):'aucun'); } }
   function drawTacticLane(g){ var r=getTactic(Date.now()); if(!r||r.best.lane===r.ego)return;
     var bx=laneX(r.best.lane);
     var gg=ctx.createLinearGradient(0,g.topY,0,g.egoY); gg.addColorStop(0,'rgba(57,217,138,0)'); gg.addColorStop(1,'rgba(57,217,138,.15)');
