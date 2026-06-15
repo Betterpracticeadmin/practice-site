@@ -2538,6 +2538,7 @@
     var nqd=navQuestion(t); if(nqd){ lastRef=null; sayVA(pickL(['Je calcule l\'itinéraire vers '+nqd+'.'],['Routing to '+nqd+'.'])); geocode(nqd).then(function(d){ if(d){ $('dest').value=nqd; lastRef={name:nqd,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
     var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|navigue|itin[eé]raire|va|aller|allons|direction|lance|go|trajet|take me|drive me|navigate|go to)\s+(?:à|a|au|aux|vers|jusqu'?à|jusqu'?au|en|sur|to|chez|le|la|les|l')?\s*(.+)/);
     if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=resolveCity(m[1].trim()); lastRef=null; sayVA(pickL(['Je calcule l\'itinéraire vers '+q+'.'],['Routing to '+q+'.'])); geocode(q).then(function(d){ if(d){ $('dest').value=q; lastRef={name:q,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
+    var _calc=calcReply(t); if(_calc){ if(typeof showHeard==='function')showHeard(t); sayVA(_calc); return; } /* calcul / conversion / petit jeu, exécuté en local sans IA */
     if(cityNickAnswer(t))return; /* "c'est quoi Paname" -> "surnom de Paris" */
     if(landmarksAsk(t))return;   /* "quels monuments autour / à voir à X" -> géo-recherche Wikipédia */
     if(wikiAsk(t))return;       /* question encyclopédique → Wikipédia en direct (vraies données, sans téléchargement) */
@@ -2645,6 +2646,40 @@
       return say(_rnd(['Commence par la plus petite étape — le reste suit toujours. Et garde les yeux sur la route.','Fais ce qui te rapproche de qui tu veux être. Le bon choix, c\'est souvent le plus honnête.']));
     return false;
   }
+  /* ===== capacités exécutées EN LOCAL (sans IA) : calcul, conversions, petits jeux ===== */
+  function _num(s){ return parseFloat(((s||'')+'').replace(',','.')); }
+  function doMath(expr){ if(!expr)return null;
+    var s=(expr+'').toLowerCase()
+      .replace(/\bla racine (?:carr[ée]e )?de\s+([\d.,]+)/g,function(_m,n){ return Math.sqrt(_num(n)); })
+      .replace(/([\d.,]+)\s+(?:au carr[ée]|puissance\s*2)/g,function(_m,n){ return Math.pow(_num(n),2); })
+      .replace(/([\d.,]+)\s+puissance\s+([\d.,]+)/g,function(_m,a,b){ return Math.pow(_num(a),_num(b)); })
+      .replace(/([\d.,]+)\s*(?:%|pour ?cent)\s*(?:de|sur)\s*([\d.,]+)/g,function(_m,a,b){ return _num(a)/100*_num(b); })
+      .replace(/\bplus\b/g,'+').replace(/\bmoins\b/g,'-').replace(/\b(?:fois|multipli[ée] par|×)\b/g,'*').replace(/\b(?:divis[ée] par|sur|÷)\b/g,'/')
+      .replace(/[^0-9.+\-*/() ]/g,' ').replace(/\s+/g,' ').trim();
+    if(!/[0-9]/.test(s)||!/^[0-9.+\-*/() ]+$/.test(s))return null;
+    try{ var v=Function('"use strict";return ('+s+')')(); if(typeof v==='number'&&isFinite(v))return Math.round(v*1000)/1000; }catch(e){}
+    return null; }
+  function convReply(s){
+    var tc=s.match(/(-?[\d.,]+)\s*(?:°|degr[ée]s?)?\s*c(?:elsius)?\b[^a-z]*(?:en|vers|to|dans)[^a-z]*(?:°|degr[ée]s?)?\s*f/); if(tc)return Math.round(_num(tc[1])*9/5+32)+' degrés Fahrenheit.';
+    var tf=s.match(/(-?[\d.,]+)\s*(?:°|degr[ée]s?)?\s*f(?:ahrenheit)?\b[^a-z]*(?:en|vers|to|dans)[^a-z]*(?:°|degr[ée]s?)?\s*c/); if(tf)return Math.round((_num(tf[1])-32)*5/9)+' degrés Celsius.';
+    var u=s.match(/([\d.,]+)\s*(km\/?h|kmh|km|kilom[èe]tres?|miles?|milles?|mph)\s*(?:en|vers|to|dans)\s*(km\/?h|kmh|km|kilom[èe]tres?|miles?|milles?|mph)/);
+    if(u){ var v=_num(u[1]),f1=u[2],t1=u[3],isMi=function(x){return /mile|mille|mph/.test(x);},perH=function(x){return /h|mph/.test(x);};
+      if(!isMi(f1)&&isMi(t1))return (Math.round(v*0.621371*100)/100)+(perH(t1)?' miles par heure.':' miles.');
+      if(isMi(f1)&&!isMi(t1))return (Math.round(v*1.60934*100)/100)+(perH(t1)?' kilomètres par heure.':' kilomètres.'); }
+    var w=s.match(/([\d.,]+)\s*(?:kg|kilos?|kilogrammes?)\s*(?:en|vers|to|dans)\s*(?:livres?|lbs?|pounds?)/); if(w)return (Math.round(_num(w[1])*2.20462*100)/100)+' livres.';
+    var w2=s.match(/([\d.,]+)\s*(?:livres?|lbs?|pounds?)\s*(?:en|vers|to|dans)\s*(?:kg|kilos?|kilogrammes?)/); if(w2)return (Math.round(_num(w2[1])/2.20462*100)/100)+' kilos.';
+    return null; }
+  function calcReply(t){ var s=' '+(t||'').toLowerCase()+' ';
+    if(/\b(pile ou face|[àa] pile ou face|lance (?:une )?pi[èe]ce)\b/.test(s))return _rnd(['Pile !','Face !']);
+    if(/\b(?:lance|jette|tire|roule)\s+(?:un |les |le )?d[ée]s?(?![a-z])/.test(s))return 'Le dé donne… '+(1+Math.floor(Math.random()*6))+' !';
+    var ch=s.match(/\bchoisis (?:pour moi |entre )?(.+)/)||s.match(/\btire au sort (?:entre )?(.+)/);
+    if(ch){ var opts=ch[1].split(/\s*(?:,| ou | et )\s*/).map(function(x){return x.trim().replace(/[?.!]+$/,'');}).filter(function(x){return x.length&&x.length<40;}); if(opts.length>=2)return 'Je choisis… '+_rnd(opts)+' !'; }
+    var bet=s.match(/\b(?:un nombre|chiffre) entre (\d+) et (\d+)/); if(bet){ var lo=+bet[1],hi=+bet[2]; if(hi>lo)return 'Je dis '+(lo+Math.floor(Math.random()*(hi-lo+1)))+'.'; }
+    var cv=convReply(s); if(cv)return cv;
+    var mm=s.match(/\b(?:combien (?:font|fait|[çc]a fait)|calcule|[ée]gale?|r[ée]sultat de)\b(.+)/);
+    var r=doMath(mm?mm[1]:(/[0-9]\s*[-+*/×÷]\s*[0-9]|racine|puissance|carr[ée]|pour ?cent|\d+\s*%/.test(s)?s:''));
+    if(r!=null)return 'Ça fait '+r+'.';
+    return null; }
   function pickL(fr,en,ja){ var a=(LANG==='ja'&&ja)?ja:((LANG==='ja'&&en)?en:((LANG==='en'&&en)?en:fr)); return a[Math.floor((Date.now()/900)%a.length)]; }
   /* texte localisé avec repli : LANG -> en -> fr */
   function tr(o){ return (o&&(o[LANG]||o.en||o.fr))||''; }
