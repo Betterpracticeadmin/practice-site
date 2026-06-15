@@ -1984,6 +1984,8 @@
   function endResponse(){ responding=false; recogPaused=false; clearTimeout(respondSafety); setTimeout(startRecog, 280); }
   /* CHIEN DE GARDE : toutes les 3,5 s, si l'assistant est actif et que Practice ne parle pas, on s'assure que le micro tourne -> auto-réparation si le moteur s'est arrêté en silence (Practice ne réagit plus). */
   setInterval(function(){ if(vaOn && !responding && !recogPaused && recog){ try{ recog.start(); recogRunning=true; }catch(e){} } }, 3500);
+  /* relance immédiate quand l'onglet/l'app revient au premier plan (les navigateurs mobiles coupent la reco en arrière-plan) */
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden && vaOn && !responding && !recogPaused && recog){ try{ recog.start(); recogRunning=true; }catch(e){} } });
   function markSpeakEnd(){ vaSpeaking=false; vaSpeakEnd=Date.now(); clearTimeout(speakSafety); spkBusy=false; if(responding)endResponse(); if(typeof awake!=='undefined'&&awake&&vaOn&&typeof resetAwake==='function')resetAwake();
     if(spkQ){ var n=spkQ; spkQ=null; setTimeout(function(){ _emitSpeak(n.t,n.quiet); }, 130); } /* une annonce de guidage attendait la fin -> on l'enchaîne sans se couper la parole */ }
   function webSpeak(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice){u.voice=Voice.voice;u.lang=Voice.voice.lang;} u.rate=Voice.sayRate||0.85; u.pitch=Voice.sayPitch||0.92; u.volume=Voice.volume||0.96; u.onend=markSpeakEnd; u.onerror=markSpeakEnd; speechSynthesis.speak(u);} else markSpeakEnd(); }catch(e){ markSpeakEnd(); } }
@@ -2265,9 +2267,9 @@
   function askClaude(t){ var ctx={ speed:Math.round(liveSpd||0), loc:($('wxLoc')?($('wxLoc').textContent||'').trim():''), nav:(navActive?($('navEta')?$('navEta').textContent:''):'aucune'), mode:(typeof mode!=='undefined'?mode:''), temp:($('wxTemp')?$('wxTemp').textContent:'') };
     vaHist.push({role:'user',content:t}); vaHist=vaHist.slice(-8);
     fetch('/api/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:vaHist,ctx:ctx,lang:LANG,name:vaName()})}).then(function(r){return r.json();}).then(function(j){
-      if(!j||!j.reply){ localMiss(t); return; } var rep=j.reply; var am=rep.match(/ACTION:\s*([a-z_]+)\s*[:=]\s*([^\n]+)/i); if(am){ rep=rep.replace(am[0],'').trim(); handleClaudeAction(am[1].toLowerCase(),am[2].trim()); }
+      if(!j||!j.reply){ wikiFallback(t); return; } /* Claude indisponible (ex: clé absente) -> on tente Wikipédia avant d'abandonner */ var rep=j.reply; var am=rep.match(/ACTION:\s*([a-z_]+)\s*[:=]\s*([^\n]+)/i); if(am){ rep=rep.replace(am[0],'').trim(); handleClaudeAction(am[1].toLowerCase(),am[2].trim()); }
       vaHist.push({role:'assistant',content:j.reply}); if(rep)sayVA(rep);
-    }).catch(function(){ localMiss(t); }); }
+    }).catch(function(){ wikiFallback(t); }); }
   function handleClaudeAction(verb,arg){ if(verb==='navigate'){ geocode(arg).then(function(d){ if(d){$('dest').value=arg;startRouteTo(d);} }); }
     else if(verb==='mode'){ runCmd('mode '+arg); } else if(verb==='theme'){ runCmd('thème '+arg); } else if(verb==='nearby'){ for(var i=0;i<POITYPES.length;i++){ if(POITYPES[i].re.test(arg)){ nearestPOI(POITYPES[i]); break; } } }
     else if(verb==='media'){ runCmd(arg); } else if(verb==='view'){ if(typeof setView==='function')setView(arg); } }
@@ -2565,6 +2567,31 @@
           });
       }).catch(function(){ askClaude(t); });
     return true;
+  }
+  /* dernier recours intelligent : si rien n'a matché (et Claude indisponible), on cherche le sujet sur Wikipédia — avec garde-fou de pertinence pour ne JAMAIS inventer une réponse hors-sujet. */
+  function wikiFallback(t){
+    var raw=(t||'').trim(); if(raw.length<3){ miss2(); return; }
+    var informational=/\b(quoi|comment|pourquoi|qui|combien|o[uù]|quand|c'?est|signifie|veut dire|d[ée]finition|histoire|parle|raconte|explique|sais[- ]?tu|connais|c'?[eé]tait|what|how|why|who|where|when)\b/i.test(raw) || _ctok(raw).length<=4;
+    if(!informational){ miss2(); return; }
+    var topic=resolveCity(raw
+      .replace(/^(dis[- ]?moi|peux[- ]?tu( me)?|tu sais|tu peux|raconte[- ]?moi|parle[- ]?moi de|explique[- ]?moi|c'?est quoi|c'?est qui|qu'?est[- ]?ce que?|qui est|qui [eé]tait|comment|pourquoi|donne[- ]?moi des? infos? sur|que sais[- ]?tu de|sur|le |la |les |l'|un |une |des )\s*/i,'')
+      .replace(/\s+(ç?a marche comment|comment ç?a marche|ç?a marche|comment|pourquoi|c'?est quoi|ç?a veut dire quoi|exactement|au juste|en gros|pr[eé]cis[eé]ment)\b.*$/i,'')
+      .replace(/[?!.…]+$/,'').trim());
+    var qtok=_ctok(topic); if(topic.length<2||!qtok.length){ miss2(); return; }
+    if(typeof showHeard==='function')showHeard(t); if(typeof toast==='function')toast('📚 Wikipédia…');
+    var wl=(LANG==='ja'?'ja':(LANG==='en'?'en':'fr'));
+    fetch('https://'+wl+'.wikipedia.org/w/api.php?action=query&format=json&origin=*&list=search&srlimit=1&srsearch='+encodeURIComponent(topic))
+      .then(function(r){return r.json();}).then(function(j){
+        var hit=j&&j.query&&j.query.search&&j.query.search[0]; if(!hit){ miss2(); return; }
+        var titleTok=_ctok(hit.title); var rel=qtok.some(function(w){ return w.length>=4 && titleTok.indexOf(w)>=0; });
+        if(!rel){ miss2(); return; }   /* pas assez proche du sujet -> on n'invente pas */
+        return fetch('https://'+wl+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(hit.title))
+          .then(function(r){return r.json();}).then(function(s){
+            var ex=((s&&s.extract)||'').trim(); if(!ex||(s&&s.type&&s.type.indexOf('disambiguation')>=0)){ miss2(); return; }
+            if(ex.length>300){ var cut=ex.slice(0,300), p=cut.lastIndexOf('. '); ex=(p>120?cut.slice(0,p+1):cut.replace(/\s\S*$/,'')+'…'); }
+            sayVA(ex);
+          });
+      }).catch(function(){ miss2(); });
   }
   function pickL(fr,en,ja){ var a=(LANG==='ja'&&ja)?ja:((LANG==='ja'&&en)?en:((LANG==='en'&&en)?en:fr)); return a[Math.floor((Date.now()/900)%a.length)]; }
   /* texte localisé avec repli : LANG -> en -> fr */
