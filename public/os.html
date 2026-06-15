@@ -1953,9 +1953,9 @@
   /* un seul élément audio, déverrouillé au 1er geste utilisateur (sinon iOS bloque la lecture auto) */
   var SILENT_WAV='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
   var neuralAudio=new Audio(); try{neuralAudio.setAttribute('playsinline','');neuralAudio.preload='auto';}catch(e){}
-  var neuralOff=false, neuralUnlocked=false;
-  function unlockNeural(){ if(neuralUnlocked)return; neuralUnlocked=true; try{ neuralAudio.src=SILENT_WAV; var p=neuralAudio.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){} }
-  document.addEventListener('pointerdown',function _u(){ unlockNeural(); document.removeEventListener('pointerdown',_u,true); },true);
+  var neuralOff=false, neuralPlayed=false;
+  function unlockNeural(){ if(neuralPlayed)return; try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0&&!neuralAudio.paused)return; neuralAudio.muted=true; neuralAudio.src=SILENT_WAV; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){neuralAudio.pause();neuralAudio.muted=false;},function(){neuralAudio.muted=false;}); else neuralAudio.muted=false; }catch(e){} }
+  ['pointerdown','touchend','click'].forEach(function(ev){ document.addEventListener(ev,function(){ unlockNeural(); },true); });
   function stopNeural(){ try{ neuralAudio.pause(); }catch(e){} }
   /* Practice ne doit pas s'écouter parler (sinon il coupe sa phrase) : on ignore le micro pendant qu'il parle, et on relance le minuteur de conversation quand il a fini */
   var vaSpeaking=false, vaSpeakEnd=0, speakSafety=null;
@@ -1964,11 +1964,11 @@
   function speakNeural(t){ try{speechSynthesis.cancel();}catch(e){} stopNeural();
     return fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t,lang:LANG,voice:Voice.ttsVoice})})
       .then(function(r){ var ct=r.headers.get('content-type')||''; if(r.ok&&ct.indexOf('audio')>=0)return r.blob(); return r.json().then(function(j){throw (j&&j.error)||'noaudio';},function(){throw 'noaudio';}); })
-      .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); neuralAudio.onended=markSpeakEnd; var p=neuralAudio.play(); if(p&&p.catch)p.catch(function(){ toast('🔈 lecture bloquée (touche l\'écran)'); webSpeak(t); }); return true; }); }
+      .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); neuralAudio.onended=markSpeakEnd; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){ neuralPlayed=true; }).catch(function(){ webSpeak(t); }); return true; }); }
   function sayVA(t){ lastSpoken=t; if(!Voice.on){toast('🔇 '+t);return;}
     vaSpeaking=true; clearTimeout(speakSafety); speakSafety=setTimeout(markSpeakEnd, Math.min(14000, 1600+((t&&t.length)||0)*90));
     if(neuralOff||Voice.neural===false){ toast('🔈 voix navigateur · '+t); webSpeak(t); return; }
-    toast('🎙 Roger · '+t);
+    toast('🎙 '+t);
     speakNeural(t).catch(function(err){ toast('🔈 repli ('+err+')'); if(err==='no_key'||err==='no_text'||err==='tts'||err==='upstream'){ neuralOff=true; } webSpeak(t); }); }
   /* ---- wake-word conversation state machine (sleeps until "Practice") ---- */
   var awake=false, awakeTimer=null;
@@ -2470,7 +2470,7 @@
   function testVoice(){ unlockNeural(); if(Voice.neural===false){ toast('Active « Réaliste » d\'abord.'); webSpeak('Voix navigateur, bonjour '+vaName()+'.'); return; } toast('🎧 Chargement de la voix…');
     fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:'Bonjour '+vaName()+'. Je suis Practice, ta voix embarquée. Ravi de faire la route avec toi.',lang:LANG,voice:Voice.ttsVoice})})
     .then(function(r){ var ct=r.headers.get('content-type')||''; if(r.ok&&ct.indexOf('audio')>=0)return r.blob(); return r.json().then(function(j){throw ((j&&j.error)||'erreur')+' ('+r.status+')';},function(){throw 'reponse '+r.status;}); })
-    .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); neuralOff=false; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){ toast('🎙 Roger ('+Math.round(b.size/1024)+' Ko)'); }).catch(function(){ toast('🔈 lecture bloquée — touche l\'écran puis réessaie'); }); })
+    .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); neuralOff=false; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){ neuralPlayed=true; toast('🎙 Voix Jessica ('+Math.round(b.size/1024)+' Ko)'); }).catch(function(){ toast('🔈 lecture bloquée — touche l\'écran puis réessaie'); }); })
     .catch(function(e){ toast('⚠️ voix indisponible : '+e); }); }
   if($('voiceTest'))$('voiceTest').addEventListener('click',testVoice);
   if($('voiceKind'))$('voiceKind').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Voice.neural=(b.dataset.vk==='neural'); neuralOff=false; if(Mem.prefs)Mem.prefs.neural=Voice.neural; saveMem(); toast(Voice.neural?'Voix réaliste activée':'Voix navigateur'); });
