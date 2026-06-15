@@ -27,7 +27,7 @@ export default async function handler(req, res) {
   const voice = body.voice || ENV_VOICE || 'cgSgspJ2msm6clMCkdW9';
 
   try {
-    const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?optimize_streaming_latency=2', {
+    const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?optimize_streaming_latency=3&output_format=mp3_44100_64', {
       method: 'POST',
       headers: { 'xi-api-key': key, 'content-type': 'application/json', 'accept': 'audio/mpeg' },
       body: JSON.stringify({

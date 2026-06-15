@@ -1987,10 +1987,19 @@
   function markSpeakEnd(){ vaSpeaking=false; vaSpeakEnd=Date.now(); clearTimeout(speakSafety); spkBusy=false; if(responding)endResponse(); if(typeof awake!=='undefined'&&awake&&vaOn&&typeof resetAwake==='function')resetAwake();
     if(spkQ){ var n=spkQ; spkQ=null; setTimeout(function(){ _emitSpeak(n.t,n.quiet); }, 130); } /* une annonce de guidage attendait la fin -> on l'enchaîne sans se couper la parole */ }
   function webSpeak(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice){u.voice=Voice.voice;u.lang=Voice.voice.lang;} u.rate=Voice.sayRate||0.85; u.pitch=Voice.sayPitch||0.92; u.volume=Voice.volume||0.96; u.onend=markSpeakEnd; u.onerror=markSpeakEnd; speechSynthesis.speak(u);} else markSpeakEnd(); }catch(e){ markSpeakEnd(); } }
+  /* cache audio : les phrases courtes/fréquentes (réponses, confirmations) sont rejouées INSTANTANÉMENT, sans réseau */
+  var ttsCache={}, ttsCacheN=0, lastTmpUrl=null;
+  function playUrl(url,t){ neuralAudio.src=url; neuralAudio.onended=markSpeakEnd; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){ neuralPlayed=true; }).catch(function(){ webSpeak(t); }); }
   function speakNeural(t){ try{speechSynthesis.cancel();}catch(e){} stopNeural();
-    return fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t,lang:LANG,voice:Voice.ttsVoice})})
-      .then(function(r){ var ct=r.headers.get('content-type')||''; if(r.ok&&ct.indexOf('audio')>=0)return r.blob(); return r.json().then(function(j){throw (j&&j.error)||'noaudio';},function(){throw 'noaudio';}); })
-      .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); neuralAudio.onended=markSpeakEnd; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){ neuralPlayed=true; }).catch(function(){ webSpeak(t); }); return true; }); }
+    var key=Voice.ttsVoice+'|'+LANG+'|'+t;
+    if(ttsCache[key]){ playUrl(ttsCache[key],t); return Promise.resolve(true); }   /* déjà connu -> lecture immédiate */
+    var ctrl=(typeof AbortController!=='undefined')?new AbortController():null; var to=setTimeout(function(){ if(ctrl)try{ctrl.abort();}catch(e){} }, 8000); /* anti-blocage : si l'API tarde, on bascule sur la voix navigateur */
+    return fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t,lang:LANG,voice:Voice.ttsVoice}),signal:ctrl?ctrl.signal:undefined})
+      .then(function(r){ clearTimeout(to); var ct=r.headers.get('content-type')||''; if(r.ok&&ct.indexOf('audio')>=0)return r.blob(); return r.json().then(function(j){throw (j&&j.error)||'noaudio';},function(){throw 'noaudio';}); })
+      .then(function(b){ var url=URL.createObjectURL(b);
+        if(t.length<=70&&ttsCacheN<160){ ttsCache[key]=url; ttsCacheN++; }   /* on garde les phrases courtes en cache (limité à 160) */
+        else { if(lastTmpUrl){ try{URL.revokeObjectURL(lastTmpUrl);}catch(e){} } lastTmpUrl=url; }   /* phrase longue : temporaire */
+        playUrl(url,t); return true; }); }
   function sayVA(t,quiet){ if(!t)return; if(!Voice.on){if(!quiet)toast('🔇 '+t);return;}
     /* file d'attente : si Practice parle déjà, une annonce de GUIDAGE (quiet) attend la fin (pas de coupure) ; une réponse conversationnelle prend la priorité */
     if(spkBusy&&quiet){ spkQ={t:t,quiet:true}; return; }
@@ -2594,7 +2603,7 @@
     if(!recog){ recog=new SR(); recog.continuous=true; recog.interimResults=false; recog.maxAlternatives=5; recog.lang=T().code;
       recog.onresult=function(e){
         if(responding) return;   /* VERROU : Practice répond déjà -> on ignore tout, on attend la fin de SA réponse */
-        if(vaSpeaking || Date.now()-vaSpeakEnd < 500) return; /* guidage en cours : on ignore l'écho de la voix de Practice */
+        if(vaSpeaking || Date.now()-vaSpeakEnd < 380) return; /* guidage en cours : on ignore l'écho de la voix de Practice (court délai -> réécoute vite) */
         for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var res=e.results[i];
         var alts=[]; for(var a=0;a<res.length&&a<5;a++){ var s=(res[a].transcript||'').toLowerCase().trim(); if(s&&alts.indexOf(s)<0)alts.push(s); } if(!alts.length)continue;
         /* mot-clé « Practice » — tolérant aux variantes que la reconnaissance vocale FR/EN produit (pratique, praktis, practisse, pratisse, practiz…) sinon il ne se réveille jamais */
