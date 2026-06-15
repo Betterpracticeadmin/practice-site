@@ -128,6 +128,18 @@
     #mapPanel{display:none;}
     #risk{bottom:60px;}
   }
+  /* TacticAI — assistant tactique (inspiré de TacticAI, DeepMind) */
+  #tactic{top:calc(268px + env(safe-area-inset-top));left:calc(16px + env(safe-area-inset-left));width:215px;}
+  #tactic .tac-action{font-weight:700;font-size:15px;margin:2px 0 1px;color:#39d98a;}
+  #tactic .tac-why{font-size:10px;color:#565b61;margin-bottom:9px;}
+  .tac-row{display:flex;align-items:center;gap:7px;margin:5px 0;font-size:11px;}
+  .tac-l{width:56px;color:#8b9298;font-family:var(--mono);}
+  .tac-bar{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;}
+  .tac-bar i{display:block;height:100%;width:0;background:rgba(255,255,255,.28);border-radius:3px;transition:width .4s;}
+  .tac-p{width:30px;text-align:right;font-family:var(--mono);color:#8b9298;}
+  .tac-foot{font-size:8px;color:#3a3d42;margin-top:9px;font-family:var(--mono);letter-spacing:.04em;line-height:1.45;}
+  @media(max-width:900px){ #tactic{width:185px;top:calc(238px + env(safe-area-inset-top));} }
+  @media(max-width:760px){ #tactic{display:none;} }
 </style>
 </head>
 <body data-lvl="SAFE">
@@ -168,6 +180,14 @@
     <div class="ttl"><span><b>02</b> Champ de risque</span><span class="lbl" id="riskActions"></span></div>
     <div class="rk"><div class="n" id="riskN">0.00</div><div class="spark" id="riskSpark"></div></div>
     <div class="trow"><span class="lbl">Avant</span><span class="v" id="rFront">0.00</span></div>
+  </div>
+
+  <div class="panel" id="tactic">
+    <div class="ttl"><span><b>03</b> TacticAI · manœuvre</span><span class="lbl" id="tacConf">—</span></div>
+    <div class="tac-action" id="tacAction">Analyse…</div>
+    <div class="tac-why" id="tacWhy"></div>
+    <div id="tacBars"></div>
+    <div class="tac-foot">graphe ego + véhicules · symétrie G/D · inspiré de TacticAI (DeepMind)</div>
   </div>
 
   <div class="panel" id="voice"><span class="ic"></span><span id="voiceTxt"></span></div>
@@ -386,6 +406,7 @@
     // lane-centering force field (subtle glow in ego lane)
     var elx=laneX(world.egoLane); var fg=ctx.createLinearGradient(0,g.topY,0,g.egoY); fg.addColorStop(0,'rgba(106,161,255,0)'); fg.addColorStop(1,'rgba(106,161,255,.10)');
     ctx.fillStyle=fg; ctx.fillRect(elx-g.lw/2,g.topY,g.lw,g.egoY-g.topY+40);
+    if(typeof drawTacticLane==='function')drawTacticLane(g);
 
     // RACING LINE: chevrons whose colour & behaviour follow the AI mode's identity
     var ms=MODESTYLE[hudMode]||MODESTYLE.copilot;
@@ -437,6 +458,48 @@
   }
   function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 
+  /* ---------- TacticAI : assistant tactique de conduite (inspiré de TacticAI, DeepMind) ----------
+     Modélise ego + véhicules en graphe, score chaque voie (gap, vitesse relative, coût de déboîtement),
+     normalise en probabilités (softmax), recommande la meilleure manœuvre + alternatives. Symétrie G/D respectée. */
+  var tacState=null, tacAt=0;
+  function tacticAI(){
+    var lanes=world.lanes, ego=world.egoLane, egoV=world.egoV, info=[];
+    for(var L=0;L<lanes;L++){
+      var gap=VIEW_M, vAhead=null;
+      world.cars.forEach(function(c){ if(c.lane===L&&c.dist>0&&c.dist<gap){ gap=c.dist; vAhead=c.v; } });
+      var changeCost=Math.abs(L-ego);
+      var clearAhead=Math.min(1,gap/VIEW_M);
+      var speedAdv=(vAhead==null)?0.5:clamp((vAhead-egoV)/12,-1,0.5);
+      var score=clearAhead*1.0 + speedAdv*0.5 - changeCost*0.3;
+      info.push({lane:L,gap:gap,vAhead:vAhead,score:score});
+    }
+    var mx=Math.max.apply(null,info.map(function(o){return o.score;}));
+    var exps=info.map(function(o){return Math.exp((o.score-mx)*2.4);});
+    var sum=exps.reduce(function(a,b){return a+b;},0)||1;
+    info.forEach(function(o,i){ o.prob=exps[i]/sum; });
+    var sorted=info.slice().sort(function(a,b){return b.score-a.score;});
+    var best=sorted[0];
+    var action=best.lane===ego?'Tiens ta voie':(best.lane<ego?'Déboîte à gauche':'Déboîte à droite');
+    var why=best.gap>=VIEW_M?'voie libre devant':(best.lane===ego?'meilleur compromis':'plus d\'espace');
+    return {ego:ego,best:best,action:action,why:why,sorted:sorted};
+  }
+  function getTactic(now){ if(!tacState||now-tacAt>500){ tacState=tacticAI(); tacAt=now; } return tacState; }
+  function paintTactic(){ var r=getTactic(Date.now()); if(!r)return;
+    if($('tacAction'))$('tacAction').textContent=r.action;
+    if($('tacWhy'))$('tacWhy').textContent=r.why;
+    if($('tacConf'))$('tacConf').textContent=Math.round(r.best.prob*100)+'%';
+    if($('tacBars')){ var html=''; r.sorted.forEach(function(o){ var pct=Math.round(o.prob*100), me=o.lane===r.ego, isb=o.lane===r.best.lane;
+      html+='<div class="tac-row"><span class="tac-l">Voie '+(o.lane+1)+(me?' ·toi':'')+'</span><div class="tac-bar"><i style="width:'+pct+'%;'+(isb?'background:#39d98a':'')+'"></i></div><span class="tac-p">'+pct+'%</span></div>'; });
+      $('tacBars').innerHTML=html; } }
+  function drawTacticLane(g){ var r=getTactic(Date.now()); if(!r||r.best.lane===r.ego)return;
+    var bx=laneX(r.best.lane);
+    var gg=ctx.createLinearGradient(0,g.topY,0,g.egoY); gg.addColorStop(0,'rgba(57,217,138,0)'); gg.addColorStop(1,'rgba(57,217,138,.15)');
+    ctx.fillStyle=gg; ctx.fillRect(bx-g.lw/2,g.topY,g.lw,g.egoY-g.topY+40);
+    var ex=laneX(r.ego), ay=g.egoY-66, dir=r.best.lane<r.ego?-1:1;
+    ctx.strokeStyle='rgba(57,217,138,.85)'; ctx.lineWidth=3; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(ex,ay); ctx.lineTo(ex+dir*30,ay); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ex+dir*30,ay); ctx.lineTo(ex+dir*22,ay-7); ctx.lineTo(ex+dir*22,ay+7); ctx.closePath(); ctx.fillStyle='rgba(57,217,138,.9)'; ctx.fill(); }
+
   /* ---------- HUD panels ---------- */
   var STcol={SAFE:'var(--safe)',ALERT:'var(--alert)',CRITICAL:'var(--crit)'};
   var TWcol={calm:['Calme','#46C28E'],focused:['Focalisé','#6AA1FF'],stressed:['Tendu','#E0A33A'],aggressive:['Agressif','#E2554F'],fatigued:['Fatigué','#B98BFF']};
@@ -460,6 +523,7 @@
     var t=TWcol[twin.state]||TWcol.calm; $('dState').textContent=t[0]; $('dDot').style.color=$('dDot').style.background=t[1];
     setB('bFocus','vFocus',twin.focus); setB('bFat','vFat',twin.fatigue); setB('bAgg','vAgg',twin.aggr);
     $('rt').textContent=twin.rt.toFixed(2)+' s';
+    paintTactic();
   }
   function setB(b,v,x){ $(b).style.width=clamp(x,2,100).toFixed(0)+'%'; $(v).textContent=Math.round(x); }
 
