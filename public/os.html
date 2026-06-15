@@ -1855,7 +1855,7 @@
   /* ---------- controls ---------- */
   $('gateGo').addEventListener('click',startGeo);
   $('gateDemo').addEventListener('click',startDemo);
-  $('langSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});LANG=b.dataset.lang;Voice.pick();Mem.prefs.lang=LANG;saveMem();});
+  $('langSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;setLang(b.dataset.lang);});
   $('goBtn').addEventListener('click',function(){var q=$('dest').value.trim();if(!q)return;hideSuggest();setMsg(T().reroute,'');geocode(q).then(function(d){if(!d){toast(T().notFound);return;}startRouteTo(d);}).catch(function(){toast(T().netErr);});});
   $('dest').addEventListener('keydown',function(e){if(e.key==='Enter'){hideSuggest();$('goBtn').click();}});
   $('dest').addEventListener('input',function(){var q=this.value.trim();clearTimeout(suggTimer);suggTimer=setTimeout(function(){searchSuggest(q);},350);});
@@ -1947,7 +1947,7 @@
   $('dmCard').addEventListener('click',openPanel);
   $('modeGrid').addEventListener('click',function(e){ var b=e.target.closest('.mode-btn'); if(b) setMode(b.dataset.m); });
   $('themeSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; themeMode=b.dataset.t; applyTheme(); syncPanel(); Mem.prefs.theme=themeMode;saveMem(); });
-  $('langSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; LANG=b.dataset.l; Voice.pick(); syncPanel(); Mem.prefs.lang=LANG;saveMem(); });
+  $('langSeg2').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; setLang(b.dataset.l||b.dataset.lang); });
   $('voiceSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; Voice.on=(b.dataset.v==='on'); if(!Voice.on)Voice.flush(); var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); syncPanel(); Mem.prefs.voice=Voice.on;saveMem(); });
 
   /* ===== voice assistant — "Practice …" wake word + command engine (Web Speech API) ===== */
@@ -2150,7 +2150,7 @@
     },function(){ poiSearching=false; sayVA('La recherche est momentanément indisponible, réessaie dans un instant.'); }); }
   function nearestPOI(def,auto){ var pos=pts.length?pts[pts.length-1]:null; if(!pos){ sayVA('Active d\'abord ta position pour que je cherche autour de toi.'); return; }
     if(poiSearching)return;                                   /* deja une recherche en cours -> on ne ré-annonce pas */
-    poiSearching=true; sayVA('Je cherche la '+def.n+' la plus proche…');
+    poiSearching=true; sayVA(tr({fr:'Je cherche la '+def.n+' la plus proche…',en:'Looking for the nearest '+def.n+'…',ja:'近くの'+def.n+'を探しています…'}));
     poiSearch(def,7000).then(function(r){ return r||poiSearch(def,35000); })
       .then(function(r){ if(r)announcePOI(def,r,auto); else poiFallbackText(def,auto); })
       .catch(function(){ poiFallbackText(def,auto); }); }
@@ -2365,11 +2365,11 @@
   function vocabRun(t){
     /* une destination est proposée et on attend ton feu vert */
     /* confirmation / lancement de trajet — robuste ; relance aussi le dernier lieu évoqué */
-    if(isGo(t)){ var tg=pendingNav||lastRef; if(tg){ pendingNav=null; clearFound(); sayVA('C\'est parti, je lance le trajet vers '+tg.name+'.'); $('dest').value=tg.name; startRouteTo(tg); return true; }
-      var dv=(($('dest')&&$('dest').value)||'').trim(); if(dv){ sayVA('Je lance le trajet vers '+dv+'.'); geocode(dv).then(function(d){ if(d)startRouteTo({name:dv,lat:d.lat,lon:d.lon}); else sayVA('Adresse introuvable.'); }); return true; }
+    if(isGo(t)){ var tg=pendingNav||lastRef; if(tg){ pendingNav=null; clearFound(); sayVA(tr({fr:'C\'est parti, je lance le trajet vers '+tg.name+'.',en:'Let\'s go, starting the route to '+tg.name+'.',ja:tg.name+'へのルートを開始します。'})); $('dest').value=tg.name; startRouteTo(tg); return true; }
+      var dv=(($('dest')&&$('dest').value)||'').trim(); if(dv){ sayVA(tr({fr:'Je lance le trajet vers '+dv+'.',en:'Starting the route to '+dv+'.',ja:dv+'へのルートを開始します。'})); geocode(dv).then(function(d){ if(d)startRouteTo({name:dv,lat:d.lat,lon:d.lon}); else sayVA(tr({fr:'Adresse introuvable.',en:'Address not found.',ja:'住所が見つかりません。'})); }); return true; }
       if(GOLAUNCH.test(t)){ sayVA('Dis-moi d\'abord où tu veux aller.'); return true; } }
     if(pendingNav&&/^\s*(non|nan|nope|laisse|annule|pas (maintenant|tout de suite|l[aà]|encore)|surtout pas|c'?est bon|plus tard|oublie)\b/.test(t)){ pendingNav=null; clearFound(); sayVA('D\'accord, j\'annule.'); return true; }
-    if(lx(t,'here')&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return true; }
+    if(lx(t,'here')&&lastRef){ sayVA(tr({fr:'On y va : '+lastRef.name+'.',en:'Let\'s go to '+lastRef.name+'.',ja:lastRef.name+'へ向かいます。'})); $('dest').value=lastRef.name; startRouteTo(lastRef); return true; }
     /* "emmène-moi à la plage / pharmacie / station la plus proche" -> trouve le lieu ET lance le trajet directement (pas de confirmation) */
     if(/(emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|d[eé]pose[- ]?moi|je veux aller|j'?aimerais aller|on va\b|direction\b|take me|drive me|bring me|go to|\bva (à|a|au|aux|vers)|\bvas (à|a|au|aux|vers))/i.test(t)){
       var _dest=navTarget(t), _near=/(plus proche|pr[eè]s d'?ici|[aà] proximit[eé]|dans le coin|aux alentours|n'?importe quel|nearest|closest)/i.test(t);
@@ -2379,7 +2379,7 @@
         if(_near||_rest.length<2){ nearestPOI(POITYPES[gi],true); return true; }
         break;
       } }
-      if(_dest&&_dest.replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var _dd=cap(_dest); lastRef=null; sayVA('Je t\'emmène à '+_dd+'.'); geocode(_dest).then(function(d){ if(d){ if($('dest'))$('dest').value=_dd; lastRef={name:_dd,lat:d.lat,lon:d.lon}; startRouteTo({name:_dd,lat:d.lat,lon:d.lon}); } else sayVA('Adresse introuvable.'); }).catch(function(){ sayVA('Réseau indisponible.'); }); return true; } }
+      if(_dest&&_dest.replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var _dd=cap(_dest); lastRef=null; sayVA(tr({fr:'Je t\'emmène à '+_dd+'.',en:'Taking you to '+_dd+'.',ja:_dd+'へお連れします。'})); geocode(_dest).then(function(d){ if(d){ if($('dest'))$('dest').value=_dd; lastRef={name:_dd,lat:d.lat,lon:d.lon}; startRouteTo({name:_dd,lat:d.lat,lon:d.lon}); } else sayVA(tr({fr:'Adresse introuvable.',en:'Address not found.',ja:'住所が見つかりません。'})); }).catch(function(){ sayVA(tr({fr:'Réseau indisponible.',en:'Network unavailable.',ja:'ネットワークに接続できません。'})); }); return true; } }
     if(lx(t,'nearby')){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return true; } } }
     /* ---- sécurité d'abord ---- */
     if(lx(t,'emergency')){ sayVA('En cas d\'urgence appelle le 112 — police 17, SAMU 15. Je ne peux pas passer l\'appel depuis le cockpit ; mets-toi en sécurité et arrête-toi dès que possible.'); return true; }
@@ -2418,7 +2418,7 @@
     if(lx(t,'prev')&&typeof mediaPrev==='function'){ mediaPrev(); sayVA('Titre précédent.'); return true; }
     if(lx(t,'openmedia')&&typeof openMedia==='function'){ openMedia(); sayVA('Média ouvert.'); return true; }
     if((lx(t,'play')||lx(t,'media_genre')||lx(t,'pause'))&&typeof mediaToggle==='function'){ mediaToggle(); sayVA('Musique.'); return true; }
-    if(lx(t,'stopnav')){ stopNav(); setMsg(T().ready,''); sayVA('Navigation arrêtée.'); return true; }
+    if(lx(t,'stopnav')){ stopNav(); setMsg(T().ready,''); sayVA(tr({fr:'Navigation arrêtée.',en:'Navigation stopped.',ja:'ナビを終了しました。'})); return true; }
     if(lx(t,'vpulse')&&typeof setView==='function'){ setView('pulse'); sayVA('Vue Pulse.'); return true; }
     if(lx(t,'vhud')&&typeof setView==='function'){ setView('hud'); sayVA('Vue Practice Vision.'); return true; }
     if(lx(t,'vnormal')&&typeof setView==='function'){ setView('normal'); sayVA('Vue normale.'); return true; }
@@ -2478,7 +2478,7 @@
     if(/(pause|lecture|joue|musique|play|reprend)/.test(t)&&typeof mediaToggle==='function'){ mediaToggle(); sayVA('Musique.'); return; }
     if(/(suivant|next|prochaine|suivante)/.test(t)&&typeof mediaNext==='function'){ mediaNext(); sayVA('Titre suivant.'); return; }
     if(/(pr[eé]c[eé]dent|previous)/.test(t)&&typeof mediaPrev==='function'){ mediaPrev(); sayVA('Titre précédent.'); return; }
-    if(/(arr[eê]te|stop|annule|termine).*(nav|itin|trajet|route|guidage)/.test(t)){ stopNav(); setMsg(T().ready,''); sayVA('Navigation arrêtée.'); return; }
+    if(/(arr[eê]te|stop|annule|termine).*(nav|itin|trajet|route|guidage)/.test(t)){ stopNav(); setMsg(T().ready,''); sayVA(tr({fr:'Navigation arrêtée.',en:'Navigation stopped.',ja:'ナビを終了しました。'})); return; }
     if(/\bhud\b|vision/.test(t)&&typeof setView==='function'){ setView('hud'); sayVA('Vue HUD.'); return; }
     if(/pulse/.test(t)&&typeof setView==='function'){ setView('pulse'); sayVA('Vue Pulse.'); return; }
     if(/radar/.test(t)){ if($('radarBtn'))$('radarBtn').click(); return; }
@@ -2500,7 +2500,7 @@
     if(/(blague|joke|fais[- ]moi rire|raconte)/.test(t)){ sayVA(pickL(['Pourquoi la voiture électrique reste zen ? Zéro émission de stress.','Un GPS entre dans un bar… puis recalcule l\'itinéraire.'],['Why was the EV so calm? Zero stress emissions.'])); return; }
     if(/(quel jour|what day|on est quel)/.test(t)){ try{ sayVA(new Date().toLocaleDateString(LANG==='en'?'en-US':(LANG==='ja'?'ja-JP':'fr-FR'),{weekday:'long',day:'numeric',month:'long'})); }catch(e){} return; }
     /* "j'y vais" / "emmène-moi là" → navigate to the last place we talked about */
-    if(/(j'?y vais|on y va|vas[- ]?y|emm[eè]ne[- ]?moi (là|y)|je veux m'?y rendre|rends[- ]?y moi|go there|take me there|allons[- ]?y)/.test(t)&&lastRef){ sayVA('On y va : '+lastRef.name+'.'); $('dest').value=lastRef.name; startRouteTo(lastRef); return; }
+    if(/(j'?y vais|on y va|vas[- ]?y|emm[eè]ne[- ]?moi (là|y)|je veux m'?y rendre|rends[- ]?y moi|go there|take me there|allons[- ]?y)/.test(t)&&lastRef){ sayVA(tr({fr:'On y va : '+lastRef.name+'.',en:'Let\'s go to '+lastRef.name+'.',ja:lastRef.name+'へ向かいます。'})); $('dest').value=lastRef.name; startRouteTo(lastRef); return; }
     /* nearby places: "où est la station la plus proche", "trouve une pharmacie" */
     if(/(o[uù] (est|sont|se trouve|y a)|la plus proche|le plus proche|près d'?ici|trouve|cherche|y a[- ]?t[- ]?il|il y a|where('?s| is)|nearest|find)/.test(t)){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return; } } }
     /* itinéraire formulé en QUESTION : "c'est quoi la route la plus rapide pour aller à X", "comment me rendre à X", "le chemin pour la gare" */
@@ -2539,7 +2539,18 @@
       }).catch(function(){ askClaude(t); });
     return true;
   }
-  function pickL(fr,en){ var a=(LANG==='en'&&en)?en:fr; return a[Math.floor((Date.now()/900)%a.length)]; }
+  function pickL(fr,en,ja){ var a=(LANG==='ja'&&ja)?ja:((LANG==='ja'&&en)?en:((LANG==='en'&&en)?en:fr)); return a[Math.floor((Date.now()/900)%a.length)]; }
+  /* texte localisé avec repli : LANG -> en -> fr */
+  function tr(o){ return (o&&(o[LANG]||o.en||o.fr))||''; }
+  /* changement de langue UNIFIÉ : met à jour la reconnaissance vocale + la voix + l'UI, et annonce dans la nouvelle langue */
+  function setLang(code){ if(!/^(fr|en|ja)$/.test(code))return; LANG=code;
+    ['langSeg','langSeg2'].forEach(function(id){ var seg=$(id); if(!seg)return; [].forEach.call(seg.children,function(x){ x.classList.toggle('on',(x.dataset.lang||x.dataset.l)===code); }); });
+    if(typeof Voice!=='undefined'&&Voice.pick)Voice.pick();
+    if(typeof recog!=='undefined'&&recog){ try{ recog.lang=T().code; }catch(e){} }   /* la reconnaissance écoute désormais dans la nouvelle langue */
+    if(typeof syncPanel==='function')syncPanel();
+    Mem.prefs.lang=LANG; saveMem();
+    if(typeof vaOn!=='undefined'&&vaOn){ if(Voice.on){ sayVA(tr({fr:'Langue changée. Je te parle en français maintenant.',en:'Language changed. I\'ll speak English now.',ja:'言語を日本語に切り替えました。'})); } /* la voix neuronale multilingue la prononce ; beginResponse/endResponse relance le micro avec la nouvelle langue */ else if(typeof recogRunning!=='undefined'&&recogRunning){ try{recog.stop();}catch(e){} } }
+  }
   /* ---- Lot 2 : couche securite persistante (au-dessus de toutes les vues) + suggestions proactives ---- */
   var safetyT=null;
   function safety(text,level,ms){ var el=$('safetyStrip'); if(!el)return; el.className=''; if(level)el.classList.add(level); var tx=el.querySelector('.ss-tx'); if(tx)tx.textContent=text; el.classList.add('show'); clearTimeout(safetyT); safetyT=setTimeout(function(){el.classList.remove('show');},ms||4200); }
