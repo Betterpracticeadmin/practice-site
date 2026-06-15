@@ -14,8 +14,8 @@ export default async function handler(req, res) {
   const text = (body.text || '').toString().slice(0, 800);
   if (!text) { res.status(200).json({ error: 'no_text' }); return; }
 
-  // Voix par défaut : "Roger" (Laid-Back, Casual, Resonant) — Voice ID ElevenLabs.
-  const voice = body.voice || 'XB0fDUnXU5powFXDhCwa';
+  // Voix par défaut : "Sarah" (féminine, douce et chaleureuse) — voix par défaut ElevenLabs (gratuite).
+  const voice = body.voice || 'EXAVITQu4vr4xnSDxMaL';
 
   try {
     const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?optimize_streaming_latency=2', {
