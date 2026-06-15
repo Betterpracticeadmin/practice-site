@@ -2542,6 +2542,7 @@
     if(cityNickAnswer(t))return; /* "c'est quoi Paname" -> "surnom de Paris" */
     if(landmarksAsk(t))return;   /* "quels monuments autour / à voir à X" -> géo-recherche Wikipédia */
     if(wikiAsk(t))return;       /* question encyclopédique → Wikipédia en direct (vraies données, sans téléchargement) */
+    if(looseIntent(t))return;   /* rattrape les commandes formulées de façon indirecte/inhabituelle */
     if(chitchatReply(t))return; /* échange trouvé dans le corpus (forte correspondance) */
     if(freeChat(t))return;      /* moteur de conversation libre hors-ligne (émotions, rédaction, histoires, opinions…) */
     askClaude(t); /* sinon Claude si la clé est présente, sinon repli Wikipédia puis message d'aide */
@@ -2680,6 +2681,26 @@
     var r=doMath(mm?mm[1]:(/[0-9]\s*[-+*/×÷]\s*[0-9]|racine|puissance|carr[ée]|pour ?cent|\d+\s*%/.test(s)?s:''));
     if(r!=null)return 'Ça fait '+r+'.';
     return null; }
+  /* ===== filet d'intentions SOUPLES : rattrape les formulations indirectes/inhabituelles que les détecteurs précis ratent ===== */
+  function looseIntent(t){ var s=' '+(t||'').toLowerCase()+' ';
+    var say=function(x){ if(typeof showHeard==='function')showHeard(t); sayVA(x); return true; };
+    if(/(de la musique|un peu de (?:son|musique)|balance (?:le son|la musique|un (?:son|morceau|titre))|envie d['’\s]?[ée]couter|mets? (?:moi )?quelque chose|un peu d['’\s]?ambiance|fais p[ée]ter (?:le son|la musique))/.test(s)){ if(typeof mediaToggle==='function'){ mediaToggle(); return say('Je lance la musique.'); } if(typeof openMedia==='function'){ openMedia(); return say('Voilà la musique.'); } }
+    if(/(laisse tomber|oublie|annule|j'?ai plus besoin|plus besoin|coupe|stoppe|arr[êe]te)[^.]{0,22}(itin|trajet|gps|nav|guidage|la route|la direction)/.test(s)&&typeof stopNav==='function'){ stopNav(); if(typeof setMsg==='function')setMsg(T().ready,''); return say(tr({fr:'Navigation arrêtée.',en:'Navigation stopped.',ja:'ナビを終了しました。'})); }
+    var hints=[[/(j'?ai faim|petit creux|envie de (?:manger|bouffer)|je mangerais bien|aller manger|on mange\b|d[ée]jeuner|d[îi]ner|un resto\b|un restaurant)/,'restaurant'],
+      [/(j'?ai soif|envie d'?un caf[ée]|un (?:petit )?caf[ée]|une pause caf[ée]|boire un coup|boire un caf[ée])/,'café'],
+      [/(plus d'?essence|presque (?:à|a) sec|tomber en panne|faire le plein|\ble plein\b|panne s[èe]che|station[- ]?service|de l'?essence|du carburant)/,'station-service'],
+      [/(envie (?:de pisser|d'?aller aux toilettes)|trouver des toilettes|le petit coin|besoin d'?un wc|aux toilettes)/,'toilettes'],
+      [/(me garer|trouver une place|(?:où|ou) (?:me )?stationner|un parking)/,'parking'],
+      [/(envie de me baigner|aller (?:à|a) la plage|piquer une t[êe]te|aller (?:à|a) la mer)/,'plage'],
+      [/(un distributeur|retirer de l'?argent|du cash\b|un dab\b)/,'distributeur']];
+    for(var i=0;i<hints.length;i++){ if(hints[i][0].test(s)){ for(var k=0;k<POITYPES.length;k++){ if(POITYPES[k].n===hints[i][1]){ if(typeof showHeard==='function')showHeard(t); nearestPOI(POITYPES[k]); return true; } } } }
+    if(/(il (?:caille|fait frais|fait chaud|g[èe]le|fait un de ces froids)|je g[èe]le|on cr[èe]ve de chaud|fait[- ]il (?:beau|chaud|froid))/.test(s)){ var tp=$('wxTemp')?($('wxTemp').textContent||'').trim():'', de=$('wxDesc')?($('wxDesc').textContent||'').trim():''; return say('Il fait '+(tp||'—')+' degrés'+(de&&de!=='—'?', '+de.toLowerCase():'')+'.'); }
+    var nm=s.match(/\b(?:j['’\s]?aimerais (?:bien )?aller|j['’\s]?ai envie d['’\s]?aller|on (?:pourrait|va) aller|faudrait (?:aller|passer)|il faudrait aller|passer par|me rendre|rejoindre|direction)\s+(?:à |a |au |aux |jusqu'?(?:à|au) |vers |chez |par |la |le |les |l'|du |de la )*([a-zà-ÿ][a-zà-ÿ' -]{2,40})/);
+    if(nm){ var dest=nm[1].trim().replace(/[?.!,].*$/,'').replace(/\s*\b(stp|s'?il te pla[îi]t|maintenant|please|ce soir|demain|tout de suite|vite)\b.*$/,'').trim();
+      if(/^(lit|dodo|dormir|travail|boulot|bosser|toilettes?|chier|pisser|manger|bouffer|maison|nulle part|chez moi|chez toi)$/.test(dest))return false;
+      for(var p=0;p<POITYPES.length;p++){ if(POITYPES[p].re.test(dest)){ if(typeof showHeard==='function')showHeard(t); nearestPOI(POITYPES[p]); return true; } }
+      if(dest.replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ dest=resolveCity(dest); var dd=cap(dest); lastRef=null; say('Je calcule l\'itinéraire vers '+dd+'.'); geocode(dest).then(function(d){ if(d){ if($('dest'))$('dest').value=dd; lastRef={name:dd,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(tr({fr:'Adresse introuvable.',en:'Address not found.'})); }).catch(function(){ sayVA(tr({fr:'Réseau indisponible.',en:'Network unavailable.'})); }); return true; } }
+    return false; }
   function pickL(fr,en,ja){ var a=(LANG==='ja'&&ja)?ja:((LANG==='ja'&&en)?en:((LANG==='en'&&en)?en:fr)); return a[Math.floor((Date.now()/900)%a.length)]; }
   /* texte localisé avec repli : LANG -> en -> fr */
   function tr(o){ return (o&&(o[LANG]||o.en||o.fr))||''; }
