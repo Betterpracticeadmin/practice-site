@@ -209,6 +209,7 @@
     <button id="bGps">📍 GPS réel</button>
     <button id="bObd">🔌 OBD2</button>
     <button id="b3d" class="on">🛰 3D satellite</button>
+    <button id="bNorth">🧭 Nord libre</button>
     <button id="bFull">⛶ Plein écran</button>
     <div class="sep"></div>
     <div id="hz"><span>Horizon</span><input id="hzR" type="range" min="1" max="5" step="1" value="3"/><span id="hzV">3s</span></div>
@@ -606,7 +607,7 @@
     if(acc!=null) $('gpsAcc').textContent='±'+Math.round(acc)+' m';
     $('bGps').classList.add('on');
     if(lat!=null){ egoLL={lat:lat,lon:lon}; if(hdg!=null&&!isNaN(hdg))egoHdg=hdg; loadSurroundings(lat,lon);
-      if(view3d&&map3d&&b3dReady){ map3d.easeTo({center:[lon,lat],bearing:(hdg!=null&&!isNaN(hdg))?hdg:map3d.getBearing(),pitch:64,zoom:17,duration:900}); load3DBuildings(lat,lon); } }
+      if(view3d&&map3d&&b3dReady){ map3d.easeTo({center:[lon,lat],bearing:northLock?0:((hdg!=null&&!isNaN(hdg))?hdg:map3d.getBearing()),pitch:64,zoom:17,duration:900}); load3DBuildings(lat,lon); } }
     if(map&&lat!=null){ meMarker.setLatLng([lat,lon]); map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true}); loadHudRadars(lat,lon); checkHudRadars(lat,lon,hdg); }
     // reverse geocode locality (throttled, every 25s)
     if(lat!=null && Date.now()-geoAt>25000){ geoAt=Date.now();
@@ -679,6 +680,8 @@
   function set3D(on){ view3d=on; document.body.setAttribute('data-view',on?'3d':'sim'); $('b3d').classList.toggle('on',on);
     if(on){ initMap3D(); setTimeout(function(){ if(map3d)map3d.resize(); if(egoLL&&map3d&&b3dReady){map3d.jumpTo({center:[egoLL.lon,egoLL.lat],bearing:egoHdg});load3DBuildings(egoLL.lat,egoLL.lon);} },150); } }
   $('b3d').addEventListener('click',function(){ set3D(!view3d); });
+  var northLock=false;
+  $('bNorth').addEventListener('click',function(){ northLock=!northLock; this.classList.toggle('on',northLock); this.textContent=northLock?'🧭 Nord verrouillé':'🧭 Nord libre'; if(view3d&&map3d&&b3dReady){ try{map3d.easeTo({bearing:northLock?0:(egoHdg||0),duration:600});}catch(e){} } });
   set3D(false); /* default = clean Vision sim with arrows; 3D satellite is opt-in */
 
   // seed cognitive traffic layer + roadside scenery

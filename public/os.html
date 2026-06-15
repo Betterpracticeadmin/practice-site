@@ -765,6 +765,11 @@
   .slider-row label{font-size:12px;color:var(--dim);display:flex;justify-content:space-between;align-items:center;}
   .slider-row label b{color:var(--txt);font-family:var(--mono);font-weight:500;font-size:13px;}
   .slider-row input[type=range]{width:100%;accent-color:var(--acc);height:24px;cursor:pointer;background:transparent;}
+  .pax-presets{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0;}
+  .pax-presets button{background:var(--card);border:.5px solid var(--border);color:var(--txt);border-radius:10px;padding:7px 12px;font-size:12px;cursor:pointer;}
+  .pax-embed{flex:1;min-height:240px;border-radius:14px;overflow:hidden;background:#000;margin-bottom:10px;display:flex;}
+  .pax-embed iframe{width:100%;height:100%;border:0;}
+  #paxNote{margin-top:0;}
 </style>
 </head>
 <body data-theme="dark" class="safe">
@@ -1128,6 +1133,7 @@
       <div class="vt-meta"><div class="vt-zone" id="vtZone">Cardio non connecté</div><div class="vt-sub" id="vtStress">Ceinture / capteur BLE</div></div>
       <button class="vt-btn" id="hrBtn">Connecter ♥</button>
     </div>
+    <div class="key-note" style="margin-top:8px">♥ <b>Capteur cardio Bluetooth</b> (ceinture Polar/Wahoo, brassard, montre Wear OS qui diffuse) → se connecte directement ici. <b>⌚ Apple Watch : impossible depuis une page web</b> — Apple réserve l'accès cardiaque (HealthKit) aux apps natives, l'Apple Watch ne diffuse pas son rythme en Bluetooth ouvert. Il faudrait l'app iOS+watchOS native (squelette dans <i>practice-native/watchos</i>). Sur iPhone, le Bluetooth web marche dans <b>Bluefy</b> ou Chrome, pas Safari.</div>
     <div class="twin-scores">
       <div><div class="tsc-h"><span>Fluidité</span><span id="tvSmooth">—</span></div><div class="tsc-bar"><i id="tbSmooth"></i></div></div>
       <div><div class="tsc-h"><span>Agressivité</span><span id="tvAggr">—</span></div><div class="tsc-bar"><i id="tbAggr"></i></div></div>
@@ -1156,6 +1162,7 @@
   <div class="media-screen">
     <div class="media-head">
       <div class="media-seg" id="mediaSeg"><button class="on" data-s="sc">Playlist</button><button data-s="radio">Radio</button><button data-s="podcast">Podcasts</button><button data-s="liked">♥ Favoris</button></div>
+      <button class="media-x" id="paxOpen" title="Vidéo & sources passager">📺</button>
       <button class="media-x" id="mediaX">✕</button>
     </div>
     <input class="media-search" id="mediaSearch" type="text" placeholder="Rechercher une station…" autocomplete="off" style="display:none"/>
@@ -1180,6 +1187,20 @@
         <div class="mq-list" id="mQueue"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Média passager : YouTube / Spotify / Apple Music (intégration) -->
+<div class="media-ov" id="paxMediaOv">
+  <div class="media-screen">
+    <div class="media-head">
+      <div class="media-seg" id="paxSeg"><button class="on" data-px="yt">📺 YouTube</button><button data-px="sp">Spotify</button><button data-px="am">Apple Music</button></div>
+      <button class="media-x" id="paxX">✕</button>
+    </div>
+    <input class="media-search" id="paxLink" type="text" placeholder="Colle un lien YouTube et appuie sur Entrée…" autocomplete="off"/>
+    <div class="pax-presets" id="paxPresets"></div>
+    <div class="pax-embed" id="paxEmbed"></div>
+    <div class="key-note" id="paxNote"></div>
   </div>
 </div>
 
@@ -1658,7 +1679,7 @@
     if($('vtStress'))$('vtStress').textContent='Stress '+Math.round((Twin.hrStress||0)*100)+'% · repos ~'+(Twin.hrBase||hrBpm)+' bpm';
     if($('vtHr')){$('vtHr').classList.add('live'); var hb=document.querySelector('#vtHr .vt-heart'); if(hb)hb.style.animationDuration=(60/Math.max(40,Math.min(200,hrBpm)))+'s';} }
   function onHR(ev){ var v=ev.target.value; var flags=v.getUint8(0); var bpm=(flags&1)?v.getUint16(1,true):v.getUint8(1); if(bpm>0){ hrBpm=bpm; updateVitals(); if($('twinOv')&&$('twinOv').classList.contains('show'))renderTwin(); } }
-  async function connectHR(){ if(!navigator.bluetooth){ if($('vtZone'))$('vtZone').textContent='Bluetooth web indispo (Android Chrome / Bluefy iOS)'; return; }
+  async function connectHR(){ if(!navigator.bluetooth){ if($('vtZone'))$('vtZone').textContent='Bluetooth web indispo'; toast('Bluetooth web indisponible. Sur iPhone : utilise Bluefy ou Chrome (pas Safari). ⚠ L\'Apple Watch ne peut pas se connecter à une page web — il faut l\'app iOS native.'); return; }
     try{ $('hrBtn').textContent='…'; hrDev=await navigator.bluetooth.requestDevice({filters:[{services:['heart_rate']}],optionalServices:['battery_service']});
       hrDev.addEventListener('gattserverdisconnected',function(){ hrBpm=null; $('hrBtn').textContent='Connecter ♥'; if($('vtHr'))$('vtHr').classList.remove('live'); if($('vtZone'))$('vtZone').textContent='Cardio déconnecté'; });
       var g=await hrDev.gatt.connect(); var s=await g.getPrimaryService('heart_rate'); hrChar=await s.getCharacteristic('heart_rate_measurement');
@@ -2497,6 +2518,29 @@
   }catch(e){} }
   function openMedia(){ $('mediaOv').classList.add('show'); updateTrack(); buildQueue(); }
   function closeMedia(){ $('mediaOv').classList.remove('show'); }
+  /* ---- Média passager : YouTube / Spotify / Apple Music par intégration (sans clé) ---- */
+  var paxSrc='yt';
+  var PAX_PRESETS={ yt:[{n:'Lofi 24/7',id:'jfKfPfyJRdk'},{n:'Nature 4K',id:'BHACKCNDMW8'},{n:'Voyage relaxant',id:'1La4QzGeaaQ'}],
+    sp:[{n:'Top hits',u:'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'},{n:'Chill',u:'https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6'},{n:'Road trip',u:'https://open.spotify.com/playlist/37i9dQZF1DWSThc8QnxqcG'}],
+    am:[{n:'Today\'s Hits',u:'https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb'}] };
+  var PAX_NOTE={ yt:'Pour les passagers / à l\'arrêt : colle un lien YouTube (ou choisis un flux). Évite de regarder en conduisant.',
+    sp:'Colle un lien Spotify (titre, playlist, album). Lecture complète si tu es connecté à Spotify dans ce navigateur, sinon extraits de 30 s. La lecture pilotée par la voix demanderait l\'API Spotify (compte développeur).',
+    am:'Colle un lien Apple Music (album/playlist). Lecture via l\'intégration Apple ; la lecture complète demande un abonnement Apple Music actif.' };
+  function paxEmbed(src,link){ link=(link||'').trim();
+    if(src==='yt'){ var m=link.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/); var id=m?m[1]:(/^[\w-]{11}$/.test(link)?link:null); return id?'<iframe src="https://www.youtube.com/embed/'+id+'?rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>':null; }
+    if(src==='sp'){ var sm=link.match(/open\.spotify\.com\/(intl-\w+\/)?(track|playlist|album|episode|show)\/([\w]+)/); if(sm)return '<iframe src="https://open.spotify.com/embed/'+sm[2]+'/'+sm[3]+'" allow="autoplay; encrypted-media; clipboard-write; fullscreen"></iframe>'; return null; }
+    if(src==='am'){ if(/music\.apple\.com/.test(link))return '<iframe src="'+link.replace('music.apple.com','embed.music.apple.com')+'" allow="autoplay *; encrypted-media *; fullscreen *" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-presentation"></iframe>'; return null; }
+    return null; }
+  function paxRenderPresets(){ if(!$('paxPresets'))return; var arr=PAX_PRESETS[paxSrc]||[]; $('paxPresets').innerHTML=''; arr.forEach(function(p){ var b=document.createElement('button'); b.textContent=p.n; b.addEventListener('click',function(){ var h=paxEmbed(paxSrc,p.id?('https://youtu.be/'+p.id):p.u); if(h)$('paxEmbed').innerHTML=h; }); $('paxPresets').appendChild(b); }); }
+  function paxSetSrc(s){ paxSrc=s; if($('paxSeg'))[].forEach.call($('paxSeg').children,function(x){x.classList.toggle('on',x.dataset.px===s);});
+    if($('paxLink'))$('paxLink').placeholder='Colle un lien '+(s==='yt'?'YouTube':s==='sp'?'Spotify':'Apple Music')+' et appuie sur Entrée…';
+    if($('paxNote'))$('paxNote').textContent=PAX_NOTE[s]; if($('paxEmbed'))$('paxEmbed').innerHTML=''; paxRenderPresets(); }
+  function openPaxMedia(s){ $('paxMediaOv').classList.add('show'); paxSetSrc(s||paxSrc||'yt'); }
+  function closePaxMedia(){ $('paxMediaOv').classList.remove('show'); if($('paxEmbed'))$('paxEmbed').innerHTML=''; }
+  if($('paxSeg'))$('paxSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b)paxSetSrc(b.dataset.px); });
+  if($('paxLink'))$('paxLink').addEventListener('keydown',function(e){ if(e.key==='Enter'){ var h=paxEmbed(paxSrc,this.value); if(h)$('paxEmbed').innerHTML=h; else toast('Lien non reconnu pour '+(paxSrc==='yt'?'YouTube':paxSrc==='sp'?'Spotify':'Apple Music')+'.'); } });
+  if($('paxX'))$('paxX').addEventListener('click',closePaxMedia);
+  if($('paxOpen'))$('paxOpen').addEventListener('click',function(){ openPaxMedia('yt'); });
   $('plPlay').addEventListener('click',mediaToggle);
   $('plPrev').addEventListener('click',mediaPrev);
   $('plNext').addEventListener('click',mediaNext);
