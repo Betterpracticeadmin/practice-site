@@ -2150,6 +2150,13 @@
     var fr=['Désolé, je n\'ai pas bien saisi. Tu peux reformuler ?','Pardon, je n\'ai pas tout compris.','Hmm, je n\'ai pas capté, réessaie ?','Je n\'ai pas compris — je peux naviguer, changer de mode, gérer la musique, ou répondre sur le trafic et la météo.','Dis-moi par exemple « emmène-moi à… », « trouve une pharmacie » ou « mets le mode sport ».'];
     var en=['Sorry, I didn\'t catch that — try again?','Didn\'t get that. Try « take me to… », « find a pharmacy » or « play music ».'];
     sayVA(pickL([fr[missN%fr.length]],en)); }
+  /* ---- conversation par récupération : corpus DailyDialog filtré (1900+ échanges propres). Retrouve la meilleure réponse par similarité de mots, et ne répond QUE si la correspondance est forte (sinon -> Claude/repli). ---- */
+  var CHITCHAT=null;
+  fetch('/chitchat.json').then(function(r){return r.json();}).then(function(j){ CHITCHAT=j; }).catch(function(){});
+  function _ctok(s){ return (s||'').toLowerCase().replace(/[^a-zà-ÿ0-9'\s]/g,' ').split(/\s+/).filter(function(w){return w.length>2;}); }
+  function chitchatReply(t){ if(!CHITCHAT||!CHITCHAT.length)return false; var q=_ctok(t); if(q.length<1)return false; var qs={}; q.forEach(function(w){qs[w]=1;});
+    var best=null,bestScore=0; for(var i=0;i<CHITCHAT.length;i++){ var it=_ctok(CHITCHAT[i][0]); if(!it.length)continue; var ov=0; for(var k=0;k<it.length;k++)if(qs[it[k]])ov++; var sc=ov/Math.max(q.length,it.length); if(sc>bestScore){bestScore=sc;best=CHITCHAT[i];} }
+    if(best&&bestScore>=0.5){ if(typeof showHeard==='function')showHeard(t); sayVA(best[1]); return true; } return false; }
   var vaHist=[];
   function askClaude(t){ var ctx={ speed:Math.round(liveSpd||0), loc:($('wxLoc')?($('wxLoc').textContent||'').trim():''), nav:(navActive?($('navEta')?$('navEta').textContent:''):'aucune'), mode:(typeof mode!=='undefined'?mode:''), temp:($('wxTemp')?$('wxTemp').textContent:'') };
     vaHist.push({role:'user',content:t}); vaHist=vaHist.slice(-8);
@@ -2414,7 +2421,8 @@
     if(/(o[uù] (est|sont|se trouve|y a)|la plus proche|le plus proche|près d'?ici|trouve|cherche|y a[- ]?t[- ]?il|il y a|where('?s| is)|nearest|find)/.test(t)){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return; } } }
     var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|navigue|itin[eé]raire|va|aller|allons|direction|lance|go|trajet|take me|drive me|navigate|go to)\s+(?:à|a|au|aux|vers|jusqu'?à|jusqu'?au|en|sur|to|chez|le|la|les|l')?\s*(.+)/);
     if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=m[1].trim(); lastRef=null; sayVA(pickL(['Je calcule l\'itinéraire vers '+q+'.'],['Routing to '+q+'.'])); geocode(q).then(function(d){ if(d){ $('dest').value=q; lastRef={name:q,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
-    askClaude(t); /* free conversation via Claude (falls back to "didn't understand" if no backend) */
+    if(chitchatReply(t))return; /* échange trouvé dans le corpus (forte correspondance) */
+    askClaude(t); /* sinon conversation libre via Claude (repli "pas compris" si pas de backend) */
   }
   function pickL(fr,en){ var a=(LANG==='en'&&en)?en:fr; return a[Math.floor((Date.now()/900)%a.length)]; }
   /* ---- Lot 2 : couche securite persistante (au-dessus de toutes les vues) + suggestions proactives ---- */
