@@ -2173,7 +2173,54 @@
     var best=null,bestScore=0,bestOv=0; for(var i=0;i<CHITCHAT.length;i++){ var it=_ctok(CHITCHAT[i][0]); if(!it.length)continue; var ov=0; for(var k=0;k<it.length;k++)if(qs[it[k]])ov++; var sc=ov/Math.max(q.length,it.length); if(sc>bestScore){bestScore=sc;best=CHITCHAT[i];bestOv=ov;} }
     if(best&&bestScore>=0.62&&bestOv>=2){ if(typeof showHeard==='function')showHeard(t); sayVA(best[1]); return true; } return false; }
   /* destination brute après "emmène-moi à / va à / conduis-moi à ..." (sert à distinguer un lieu nommé d'une recherche de POI proche) */
-  function navTarget(t){ var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|d[eé]pose[- ]?moi|je veux aller|j'?aimerais aller|on va|direction|take me|drive me|bring me|go to|\bva|\bvas|\baller)\s+(?:à |a |au |aux |vers |chez |en |to |la |le |les |l'|du |de la |de |d'|the )*(.+)$/i); return m?(m[1]||'').replace(/[?!.…]+$/,'').trim():''; }
+  /* ===== surnoms de villes (Paname=Paris…) — compris partout : navigation ET Wikipédia ===== */
+  var CITY_NICK={
+    'paname':'Paris','la ville lumière':'Paris','ville lumière':'Paris','la ville lumiere':'Paris','ville lumiere':'Paris',
+    'la cité phocéenne':'Marseille','cité phocéenne':'Marseille','cite phoceenne':'Marseille','massalia':'Marseille',
+    'la capitale des gaules':'Lyon','capitale des gaules':'Lyon',
+    'la ville rose':'Toulouse','ville rose':'Toulouse',
+    'la belle endormie':'Bordeaux','port de la lune':'Bordeaux',
+    'la capitale des flandres':'Lille','capitale des flandres':'Lille','la perle du nord':'Lille',
+    'sainté':'Saint-Étienne',
+    'la cité des ducs':'Nantes','cité des ducs':'Nantes',
+    'la cité ardente':'Liège',
+    'la grosse pomme':'New York','big apple':'New York','the big apple':'New York',
+    'frisco':'San Francisco','san fran':'San Francisco',
+    'vegas':'Las Vegas','sin city':'Las Vegas',
+    'la cité éternelle':'Rome','cité éternelle':'Rome','cite eternelle':'Rome',
+    'la sérénissime':'Venise','sérénissime':'Venise','serenissime':'Venise'
+  };
+  var CITY_NICK_KEYS=Object.keys(CITY_NICK).sort(function(a,b){return b.length-a.length;});
+  function _rx(k){ return new RegExp('\\b'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'); }
+  function resolveCity(s){ if(!s)return s; var out=s; for(var i=0;i<CITY_NICK_KEYS.length;i++){ out=out.replace(_rx(CITY_NICK_KEYS[i]),CITY_NICK[CITY_NICK_KEYS[i]]); } return out; }
+  /* réponse directe : "c'est quoi Paname / pourquoi on dit Paname" -> "Paname, c'est un surnom de Paris." */
+  function cityNickAnswer(t){
+    if(!/(c'?est quoi|que veut dire|qu'?est[- ]?ce que|pourquoi (?:on dit|dit[- ]?on|on appelle)|signifie|veut dire quoi|[çc]a veut dire|surnom)/i.test(t))return false;
+    for(var i=0;i<CITY_NICK_KEYS.length;i++){ var k=CITY_NICK_KEYS[i]; if(new RegExp('\\b'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(t)){ if(typeof showHeard==='function')showHeard(t); sayVA(cap(k)+', c\'est un surnom de '+CITY_NICK[k]+'.'); return true; } }
+    return false;
+  }
+  /* monuments / bâtiments connus autour de toi ou dans une ville (géo-recherche Wikipédia) */
+  function landmarksAsk(t){
+    if(!/(monument|b[aâ]timents? (?:connus?|c[eé]l[eè]bres?)|[aà] voir|choses? [aà] voir|lieux (?:connus|c[eé]l[eè]bres|d'?int[eé]r[eê]t)|points? d'?int[eé]r[eê]t|qu'?est[- ]?ce qu'?il y a [aà] voir|que (?:voir|visiter)|sites? touristiques?|[aà] visiter)/i.test(t))return false;
+    var cm=t.match(/\b(?:dans|autour de|pr[eè]s de|du c[oô]t[eé] de|[aà])\s+(?:la ville de |la |le |l')?([a-zà-ÿ][a-zà-ÿ' -]{2,30})\s*\??$/i);
+    var city=cm?cm[1].trim():''; var STOP=/^(voir|visiter|faire|ici|c[oô]t[eé]|proximit[eé]|pied|moi|toi)$/i;
+    var here=/\b(ici|autour|dans le coin|aux alentours|par ici|pr[eè]s d'?ici|[aà] proximit[eé])\b/i.test(t)||!city||STOP.test(city);
+    if(typeof showHeard==='function')showHeard(t); if(typeof toast==='function')toast('🏛 monuments…');
+    var wl=(LANG==='ja'?'ja':(LANG==='en'?'en':'fr'));
+    function geo(lat,lon,label){
+      fetch('https://'+wl+'.wikipedia.org/w/api.php?action=query&format=json&origin=*&list=geosearch&gsradius=10000&gslimit=14&gscoord='+lat+'%7C'+lon)
+        .then(function(r){return r.json();}).then(function(j){
+          var arr=(j&&j.query&&j.query.geosearch)||[];
+          var names=arr.map(function(x){return x.title;}).filter(function(n){ return !/^(Gare|Rue |Avenue |Boulevard |Place |Station |Ligne |Quartier|Arrondissement|Canton|Liste |Métro|Tramway)/i.test(n); }).slice(0,4);
+          if(!names.length){ sayVA('Je ne trouve pas de monument connu '+(label?('à '+label):'par ici')+'.'); return; }
+          sayVA((label?('À '+label+', à voir : '):'Autour de toi : ')+names.join(', ')+'.');
+        }).catch(function(){ sayVA('Je n\'ai pas pu récupérer les monuments.'); });
+    }
+    if(!here&&city){ var c=resolveCity(city); geocode(c).then(function(d){ if(d)geo(d.lat,d.lon,cap(c)); else sayVA('Je ne situe pas '+c+'.'); }).catch(function(){ sayVA('Réseau indisponible.'); }); return true; }
+    var p=pts.length?pts[pts.length-1]:null; if(!p){ sayVA('Je n\'ai pas encore ta position.'); return true; }
+    geo(p.lat,p.lon,null); return true;
+  }
+  function navTarget(t){ var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|d[eé]pose[- ]?moi|je veux aller|j'?aimerais aller|on va|direction|take me|drive me|bring me|go to|\bva|\bvas|\baller)\s+(?:à |a |au |aux |vers |chez |en |to |la |le |les |l'|du |de la |de |d'|the )*(.+)$/i); return m?resolveCity((m[1]||'').replace(/[?!.…]+$/,'').trim()):''; }
   /* destination d'un itinéraire formulé en question/indirect ; null si ce n'est pas une demande d'aller quelque part */
   function navQuestion(t){
     var m=t.match(/(?:pour (?:aller|me rendre|y aller)|comment (?:aller|je vais|on va|se rendre|y aller)|me rendre|se rendre|(?:itin[eé]raire|route|chemin|trajet|direction)\b[^?]*?\b(?:pour|vers|jusqu'?(?:à|au)|à|au|aux))\s+(?:aller\s+)?(?:à |a |au |aux |en |vers |chez |jusqu'?(?:à|au)\s+|la |le |les |l'|du |de la |de |d'|to |the )*(.+)/i);
@@ -2181,7 +2228,7 @@
     var d=(m[1]||'').replace(/^(?:la |le |les |l'|un |une |des |the |a )/i,'').replace(/\s*\b(s'?il te pla[iî]t|stp|merci|maintenant|please|le plus (?:vite|rapidement) possible)\b.*$/i,'').replace(/[?!.…,]+$/,'').trim();
     if(d.replace(/[^a-zà-ÿ0-9]/gi,'').length<=2)return null;
     if(/^(toi|moi|lui|elle|nous|vous|eux|[çc]a|bien|l[aà]|y|ici|l[aà][- ]bas|maintenant)$/i.test(d))return null;
-    return d;
+    return resolveCity(d);
   }
   var vaHist=[];
   function askClaude(t){ var ctx={ speed:Math.round(liveSpd||0), loc:($('wxLoc')?($('wxLoc').textContent||'').trim():''), nav:(navActive?($('navEta')?$('navEta').textContent:''):'aucune'), mode:(typeof mode!=='undefined'?mode:''), temp:($('wxTemp')?$('wxTemp').textContent:'') };
@@ -2455,7 +2502,9 @@
     /* itinéraire formulé en QUESTION : "c'est quoi la route la plus rapide pour aller à X", "comment me rendre à X", "le chemin pour la gare" */
     var nqd=navQuestion(t); if(nqd){ lastRef=null; sayVA(pickL(['Je calcule l\'itinéraire vers '+nqd+'.'],['Routing to '+nqd+'.'])); geocode(nqd).then(function(d){ if(d){ $('dest').value=nqd; lastRef={name:nqd,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
     var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|navigue|itin[eé]raire|va|aller|allons|direction|lance|go|trajet|take me|drive me|navigate|go to)\s+(?:à|a|au|aux|vers|jusqu'?à|jusqu'?au|en|sur|to|chez|le|la|les|l')?\s*(.+)/);
-    if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=m[1].trim(); lastRef=null; sayVA(pickL(['Je calcule l\'itinéraire vers '+q+'.'],['Routing to '+q+'.'])); geocode(q).then(function(d){ if(d){ $('dest').value=q; lastRef={name:q,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
+    if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=resolveCity(m[1].trim()); lastRef=null; sayVA(pickL(['Je calcule l\'itinéraire vers '+q+'.'],['Routing to '+q+'.'])); geocode(q).then(function(d){ if(d){ $('dest').value=q; lastRef={name:q,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
+    if(cityNickAnswer(t))return; /* "c'est quoi Paname" -> "surnom de Paris" */
+    if(landmarksAsk(t))return;   /* "quels monuments autour / à voir à X" -> géo-recherche Wikipédia */
     if(wikiAsk(t))return;       /* question encyclopédique → Wikipédia en direct (vraies données, sans téléchargement) */
     if(chitchatReply(t))return; /* échange trouvé dans le corpus (forte correspondance) */
     askClaude(t); /* sinon conversation libre via Claude (repli "pas compris" si pas de backend) */
@@ -2464,7 +2513,7 @@
   function wikiTopic(t){
     var m=t.match(/^(?:dis[- ]?moi |peux[- ]?tu (?:me )?(?:dire|expliquer) )?(?:c'?est quoi(?: que)?|qu'?est[- ]?ce que?(?: c'?est)?|c'?est qui|qui (?:est|était|sont|c'?est)|parle[- ]?moi de|parle moi de|raconte[- ]?moi(?: l'?histoire de)?|d[ée]finis|d[ée]finition de|explique[- ]?moi|donne[- ]?moi des? (?:infos?|informations?|détails?) sur|que sais[- ]?tu (?:sur|de)|what'?s|what is|what are|who (?:is|was|are)|tell me about|define)\s+(.+)$/i);
     if(!m)return null;
-    var topic=(m[1]||'').replace(/^(le |la |les |l'|un |une |des |the |a |an )/i,'').replace(/[?!.…]+$/,'').trim();
+    var topic=resolveCity((m[1]||'').replace(/^(le |la |les |l'|un |une |des |the |a |an )/i,'').replace(/[?!.…]+$/,'').trim());
     return topic.length>=2?topic:null;
   }
   function wikiAsk(t){
