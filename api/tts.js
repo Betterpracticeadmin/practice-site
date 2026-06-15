@@ -8,14 +8,23 @@ export default async function handler(req, res) {
   const key = process.env.ELEVENLABS_API_KEY;
   if (!key) { res.status(200).json({ error: 'no_key' }); return; }
 
+  // diagnostic SÛR pour retrouver le nom de la variable où l'utilisateur a déposé son Voice ID
+  if (req.query && req.query.debug) {
+    const names = Object.keys(process.env).filter(function (k) { return !/^(VERCEL|AWS|NODE|PATH|HOME|LAMBDA|_|TZ|LANG|NX|PWD|SHLVL|HOSTNAME|TERM|NOW_|VC_|TURBO|LD_)/i.test(k); });
+    const voiceVars = {};
+    names.forEach(function (k) { if (/voice|eleven|tts|11labs/i.test(k) && !/key|secret|api_key|token/i.test(k)) voiceVars[k] = (process.env[k] || '').slice(0, 40); });
+    res.status(200).json({ custom_names: names, voice_vars: voiceVars }); return;
+  }
+
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
   body = body || {};
   const text = (body.text || '').toString().slice(0, 800);
   if (!text) { res.status(200).json({ error: 'no_text' }); return; }
 
-  // Voix par défaut : "Sarah" (féminine, douce et chaleureuse) — voix par défaut ElevenLabs (gratuite).
-  const voice = body.voice || 'EXAVITQu4vr4xnSDxMaL';
+  // Voix : 1) celle demandée par le front, 2) celle déposée en variable d'env (plusieurs noms possibles), 3) Sarah par défaut.
+  const ENV_VOICE = process.env.ELEVENLABS_VOICE_ID || process.env.ELEVENLABS_VOICE || process.env.ELEVEN_VOICE_ID || process.env.VOICE_ID || process.env.TTS_VOICE || process.env.ELEVEN_VOICE || '';
+  const voice = body.voice || ENV_VOICE || 'EXAVITQu4vr4xnSDxMaL';
 
   try {
     const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?optimize_streaming_latency=2', {
