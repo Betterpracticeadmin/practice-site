@@ -2431,8 +2431,35 @@
     if(/(o[uù] (est|sont|se trouve|y a)|la plus proche|le plus proche|près d'?ici|trouve|cherche|y a[- ]?t[- ]?il|il y a|where('?s| is)|nearest|find)/.test(t)){ for(var pi=0;pi<POITYPES.length;pi++){ if(POITYPES[pi].re.test(t)){ nearestPOI(POITYPES[pi]); return; } } }
     var m=t.match(/(?:emm[eè]ne[- ]?moi|conduis[- ]?moi|am[eè]ne[- ]?moi|navigue|itin[eé]raire|va|aller|allons|direction|lance|go|trajet|take me|drive me|navigate|go to)\s+(?:à|a|au|aux|vers|jusqu'?à|jusqu'?au|en|sur|to|chez|le|la|les|l')?\s*(.+)/);
     if(m&&m[1]&&m[1].replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ var q=m[1].trim(); lastRef=null; sayVA(pickL(['Je calcule l\'itinéraire vers '+q+'.'],['Routing to '+q+'.'])); geocode(q).then(function(d){ if(d){ $('dest').value=q; lastRef={name:q,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(pickL(['Adresse introuvable.'],['Address not found.'])); }).catch(function(){ sayVA('Réseau indisponible.'); }); return; }
+    if(wikiAsk(t))return;       /* question encyclopédique → Wikipédia en direct (vraies données, sans téléchargement) */
     if(chitchatReply(t))return; /* échange trouvé dans le corpus (forte correspondance) */
     askClaude(t); /* sinon conversation libre via Claude (repli "pas compris" si pas de backend) */
+  }
+  /* ===== Savoir encyclopédique : Wikipédia en direct (API REST officielle, CORS, sans clé) ===== */
+  function wikiTopic(t){
+    var m=t.match(/^(?:dis[- ]?moi |peux[- ]?tu (?:me )?(?:dire|expliquer) )?(?:c'?est quoi(?: que)?|qu'?est[- ]?ce que?(?: c'?est)?|c'?est qui|qui (?:est|était|sont|c'?est)|parle[- ]?moi de|parle moi de|raconte[- ]?moi(?: l'?histoire de)?|d[ée]finis|d[ée]finition de|explique[- ]?moi|donne[- ]?moi des? (?:infos?|informations?|détails?) sur|que sais[- ]?tu (?:sur|de)|what'?s|what is|what are|who (?:is|was|are)|tell me about|define)\s+(.+)$/i);
+    if(!m)return null;
+    var topic=(m[1]||'').replace(/^(le |la |les |l'|un |une |des |the |a |an )/i,'').replace(/[?!.…]+$/,'').trim();
+    return topic.length>=2?topic:null;
+  }
+  function wikiAsk(t){
+    var topic=wikiTopic(t); if(!topic)return false;
+    if(typeof showHeard==='function')showHeard(t);
+    if(typeof toast==='function')toast('📚 Wikipédia…');
+    var wl=(LANG==='ja'?'ja':(LANG==='en'?'en':'fr'));
+    fetch('https://'+wl+'.wikipedia.org/w/api.php?action=query&format=json&origin=*&list=search&srlimit=1&srsearch='+encodeURIComponent(topic))
+      .then(function(r){return r.json();}).then(function(j){
+        var hit=j&&j.query&&j.query.search&&j.query.search[0];
+        if(!hit){ askClaude(t); return; }
+        return fetch('https://'+wl+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(hit.title))
+          .then(function(r){return r.json();}).then(function(s){
+            var ex=((s&&s.extract)||'').trim();
+            if(!ex||(s&&s.type&&s.type.indexOf('disambiguation')>=0)){ askClaude(t); return; }
+            if(ex.length>300){ var cut=ex.slice(0,300), p=cut.lastIndexOf('. '); ex=(p>120?cut.slice(0,p+1):cut.replace(/\s\S*$/,'')+'…'); }
+            sayVA(ex);
+          });
+      }).catch(function(){ askClaude(t); });
+    return true;
   }
   function pickL(fr,en){ var a=(LANG==='en'&&en)?en:fr; return a[Math.floor((Date.now()/900)%a.length)]; }
   /* ---- Lot 2 : couche securite persistante (au-dessus de toutes les vues) + suggestions proactives ---- */
