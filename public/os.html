@@ -1303,7 +1303,7 @@
   function applyTheme(){
     var t=effectiveTheme(); document.body.setAttribute('data-theme',t);
     $('themeBtn').textContent = themeMode==='auto'?'◐ Auto':(themeMode==='dark'?'● Nuit':'○ Jour');
-    if(map&&tileLayer){ tileLayer.setUrl('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}{r}.png'); }
+    if(map&&tileLayer){ tileLayer.setUrl('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}.png'); }
     if(routeLine){ var dk=(t==='dark')||mode==='night'||mode==='ultra'||mode==='performance'; routeLine.setStyle({color: dk?'#ffffff':'#111111'}); }
   }
   setInterval(function(){ if(themeMode==='auto') applyTheme(); }, 60000);
@@ -1312,7 +1312,7 @@
   function initMap(){
     map=L.map('map',{zoomControl:true,attributionControl:true}).setView([46.6,2.4],5);
     var t=effectiveTheme();
-    tileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+THEMES[t]+'/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',updateWhenIdle:false,updateWhenZooming:false,keepBuffer:4}).addTo(map);
+    tileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+THEMES[t]+'/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',updateWhenIdle:false,updateWhenZooming:false,keepBuffer:6,detectRetina:false}).addTo(map);
     routeLine=L.polyline([],{color:t==='dark'?'#fff':'#111',weight:6,opacity:.92,lineJoin:'round'}).addTo(map);
     accCircle=L.circle([46.6,2.4],{radius:0,color:'#888',weight:1,opacity:.3,fillOpacity:.05}).addTo(map);
     poiLayer=L.layerGroup().addTo(map);
