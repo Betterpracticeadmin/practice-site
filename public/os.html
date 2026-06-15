@@ -2212,6 +2212,14 @@
     sing:/(chante|tu peux chanter|une chanson de toi|sing( me)? a song|fais[- ]?moi une chanson)/i,
     age:/(quel [aâ]ge (as|a)[- ]?tu|t'?as quel [aâ]ge|tu es n[eé] quand|how old are you|ta date de naissance)/i,
     rude:/(ferme[- ]?la|la ferme|tu (es|sers) (nul|[aà] rien|inutile)|t'?es nul|esp[eè]ce d'?idiot|t'?es stupide|shut up|you'?re useless)/i,
+    /* actes de conversation (inspirés du corpus DailyDialog) — clarification, accord, excuse, humeurs */
+    clarify:/(qu'?est[- ]?ce que tu veux dire|je (comprends|capte) pas|comment [çc]a\b|c'?est[- ]?[aà][- ]?dire|tu peux (pr[eé]ciser|expliquer|reformuler)|pas compris)/i,
+    apolog:/((excuse|pardonne)[- ]?moi|je m'?excuse|d[eé]sol[eé]|pardon\b|au temps pour moi)/i,
+    agree:/(tout [aà] fait|exactement|t'?as (bien )?raison|bien vu|c'?est (bien )?vrai|je suis d'?accord|c'?est clair|absolument)/i,
+    idk:/(je (ne )?sais pas|aucune id[eé]e|j'?en sais rien|je suis pas s[uû]r|chais pas)/i,
+    happy:/(je suis (content|heureux|ravi|de bonne humeur)|j'?ai la p[eê]che|trop (content|bien)|quelle belle journ[eé]e|je p[eé]te la forme)/i,
+    sad:/(je suis (triste|d[eé]prim[eé]|mal|down)|j'?ai pas le moral|je d[eé]prime|j'?ai le cafard|c'?est dur en ce moment)/i,
+    angry:/(je suis ([eé]nerv[eé]|en col[eè]re|furieux|[aà] cran)|[çc]a m'?[eé]nerve|j'?en ai marre|[çc]a me (gonfle|soule|saoule)|ras[- ]?le[- ]?bol)/i,
     unwired_reminder:/(rappelle[- ]?moi|mets? (un|une) (rappel|alarme|minuteur|r[eé]veil|chrono)|cr[eé]e un rappel|set (a|an) (alarm|reminder|timer)|note que|ajoute (un|une) (rappel|t[aâ]che))/i,
     hello:/(bonjour|bonsoir|salut|coucou|hello|^hi\b|^hey|good (morning|evening)|yo\b|wesh|hola)/i,
     howru:/([çc]a va|comment vas|comment tu vas|how are you|tu vas bien|how'?s it going|la forme|tu p[eè]tes la forme|tout va bien)/i,
@@ -2303,6 +2311,13 @@
     if(lx(t,'loveyou')){ sayVA(pickL(['C\'est gentil '+vaName()+' ! Moi je veille sur toi sur la route.','Tout le plaisir est pour moi — concentrons-nous sur la route.'],['Aw, thanks '+vaName()+'! Eyes on the road, though.'])); return true; }
     if(lx(t,'sing')){ sayVA(pickL(['Chanter n\'est pas mon fort, mais je peux lancer ta playlist. Dis « mets de la musique ».','Je te laisse le micro pour ça — par contre je m\'occupe de la musique.'],['Singing isn\'t my thing — want me to play music?'])); return true; }
     if(lx(t,'rude')){ sayVA(pickL(['Reçu, je me fais discret. Dis « Practice » quand tu as besoin de moi.','Pas de souci, je me tais — je reste là si besoin.'],['No worries, I\'ll keep quiet.'])); return true; }
+    if(lx(t,'clarify')){ sayVA(lastSpoken?('Je voulais dire : '+lastSpoken):'Dis-moi simplement ce que tu veux — naviguer, trouver un lieu, changer de mode, de la musique — et je m\'en occupe.'); return true; }
+    if(lx(t,'apolog')){ sayVA(pickL(['Pas de souci '+vaName()+', aucun problème.','T\'inquiète, tout va bien.','Aucun souci, on continue.'],['No worries at all.'])); return true; }
+    if(lx(t,'agree')){ sayVA(pickL(['Content qu\'on soit sur la même longueur d\'onde.','Exactement, on est d\'accord.','Parfait, je suis avec toi.'],['Exactly, we agree.'])); return true; }
+    if(lx(t,'idk')){ sayVA(pickL(['Pas de souci, je peux t\'aider — dis-moi juste où tu veux aller ou ce que tu cherches.','Aucun souci. Je te propose un lieu si tu veux : dis « trouve un café », par exemple.'],['No problem, I can help — tell me what you need.'])); return true; }
+    if(lx(t,'happy')){ sayVA(pickL(['Ça fait plaisir à entendre '+vaName()+' ! Profite de la route.','Super, garde cette énergie ! Tu veux un peu de musique ?','J\'adore. Bonne route à toi.'],['Great to hear! Enjoy the drive.'])); return true; }
+    if(lx(t,'sad')){ sayVA(pickL(['Je suis là '+vaName()+'. Une musique douce pour le moral ? Dis « mets de la musique ».','Courage, ça va aller. Concentre-toi sur la route, je gère le reste.','Désolé d\'entendre ça. Si tu veux, je te trouve un café pour souffler un peu.'],['I\'m here for you. Want some music to lift the mood?'])); return true; }
+    if(lx(t,'angry')){ sayVA(pickL(['Respire un coup '+vaName()+'. La route est à toi, je m\'occupe du reste.','Je comprends. On souffle, et on reste concentré sur la conduite.','Du calme, ça va passer. Je t\'apaise l\'ambiance.'],['Take a breath — I\'ve got the rest covered.'])); return true; }
     if(lx(t,'theme')){ themeMode=/nuit|sombre|noir|dark/.test(t)?'dark':(/jour|clair|blanc|lumi|light/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return true; }
     for(var mi=0;mi<MODEWORDS.length;mi++){ if(MODEWORDS[mi].re.test(t)&&(MODETRIG.test(t)||MODEWORDS[mi].re.source.length<14)){ setMode(MODEWORDS[mi].id); sayVA('Mode '+MODES[MODEWORDS[mi].id].name+'.'); return true; } }
     if(lx(t,'voiceoff')){ Voice.on=false; Voice.flush(); syncPanel(); Mem.prefs.voice=false; saveMem(); sayVA('Voix coupée.'); return true; }
