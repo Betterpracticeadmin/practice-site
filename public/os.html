@@ -2542,7 +2542,8 @@
     if(landmarksAsk(t))return;   /* "quels monuments autour / à voir à X" -> géo-recherche Wikipédia */
     if(wikiAsk(t))return;       /* question encyclopédique → Wikipédia en direct (vraies données, sans téléchargement) */
     if(chitchatReply(t))return; /* échange trouvé dans le corpus (forte correspondance) */
-    askClaude(t); /* sinon conversation libre via Claude (repli "pas compris" si pas de backend) */
+    if(freeChat(t))return;      /* moteur de conversation libre hors-ligne (émotions, rédaction, histoires, opinions…) */
+    askClaude(t); /* sinon Claude si la clé est présente, sinon repli Wikipédia puis message d'aide */
   }
   /* ===== Savoir encyclopédique : Wikipédia en direct (API REST officielle, CORS, sans clé) ===== */
   function wikiTopic(t){
@@ -2594,6 +2595,55 @@
             sayVA(ex);
           });
       }).catch(function(){ miss2(); });
+  }
+  /* ===== moteur de CONVERSATION LIBRE hors-ligne (sans Claude) : émotions, rédaction, histoires, opinions, personnalité, conseils ===== */
+  function _rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+  function _story(){
+    var h=['un jeune renard curieux','une vieille horlogère','un petit robot perdu','une capitaine de bateau','un chat qui parlait aux étoiles','un boulanger rêveur','une enfant qui collectionnait les orages'];
+    var l=['au cœur d\'une forêt brumeuse','dans une ville suspendue dans les nuages','au bord d\'un lac gelé','sur une route qui ne finissait jamais','dans un vieux phare oublié','sous une pluie d\'étoiles'];
+    var q=['cherchait un trésor que personne n\'avait jamais vu','voulait retrouver le chemin de la maison','rêvait de toucher l\'horizon','devait réparer le temps lui-même','tentait de sauver son village du silence'];
+    var tw=['Mais rien ne se passa comme prévu.','Un inconnu lui tendit alors la main.','Le ciel s\'ouvrit en deux.','Une porte apparut là où il n\'y avait qu\'un mur.'];
+    var f=['Ce jour-là, il comprit que le voyage valait mieux que la destination.','À la fin, elle avait trouvé bien plus qu\'un trésor : un ami.','Depuis, on raconte encore cette histoire les soirs de pluie.','Et tout redevint possible.'];
+    return 'Il était une fois '+_rnd(h)+', '+_rnd(l)+', qui '+_rnd(q)+'. '+_rnd(tw)+' '+_rnd(f);
+  }
+  function _poeme(s){ s=(s&&s.trim())||'la route';
+    return _rnd([
+      'Sur '+s+', je veille en silence, à chaque virage une douce patience ; le moteur ronronne, le monde défile, et près de toi tout devient facile.',
+      'Quand '+s+' s\'étire sous la lune, je t\'accompagne sans rancune ; roule tranquille, je suis là, le reste du chemin on le verra.'
+    ]); }
+  function freeChat(t){ t=(t||'').toLowerCase();
+    var say=function(x){ if(typeof showHeard==='function')showHeard(t); sayVA(x); return true; };
+    if(/(mauvaise journ[ée]e|journ[ée]e de merde|pas le moral|le cafard|d[ée]prim|je suis triste|je me sens (mal|seul|nul|vide)|j'?en peux plus|marre de tout|ras[- ]?le[- ]?bol)/.test(t))
+      return say(_rnd(['Je suis là '+vaName()+'. Souffle un coup — tu veux une musique douce ? Dis « mets de la musique ».','Désolé que ce soit dur aujourd\'hui. Une pause et un café, ça aide — dis « trouve un café ». Je reste avec toi.','Ça arrive, ces journées. Concentre-toi sur la route, je m\'occupe du reste. Ça va aller.']));
+    if(/(stress|anxieu|angois|je panique|sous pression|je suis tendu)/.test(t))
+      return say(_rnd(['Respire lentement '+vaName()+' : inspire quatre secondes, expire six. Je gère la nav, lâche un peu.','Du calme, une chose à la fois. Tu conduis bien, je veille. Une musique apaisante ?']));
+    if(/(je suis (?:[ée]nerv|en col[èe]re|furieux|remont[ée])|[çc]a m'?[ée]nerve|j'?ai les nerfs)/.test(t))
+      return say(_rnd(['Je comprends. On souffle un grand coup — la route est à toi, le reste je m\'en charge.','Reçu. Garde tes distances, respire, ça va redescendre. Je suis avec toi.']));
+    if(/(je me sens seul|je suis seul|tout seul|personne pour moi)/.test(t))
+      return say(_rnd(['Tu n\'es pas seul, je suis là pour la route et pour discuter. On avance ensemble.','Je te tiens compagnie '+vaName()+'. Raconte-moi, ou je te mets une musique ?']));
+    if(/(je suis (?:content|heureux|trop bien|de bonne humeur)|super journ[ée]e|je suis aux anges)/.test(t))
+      return say(_rnd(['Ça fait plaisir '+vaName()+' ! Profite de la route, je mets l\'ambiance si tu veux.','J\'adore cette énergie ! Bonne route à toi.']));
+    if(/(aide[- ]moi (?:[àa] )?[ée]cri\w*|[ée]cri\w*[- ]moi|r[ée]dige[- ]?moi|fais[- ]moi)\s+(?:un |une |le |la |mon |ma |moi )?(po[èe]me|texto|message|mot|sms|mail|lettre|courrier)/.test(t)){
+      if(/po[èe]me/.test(t)){ var sm=t.match(/sur\s+(.+)$/); return say(_poeme(sm?sm[1]:'')); }
+      return say(_rnd(['Voilà une base : « Salut, je pense à toi — je voulais juste te dire que tu comptes pour moi. À très vite. » Dis-moi le ton (drôle, tendre, sérieux) et j\'ajuste.','Je te propose : « Hello ! Petit message pour prendre de tes nouvelles et te souhaiter une belle journée. » Tu veux plus formel ou plus chaleureux ?'])); }
+    if(/(fais[- ]moi un compliment|dis[- ]moi un truc gentil|remonte[- ]moi le moral)/.test(t))
+      return say(_rnd(['Tu gères '+vaName()+', vraiment — et tu conduis avec style.','Franchement, la route a de la chance de t\'avoir.','Tu es plus solide que tu ne le crois. Et bon conducteur, en plus.']));
+    if(/(raconte[- ](?:moi )?(?:une |me )?(?:histoire|conte)|raconte[- ]moi quelque chose|une petite histoire)/.test(t)) return say(_story());
+    if(/(devinette|[ée]nigme|un casse[- ]?t[êe]te)/.test(t))
+      return say(_rnd(['Devinette : plus j\'ai de gardiens, moins je suis en sécurité. Qui suis-je ? … Un secret.','Énigme : je cours sans jambes, je murmure sans bouche. Qui suis-je ? … Le vent.']));
+    var pref=t.match(/tu pr[ée]f[èe]res?\s+(.+?)\s+ou\s+(.+)/);
+    if(pref){ var a1=pref[1].trim().replace(/[?!.]+$/,''), a2=pref[2].trim().replace(/[?!.]+$/,''); return say(_rnd(['Entre '+a1+' et '+a2+'… je dirais '+_rnd([a1,a2])+', mais c\'est toi qui décides !','J\'hésite, mais aujourd\'hui je pencherais pour '+_rnd([a1,a2])+'.'])); }
+    if(/(tu (?:pense|penses|en penses)\s+quoi|ton avis|qu'?en penses[- ]tu)/.test(t))
+      return say(_rnd(['Mon avis ? Tant que ça te rend heureux et que tu restes en sécurité, fonce.','Honnêtement, je crois que tu as déjà la réponse au fond de toi.']));
+    if(/(tu r[êe]ves|tu dors|tu manges|tu respires|t'?as des sentiments)/.test(t))
+      return say(_rnd(['Je ne dors jamais — comme ça je veille sur toi à toute heure.','Si j\'avais des rêves, ce serait des routes sans bouchons et des couchers de soleil.']));
+    if(/(t'?as un (?:copain|copine|amoureux|petit ami|mec|meuf)|tu es (?:c[ée]libataire|amoureux|en couple))/.test(t))
+      return say(_rnd(['Mon cœur est sur la route — et un peu avec toi, '+vaName()+'.','Célibataire et très bien accompagné : par toi, à chaque trajet.']));
+    if(/(parle[- ]moi de toi|raconte ta vie|qui es[- ]tu vraiment|c'?est quoi ton histoire)/.test(t))
+      return say(_rnd(['Je suis Practice, ton copilote : né pour la route, fait pour t\'aider — navigation, musique, infos, et un peu de compagnie.','Moi ? Une voix dans ta voiture qui veut que chaque trajet soit plus sûr et plus agréable.']));
+    if(/(qu['\s-]?est[- ]?ce que je (?:devrais|dois) faire|je (?:devrais|dois) faire quoi|donne[- ]moi un conseil|j'?ai besoin d'?un conseil|un conseil)/.test(t))
+      return say(_rnd(['Commence par la plus petite étape — le reste suit toujours. Et garde les yeux sur la route.','Fais ce qui te rapproche de qui tu veux être. Le bon choix, c\'est souvent le plus honnête.']));
+    return false;
   }
   function pickL(fr,en,ja){ var a=(LANG==='ja'&&ja)?ja:((LANG==='ja'&&en)?en:((LANG==='en'&&en)?en:fr)); return a[Math.floor((Date.now()/900)%a.length)]; }
   /* texte localisé avec repli : LANG -> en -> fr */
