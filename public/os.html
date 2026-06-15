@@ -1923,7 +1923,9 @@
   var navtabs=document.querySelector('.navtabs');
   navtabs.addEventListener('click',function(e){
     var b=e.target.closest('button'); if(!b)return; var t=(b.textContent||'').trim().toLowerCase();
-    if(t==='voix'||b.id==='voiceBtn'){ if(typeof toggleVA==='function')toggleVA(); return; }
+    if(t==='voix'||b.id==='voiceBtn'){ var _SRok=(window.SpeechRecognition||window.webkitSpeechRecognition);
+      if(!_SRok && typeof sttSupported==='function' && sttSupported()){ if(typeof unlockNeural==='function')unlockNeural(); if(typeof pttSTT==='function')pttSTT(); return; } /* iPhone/Safari : push-to-talk via Scribe */
+      if(typeof toggleVA==='function')toggleVA(); return; }
     if(t==='settings'){ openPanel(); return; }
     [].forEach.call(navtabs.querySelectorAll('button'),function(x){ if(x.id!=='voiceBtn') x.classList.remove('on'); });
     b.classList.add('on');
@@ -2626,7 +2628,7 @@
   function handleSpeech(alts){ alts=(alts||[]).filter(Boolean); if(!alts.length)return;
     for(var i=0;i<alts.length;i++){ if(vocabRun(alts[i])){ showHeard(alts[i]); return; } }
     showHeard(alts[0]); runCmd(alts[0]); }
-  function startVA(greet){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — utilise Chrome / Android.'); $('vaSeg')&&[].forEach.call($('vaSeg').children,function(b){b.classList.toggle('on',b.dataset.va==='off');}); return; }
+  function startVA(greet){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ if(typeof sttSupported==='function'&&sttSupported()){ toast('Sur iPhone : touche le bouton « Voix » et parle (appui pour parler).'); } else { toast('Reconnaissance vocale non supportée — utilise Chrome / Android.'); } $('vaSeg')&&[].forEach.call($('vaSeg').children,function(b){b.classList.toggle('on',b.dataset.va==='off');}); return; }
     if(!recog){ recog=new SR(); recog.continuous=true; recog.interimResults=false; recog.maxAlternatives=5; recog.lang=T().code;
       recog.onresult=function(e){
         if(responding) return;   /* VERROU : Practice répond déjà -> on ignore tout, on attend la fin de SA réponse */
@@ -2679,6 +2681,45 @@
     p.onend=finish; p.onerror=function(ev){ if(ev.error==='not-allowed')toast('Micro refusé.'); finish(); };
     try{p.start();}catch(e){ finish(); }
     setTimeout(function(){ if(!done){ try{p.stop();}catch(e){} } },7000);
+  }
+  /* ===== reconnaissance vocale par ENREGISTREMENT (iPhone/Safari & tout navigateur sans Web Speech API) : enregistre -> ElevenLabs Scribe -> exécute ===== */
+  var sttRec=null, sttChunks=[], sttBusy=false, sttStream=null, sttTimer=null, sttMime='';
+  function sttSupported(){ return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder); }
+  function stopSTT(){ clearTimeout(sttTimer); if(sttRec&&sttRec.state!=='inactive'){ try{sttRec.stop();}catch(e){} } }
+  function pttSTT(){
+    if(sttBusy){ stopSTT(); return; }                 /* 2e tap = arrête et transcrit maintenant */
+    if(!sttSupported()){ toast('Micro non disponible sur ce navigateur.'); return; }
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+      sttStream=stream; sttChunks=[]; sttMime='';
+      ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/mpeg'].some(function(m){ if(window.MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m)){sttMime=m;return true;} return false; });
+      try{ sttRec=sttMime?new MediaRecorder(stream,{mimeType:sttMime}):new MediaRecorder(stream); }catch(e){ try{sttRec=new MediaRecorder(stream);}catch(e2){ toast('Enregistrement non supporté.'); return; } }
+      sttRec.ondataavailable=function(e){ if(e.data&&e.data.size)sttChunks.push(e.data); };
+      sttRec.onstop=finishSTT;
+      sttBusy=true;
+      document.body.setAttribute('data-listening','hear'); if($('micDot')){$('micDot').classList.add('on','hear');} if($('micTxt'))$('micTxt').textContent='Parle… (re-touche pour finir)'; var vb=$('voiceBtn'); if(vb)vb.classList.add('on'); try{ if(Voice.supported)speechSynthesis.cancel(); }catch(e){} if(typeof stopNeural==='function')stopNeural();
+      try{ sttRec.start(); }catch(e){ sttBusy=false; toast('Micro indisponible.'); return; }
+      sttTimer=setTimeout(stopSTT, 6500);              /* arrêt auto à 6,5 s */
+    }).catch(function(){ toast('Micro refusé. Autorise le micro pour parler à Practice.'); });
+  }
+  function finishSTT(){
+    if(sttStream){ try{sttStream.getTracks().forEach(function(t){t.stop();});}catch(e){} sttStream=null; }
+    var vb=$('voiceBtn'); if(vb)vb.classList.remove('on'); document.body.removeAttribute('data-listening'); if($('micDot'))$('micDot').classList.remove('hear');
+    if(!sttChunks.length){ sttBusy=false; if($('micTxt'))$('micTxt').textContent=vaTxt('asleep'); return; }
+    var blob=new Blob(sttChunks,{type:sttMime||'audio/webm'}); if($('micTxt'))$('micTxt').textContent='…';
+    var reader=new FileReader();
+    reader.onloadend=function(){
+      var b64=((reader.result||'')+'').split(',')[1]||'';
+      if(!b64){ sttBusy=false; return; }
+      fetch('/api/stt',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({audio:b64,type:blob.type,lang:(LANG==='en'?'eng':LANG==='ja'?'jpn':'fra')})})
+        .then(function(r){return r.json();}).then(function(j){ sttBusy=false;
+          var txt=((j&&j.text)||'').trim();
+          if(!txt){ sayVA(pickL(['Je n\'ai rien entendu, réessaie ?'],['I didn\'t catch that, try again?'])); if($('micTxt'))$('micTxt').textContent=vaTxt('asleep'); return; }
+          if(typeof showHeard==='function')showHeard(txt);
+          var clean=txt.toLowerCase().replace(/^\s*(ok\s+)?(pra[ckg]?t[iy]\w*|practi\w*|pratiqu\w*)[\s,]*/i,'').trim();
+          handleSpeech([clean||txt.toLowerCase()]);
+        }).catch(function(){ sttBusy=false; sayVA(pickL(['Souci de transcription, réessaie.'],['Transcription issue, try again.'])); });
+    };
+    reader.readAsDataURL(blob);
   }
   if($('vaSeg'))$('vaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var on=(b.dataset.va==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Mem.prefs.va=on; saveMem(); if(on)startVA(true); else stopVA(); });
   /* test direct de la voix réaliste : lecture dans le geste de clic (aucun blocage autoplay) */
