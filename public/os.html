@@ -2564,11 +2564,18 @@
         if(vaSpeaking || Date.now()-vaSpeakEnd < 500) return; /* guidage en cours : on ignore l'écho de la voix de Practice */
         for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var res=e.results[i];
         var alts=[]; for(var a=0;a<res.length&&a<5;a++){ var s=(res[a].transcript||'').toLowerCase().trim(); if(s&&alts.indexOf(s)<0)alts.push(s); } if(!alts.length)continue;
-        var wakeRe=/practi[sc]e?|pratis|practi[sz]|プラクティス/, anyWake=alts.some(function(s){return wakeRe.test(s);});
+        /* mot-clé « Practice » — tolérant aux variantes que la reconnaissance vocale FR/EN produit (pratique, praktis, practisse, pratisse, practiz…) sinon il ne se réveille jamais */
+        var WAKE=/pra[ckg]?t[iy](?:[sczqk]|qu|ss|c)\w*|practi\w*|pratiqu\w*|プラクティス/i, STRIP=/^.*?(pra[ckg]?t[iy](?:[sczqk]|qu|ss|c)\w*|practi\w*|pratiqu\w*)\s*/i, STRIPL=/^(pra[ckg]?t[iy](?:[sczqk]|qu|ss|c)\w*|practi\w*|pratiqu\w*)\s*/i;
+        var anyWake=alts.some(function(s){return WAKE.test(s);});
+        var greetSaid=alts.some(function(s){return /\b(bonjour|bonsoir|salut|coucou|hello|hey|good (morning|evening)|yo|wesh)\b/i.test(s);});
         if(!awake){ /* endormi : seul le mot-clé réveille */
-          if(anyWake){ var cmdAlts=alts.map(function(s){return s.replace(/^.*?(practi[sc]e?|pratis|practi[sz])\s*/,'').trim();}).filter(Boolean); beginResponse(); wakeVA(); if(cmdAlts.length){ handleSpeech(cmdAlts); } else { showHeard(vaTxt('yes')); sayVA(vaTxt('yes')); } resetAwake(); return; /* UNE commande, puis on attend la fin de la réponse */ }
+          if(anyWake){ var cmdAlts=alts.map(function(s){return s.replace(STRIP,'').trim();}).filter(Boolean); beginResponse(); wakeVA();
+            if(cmdAlts.length){ handleSpeech(cmdAlts); }
+            else if(greetSaid){ showHeard(alts[0]); sayVA(pickL(['Bonjour '+vaName()+' ! Je t\'écoute.','Salut '+vaName()+' ! Qu\'est-ce que je peux faire pour toi ?','Hey '+vaName()+' ! À ton écoute.'],['Hi '+vaName()+'! I\'m listening.','Hey '+vaName()+'! What can I do?'])); }
+            else { showHeard(vaTxt('yes')); sayVA(vaTxt('yes')); }
+            resetAwake(); return; /* UNE commande, puis on attend la fin de la réponse */ }
         } else { /* éveillé : conversation, sans mot-clé */
-          var c2alts=alts.map(function(s){return s.replace(/^(practi[sc]e?|pratis|practi[sz])\s*/,'').trim();}).filter(Boolean), c2=c2alts[0]||'';
+          var c2alts=alts.map(function(s){return s.replace(STRIPL,'').trim();}).filter(Boolean), c2=c2alts[0]||'';
           beginResponse();
           if(/^(merci|c'?est (tout|bon)|au revoir|arr[eê]te d'?[eé]couter|stop|dors|tais[- ]toi|thanks?|that'?s all|bye|stop listening|go to sleep)\b/.test(c2)){ sayVA(vaTxt('bye')); sleepVA_(); }
           else if(c2alts.length){ handleSpeech(c2alts); resetAwake(); }
