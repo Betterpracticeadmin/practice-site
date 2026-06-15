@@ -1992,7 +1992,7 @@
     imListening:{fr:'Je t\'écoute…',en:'Listening…',ja:'聞いています…'},
     yes:{fr:'Oui ?',en:'Yes?',ja:'はい？'},
     bye:{fr:'À tout de suite.',en:'Talk soon.',ja:'また後で。'},
-    greet:{fr:'Practice activé, bonjour '+vaName()+'.',en:'Practice on. Hi '+vaName()+'.',ja:'Practice 起動。'+vaName()+'さん、こんにちは。'},
+    greet:{fr:'J\'écoute ?',en:'I\'m listening?',ja:'聞いていますか？'},
     nocmd:{fr:'Je n\'ai pas compris, tu peux reformuler ?',en:'I didn\'t catch that, can you rephrase?',ja:'うまく聞き取れませんでした。'}
   }; return (D[k]&&(D[k][LANG]||D[k].fr))||''; }
   function showHeard(t){ if($('micTxt'))$('micTxt').textContent='« '+t+' »'; var md=$('micDot'); if(md){md.classList.add('hear');clearTimeout(md._h);md._h=setTimeout(function(){md.classList.remove('hear');},900);} document.body.setAttribute('data-listening','hear'); }
