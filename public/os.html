@@ -1727,7 +1727,8 @@
     return (j&&j.routes&&j.routes.length)?j.routes.map(osrmRt):null; }); }
   function setRouteData(rt){ route=rt;stepIdx=0;stepAnnounced=false;navActive=true;offCount=0;stepMinD=Infinity;
     rt.cum=[0];rt.total=0; for(var i=1;i<rt.coords.length;i++){var a=rt.coords[i-1],b=rt.coords[i];rt.total+=haversine({lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]});rt.cum[i]=rt.total;}
-    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); refilterMarkers(); if(raceLayer)raceLayer.clearLayers(); }
+    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); refilterMarkers(); if(raceLayer)raceLayer.clearLayers(); postHudRoute(); }
+  function postHudRoute(){ var f=$('hudFrame'); if(f&&f.contentWindow){ try{ f.contentWindow.postMessage({type:'route',coords:(navActive&&route&&route.coords)?route.coords:null},'*'); }catch(e){} } }
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
     pendingNav=null;
     currentDest=to;hideSuggest();hideFavs();addFav(to);setNavContext(to);rememberPlace(to,($('dest').value||to.name));setUiMode('active');setMsg(T().reroute,'');requestWake();
@@ -1739,7 +1740,7 @@
       setState('safe');setMsg(T().go,km+' km · '+min+' min');Voice.say(T().calc(km,min),2);
       updateTraffic(); setTimeout(announceTraffic,4200); if(demoMode)driveDemo(rt.coords);
     }).catch(function(){toast(T().netErr);setMsg(T().ready,'');}); }
-  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if(raceLayer)raceLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); refilterMarkers(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
+  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if(raceLayer)raceLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); refilterMarkers(); if(typeof postHudRoute==='function')postHudRoute(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
   function reroute(pos){ if(!currentDest)return; rerouting=true;setState('attention');toast(T().reroute);Voice.say(T().reroute,1);
     getRoute(pos,currentDest).then(function(rt){rerouting=false;if(rt){setRouteData(rt);colorRouteTraffic(pos,currentDest);setState('safe');}}).catch(function(){rerouting=false;}); }
   function maneuverText(step){ var m=step.maneuver||{},mod=m.modifier||'',t=m.type||'',tr=T().turns;
@@ -1837,7 +1838,7 @@
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
   /* ---- three navigation views: Normal (map) · HUD (Practice Vision) · Pulse ---- */
   var currentView='normal';
-  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(postHudMode,500); }
+  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(function(){postHudMode();postHudRoute();},700); }
   function postHudMode(){ var f=$('hudFrame'); if(f&&f.contentWindow&&$('hudOv')&&$('hudOv').classList.contains('show')){ try{f.contentWindow.postMessage({type:'mode',mode:mode},'*');}catch(e){} } }
   function closeHud(){ $('hudOv').classList.remove('show'); var f=$('hudFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
   function openPulse(){ var f=$('pulseFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/pulse.html'); $('pulseOv').classList.add('show'); setTimeout(postPulseData,600); }

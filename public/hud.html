@@ -247,7 +247,7 @@
   function roadGeom(){ var roadW=Math.min(W*0.52,360); return {roadW:roadW, x0:W/2-roadW/2, lw:roadW/world.lanes, egoY:H-130, topY:60}; }
 
   /* ---- real surroundings (buildings / parks / rivers) projected into the HUD ---- */
-  var egoLL=null, egoHdg=0, surrLL=null, surrAt=0, surr={b:[],g:[],w:[],wl:[]};
+  var egoLL=null, egoHdg=0, surrLL=null, surrAt=0, surr={b:[],g:[],w:[],wl:[]}, hubRoute=null;
   function loadSurroundings(lat,lon){ var now=Date.now(); if(surrLL && Math.abs(lat-surrLL.lat)<0.002 && Math.abs(lon-surrLL.lon)<0.002 && now-surrAt<60000)return; surrAt=now; surrLL={lat:lat,lon:lon};
     var q='[out:json][timeout:25];(way["building"](around:300,'+lat+','+lon+');way["leisure"="park"](around:380,'+lat+','+lon+');way["landuse"~"grass|forest|meadow|recreation_ground|cemetery"](around:380,'+lat+','+lon+');way["natural"="wood"](around:380,'+lat+','+lon+');way["natural"="water"](around:430,'+lat+','+lon+');way["waterway"~"river|stream|canal"](around:430,'+lat+','+lon+'););out geom 260;';
     fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){ var b=[],g=[],w=[],wl=[];
@@ -259,6 +259,20 @@
     var hr=egoHdg*Math.PI/180, fwd=dy*Math.cos(hr)+dx*Math.sin(hr), lt=dx*Math.cos(hr)-dy*Math.sin(hr);
     if(fwd<-25||fwd>VIEW_M*1.25)return null; var t=Math.max(0,fwd/VIEW_M);
     var g=roadGeom(); return {x:W/2+lt*((W/120)*(1-t*0.74)), y:g.egoY-t*(g.egoY-g.topY), t:t}; }
+  /* projette le VRAI tracé d'itinéraire (lat/lon) dans la vue perspective du hub */
+  function projectRoute(){ if(!egoLL||!hubRoute)return null; var out=[]; for(var i=0;i<hubRoute.length;i++){ var p=projGround(hubRoute[i].lat,hubRoute[i].lon); if(p)out.push(p); } return out.length>=2?out:null; }
+  function drawRouteChevrons(rpts,col){
+    ctx.save(); ctx.strokeStyle=col; ctx.globalAlpha=.5; ctx.lineWidth=4; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath(); ctx.moveTo(rpts[0].x,rpts[0].y); for(var j=1;j<rpts.length;j++)ctx.lineTo(rpts[j].x,rpts[j].y); ctx.stroke(); ctx.globalAlpha=1;
+    var ms=MODESTYLE[hudMode]||MODESTYLE.copilot, cum=[0],total=0;
+    for(var i=1;i<rpts.length;i++){ var dx=rpts[i].x-rpts[i-1].x, dy=rpts[i].y-rpts[i-1].y; total+=Math.sqrt(dx*dx+dy*dy); cum.push(total); }
+    var pul=ms.pulse?(0.78+0.22*Math.sin(world.t*7)):1;
+    for(var ci=0;ci<ms.n;ci++){ var f=((ci/ms.n)+((world.t*ms.speed)%1))%1, dpx=f*total, s=1;
+      while(s<cum.length&&cum[s]<dpx)s++; if(s>=cum.length)continue; var seg=cum[s]-cum[s-1]||1, ltf=(dpx-cum[s-1])/seg;
+      var x=rpts[s-1].x+(rpts[s].x-rpts[s-1].x)*ltf, y=rpts[s-1].y+(rpts[s].y-rpts[s-1].y)*ltf, sz=3+(1-f)*10;
+      ctx.globalAlpha=(0.85-f*0.6)*ms.dim*pul; ctx.fillStyle=col;
+      ctx.beginPath(); ctx.moveTo(x,y-sz); ctx.lineTo(x-sz*0.85,y+sz*0.55); ctx.lineTo(x+sz*0.85,y+sz*0.55); ctx.closePath(); ctx.fill(); }
+    ctx.restore(); }
   function fillRing(ring,fill){ var pr=[]; for(var i=0;i<ring.length;i++){var p=projGround(ring[i].lat,ring[i].lon);if(p)pr.push(p);} if(pr.length<3)return; ctx.beginPath(); ctx.moveTo(pr[0].x,pr[0].y); for(var j=1;j<pr.length;j++)ctx.lineTo(pr[j].x,pr[j].y); ctx.closePath(); ctx.fillStyle=fill; ctx.fill(); }
   function strokeRing(ring,col,wd){ var pr=[]; for(var i=0;i<ring.length;i++){var p=projGround(ring[i].lat,ring[i].lon);if(p)pr.push(p);} if(pr.length<2)return; ctx.beginPath(); ctx.moveTo(pr[0].x,pr[0].y); for(var j=1;j<pr.length;j++)ctx.lineTo(pr[j].x,pr[j].y); ctx.strokeStyle=col; ctx.lineWidth=wd; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke(); }
   function ringDepth(ring){ var la=0,lo=0,c=0; for(var i=0;i<ring.length;i++){la+=ring[i].lat;lo+=ring[i].lon;c++;} var p=projGround(la/c,lo/c); return p?p.t:null; }
@@ -422,8 +436,10 @@
             : dec<-0.15 ? '#b6e63a'                /* lève le pied = lime */
             : '#39d98a';                           /* vitesse / dégagé = vert */
     var pul = ms.pulse ? (0.78+0.22*Math.sin(world.t*7)) : 1;
-    for(var ci=0;ci<ms.n;ci++){ var f=((ci/ms.n)+((world.t*ms.speed)%1))%1; var yy=g.topY+f*(g.egoY-g.topY); var sz=3+f*11;
-      ctx.globalAlpha=(0.18+f*0.7)*ms.dim*pul; ctx.fillStyle=rlc; ctx.beginPath(); ctx.moveTo(elx,yy-sz); ctx.lineTo(elx-sz*0.85,yy+sz*0.55); ctx.lineTo(elx+sz*0.85,yy+sz*0.55); ctx.closePath(); ctx.fill(); }
+    var rpts=projectRoute(), hasRR=!!rpts;   /* vrai tracé projeté si dispo */
+    if(hasRR){ drawRouteChevrons(rpts,rlc); }
+    else { for(var ci=0;ci<ms.n;ci++){ var f=((ci/ms.n)+((world.t*ms.speed)%1))%1; var yy=g.topY+f*(g.egoY-g.topY); var sz=3+f*11;
+      ctx.globalAlpha=(0.18+f*0.7)*ms.dim*pul; ctx.fillStyle=rlc; ctx.beginPath(); ctx.moveTo(elx,yy-sz); ctx.lineTo(elx-sz*0.85,yy+sz*0.55); ctx.lineTo(elx+sz*0.85,yy+sz*0.55); ctx.closePath(); ctx.fill(); } }
     ctx.globalAlpha=1;
 
     // ghosted surrounding cars (Tesla autopilot style)
@@ -449,9 +465,9 @@
       rg.addColorStop(0,'rgba('+col[0]+','+col[1]+','+col[2]+','+(0.05+S.risk*0.22)+')'); rg.addColorStop(1,'rgba('+col[0]+','+col[1]+','+col[2]+',0)');
       ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(ex,ey,rad,0,7); ctx.fill(); }
 
-    // clean dashed trajectory path (Tesla-style), colour follows braking
-    ctx.strokeStyle=rlc; ctx.globalAlpha=.55; ctx.lineWidth=3.5; ctx.setLineDash([4,10]); ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(ex,ey-12); ctx.lineTo(ex,g.topY+18); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+    // clean dashed trajectory path (Tesla-style) — uniquement si pas de vrai tracé (sinon la route projetée le remplace)
+    if(!hasRR){ ctx.strokeStyle=rlc; ctx.globalAlpha=.55; ctx.lineWidth=3.5; ctx.setLineDash([4,10]); ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(ex,ey-12); ctx.lineTo(ex,g.topY+18); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1; }
 
     // ego car (clean dark, Tesla look)
     ctx.save(); ctx.shadowColor='rgba(10,14,30,.34)'; ctx.shadowBlur=14; ctx.shadowOffsetY=5;
@@ -602,7 +618,7 @@
       function(e){ log('GPS: '+(e.message||'refusé')); $('bGps').classList.remove('on'); },{enableHighAccuracy:true,maximumAge:1000,timeout:20000}); }
   function stopGPS(){ if(gpsWatch!=null){navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;} $('bGps').classList.remove('on'); if(real.src==='GPS'){real.speed=null;real.src=null;} }
   // embedded in cockpit: accept full GPS (lat/lon/speed/heading) from parent (no 2nd prompt)
-  window.addEventListener('message',function(e){ var d=e.data; if(!d)return; if(d.type==='gps'){ onGeo(d.lat,d.lon,d.speed,d.heading,d.acc); } else if(d.type==='mode'&&d.mode&&MODESTYLE[d.mode]){ hudMode=d.mode; document.body.setAttribute('data-hudmode',d.mode); } });
+  window.addEventListener('message',function(e){ var d=e.data; if(!d)return; if(d.type==='gps'){ onGeo(d.lat,d.lon,d.speed,d.heading,d.acc); } else if(d.type==='mode'&&d.mode&&MODESTYLE[d.mode]){ hudMode=d.mode; document.body.setAttribute('data-hudmode',d.mode); } else if(d.type==='route'){ hubRoute=(d.coords&&d.coords.length>1)?d.coords.map(function(c){ return Array.isArray(c)?{lat:c[1],lon:c[0]}:{lat:c.lat,lon:c.lon}; }):null; } });
   if(/[?&]mode=/.test(location.search)){ var mm=(location.search.match(/[?&]mode=([a-z]+)/)||[])[1]; if(mm&&MODESTYLE[mm]){hudMode=mm;document.body.setAttribute('data-hudmode',mm);} }
   function toggleFull(){ var el=document.documentElement; try{ if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el);$('bFull').classList.add('on'); } else { (document.exitFullscreen||function(){}).call(document);$('bFull').classList.remove('on'); } }catch(e){} }
 
