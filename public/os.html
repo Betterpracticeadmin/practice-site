@@ -2425,9 +2425,11 @@
     showHeard(alts[0]); runCmd(alts[0]); }
   function startVA(greet){ var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ toast('Reconnaissance vocale non supportée — utilise Chrome / Android.'); $('vaSeg')&&[].forEach.call($('vaSeg').children,function(b){b.classList.toggle('on',b.dataset.va==='off');}); return; }
     if(!recog){ recog=new SR(); recog.continuous=true; recog.interimResults=false; recog.maxAlternatives=5; recog.lang=T().code;
-      recog.onresult=function(e){ if(vaSpeaking||Date.now()-vaSpeakEnd<500)return; /* ne pas traiter ce que Practice dit lui-même */
+      recog.onresult=function(e){
         for(var i=e.resultIndex;i<e.results.length;i++){ if(!e.results[i].isFinal)continue; var res=e.results[i];
         var alts=[]; for(var a=0;a<res.length&&a<5;a++){ var s=(res[a].transcript||'').toLowerCase().trim(); if(s&&alts.indexOf(s)<0)alts.push(s); } if(!alts.length)continue;
+        /* anti-écho : pendant que Practice parle, on ignore SEULEMENT ce qui ressemble à ce qu'il vient de dire ; une vraie commande l'interrompt et est traitée */
+        if(vaSpeaking||Date.now()-vaSpeakEnd<300){ var said=(lastSpoken||'').toLowerCase(), heard=alts[0]||''; if(heard.length<4||(said&&(said.indexOf(heard)>=0||heard.indexOf(said.slice(0,14))>=0)))continue; vaSpeaking=false; try{stopNeural();speechSynthesis.cancel();}catch(_e){} }
         var wakeRe=/practi[sc]e?|pratis|practi[sz]|プラクティス/, anyWake=alts.some(function(s){return wakeRe.test(s);});
         if(!awake){ /* asleep: only the wake word activates Practice */
           if(anyWake){ var cmdAlts=alts.map(function(s){return s.replace(/^.*?(practi[sc]e?|pratis|practi[sz])\s*/,'').trim();}).filter(Boolean); wakeVA(); if(cmdAlts.length){ handleSpeech(cmdAlts); } else { showHeard(vaTxt('yes')); sayVA(vaTxt('yes')); } resetAwake(); }
