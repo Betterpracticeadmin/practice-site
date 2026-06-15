@@ -554,7 +554,8 @@
   .tdelta b{font-family:var(--mono);font-size:15px;display:block;margin-top:2px;}
 
   /* ===== weather-reactive layer (hyper-realism) ===== */
-  .fx{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity 1.4s ease;}
+  /* Effets météo à l'écran (pluie/neige/brume…) désactivés à la demande — l'écran reste net. Les données météo (température, description) restent affichées dans le panneau. */
+  .fx{display:none !important;}
   body[data-wx="rain"] .fx{opacity:1;background:repeating-linear-gradient(108deg,transparent 0 6px,rgba(170,195,255,.05) 6px 7px,transparent 7px 10px);animation:rainmove .55s linear infinite;}
   @keyframes rainmove{to{transform:translateY(46px);}}
   body[data-wx="fog"] .fx{opacity:1;background:radial-gradient(ellipse 130% 100% at 50% 50%,transparent 24%,rgba(200,206,212,.16) 100%);}
