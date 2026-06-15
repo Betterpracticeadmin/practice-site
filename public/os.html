@@ -2499,6 +2499,10 @@
     return false;
   }
   function runCmd(t){ t=t.toLowerCase().trim(); if(!t)return;
+    /* changement de langue À LA VOIX : "passe en anglais", "parle en français", "switch to japanese", ou juste "anglais"/"en japonais" */
+    var _lm=t.match(/\b(?:parle(?:[- ]moi)?(?: en| moi en)?|passe(?: en)?|mets?[- ]toi en|mets en|bascule(?: en)?|switch to|speak|in)\s+(anglais|english|fran[çc]ais|french|japonais|japanese)\b/) || t.match(/^\s*(?:en\s+)?(anglais|english|fran[çc]ais|french|japonais|japanese)\s*[!.?]*$/);
+    if(_lm){ var _L=_lm[1]; setLang(/anglais|english/.test(_L)?'en':(/japonais|japanese/.test(_L)?'ja':'fr')); return; }
+    if(/(日本語|にほんご)/.test(t)){ setLang('ja'); return; }
     if(vocabRun(t))return;
     var modes={copilot:'copilot',learning:'learning',apprentissage:'learning',performance:'performance',ultra:'ultra',course:'ultra','grand touring':'gt',tourisme:'gt',nuit:'night',night:'night'};
     if(/(mode|passe|active|mets|met|bascule)/.test(t)){ for(var k in modes){ if(t.indexOf(k)>=0){ setMode(modes[k]); sayVA('Mode '+MODES[modes[k]].name+'.'); return; } } }
