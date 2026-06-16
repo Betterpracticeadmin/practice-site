@@ -1215,7 +1215,7 @@
   <div id="mediaBlur"></div>
   <div class="media-screen">
     <div class="media-head">
-      <div class="media-seg" id="mediaSeg"><button class="on" data-s="sc">Playlist</button><button data-s="radio">Radio</button><button data-s="podcast">Podcasts</button><button data-s="liked">♥ Favoris</button><button data-s="yt">📺 YouTube</button></div>
+      <div class="media-seg" id="mediaSeg"><button class="on" data-s="sc">Playlist</button><button data-s="radio">Radio</button><button data-s="podcast">Podcasts</button><button data-s="liked">♥ Favoris</button><button data-s="yt">🌍 TV Monde</button></div>
       <button class="media-x" id="mediaX">✕</button>
     </div>
     <input class="media-search" id="mediaSearch" type="text" placeholder="Rechercher une station…" autocomplete="off" style="display:none"/>
@@ -1248,7 +1248,7 @@
 <div class="media-ov" id="paxMediaOv">
   <div class="media-screen">
     <div class="media-head">
-      <div class="media-seg" id="paxSeg"><button class="on" data-px="yt">📺 YouTube</button><button data-px="sp">Spotify</button><button data-px="am">Apple Music</button></div>
+      <div class="media-seg" id="paxSeg"><button class="on" data-px="yt">🌍 TV Monde</button><button data-px="sp">Spotify</button><button data-px="am">Apple Music</button></div>
       <button class="media-x" id="paxX">✕</button>
     </div>
     <input class="media-search" id="paxLink" type="text" placeholder="Colle un lien YouTube et appuie sur Entrée…" autocomplete="off"/>
@@ -3014,10 +3014,13 @@
   function closeMedia(){ $('mediaOv').classList.remove('show'); }
   /* ---- Média passager : YouTube / Spotify / Apple Music par intégration (sans clé) ---- */
   var paxSrc='yt';
-  var PAX_PRESETS={ yt:[{n:'📰 France 24',live:'UCCCPCZNChQdGa9EkATeye4g'},{n:'🌍 Euronews',live:'UCW2QcKZiU8aUGg4yxCIditg'},{n:'🌐 France 24 EN',live:'UCQfwfsi5VrQ8yKZ-UWmAEFg'},{n:'🎵 Lofi',id:'jfKfPfyJRdk'},{n:'🌿 Nature 4K',id:'BHACKCNDMW8'},{n:'✈️ Voyage',id:'1La4QzGeaaQ'}],
+  var PAX_PRESETS={ yt:[
+      {n:'🇫🇷 France 24',live:'UCCCPCZNChQdGa9EkATeye4g'},{n:'🇪🇺 Euronews',live:'UCW2QcKZiU8aUGg4yxCIditg'},{n:'🇬🇧 Sky News',live:'UCoMdktPbSTixAyNGwb-UYkQ'},{n:'🇩🇪 DW',live:'UCknLrEdhRCp1aegoMqRaCZg'},
+      {n:'🌐 France 24 EN',live:'UCQfwfsi5VrQ8yKZ-UWmAEFg'},{n:'🌍 Al Jazeera',live:'UCNye-wNBqNL5ZzHSJj3l8Bg'},{n:'🇯🇵 NHK World',live:'UCSPEjw8F2nQDtmUKPFNF7_A'},{n:'🌍 Africanews',live:'UC1_E8NeF5QHY2dtdLRBCCLA'},
+      {n:'🎵 Lofi',id:'jfKfPfyJRdk'},{n:'🌿 Nature 4K',id:'BHACKCNDMW8'},{n:'✈️ Voyage',id:'1La4QzGeaaQ'}],
     sp:[{n:'Top hits',u:'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'},{n:'Chill',u:'https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6'},{n:'Road trip',u:'https://open.spotify.com/playlist/37i9dQZF1DWSThc8QnxqcG'}],
     am:[{n:'Today\'s Hits',u:'https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb'}] };
-  var PAX_NOTE={ yt:'📰 Infos & TV en direct (France 24, Euronews…), musique, nature — ou colle n\'importe quel lien YouTube. Pour les passagers / à l\'arrêt : évite de regarder en conduisant.',
+  var PAX_NOTE={ yt:'🌍 TV du monde en direct — touche une chaîne (France 24, Euronews, Sky News, DW, Al Jazeera, NHK, Africanews…) + musique/nature, ou colle n\'importe quel lien YouTube. Passagers / à l\'arrêt : évite de regarder en conduisant.',
     sp:'Colle un lien Spotify (titre, playlist, album). Lecture complète si tu es connecté à Spotify dans ce navigateur, sinon extraits de 30 s. La lecture pilotée par la voix demanderait l\'API Spotify (compte développeur).',
     am:'Colle un lien Apple Music (album/playlist). Lecture via l\'intégration Apple ; la lecture complète demande un abonnement Apple Music actif.' };
   function paxEmbed(src,link){ link=(link||'').trim();
