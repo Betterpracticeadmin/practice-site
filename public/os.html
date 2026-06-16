@@ -689,6 +689,26 @@
   .tvw-now{color:#fff;font-size:15px;font-weight:700;padding:0 16px 8px;}
   .tvw-frame{flex:1;min-height:0;}
   .tvw-frame iframe{width:100%;height:100%;border:0;display:block;}
+  /* ===== COCKPIT DIAGNOSTIC premium (facon Bentley Sport Mode) ===== */
+  .cockpit-ov{position:fixed;inset:0;z-index:73;display:none;color:#ece9e4;overflow:auto;background:radial-gradient(125% 85% at 50% -5%, #6f655a, #463f36 46%, #29251f 100%);}
+  .cockpit-ov.show{display:flex;flex-direction:column;animation:mediaIn .42s cubic-bezier(.32,.72,0,1);}
+  .cockpit-ov .media-x{position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;background:rgba(255,255,255,.14);}
+  .ckp-title{text-align:center;font-size:clamp(20px,3.2vw,30px);font-weight:300;letter-spacing:.5em;padding:calc(28px + env(safe-area-inset-top)) 0 2px;color:rgba(255,255,255,.9);text-transform:uppercase;}
+  .ckp-sub{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;}
+  .ckp-car{display:flex;justify-content:center;align-items:center;flex:1;min-height:120px;padding:6px 16px;}
+  .ckp-carsvg{width:min(72%,540px);height:auto;filter:drop-shadow(0 26px 44px rgba(0,0,0,.5));}
+  .ckp-gauges{display:flex;justify-content:center;gap:clamp(12px,4vw,46px);flex-wrap:wrap;padding:20px 16px 14px;border-top:.5px solid rgba(255,255,255,.13);}
+  .ckp-gauge{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;color:#ece9e4;transition:transform .2s cubic-bezier(.34,1.4,.5,1);}
+  .ckp-gauge:active{transform:scale(.93);}
+  .ckp-dial{position:relative;width:clamp(94px,19vw,124px);height:clamp(94px,19vw,124px);border-radius:50%;background:radial-gradient(circle at 50% 28%, #2c2c31, #111114 72%);box-shadow:0 0 0 3px #3c3c42, 0 0 0 5px #1a1a1e, 0 14px 30px rgba(0,0,0,.5), inset 0 2px 9px rgba(255,255,255,.08);display:grid;place-items:center;}
+  .ckp-dial svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);}
+  .ckp-dial .bg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:5;}
+  .ckp-dial .fg{fill:none;stroke-width:5;stroke-linecap:round;stroke-dasharray:276;stroke-dashoffset:276;transition:stroke-dashoffset .9s cubic-bezier(.32,.72,0,1),stroke .4s;}
+  .ckp-num{position:relative;font-size:clamp(21px,4.4vw,29px);font-weight:300;line-height:1;}
+  .ckp-num small{font-size:13px;opacity:.6;}
+  .ckp-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);}
+  .ckp-scan{align-self:center;background:rgba(255,255,255,.1);border:.5px solid rgba(255,255,255,.22);color:#fff;border-radius:24px;padding:12px 26px;font-size:13px;font-weight:500;cursor:pointer;backdrop-filter:blur(12px);margin:0 0 calc(26px + env(safe-area-inset-bottom));transition:.2s;}
+  .ckp-scan:hover{background:rgba(255,255,255,.18);}
   .media-ov{position:fixed;inset:0;z-index:70;display:none;background:#070708;overflow:hidden;color:#fff;}
   .media-ov.show{display:block;animation:mediaIn .42s cubic-bezier(.32,.72,0,1);}
   @keyframes mediaIn{from{opacity:0;transform:scale(1.04);}to{opacity:1;transform:none;}}
@@ -1152,6 +1172,29 @@
 </div>
 
 <!-- DIAGNOSTICS (Carly-style) -->
+<!-- COCKPIT DIAGNOSTIC premium (facon Bentley Sport Mode) -->
+<div class="cockpit-ov" id="cockpitOv">
+  <button class="media-x" id="cockpitX">✕</button>
+  <div class="ckp-title">Diagnostic</div>
+  <div class="ckp-sub" id="ckpVerdict">santé du véhicule</div>
+  <div class="ckp-car">
+    <svg class="ckp-carsvg" viewBox="0 0 380 140" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="ckpCar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".96"/><stop offset="1" stop-color="#b6bcc5" stop-opacity=".82"/></linearGradient></defs>
+      <path d="M16 100 C18 72 40 67 70 64 L120 38 C152 25 214 23 254 37 L304 54 C344 66 358 80 362 98 C363 106 358 110 350 110 L28 110 C18 110 15 106 16 100 Z" fill="url(#ckpCar)" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+      <path d="M128 58 L152 43 C172 35 210 34 236 42 L262 57 Z" fill="rgba(18,26,38,.6)"/>
+      <circle cx="98" cy="110" r="25" fill="#15171c" stroke="rgba(255,255,255,.55)" stroke-width="3"/><circle cx="98" cy="110" r="9" fill="#33373f"/>
+      <circle cx="294" cy="110" r="25" fill="#15171c" stroke="rgba(255,255,255,.55)" stroke-width="3"/><circle cx="294" cy="110" r="9" fill="#33373f"/>
+    </svg>
+  </div>
+  <div class="ckp-gauges">
+    <button class="ckp-gauge" id="ckpGsante"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpHealthFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpHealthV">—</div></div><div class="ckp-label">Santé</div></button>
+    <button class="ckp-gauge" id="ckpGbatt"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpBattFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpBattV">—</div></div><div class="ckp-label">Batterie</div></button>
+    <button class="ckp-gauge" id="ckpGtemp"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpTempFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpTempV">—</div></div><div class="ckp-label">Moteur</div></button>
+    <button class="ckp-gauge" id="ckpGcodes"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpCodesFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpCodesV">—</div></div><div class="ckp-label">Codes</div></button>
+  </div>
+  <button class="ckp-scan" id="ckpDetails">Scanner & voir le détail</button>
+</div>
+
 <div class="ov" id="diagOv">
   <div class="ov-panel diag-panel">
     <button class="x" id="diagX">✕</button>
@@ -1718,6 +1761,23 @@
     $('diagSys').innerHTML=h;
   }
   function openDiag(){ buildDiag(); $('vehOv').classList.remove('show'); $('diagOv').classList.add('show'); var avg=Math.round(DSYS.reduce(function(a,b){return a+b.s;},0)/DSYS.length); if(Voice.on)Voice.say('Diagnostic terminé. Santé globale '+avg+' pour cent. Un point à surveiller : l’efficacité du catalyseur.',2); }
+  /* ===== COCKPIT DIAGNOSTIC premium (jauges circulaires) ===== */
+  function ckpDial(fgId,vId,pct,val,color){ var fg=$(fgId); if(fg){ fg.style.strokeDashoffset=(276*(1-Math.max(0,Math.min(100,pct))/100)).toFixed(0); fg.style.stroke=color; } if($(vId))$(vId).innerHTML=val; }
+  function openCockpit(){
+    var avg=Math.round(DSYS.reduce(function(a,b){return a+b.s;},0)/DSYS.length);
+    var flags=DSYS.filter(function(s){return s.s<85;}).length, crit=DSYS.some(function(s){return s.s<70;});
+    if($('ckpVerdict'))$('ckpVerdict').textContent=crit?'entretien recommandé':flags?(flags+' point'+(flags>1?'s':'')+' à surveiller'):'excellent état';
+    ckpDial('ckpHealthFg','ckpHealthV',avg,avg+'<small>%</small>',ledColor(avg));
+    var batt=DSYS.filter(function(s){return /batterie/i.test(s.k);})[0]||{s:90,v:'12.6 V'}; ckpDial('ckpBattFg','ckpBattV',batt.s,(batt.v||'').replace(/\s*V/,'')+'<small>V</small>',ledColor(batt.s));
+    var cool=DSYS.filter(function(s){return /refroid/i.test(s.k);})[0]||{s:94,v:'88 °C'}; ckpDial('ckpTempFg','ckpTempV',cool.s,(cool.v||'').replace(/\s*°C/,'')+'<small>°</small>',ledColor(cool.s));
+    var n=DTC.length; ckpDial('ckpCodesFg','ckpCodesV',n?42:100,''+n,n?'#f5a623':'#39d98a');
+    $('cockpitOv').classList.add('show');
+    if(Voice.on&&typeof Voice.say==='function')Voice.say('Santé globale '+avg+' pour cent. '+(n?(n+' code défaut à examiner.'):'Aucun code défaut.'),2);
+  }
+  function closeCockpit(){ if($('cockpitOv'))$('cockpitOv').classList.remove('show'); }
+  if($('cockpitX'))$('cockpitX').addEventListener('click',closeCockpit);
+  if($('ckpDetails'))$('ckpDetails').addEventListener('click',function(){ closeCockpit(); openDiag(); });
+  if($('ckpGcodes'))$('ckpGcodes').addEventListener('click',function(){ closeCockpit(); openDiag(); setTimeout(function(){ var b=$('diagScan'); if(b)b.click(); },220); });
 
   /* ===== DRIVER DIGITAL TWIN (estimated from GPS dynamics, no biometrics) ===== */
   var Twin={ smooth:82, aggr:12, focus:86, fatigue:6, state:'calm', tStart:Date.now(), lastUpd:0 };
@@ -3209,7 +3269,7 @@
   function openVehicle(){ $('vehOv').classList.add('show'); }
   $('vehX').addEventListener('click',function(){ $('vehOv').classList.remove('show'); });
   $('vehOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
-  $('diagBtn').addEventListener('click',openDiag);
+  $('diagBtn').addEventListener('click',openCockpit);
   if($('obdBtn'))$('obdBtn').addEventListener('click',function(){ window.location.href='/obd.html'; });
   $('diagX').addEventListener('click',function(){ $('diagOv').classList.remove('show'); });
   $('diagOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
