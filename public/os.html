@@ -986,6 +986,9 @@
       <button data-voice="nPczCjzI2devNBz1zQrb">Brian · profond ♂</button>
     </div>
     <div class="key-note">Touche une voix pour l'<b>écouter</b> et la <b>choisir</b> (gardée pour la suite). Pour un vibe <b>Joi (Blade Runner) / Samantha (« Her ») / Scarlett</b> — chaud, doux, intime — essaie <b>Matilda</b> (défaut) et <b>Sarah</b> (la plus douce), et garde celle qui te touche le plus à l'oreille. Toutes sont anglophones à la base : l'accent français n'est pas parfait (une vraie voix FR sensuelle comme Charlotte est payante).</div>
+    <h3>🧠 Cerveau local — réflexion sur l'appareil</h3>
+    <button id="localBrainBtn" class="key-in" style="margin-top:4px;cursor:pointer;text-align:center;font-weight:600;background:var(--acc);color:#000;border:none;">🧠 Activer le cerveau local</button>
+    <div id="localBrainStat" class="key-note">Désactivé. Une IA open-source qui tourne <b>100 % sur ton appareil</b> — aucune autre IA, aucune clé, privé. Elle <b>raisonne vraiment</b> (plus un organigramme). Au 1er lancement : <b>~2 Go à télécharger</b> (gardés en cache ensuite), <b>Chrome/Edge récent + WebGPU</b> requis (PC ou Android récent). Plus faible que ChatGPT/Gemini — mais c'est <b>le tien</b>.</div>
     <div class="key-note">Practice <b>dort</b> et ne répond que quand tu dis son nom : « <b>Practice</b> » + ton ordre. Après, tu peux <b>enchaîner sans répéter « Practice »</b> pendant ~14 s (mode conversation), puis il se <b>rendort</b> jusqu'au prochain « Practice ». Dis « merci / au revoir » pour le rendormir tout de suite. Comprend le <b>français et l'anglais</b>, tient une petite conversation, et exécute : mode, thème, destination, favoris, média, HUD/Pulse, radar… ainsi que des questions (trafic, ETA, météo, position, heure, titre). Fonctionne sur <b>Chrome / Android</b> (iOS Safari ne gère pas la reconnaissance vocale web).</div>
     <h3>Trafic temps réel (optionnel)</h3>
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
@@ -2548,6 +2551,7 @@
     if(wikiAsk(t))return;       /* question encyclopédique → Wikipédia en direct (vraies données, sans téléchargement) */
     if(looseIntent(t))return;   /* rattrape les commandes formulées de façon indirecte/inhabituelle */
     if(chitchatReply(t))return; /* échange trouvé dans le corpus (forte correspondance) */
+    if(llmReady){ localBrainAnswer(t); return; } /* CERVEAU LOCAL actif : vrai raisonnement sur l'appareil */
     if(freeChat(t))return;      /* moteur de conversation libre hors-ligne (émotions, rédaction, histoires, opinions…) */
     askClaude(t); /* sinon Claude si la clé est présente, sinon repli Wikipédia puis message d'aide */
   }
@@ -2705,6 +2709,33 @@
       for(var p=0;p<POITYPES.length;p++){ if(POITYPES[p].re.test(dest)){ if(typeof showHeard==='function')showHeard(t); nearestPOI(POITYPES[p]); return true; } }
       if(dest.replace(/[^a-zà-ÿ0-9]/gi,'').length>2){ dest=resolveCity(dest); var dd=cap(dest); lastRef=null; say('Je calcule l\'itinéraire vers '+dd+'.'); geocode(dest).then(function(d){ if(d){ if($('dest'))$('dest').value=dd; lastRef={name:dd,lat:d.lat,lon:d.lon}; startRouteTo(d); } else sayVA(tr({fr:'Adresse introuvable.',en:'Address not found.'})); }).catch(function(){ sayVA(tr({fr:'Réseau indisponible.',en:'Network unavailable.'})); }); return true; } }
     return false; }
+  /* ===== CERVEAU LOCAL : IA open-source qui RAISONNE, 100% sur l'appareil (WebLLM / WebGPU) — aucune autre IA, aucune clé, privé ===== */
+  var LOCAL_MODEL='Llama-3.2-3B-Instruct-q4f16_1-MLC';
+  var llmEngine=null, llmLoading=false, llmReady=false;
+  var LOCAL_SYS="Tu es Practice, le copilote vocal embarqué dans une voiture. Tu RÉFLÉCHIS avant de répondre : tu comprends l'intention réelle et tu improvises une réponse vraiment utile — tu n'es pas un menu de phrases toutes faites. Réponds en 1 à 2 phrases maximum (c'est lu à voix haute en conduisant), de façon naturelle, chaleureuse et concise, dans la langue de l'utilisateur. Si l'utilisateur veut agir, termine par UNE ligne au format exact 'ACTION: navigate=<lieu>' ou 'ACTION: nearby=<type>' ou 'ACTION: mode=<copilot|night|performance>' ou 'ACTION: media=<play|pause>'. Sinon réponds simplement, sans ligne ACTION.";
+  function localBrainStatus(m){ var e=$('localBrainStat'); if(e)e.textContent=m; }
+  function loadLocalBrain(){
+    if(llmReady)return Promise.resolve(true);
+    if(llmLoading)return Promise.reject('loading');
+    if(!navigator.gpu){ localBrainStatus('❌ Ton navigateur ne gère pas WebGPU. Utilise Chrome ou Edge récent (PC ou Android récent).'); toast('WebGPU non disponible ici'); return Promise.reject('no_gpu'); }
+    llmLoading=true; localBrainStatus('⏳ Téléchargement du cerveau (~2 Go la 1re fois, puis gardé en cache)…');
+    return import('https://esm.run/@mlc-ai/web-llm').then(function(webllm){
+      return webllm.CreateMLCEngine(LOCAL_MODEL,{ initProgressCallback:function(p){ localBrainStatus('⏳ '+((p&&p.text)||('Chargement '+Math.round(((p&&p.progress)||0)*100)+'%'))); } });
+    }).then(function(eng){ llmEngine=eng; llmReady=true; llmLoading=false; localBrainStatus('✅ Cerveau local actif — Practice réfléchit sur ton appareil, sans aucune autre IA.'); if(Mem.prefs){Mem.prefs.localBrain=true;saveMem();} var b=$('localBrainBtn'); if(b)b.textContent='✅ Cerveau local actif'; toast('🧠 Cerveau local actif'); return true; })
+    .catch(function(e){ llmLoading=false; localBrainStatus('❌ Échec : '+((e&&e.message)||e)+'. Vérifie ta connexion et réessaie.'); throw e; });
+  }
+  function localAsk(msgs){ if(!llmReady||!llmEngine)return Promise.resolve(null);
+    return llmEngine.chat.completions.create({ messages:[{role:'system',content:LOCAL_SYS}].concat(msgs), max_tokens:200, temperature:0.7 })
+      .then(function(r){ return (r&&r.choices&&r.choices[0]&&r.choices[0].message&&r.choices[0].message.content)||''; }); }
+  function localBrainAnswer(t){
+    vaHist.push({role:'user',content:t}); vaHist=vaHist.slice(-8);
+    if(typeof showHeard==='function')showHeard(t); toast('🧠 réflexion…');
+    localAsk(vaHist).then(function(rep){
+      if(!rep){ if(!freeChat(t))askClaude(t); return; }
+      var am=rep.match(/ACTION:\s*([a-z_]+)\s*[:=]\s*([^\n]+)/i); if(am){ rep=rep.replace(am[0],'').trim(); if(typeof handleClaudeAction==='function')handleClaudeAction(am[1].toLowerCase(),am[2].trim()); }
+      vaHist.push({role:'assistant',content:rep}); if(rep&&rep.trim())sayVA(rep.trim());
+    }).catch(function(){ if(!freeChat(t))askClaude(t); });
+  }
   function pickL(fr,en,ja){ var a=(LANG==='ja'&&ja)?ja:((LANG==='ja'&&en)?en:((LANG==='en'&&en)?en:fr)); return a[Math.floor((Date.now()/900)%a.length)]; }
   /* texte localisé avec repli : LANG -> en -> fr */
   function tr(o){ return (o&&(o[LANG]||o.en||o.fr))||''; }
@@ -2847,6 +2878,7 @@
     if(Mem.prefs){ Mem.prefs.ttsVoice=Voice.ttsVoice; Mem.prefs.neural=true; Mem.prefs.voiceVer='scarlett1'; } saveMem();
     unlockNeural(); toast('🎧 '+((b.textContent||'voix').split('·')[0].trim())+'…');
     if(typeof speakNeural==='function'){ speakNeural('Bonjour '+vaName()+', je suis Practice. Voilà ma nouvelle voix. On prend la route ensemble ?').then(function(){ neuralPlayed=true; }).catch(function(){ toast('🔈 touche l\'écran puis re-touche la voix'); }); } });
+  if($('localBrainBtn'))$('localBrainBtn').addEventListener('click',function(){ if(llmReady){ localBrainStatus('✅ Déjà actif.'); return; } if(llmLoading){ toast('Chargement déjà en cours…'); return; } loadLocalBrain().catch(function(){}); });
   if($('vaName'))$('vaName').addEventListener('change',function(){ Mem.prefs.name=this.value.trim()||'Aldo'; saveMem(); });
 
   /* ---------- SoundCloud real controls (Widget API) ---------- */
