@@ -659,6 +659,33 @@
 
   /* ===== MEDIA — CarPlay/Deezer-style player (warm Apple-CarPlay wash) ===== */
   /* ===== MEDIA — lecteur premium façon Apple Music (toujours sombre, fond pochette flouté) ===== */
+  /* ===== TV MONDE — navigateur de chaînes en direct (façon Globe TV) ===== */
+  .tvw-ov{position:fixed;inset:0;z-index:72;display:none;color:#fff;overflow:hidden;}
+  .tvw-ov.show{display:block;animation:mediaIn .42s cubic-bezier(.32,.72,0,1);}
+  .tvw-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(125% 90% at 50% -12%, #16314a, #0a1726 46%, #05080f 92%);}
+  .tvw-bg::after{content:'';position:absolute;inset:0;opacity:.45;background:radial-gradient(circle at 1px 1px, rgba(120,180,255,.13) 1px, transparent 0) 0 0/26px 26px;}
+  .tvw-screen{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;padding:calc(20px + env(safe-area-inset-top)) clamp(16px,4vw,46px) calc(18px + env(safe-area-inset-bottom));}
+  .tvw-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0;}
+  .tvw-title{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.6px;display:flex;align-items:center;gap:12px;}
+  .tvw-live{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:#ff5b5b;border:1px solid rgba(255,91,91,.4);border-radius:20px;padding:3px 10px;animation:tvwBlink 2s infinite;}
+  @keyframes tvwBlink{0%,100%{opacity:1}50%{opacity:.45}}
+  .tvw-regions{display:flex;gap:8px;overflow-x:auto;flex-shrink:0;padding-bottom:14px;scrollbar-width:none;}
+  .tvw-regions::-webkit-scrollbar{display:none;}
+  .tvw-regions button{flex-shrink:0;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:13px;font-weight:500;padding:8px 16px;border-radius:22px;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:.18s;white-space:nowrap;}
+  .tvw-regions button.on{background:#fff;color:#0b1320;font-weight:700;}
+  .tvw-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;align-content:start;-webkit-overflow-scrolling:touch;padding:2px;}
+  .tvw-card{position:relative;aspect-ratio:16/10;border-radius:16px;border:none;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;color:#fff;text-align:left;box-shadow:0 12px 30px rgba(0,0,0,.42);transition:transform .2s cubic-bezier(.34,1.4,.5,1),box-shadow .2s;}
+  .tvw-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 20px 46px rgba(0,0,0,.55);}
+  .tvw-card .flag{position:absolute;top:9px;left:12px;font-size:30px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.55));}
+  .tvw-card .live{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;background:rgba(255,40,40,.92);color:#fff;border-radius:5px;padding:2px 6px;}
+  .tvw-card .nm{font-size:15px;font-weight:700;letter-spacing:-.2px;text-shadow:0 2px 8px rgba(0,0,0,.65);}
+  .tvw-card .sub{font-size:11px;opacity:.82;text-shadow:0 1px 6px rgba(0,0,0,.6);}
+  .tvw-player{display:none;position:absolute;inset:0;z-index:3;background:#000;flex-direction:column;}
+  .tvw-player.show{display:flex;}
+  .tvw-back{align-self:flex-start;margin:calc(14px + env(safe-area-inset-top)) 14px 6px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:13px;font-weight:600;padding:9px 14px;border-radius:22px;cursor:pointer;display:flex;align-items:center;gap:6px;backdrop-filter:blur(14px);}
+  .tvw-now{color:#fff;font-size:15px;font-weight:700;padding:0 16px 8px;}
+  .tvw-frame{flex:1;min-height:0;}
+  .tvw-frame iframe{width:100%;height:100%;border:0;display:block;}
   .media-ov{position:fixed;inset:0;z-index:70;display:none;background:#070708;overflow:hidden;color:#fff;}
   .media-ov.show{display:block;animation:mediaIn .42s cubic-bezier(.32,.72,0,1);}
   @keyframes mediaIn{from{opacity:0;transform:scale(1.04);}to{opacity:1;transform:none;}}
@@ -1255,6 +1282,24 @@
     <div class="pax-presets" id="paxPresets"></div>
     <div class="pax-embed" id="paxEmbed"></div>
     <div class="key-note" id="paxNote"></div>
+  </div>
+</div>
+
+<!-- TV MONDE — navigateur de chaînes en direct (façon Globe TV) -->
+<div class="tvw-ov" id="tvWorldOv">
+  <div class="tvw-bg"></div>
+  <div class="tvw-screen">
+    <div class="tvw-head">
+      <div class="tvw-title">🌍 TV&nbsp;Monde<span class="tvw-live">● EN DIRECT</span></div>
+      <button class="media-x" id="tvwClose">✕</button>
+    </div>
+    <div class="tvw-regions" id="tvwRegions"></div>
+    <div class="tvw-grid" id="tvwGrid"></div>
+    <div class="tvw-player" id="tvwPlayer">
+      <button class="tvw-back" id="tvwBack"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Toutes les chaînes</button>
+      <div class="tvw-now" id="tvwNow">—</div>
+      <div class="tvw-frame" id="tvwFrame"></div>
+    </div>
   </div>
 </div>
 
@@ -3034,6 +3079,39 @@
     if($('paxNote'))$('paxNote').textContent=PAX_NOTE[s]; if($('paxEmbed'))$('paxEmbed').innerHTML=''; paxRenderPresets(); }
   function openPaxMedia(s){ $('paxMediaOv').classList.add('show'); paxSetSrc(s||paxSrc||'yt'); }
   function closePaxMedia(){ $('paxMediaOv').classList.remove('show'); if($('paxEmbed'))$('paxEmbed').innerHTML=''; }
+  /* ===== TV MONDE — navigateur immersif de chaînes en direct (façon Globe TV) ===== */
+  var TVW=[
+   {n:'France 24',sub:'Info · France',f:'🇫🇷',r:'eu',id:'UCCCPCZNChQdGa9EkATeye4g',c:'#13315c'},
+   {n:'Euronews',sub:'Europe',f:'🇪🇺',r:'eu',id:'UCW2QcKZiU8aUGg4yxCIditg',c:'#003a8c'},
+   {n:'Sky News',sub:'Royaume-Uni',f:'🇬🇧',r:'eu',id:'UCoMdktPbSTixAyNGwb-UYkQ',c:'#9c1020'},
+   {n:'DW',sub:'Allemagne',f:'🇩🇪',r:'eu',id:'UCknLrEdhRCp1aegoMqRaCZg',c:'#0a2b4e'},
+   {n:'France 24 EN',sub:'International',f:'🌐',r:'intl',id:'UCQfwfsi5VrQ8yKZ-UWmAEFg',c:'#274a7b'},
+   {n:'Al Jazeera',sub:'International',f:'🌍',r:'intl',id:'UCNye-wNBqNL5ZzHSJj3l8Bg',c:'#8a6a1e'},
+   {n:'NHK World',sub:'Japon',f:'🇯🇵',r:'asia',id:'UCSPEjw8F2nQDtmUKPFNF7_A',c:'#0a4d8c'},
+   {n:'Africanews',sub:'Afrique',f:'🌍',r:'africa',id:'UC1_E8NeF5QHY2dtdLRBCCLA',c:'#176b34'},
+   {n:'Lofi Radio',sub:'Ambiance',f:'🎵',r:'music',vid:'jfKfPfyJRdk',c:'#4a2d7b'},
+   {n:'Nature 4K',sub:'Détente',f:'🌿',r:'music',vid:'BHACKCNDMW8',c:'#1e5e34'},
+   {n:'Voyage',sub:'Détente',f:'✈️',r:'music',vid:'1La4QzGeaaQ',c:'#2a5a6b'}
+  ];
+  var TVW_REG=[['all','Tous'],['eu','Europe'],['intl','International'],['asia','Asie'],['africa','Afrique'],['music','Ambiance']];
+  var tvwReg='all';
+  function tvwRender(){
+    var rg=$('tvwRegions'); if(rg){ rg.innerHTML=''; TVW_REG.forEach(function(reg){ var b=document.createElement('button'); b.textContent=reg[1]; if(reg[0]===tvwReg)b.className='on'; b.addEventListener('click',function(){ tvwReg=reg[0]; tvwRender(); }); rg.appendChild(b); }); }
+    var g=$('tvwGrid'); if(!g)return; g.innerHTML='';
+    TVW.filter(function(ch){ return tvwReg==='all'||ch.r===tvwReg; }).forEach(function(ch){
+      var card=document.createElement('button'); card.className='tvw-card'; card.style.background='linear-gradient(150deg, '+ch.c+', rgba(5,8,15,.92))';
+      card.innerHTML='<span class="flag">'+ch.f+'</span>'+(ch.vid?'':'<span class="live">● LIVE</span>')+'<span class="nm">'+ch.n+'</span><span class="sub">'+ch.sub+'</span>';
+      card.addEventListener('click',function(){ tvwPlay(ch); }); g.appendChild(card); });
+  }
+  function tvwPlay(ch){ var fr=$('tvwFrame'); if(!fr)return;
+    var src=ch.vid?('https://www.youtube.com/embed/'+ch.vid+'?autoplay=1&rel=0&playsinline=1'):('https://www.youtube.com/embed/live_stream?channel='+ch.id+'&autoplay=1&playsinline=1');
+    fr.innerHTML='<iframe src="'+src+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+    if($('tvwNow'))$('tvwNow').textContent=ch.f+' '+ch.n+(ch.vid?'':' · EN DIRECT'); $('tvwPlayer').classList.add('show'); }
+  function tvwHidePlayer(){ if($('tvwPlayer'))$('tvwPlayer').classList.remove('show'); if($('tvwFrame'))$('tvwFrame').innerHTML=''; }
+  function openTVWorld(){ tvwHidePlayer(); tvwRender(); $('tvWorldOv').classList.add('show'); }
+  function closeTVWorld(){ $('tvWorldOv').classList.remove('show'); tvwHidePlayer(); }
+  if($('tvwClose'))$('tvwClose').addEventListener('click',closeTVWorld);
+  if($('tvwBack'))$('tvwBack').addEventListener('click',tvwHidePlayer);
   if($('paxSeg'))$('paxSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b)paxSetSrc(b.dataset.px); });
   if($('paxLink'))$('paxLink').addEventListener('keydown',function(e){ if(e.key==='Enter'){ var h=paxEmbed(paxSrc,this.value); if(h)$('paxEmbed').innerHTML=h; else toast('Lien non reconnu pour '+(paxSrc==='yt'?'YouTube':paxSrc==='sp'?'Spotify':'Apple Music')+'.'); } });
   if($('paxX'))$('paxX').addEventListener('click',closePaxMedia);
@@ -3097,7 +3175,7 @@
   rpAudio.addEventListener('pause',function(){ setPlayIcon(false); });
   rpAudio.addEventListener('ended',function(){ if(mediaSource==='podcast')mediaNext(); });
   rpAudio.addEventListener('timeupdate',function(){ if(mediaSource==='podcast'&&rpAudio.duration){ var pct=Math.round(rpAudio.currentTime/rpAudio.duration*100); ['mFill','mdFill','plFill'].forEach(function(id){var e=$(id);if(e)e.style.width=pct+'%';}); if($('mCur'))$('mCur').textContent=fmtT(rpAudio.currentTime*1000); if($('mDur'))$('mDur').textContent=fmtT(rpAudio.duration*1000); } });
-  $('mediaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; if(b.dataset.s==='yt'){ openPaxMedia('yt'); return; } /* onglet Vidéo : ouvre l'interface YouTube/Spotify/Apple, sans changer la source audio */ setMediaSource(b.dataset.s); });
+  $('mediaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; if(b.dataset.s==='yt'){ openTVWorld(); return; } /* onglet TV Monde : navigateur immersif de chaînes en direct */ setMediaSource(b.dataset.s); });
   $('mediaSearch').addEventListener('input',function(){ var q=this.value.trim(); clearTimeout(rpTimer); if(q.length<2)return; rpTimer=setTimeout(function(){ if(mediaSource==='radio')searchRadio(q); else if(mediaSource==='podcast')searchPodcast(q); },420); });
 
   /* ---------- phone (call screen) ---------- */
