@@ -870,6 +870,7 @@
       <button class="theme-btn" id="followBtn" style="padding:0 14px;">⊕</button>
     </div>
     <div class="map-quick" id="mapQuick">
+      <button id="recenterBtn" title="Me recentrer sur ma position">📍</button>
       <button id="mapHud" title="Mode Nav (HUD plein écran)">◈</button>
       <button id="mapPulse" title="Vue Pulse">◉</button>
       <button id="northBtn" class="on" title="Nord verrouillé (carte orientée nord)">🧭</button>
@@ -1902,7 +1903,8 @@
   $('poiBtn').addEventListener('click',function(){ poiOn=!poiOn; this.classList.toggle('on',poiOn); if(!poiOn){ if(poiLayer)poiLayer.clearLayers(); } else { poiLL=null; if(pts.length)loadPOI(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(poiOn?'Bornes & stations affichées':'POI masqués'); Mem.prefs.poi=poiOn;saveMem(); });
   $('radarBtn').addEventListener('click',function(){ radarOn=!radarOn; this.classList.toggle('on',radarOn); if(!radarOn){ if(radarLayer)radarLayer.clearLayers(); radars=[]; } else { radarLL=null; if(pts.length)loadRadars(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(radarOn?'Radars affichés & alertes vocales':'Radars masqués'); Mem.prefs.radar=radarOn;saveMem(); });
   $('routeCancel').addEventListener('click',function(){if(demoTimer){clearInterval(demoTimer);demoTimer=null;}stopNav();setMsg(T().ready,'');});
-  /* accès direct depuis la carte : Mode Nav (HUD), Pulse, et verrou Nord */
+  /* accès direct depuis la carte : recentrage, Mode Nav (HUD), Pulse, et verrou Nord */
+  if($('recenterBtn'))$('recenterBtn').addEventListener('click',function(){ if(map&&pts&&pts.length){ follow=true; if($('followBtn'))$('followBtn').textContent='⊙'; map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],Math.max(map.getZoom(),16),{animate:true}); var b=this; b.classList.add('on'); setTimeout(function(){b.classList.remove('on');},700); toast('📍 Recentré sur ta position'); } else toast('Position pas encore disponible — active le GPS'); });
   if($('mapHud'))$('mapHud').addEventListener('click',function(){ setView('hud'); });
   if($('mapPulse'))$('mapPulse').addEventListener('click',function(){ setView('pulse'); });
   var northLock=true;
