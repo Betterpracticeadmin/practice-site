@@ -4308,5 +4308,540 @@ html[data-da-off] #daParticles{ display:none !important; }
 })();
 </script>
 <!-- DA-MODULE-END (auto) -->
+<!-- PLAYLIST-SCROLL-START (auto) -->
+<style id="daPlStyle">
+/* ============================================================
+   daPlaylist — aristidebenoist-style smooth + focal playlist
+   Namespaced .pl- / daPl. Auto-targets #mQueue (.mq-list).
+   Composites transform + opacity + filter ONLY (no layout).
+   ============================================================ */
+
+/* JS proximity snap (not CSS scroll-snap). Generous top/bottom
+   scroll padding so the FIRST and LAST rows can reach the
+   vertical center for focusing/snapping. */
+#mQueue.pl-on{
+  scroll-behavior:auto;            /* never let CSS smooth fight the JS lerp */
+  overscroll-behavior:contain;     /* tame chaining; edges still release (see JS) */
+  scrollbar-width:thin;
+  padding-top:var(--pl-pad,0px);
+  padding-bottom:var(--pl-pad,0px);
+}
+
+/* Per-row focal transform, driven from JS via custom props so the
+   browser only composites transform + opacity + filter. */
+#mQueue.pl-on .mq-row{
+  transform-origin:center center;
+  transform:
+    translate3d(var(--pl-x,0px), var(--pl-y,0px), 0)
+    scale(var(--pl-s,1));
+  opacity:var(--pl-o,1);
+  filter:blur(var(--pl-b,0px));
+  /* keep the app's own background hover fade; do NOT transition transform */
+  transition:background .18s;
+  backface-visibility:hidden;
+  pointer-events:auto;             /* never block the row click / like button */
+}
+
+/* will-change only while the effect is active, to avoid permanent
+   compositor memory pressure when the panel is idle/closed. */
+#mQueue.pl-on.pl-active .mq-row{ will-change:transform,opacity; }
+
+/* Centered row reads as gently "pre-selected" — premium, not loud. */
+#mQueue.pl-on .mq-row.pl-focus .x .a{ color:#fff; }
+#mQueue.pl-on .mq-row.pl-focus{ text-shadow:0 1px 14px rgba(0,0,0,.25); }
+
+/* Drop blur while actively scrolling for crisp responsiveness. */
+#mQueue.pl-on.pl-busy .mq-row{ filter:blur(0px); }
+
+/* Cosmetic scrollbar (webkit). */
+#mQueue.pl-on::-webkit-scrollbar{ width:6px; }
+#mQueue.pl-on::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.14); border-radius:6px; }
+#mQueue.pl-on::-webkit-scrollbar-track{ background:transparent; }
+
+/* ---- Reduced motion: no focal transform, native scroll ---- */
+@media (prefers-reduced-motion: reduce){
+  #mQueue.pl-on .mq-row{
+    transform:none !important;
+    opacity:1 !important;
+    filter:none !important;
+    will-change:auto !important;
+  }
+  #mQueue.pl-on{ padding-top:0; padding-bottom:0; }
+}
+
+/* ---- Global kill switch (shared with existing da- module) ---- */
+html[data-da-off] #mQueue.pl-on .mq-row{
+  transform:none !important;
+  opacity:1 !important;
+  filter:none !important;
+  will-change:auto !important;
+}
+html[data-da-off] #mQueue.pl-on{ padding-top:0; padding-bottom:0; }
+</style>
+<script>
+/* ============================================================
+   daPlaylist — smooth momentum + cinematic focal scrolling
+   for #mQueue (.mq-list). Vanilla, no deps. Hardened build.
+   Namespaced: window.daPlaylist, classes .pl-*, props --pl-*.
+
+   Key hardening vs. draft:
+   - Focal/snap math uses getBoundingClientRect (layout-independent).
+     The draft used offsetTop, which in this app is measured against
+     .media-screen (position:absolute), NOT #mQueue -> it focused the
+     WRONG rows. Rect math is correct regardless of offsetParent/padding.
+   - Reads batched before writes each frame (no read/write/read thrash).
+   - Touch path is 100% passive & never preventDefault -> taps always fire.
+   - Snap is desktop-only AND bails during active scrolling -> never
+     fights iOS native momentum.
+   - Boundary release also covers the non-scrollable case.
+   - watch() guarded against double-binding; rAF fully stops when idle,
+     hidden, invisible, reduced-motion, or data-da-off.
+   ============================================================ */
+(function(){
+  "use strict";
+  if (window.daPlaylist && window.daPlaylist.__live) return;
+
+  var SEL = "mQueue";
+
+  /* ---- tunables (the "aristide" feel) ------------------------ */
+  var CFG = {
+    wheelEase   : 0.115,  // wheel target -> scrollTop lerp (desktop glide)
+    smoothEase  : 0.16,   // scrollTop -> smoothed value lerp (focal source)
+    snapEase    : 0.09,   // idle ease of scrollTop toward nearest row center
+    snapDelay   : 160,    // ms after last input/scroll before snapping kicks in
+    snapMaxPx   : 240,    // skip snap if nearest center is farther than this
+    snapDeadPx  : 0.6,    // stop snapping within this many px
+    snapEnabled : true,   // desktop-only proximity snap (off on touch)
+    minScale    : 0.86,   // far rows shrink to this
+    maxScale    : 1.0,    // centered row
+    minOpacity  : 0.40,   // far rows fade to this
+    maxOpacity  : 1.0,
+    maxBlur     : 1.6,    // px blur on far rows (subtle)
+    transX      : 0,      // px horizontal recede of far rows (0 = none)
+    transY      : 0,      // px vertical drift of far rows
+    falloff     : 1.0,    // fraction of half-height used as focus radius
+    wheelMul    : 1.0,    // wheel delta multiplier
+    epsilon     : 0.05,   // stop the rAF when nothing is moving
+    busyMs      : 90      // "actively scrolling" window after last input
+  };
+
+  function isOff(){
+    try{ return document.documentElement.hasAttribute("data-da-off"); }
+    catch(e){ return false; }
+  }
+  function reducedMotion(){
+    try{
+      return !!(window.matchMedia &&
+             window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    }catch(e){ return false; }
+  }
+  function isTouch(){
+    try{
+      return ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+    }catch(e){ return false; }
+  }
+
+  var TOUCH = isTouch();
+
+  var S = {
+    el:null, raf:0, running:false, bound:false, watched:false,
+    sm:0, target:null,
+    lastInput:0,            // last wheel/touch gesture
+    lastScroll:0,           // last scroll event (incl. native momentum)
+    lastScrollTop:0,        // for detecting ongoing momentum motion
+    busy:false, busyDrag:false, active:false,
+    io:null, mo:null, ro:null, ko:null,
+    visible:false, paddingPx:-1, _reapplyT:0,
+    _rectBuf:null
+  };
+
+  function $(id){ try{ return document.getElementById(id); }catch(e){ return null; } }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+  function now(){
+    return (window.performance && performance.now) ? performance.now() : Date.now();
+  }
+  function disabled(){ return reducedMotion() || isOff(); }
+
+  /* collect visible .mq-row children (skip placeholder text divs) */
+  function rowsOf(el){
+    var out = [];
+    try{
+      var k = el.children, n = k.length;
+      for(var i=0;i<n;i++){
+        var r = k[i];
+        if(r && r.nodeType===1 && r.classList && r.classList.contains("mq-row")){
+          out.push(r);
+        }
+      }
+    }catch(e){}
+    return out;
+  }
+
+  /* ---- padding so first/last row can reach center -------------- */
+  function applyPadding(){
+    if(!S.el) return;
+    try{
+      var ch = S.el.clientHeight;
+      if(!ch) return;
+      var first = S.el.querySelector(".mq-row");
+      var rowH = first ? first.offsetHeight : 56;
+      var pad = Math.max(0, Math.round(ch/2 - rowH/2));
+      if(pad !== S.paddingPx){
+        S.paddingPx = pad;
+        S.el.style.setProperty("--pl-pad", pad + "px");
+      }
+    }catch(e){}
+  }
+
+  function setActive(on){
+    if(on === S.active) return;
+    S.active = on;
+    try{ S.el && S.el.classList.toggle("pl-active", on); }catch(e){}
+    if(!on){
+      // clear residual transforms so closed/idle panel composites nothing heavy
+      try{
+        var rows = rowsOf(S.el);
+        for(var i=0;i<rows.length;i++){
+          var st = rows[i].style;
+          st.removeProperty("--pl-s"); st.removeProperty("--pl-o");
+          st.removeProperty("--pl-b"); st.removeProperty("--pl-x");
+          st.removeProperty("--pl-y");
+          rows[i].classList.remove("pl-focus");
+        }
+      }catch(e){}
+    }
+  }
+
+  /* ---- focal pass: rect-based, reads batched, then writes ------ */
+  function paint(){
+    var el = S.el; if(!el) return;
+    var ch = el.clientHeight; if(!ch) return;
+    var rows = rowsOf(el);
+    var n = rows.length; if(!n){ return; }
+
+    // smoothing offset: difference between displayed (S.sm) and real scrollTop,
+    // applied to rect centers so the focal point eases (rects are live coords).
+    var lag = el.scrollTop - S.sm;           // px; >0 means content is "ahead"
+    var crect = el.getBoundingClientRect();  // single container read
+    var centerY = crect.top + ch/2;
+    var radius  = (ch/2) * CFG.falloff + 1;
+    var busy = S.busy;
+
+    // READ phase ------------------------------------------------
+    var buf = S._rectBuf;
+    if(!buf || buf.length < n){ buf = S._rectBuf = new Array(n); }
+    var closestIdx = -1, closestDist = Infinity;
+    for(var i=0;i<n;i++){
+      var rb = rows[i].getBoundingClientRect();
+      var rcY = rb.top + rb.height/2 + lag;  // ease toward smoothed position
+      var d   = rcY - centerY;
+      var ad  = Math.abs(d);
+      buf[i] = d;
+      if(ad < closestDist){ closestDist = ad; closestIdx = i; }
+    }
+
+    // WRITE phase (custom props only; no layout reads after here)-
+    for(var j=0;j<n;j++){
+      var r = rows[j];
+      var dd = buf[j];
+      var t  = clamp(Math.abs(dd) / radius, 0, 1);
+      var e  = t*t*(3 - 2*t);                 // smoothstep falloff
+      var s  = CFG.maxScale   + (CFG.minScale   - CFG.maxScale)   * e;
+      var o  = CFG.maxOpacity + (CFG.minOpacity - CFG.maxOpacity) * e;
+      var b  = busy ? 0 : (CFG.maxBlur * e);
+      var st = r.style;
+      st.setProperty("--pl-s", s.toFixed(4));
+      st.setProperty("--pl-o", o.toFixed(4));
+      st.setProperty("--pl-b", b.toFixed(3) + "px");
+      if(CFG.transY) st.setProperty("--pl-y",
+        (CFG.transY * e * (dd<0?-1:1)).toFixed(2) + "px");
+      if(CFG.transX) st.setProperty("--pl-x",
+        (CFG.transX * e).toFixed(2) + "px");
+      r.classList.toggle("pl-focus", j===closestIdx);
+    }
+  }
+
+  /* nearest row CENTER expressed as a scrollTop delta (rect-based) */
+  function nearestSnapDelta(){
+    var el = S.el; if(!el) return null;
+    var rows = rowsOf(el); var n = rows.length; if(!n) return null;
+    var crect = el.getBoundingClientRect();
+    var wantY = crect.top + el.clientHeight/2;
+    var best = null, bestAbs = Infinity;
+    for(var i=0;i<n;i++){
+      var rb = rows[i].getBoundingClientRect();
+      var rcY = rb.top + rb.height/2;
+      var d = rcY - wantY;                     // px the row is below center
+      var ad = Math.abs(d);
+      if(ad < bestAbs){ bestAbs = ad; best = d; }
+    }
+    if(best === null) return null;
+    // to bring the row UP to center, increase scrollTop by `best`
+    return { delta: best, dist: bestAbs };
+  }
+
+  /* ---- main rAF loop ------------------------------------------ */
+  function frame(){
+    S.raf = 0;
+    if(!S.running) return;
+    var el = S.el; if(!el){ S.running=false; return; }
+    if(disabled() || document.hidden || !S.visible){ S.running=false; setActive(false); return; }
+
+    var moving = false;
+    var t = now();
+
+    // detect ongoing native scroll motion (e.g. iOS momentum) ----
+    var real = el.scrollTop;
+    if(real !== S.lastScrollTop){ S.lastScroll = t; S.lastScrollTop = real; }
+    var scrolling = (t - S.lastScroll) < 80;
+
+    // 1) desktop: ease wheel target -> real scrollTop
+    if(S.target !== null && !TOUCH){
+      var st = el.scrollTop;
+      var nt = st + (S.target - st) * CFG.wheelEase;
+      if(Math.abs(S.target - nt) < 0.5){ nt = S.target; S.target = null; }
+      if(Math.abs(nt - st) > 0.1){ el.scrollTop = nt; moving = true; }
+      real = el.scrollTop;
+    }
+
+    // 2) proximity snap — DESKTOP ONLY, only when fully settled.
+    //    Never on touch and never while scrolling -> no momentum fight.
+    if(CFG.snapEnabled && !TOUCH){
+      var idle = (t - S.lastInput) > CFG.snapDelay &&
+                 (t - S.lastScroll) > CFG.snapDelay;
+      if(idle && S.target === null && !S.busyDrag && !scrolling){
+        var snap = nearestSnapDelta();
+        if(snap && snap.dist > CFG.snapDeadPx && snap.dist < CFG.snapMaxPx){
+          var step = snap.delta * CFG.snapEase;
+          if(Math.abs(snap.delta - step) < CFG.snapDeadPx) step = snap.delta;
+          if(Math.abs(step) > 0.05){ el.scrollTop = real + step; moving = true; real = el.scrollTop; }
+        }
+      }
+    }
+
+    // 3) smooth the (possibly externally-changed) scrollTop -> S.sm
+    var d = real - S.sm;
+    if(Math.abs(d) > CFG.epsilon){ S.sm += d * CFG.smoothEase; moving = true; }
+    else { S.sm = real; }
+
+    // 4) busy flag (drop blur during/just after input or motion)
+    var wasBusy = S.busy;
+    S.busy = (t - S.lastInput) < CFG.busyMs || scrolling;
+    if(S.busy !== wasBusy){ try{ el.classList.toggle("pl-busy", S.busy); }catch(e){} }
+
+    // 5) paint focal transforms from the smoothed value
+    try{ paint(); }catch(e){}
+    if(S.busy || S.busyDrag || scrolling) moving = true;
+
+    if(moving){ S.raf = requestAnimationFrame(frame); }
+    else { S.running = false; S.raf = 0; }   // settle: stop until next event
+  }
+
+  function kick(){
+    if(disabled()){ setActive(false); return; }
+    if(!S.el || !S.visible || document.hidden) return;
+    setActive(true);
+    if(!S.running){ S.running = true; if(!S.raf) S.raf = requestAnimationFrame(frame); }
+  }
+  function markInput(){ S.lastInput = now(); }
+
+  /* ---- input handlers ---------------------------------------- */
+  function atTop(el){ return el.scrollTop <= 0.5; }
+  function atBottom(el){ return el.scrollTop + el.clientHeight >= el.scrollHeight - 0.5; }
+  function notScrollable(el){ return el.scrollHeight - el.clientHeight <= 1; }
+
+  function onWheel(ev){
+    var el = S.el; if(!el) return;
+    if(disabled()) return;                         // native scroll
+    if(TOUCH){ markInput(); kick(); return; }      // trackpad-on-touch: keep native
+
+    // nothing to scroll -> let the page have the wheel
+    if(notScrollable(el)){ S.target = null; return; }
+
+    var dy = ev.deltaY;
+    if(ev.deltaMode === 1) dy *= 16;               // lines -> px
+    else if(ev.deltaMode === 2) dy *= el.clientHeight;
+    dy *= CFG.wheelMul;
+    if(!dy){ return; }
+
+    // boundary release: let the OUTER page scroll at edges (don't trap)
+    var base = (S.target === null) ? el.scrollTop : S.target;
+    var max  = el.scrollHeight - el.clientHeight;
+    if((dy < 0 && atTop(el) && base <= 0.5) ||
+       (dy > 0 && atBottom(el) && base >= max - 0.5)){
+      S.target = null;
+      return;                                       // no preventDefault -> page scrolls
+    }
+
+    ev.preventDefault();                            // we own this gesture
+    S.target = clamp(base + dy, 0, max);
+    markInput(); kick();
+  }
+
+  // Touch: native momentum drives scrollTop; we only layer focal.
+  // ALL passive, NEVER preventDefault -> taps still fire row clicks.
+  function onTouchStart(){ S.busyDrag = true; markInput(); kick(); }
+  function onTouchMove(){ markInput(); kick(); }
+  function onTouchEnd(){ S.busyDrag = false; markInput(); S.lastScroll = now(); kick(); }
+
+  // Native scroll (keyboard, momentum, scrollIntoView, drag-thumb)
+  function onScroll(){ S.lastScroll = now(); kick(); }
+
+  /* ---- wiring ------------------------------------------------- */
+  function bind(){
+    var el = S.el; if(!el || S.bound) return;
+    try{
+      el.addEventListener("wheel", onWheel, { passive:false });
+      el.addEventListener("scroll", onScroll, { passive:true });
+      el.addEventListener("touchstart", onTouchStart, { passive:true });
+      el.addEventListener("touchmove", onTouchMove, { passive:true });
+      el.addEventListener("touchend", onTouchEnd, { passive:true });
+      el.addEventListener("touchcancel", onTouchEnd, { passive:true });
+      S.bound = true;
+    }catch(e){}
+  }
+
+  function enable(){
+    var el = S.el; if(!el) return;
+    try{ el.classList.add("pl-on"); }catch(e){}
+    applyPadding();
+    bind();
+    S.sm = el.scrollTop;            // avoid first-paint jump
+    S.lastScrollTop = el.scrollTop;
+    kick();
+  }
+
+  /* (re)apply after rebuilds: rows recreated via innerHTML.
+     No per-row state stored -> just re-pad, resync, repaint. */
+  function reapply(){
+    if(!S.el) return;
+    if(disabled()){
+      setActive(false);
+      S.running = false;
+      if(S.raf){ cancelAnimationFrame(S.raf); S.raf = 0; }
+      return;
+    }
+    applyPadding();
+    S.sm = S.el.scrollTop;          // innerHTML reset can move scrollTop
+    S.lastScrollTop = S.el.scrollTop;
+    S.target = null;
+    kick();
+  }
+
+  /* ---- observers (guarded so start() can run more than once) -- */
+  function watch(){
+    var el = S.el; if(!el || S.watched) return;
+    S.watched = true;
+
+    // rebuilds (buildQueue / fillRows / renderLiked set innerHTML)
+    try{
+      S.mo = new MutationObserver(function(){
+        if(S._reapplyT) return;
+        S._reapplyT = setTimeout(function(){ S._reapplyT = 0; reapply(); }, 0);
+      });
+      S.mo.observe(el, { childList:true });
+    }catch(e){}
+
+    // visibility: panel is display:none until the media overlay opens
+    try{
+      if("IntersectionObserver" in window){
+        S.io = new IntersectionObserver(function(entries){
+          for(var i=0;i<entries.length;i++){
+            var vis = entries[i].isIntersecting && entries[i].intersectionRatio > 0;
+            S.visible = vis;
+            if(vis){ applyPadding(); S.sm = el.scrollTop; S.lastScrollTop = el.scrollTop; kick(); }
+            else { S.running = false; if(S.raf){ cancelAnimationFrame(S.raf); S.raf = 0; } setActive(false); }
+          }
+        }, { threshold:[0, 0.01] });
+        S.io.observe(el);
+      } else { S.visible = true; }
+    }catch(e){ S.visible = true; }
+
+    // size changes (lazy reveal / responsive reflow)
+    try{
+      if("ResizeObserver" in window){
+        S.ro = new ResizeObserver(function(){
+          if(el.clientHeight > 0){
+            if(el.offsetParent !== null) S.visible = true;
+            applyPadding();             // guarded: only writes when value changes
+            kick();
+          }
+        });
+        S.ro.observe(el);
+      }
+    }catch(e){}
+
+    // tab visibility -> pause/resume
+    try{
+      document.addEventListener("visibilitychange", function(){
+        if(document.hidden){
+          S.running = false;
+          if(S.raf){ cancelAnimationFrame(S.raf); S.raf = 0; }
+        } else { kick(); }
+      });
+    }catch(e){}
+
+    // live react to reduced-motion changes
+    try{
+      if(window.matchMedia){
+        var mm = window.matchMedia("(prefers-reduced-motion: reduce)");
+        var onMM = function(){ reapply(); };
+        if(mm.addEventListener) mm.addEventListener("change", onMM);
+        else if(mm.addListener) mm.addListener(onMM);
+      }
+    }catch(e){}
+
+    // live react to kill-switch (shared html[data-da-off])
+    try{
+      S.ko = new MutationObserver(function(){ reapply(); });
+      S.ko.observe(document.documentElement,
+                 { attributes:true, attributeFilter:["data-da-off"] });
+    }catch(e){}
+
+    // window resize fallback
+    try{
+      window.addEventListener("resize", function(){ applyPadding(); kick(); },
+                              { passive:true });
+    }catch(e){}
+  }
+
+  /* ---- bootstrap --------------------------------------------- */
+  function start(){
+    if(S.el) return;
+    var el = $(SEL);
+    if(!el){
+      if(start._tries === undefined) start._tries = 0;
+      if(start._tries++ < 40){ setTimeout(start, 150); }
+      return;
+    }
+    S.el = el;
+    try{ S.visible = (el.offsetParent !== null) && el.clientHeight > 0; }
+    catch(e){ S.visible = true; }
+    try{ enable(); }catch(e){}
+    try{ watch(); }catch(e){}
+    if(S.visible) kick();
+  }
+
+  /* single global, minimal surface */
+  window.daPlaylist = {
+    __live:true,
+    refresh:function(){ try{ reapply(); }catch(e){} },
+    config:CFG,
+    _state:S
+  };
+
+  /* init whether or not DOMContentLoaded already fired */
+  try{
+    if(document.readyState === "loading"){
+      document.addEventListener("DOMContentLoaded", start, { once:true });
+      setTimeout(start, 300);
+    } else {
+      start();
+    }
+    window.addEventListener("load", function(){ setTimeout(start, 0); }, { once:true });
+  }catch(e){}
+})();
+</script>
+<!-- PLAYLIST-SCROLL-END (auto) -->
 </body>
 </html>
