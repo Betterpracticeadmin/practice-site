@@ -84,6 +84,12 @@
 
   /* map overlays */
   .map-search{position:absolute;top:12px;left:12px;right:12px;z-index:6;display:flex;gap:8px;}
+  .map-quick{position:absolute;right:12px;top:66px;z-index:6;display:flex;flex-direction:column;gap:8px;}
+  .map-quick button{width:42px;height:42px;border-radius:12px;background:var(--card);border:.5px solid var(--border);color:var(--txt);font-size:17px;cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 4px 14px rgba(0,0,0,.28);transition:transform .15s,background .15s;}
+  .map-quick button:active{transform:scale(.9);}
+  .map-quick button.on{background:var(--acc);color:#0a0a0a;border-color:var(--acc);}
+  @media(max-width:760px){ .map-quick{top:calc(106px + env(safe-area-inset-top));} }
+  body[data-navfocus] .map-quick{display:none;}
   .search{flex:1;display:flex;gap:6px;background:var(--card);backdrop-filter:blur(22px);border:.5px solid var(--border);border-radius:14px;padding:5px 5px 5px 14px;align-items:center;}
   .search input{flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-size:14px;}
   .search input::placeholder{color:var(--faint);}
@@ -855,6 +861,11 @@
       <button class="theme-btn" id="poiBtn" style="padding:0 12px;" title="Bornes & stations">⚡</button>
       <button class="theme-btn on" id="radarBtn" style="padding:0 12px;" title="Radars">📷</button>
       <button class="theme-btn" id="followBtn" style="padding:0 14px;">⊕</button>
+    </div>
+    <div class="map-quick" id="mapQuick">
+      <button id="mapHud" title="Mode Nav (HUD plein écran)">◈</button>
+      <button id="mapPulse" title="Vue Pulse">◉</button>
+      <button id="northBtn" class="on" title="Nord verrouillé (carte orientée nord)">🧭</button>
     </div>
     <div class="favs" id="favs"></div>
     <div class="suggest" id="suggest"></div>
@@ -1880,6 +1891,15 @@
   $('poiBtn').addEventListener('click',function(){ poiOn=!poiOn; this.classList.toggle('on',poiOn); if(!poiOn){ if(poiLayer)poiLayer.clearLayers(); } else { poiLL=null; if(pts.length)loadPOI(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(poiOn?'Bornes & stations affichées':'POI masqués'); Mem.prefs.poi=poiOn;saveMem(); });
   $('radarBtn').addEventListener('click',function(){ radarOn=!radarOn; this.classList.toggle('on',radarOn); if(!radarOn){ if(radarLayer)radarLayer.clearLayers(); radars=[]; } else { radarLL=null; if(pts.length)loadRadars(pts[pts.length-1].lat,pts[pts.length-1].lon); } toast(radarOn?'Radars affichés & alertes vocales':'Radars masqués'); Mem.prefs.radar=radarOn;saveMem(); });
   $('routeCancel').addEventListener('click',function(){if(demoTimer){clearInterval(demoTimer);demoTimer=null;}stopNav();setMsg(T().ready,'');});
+  /* accès direct depuis la carte : Mode Nav (HUD), Pulse, et verrou Nord */
+  if($('mapHud'))$('mapHud').addEventListener('click',function(){ setView('hud'); });
+  if($('mapPulse'))$('mapPulse').addEventListener('click',function(){ setView('pulse'); });
+  var northLock=true;
+  if($('northBtn'))$('northBtn').addEventListener('click',function(){ northLock=!northLock; this.classList.toggle('on',northLock);
+    if(northLock&&map&&pts&&pts.length){ map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],Math.max(map.getZoom(),15),{animate:true}); }
+    try{ ['hudFrame','pulseFrame'].forEach(function(id){ var f=$(id); if(f&&f.contentWindow)f.contentWindow.postMessage({type:'northlock',on:northLock},'*'); }); }catch(e){}
+    if(Mem.prefs){Mem.prefs.northLock=northLock;saveMem();}
+    toast(northLock?'🧭 Nord verrouillé — carte orientée nord':'🧭 Nord libre'); });
   if($('ghostPrompt'))$('ghostPrompt').addEventListener('click',takeGhost);
   $('followBtn').addEventListener('click',function(){follow=!follow;this.textContent=follow?'⊙':'⊕';});
   $('themeBtn').addEventListener('click',function(){var seq=['auto','dark','light'];themeMode=seq[(seq.indexOf(themeMode)+1)%seq.length];applyTheme();syncPanel();Mem.prefs.theme=themeMode;saveMem();});
