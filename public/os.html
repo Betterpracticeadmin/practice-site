@@ -697,6 +697,14 @@
   .ckp-sub{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;}
   .ckp-car{display:flex;justify-content:center;align-items:center;flex:1;min-height:120px;padding:6px 16px;}
   .ckp-carsvg{width:min(72%,540px);height:auto;filter:drop-shadow(0 26px 44px rgba(0,0,0,.5));}
+  /* voiture du cockpit : effet glitch / Nothing (dot-matrix + scanline + tranches + point rouge) */
+  .ckp-glitch{position:relative;display:inline-block;line-height:0;border-radius:16px;overflow:hidden;filter:drop-shadow(0 26px 44px rgba(0,0,0,.55));}
+  .ckp-glitch .ckp-carsvg{display:block;width:min(74vw,560px);filter:none;animation:ckpGlitch 6.5s steps(1,end) infinite;}
+  .ckp-glitch .gc-dots{position:absolute;inset:0;z-index:3;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,.16) .6px,transparent .8px);background-size:5px 5px;mix-blend-mode:screen;opacity:.5;}
+  .ckp-glitch .gc-dots::after{content:'';position:absolute;left:0;right:0;top:-30%;height:30%;background:linear-gradient(transparent,rgba(255,255,255,.13),transparent);animation:gcScan 3.4s linear infinite;}
+  .ckp-glitch .gc-red{position:absolute;top:9px;right:11px;width:7px;height:7px;border-radius:50%;background:#ff2d2d;z-index:4;box-shadow:0 0 8px #ff2d2d;animation:gcRed 1.6s steps(1,end) infinite;}
+  @keyframes ckpGlitch{0%,90%,100%{transform:none;clip-path:none;}91%{transform:translateX(-3px);clip-path:inset(18% 0 56% 0);}93%{transform:translateX(4px);clip-path:inset(58% 0 12% 0);}95%{transform:translateX(-2px);clip-path:inset(40% 0 36% 0);}97%{transform:translateX(2px);clip-path:none;}}
+  @media(prefers-reduced-motion:reduce){.ckp-glitch .ckp-carsvg{animation:none;}.ckp-glitch .gc-dots::after{animation:none;}}
   .ckp-gauges{display:flex;justify-content:center;gap:clamp(12px,4vw,46px);flex-wrap:wrap;padding:20px 16px 14px;border-top:.5px solid rgba(255,255,255,.13);}
   .ckp-gauge{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;color:#ece9e4;transition:transform .2s cubic-bezier(.34,1.4,.5,1);}
   .ckp-gauge:active{transform:scale(.93);}
@@ -1179,13 +1187,54 @@
   <div class="ckp-title">Diagnostic</div>
   <div class="ckp-sub" id="ckpVerdict">santé du véhicule</div>
   <div class="ckp-car">
-    <svg class="ckp-carsvg" viewBox="0 0 380 140" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="ckpCar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".96"/><stop offset="1" stop-color="#b6bcc5" stop-opacity=".82"/></linearGradient></defs>
-      <path d="M16 100 C18 72 40 67 70 64 L120 38 C152 25 214 23 254 37 L304 54 C344 66 358 80 362 98 C363 106 358 110 350 110 L28 110 C18 110 15 106 16 100 Z" fill="url(#ckpCar)" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
-      <path d="M128 58 L152 43 C172 35 210 34 236 42 L262 57 Z" fill="rgba(18,26,38,.6)"/>
-      <circle cx="98" cy="110" r="25" fill="#15171c" stroke="rgba(255,255,255,.55)" stroke-width="3"/><circle cx="98" cy="110" r="9" fill="#33373f"/>
-      <circle cx="294" cy="110" r="25" fill="#15171c" stroke="rgba(255,255,255,.55)" stroke-width="3"/><circle cx="294" cy="110" r="9" fill="#33373f"/>
+   <div class="ckp-glitch">
+    <svg class="ckp-carsvg" viewBox="0 0 400 150" xmlns="http://www.w3.org/2000/svg" role="img"><title>Hypercar Practice</title>
+      <defs>
+        <linearGradient id="hcBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2b31"/><stop offset="0.18" stop-color="#1c1d22"/><stop offset="0.5" stop-color="#121317"/><stop offset="0.82" stop-color="#0a0a0c"/><stop offset="1" stop-color="#050506"/></linearGradient>
+        <linearGradient id="hcBodyLower" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#161619"/><stop offset="1" stop-color="#040405"/></linearGradient>
+        <linearGradient id="hcGlass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#465562"/><stop offset="0.4" stop-color="#2c3742"/><stop offset="1" stop-color="#13181e"/></linearGradient>
+        <linearGradient id="hcSheen" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#3a3b42" stop-opacity="0"/><stop offset="0.5" stop-color="#43444c" stop-opacity="0.55"/><stop offset="1" stop-color="#3a3b42" stop-opacity="0"/></linearGradient>
+        <linearGradient id="hcIntake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1b1f"/><stop offset="1" stop-color="#000000"/></linearGradient>
+        <radialGradient id="hcRim" cx="0.5" cy="0.42" r="0.62"><stop offset="0" stop-color="#34353b"/><stop offset="0.62" stop-color="#1a1b1f"/><stop offset="0.9" stop-color="#101013"/><stop offset="1" stop-color="#050506"/></radialGradient>
+        <radialGradient id="hcTire" cx="0.5" cy="0.5" r="0.5"><stop offset="0.62" stop-color="#0a0a0c"/><stop offset="0.92" stop-color="#1d1e22"/><stop offset="1" stop-color="#08080a"/></radialGradient>
+        <radialGradient id="hcDisc" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#3c3d42"/><stop offset="0.7" stop-color="#26272c"/><stop offset="1" stop-color="#161619"/></radialGradient>
+        <radialGradient id="hcGshadow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#000000" stop-opacity="0.5"/><stop offset="0.7" stop-color="#000000" stop-opacity="0.22"/><stop offset="1" stop-color="#000000" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse cx="200" cy="132" rx="170" ry="11" fill="url(#hcGshadow)"/>
+      <path d="M300 118 L322 118 L322 110 L312 96 L300 92 Z" fill="url(#hcBodyLower)"/>
+      <path d="M300 92 L312 96 L322 110 L322 114 L304 114 Z" fill="#0c0c0e"/>
+      <rect x="306" y="100" width="14" height="2.4" rx="1" fill="#202127"/><rect x="306" y="105" width="14" height="2.4" rx="1" fill="#202127"/><rect x="306" y="110" width="14" height="2.4" rx="1" fill="#202127"/>
+      <path d="M40 118 L44 100 L60 88 L96 80 Q120 64 150 58 Q176 50 210 51 Q236 52 258 62 L300 78 Q322 84 332 96 L344 104 Q352 108 352 116 L352 120 Q352 122 348 122 L46 122 Q40 122 40 118 Z" fill="url(#hcBody)"/>
+      <path d="M150 58 Q176 50 210 51 Q236 52 258 62 L272 68 Q244 56 210 55 Q174 54 150 58 Z" fill="url(#hcSheen)" opacity="0.7"/>
+      <path d="M150 60 Q178 47 214 51 Q244 54 262 70 L256 74 Q236 60 212 58 Q182 55 158 65 Z" fill="url(#hcGlass)"/>
+      <path d="M158 64 Q182 53 210 56 L210 58 Q184 56 162 66 Z" fill="#5a6b78" opacity="0.6"/>
+      <path d="M212 57 L256 71 L254 74 L212 60 Z" fill="#1b232b"/>
+      <path d="M96 80 L150 58 L158 65 Q126 74 108 84 Z" fill="#0e0f12"/>
+      <path d="M262 70 L300 78 Q316 82 326 92 L300 90 Q282 80 262 74 Z" fill="#16171b"/>
+      <path d="M236 84 Q252 80 268 86 L286 96 Q268 92 250 92 Q240 92 234 96 Z" fill="url(#hcIntake)"/>
+      <path d="M238 88 Q252 85 264 89 L276 95 Q260 91 246 92 Z" fill="#000000"/>
+      <path d="M40 118 L44 100 L60 88 L72 90 Q56 100 52 118 Z" fill="#0a0a0c"/>
+      <path d="M40 118 L40 116 Q40 110 46 108 L60 106 L58 118 Z" fill="#000000"/>
+      <rect x="46" y="109" width="11" height="2.4" rx="1" fill="#1c1d22"/><rect x="46" y="113" width="11" height="2.4" rx="1" fill="#1c1d22"/>
+      <path d="M300 78 Q320 80 332 88 L344 90 Q350 86 352 80 L350 78 Q336 74 318 74 Z" fill="#0a0a0c"/>
+      <path d="M330 80 L352 78 L352 84 L334 86 Z" fill="#161619"/>
+      <rect x="334" y="80" width="16" height="1.6" rx="0.8" fill="#23242a"/>
+      <path d="M88 100 Q108 96 128 100 L128 104 Q108 100 88 104 Z" fill="#3a3b42" opacity="0.45"/>
+      <path d="M178 96 Q210 92 244 96 L244 99 Q210 95 178 99 Z" fill="#3a3b42" opacity="0.4"/>
+      <circle cx="108" cy="116" r="30" fill="url(#hcTire)"/><circle cx="108" cy="116" r="30" fill="none" stroke="#000000" stroke-width="1.4"/><circle cx="108" cy="116" r="22.5" fill="url(#hcDisc)"/><circle cx="108" cy="116" r="20" fill="url(#hcRim)"/>
+      <g fill="#2c2d33" stroke="#37383f" stroke-width="0.6"><path d="M108 116 L106 98 Q108 96.5 110 98 Z"/><path d="M108 116 L122.6 105.4 Q124.2 107 123.2 109.3 Z"/><path d="M108 116 L124.6 122.8 Q124.6 124.8 122.6 125.8 Z"/><path d="M108 116 L113.2 133.3 Q111.2 134.4 109 133.8 Z"/><path d="M108 116 L100.8 133.6 Q98.4 132.8 97.4 130.7 Z"/><path d="M108 116 L91.6 124.6 Q90.6 122.6 91.3 120.3 Z"/><path d="M108 116 L91.3 109 Q92 106.7 94 105.7 Z"/></g>
+      <circle cx="108" cy="116" r="5" fill="#1a1b1f" stroke="#3a3b42" stroke-width="0.8"/><circle cx="108" cy="116" r="1.6" fill="#45464d"/>
+      <path d="M122 102 a17 17 0 0 1 4 9" fill="none" stroke="#c2682f" stroke-width="3" stroke-linecap="round" opacity="0.92"/>
+      <circle cx="300" cy="116" r="30" fill="url(#hcTire)"/><circle cx="300" cy="116" r="30" fill="none" stroke="#000000" stroke-width="1.4"/><circle cx="300" cy="116" r="22.5" fill="url(#hcDisc)"/><circle cx="300" cy="116" r="20" fill="url(#hcRim)"/>
+      <g fill="#2c2d33" stroke="#37383f" stroke-width="0.6"><path d="M300 116 L298 98 Q300 96.5 302 98 Z"/><path d="M300 116 L314.6 105.4 Q316.2 107 315.2 109.3 Z"/><path d="M300 116 L316.6 122.8 Q316.6 124.8 314.6 125.8 Z"/><path d="M300 116 L305.2 133.3 Q303.2 134.4 301 133.8 Z"/><path d="M300 116 L292.8 133.6 Q290.4 132.8 289.4 130.7 Z"/><path d="M300 116 L283.6 124.6 Q282.6 122.6 283.3 120.3 Z"/><path d="M300 116 L283.3 109 Q284 106.7 286 105.7 Z"/></g>
+      <circle cx="300" cy="116" r="5" fill="#1a1b1f" stroke="#3a3b42" stroke-width="0.8"/><circle cx="300" cy="116" r="1.6" fill="#45464d"/>
+      <path d="M314 102 a17 17 0 0 1 4 9" fill="none" stroke="#c2682f" stroke-width="3" stroke-linecap="round" opacity="0.92"/>
+      <path d="M300 78 Q320 76 334 84 L334 80 Q322 73 304 73 Z" fill="#1f2025"/>
+      <path d="M330 74 Q344 75 352 80 L352 76 Q344 71 334 71 Z" fill="#101013"/>
     </svg>
+    <span class="gc-dots"></span>
+    <span class="gc-red"></span>
+   </div>
   </div>
   <div class="ckp-gauges">
     <button class="ckp-gauge" id="ckpGsante"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpHealthFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpHealthV">—</div></div><div class="ckp-label">Santé</div></button>
