@@ -505,6 +505,19 @@
   .ov.show{display:grid;}
   .ov-panel{width:min(560px,92vw);max-height:88vh;overflow:auto;background:var(--bg2);border:.5px solid var(--border);border-radius:24px;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.6);position:relative;}
   .ov-panel .x{position:absolute;top:16px;right:16px;background:transparent;border:.5px solid var(--border);color:var(--dim);border-radius:9px;width:30px;height:28px;cursor:pointer;}
+  /* FIX fermeture : les croix doivent rester AU-DESSUS des titres animés (.da-fx = position:relative) */
+  .ov .x,.ov-panel .x,.panel .x,.diag-panel .x,.media-x{z-index:140;}
+  .ov h3.da-fx,.ckp-title.da-fx,.boot-title.da-fx,.ckp-sub.da-fx{pointer-events:none;}
+  /* ===== Polish interactions façon Apple (pression) + focus énergique façon Xbox — sûr, pointer-events neutres ===== */
+  .seg button,.mode-btn,.k,.i,.fav,.mq-like,.media-x,.ov .x,.ckp-scan,.ckp-gauge,.dc-head button,.book{transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,background .2s ease,color .2s ease;}
+  .seg button:active,.mode-btn:active,.k:active,.i:active,.fav:active,.media-x:active,.ov .x:active,.ckp-scan:active,.ckp-gauge:active{transform:scale(.93);}
+  button:focus-visible,.seg button:focus-visible,.mode-btn:focus-visible,.ckp-gauge:focus-visible,.book:focus-visible,input:focus-visible,a:focus-visible{outline:none;box-shadow:0 0 0 2px var(--bg2,#0b0b0d),0 0 0 4px var(--acc),0 0 18px -3px var(--acc);}
+  @keyframes daPop{from{transform:translateY(16px) scale(.985);opacity:0;}to{transform:none;opacity:1;}}
+  .ov.show .ov-panel,.cockpit-ov.show .ckp-title,.cockpit-ov.show .ckp-car,.cockpit-ov.show .ckp-gauges,.cockpit-ov.show .ckp-actions{animation:daPop .5s cubic-bezier(.2,.85,.25,1) both;}
+  .cockpit-ov.show .ckp-car{animation-delay:.05s;}
+  .cockpit-ov.show .ckp-gauges{animation-delay:.11s;}
+  .cockpit-ov.show .ckp-actions{animation-delay:.17s;}
+  @media(prefers-reduced-motion:reduce){.ov.show .ov-panel,.cockpit-ov.show .ckp-title,.cockpit-ov.show .ckp-car,.cockpit-ov.show .ckp-gauges,.cockpit-ov.show .ckp-actions{animation:none!important;}}
   .contacts{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
   .contact{display:flex;align-items:center;gap:13px;background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:12px 15px;text-decoration:none;color:var(--txt);}
   .contact .av{width:38px;height:38px;border-radius:50%;background:var(--acc);color:#0a0a0a;display:grid;place-items:center;font-weight:600;font-family:var(--mono);}
