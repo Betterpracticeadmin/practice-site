@@ -38,6 +38,9 @@
   /* night / any dark-theme mode: coloured DARK map (invert+hue-rotate keeps green parks & blue water) */
   body[data-theme="dark"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(.92) saturate(.95);}
   body[data-mode="night"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.8) contrast(.9) saturate(1.08);}
+  /* La carte reste BLANCHE dans TOUS les modes — seul le mode NUIT garde une carte sombre. */
+  body:not([data-mode="night"]) .leaflet-tile-pane{filter:none !important;}
+  body[data-mode="night"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.8) contrast(.9) saturate(1.08) !important;}
   body[data-mode="performance"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.82) sepia(.42) hue-rotate(-32deg) saturate(1.75) contrast(1.05);}
   body[data-theme="light"][data-mode="learning"] .leaflet-tile-pane{filter:sepia(.32) saturate(1.45) hue-rotate(72deg) brightness(.99) contrast(1.02);}
   body[data-theme="dark"][data-mode="learning"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.84) sepia(.4) hue-rotate(72deg) saturate(1.45);}
