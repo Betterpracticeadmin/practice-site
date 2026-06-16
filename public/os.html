@@ -231,6 +231,8 @@
   .dc-txt{flex:1;font-size:11.5px;line-height:1.3;}
   .dc-sv{font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);}
   .dc-clear{background:transparent;border:.5px solid var(--border);color:var(--dim);border-radius:8px;padding:5px 10px;font-size:10px;cursor:pointer;flex-shrink:0;}
+  .dc-fix{background:rgba(245,166,35,.14);border:.5px solid rgba(245,166,35,.4);color:#f5a623;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;cursor:pointer;flex-shrink:0;}
+  .dc-fix:hover{background:rgba(245,166,35,.24);}
   .diag-foot{margin-top:16px;font-size:10.5px;color:var(--faint);line-height:1.45;border-top:.5px solid var(--border);padding-top:12px;}
   .key-in{width:100%;background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:11px 13px;color:var(--txt);font-size:12px;font-family:var(--mono);box-sizing:border-box;}
   .key-note{font-size:10.5px;color:var(--faint);margin-top:7px;line-height:1.45;}
@@ -672,9 +674,9 @@
   .media-x{background:rgba(255,255,255,.16);border:none;color:#fff;width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(20px);transition:transform .2s cubic-bezier(.34,1.5,.5,1);}
   .media-x:active{transform:scale(.88);}
   .media-main{flex:1;display:flex;gap:clamp(24px,4.5vw,56px);min-height:0;align-items:center;}
-  .media-now{display:flex;flex-direction:column;gap:clamp(18px,2.6vh,26px);flex:1;min-width:0;max-width:480px;justify-content:center;background:rgba(255,255,255,.05);backdrop-filter:blur(38px) saturate(1.5);-webkit-backdrop-filter:blur(38px) saturate(1.5);border:.5px solid rgba(255,255,255,.13);border-radius:28px;padding:clamp(22px,3.2vh,34px);box-shadow:0 30px 70px rgba(0,0,0,.36), 0 1px 0 rgba(255,255,255,.05) inset;}
-  .media-cover{width:100%;aspect-ratio:1;max-width:320px;border-radius:16px;background:#15171c 50%/cover no-repeat;box-shadow:0 40px 90px rgba(0,0,0,.55), 0 0 80px 0 var(--mAccentG,rgba(255,255,255,.07)), 0 0 0 .5px rgba(255,255,255,.14) inset;align-self:center;flex-shrink:0;transition:transform .55s cubic-bezier(.32,.72,0,1),box-shadow .9s;}
-  body:not([data-mplaying]) .media-cover{transform:scale(.82);box-shadow:0 20px 56px rgba(0,0,0,.5), 0 0 0 .5px rgba(255,255,255,.06) inset;}
+  .media-now{display:flex;flex-direction:column;gap:clamp(18px,2.6vh,26px);flex:1;min-width:0;max-width:480px;justify-content:center;background:rgba(255,255,255,.05);backdrop-filter:blur(38px) saturate(1.5);-webkit-backdrop-filter:blur(38px) saturate(1.5);border:.5px solid rgba(255,255,255,.13);border-radius:28px;padding:clamp(22px,3.2vh,34px);box-shadow:0 30px 70px rgba(0,0,0,.36), 0 1px 0 rgba(255,255,255,.05) inset;perspective:1200px;}
+  .media-cover{--mScale:1;width:100%;aspect-ratio:1;max-width:320px;border-radius:16px;background:#15171c 50%/cover no-repeat;box-shadow:0 40px 90px rgba(0,0,0,.55), 0 0 80px 0 var(--mAccentG,rgba(255,255,255,.07)), 0 0 0 .5px rgba(255,255,255,.14) inset;align-self:center;flex-shrink:0;transform:perspective(1200px) rotateX(var(--tiltX,0deg)) rotateY(var(--tiltY,0deg)) scale(var(--mScale));transform-style:preserve-3d;transition:transform .2s ease-out,box-shadow .9s;will-change:transform;}
+  body:not([data-mplaying]) .media-cover{--mScale:.82;box-shadow:0 20px 56px rgba(0,0,0,.5), 0 0 0 .5px rgba(255,255,255,.06) inset;}
   .media-meta{display:flex;align-items:center;justify-content:space-between;gap:14px;}
   .media-meta .mm-tx{min-width:0;}
   .media-meta .ti{font-size:clamp(23px,2.7vw,30px);font-weight:700;line-height:1.12;letter-spacing:-.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;}
@@ -1648,6 +1650,9 @@
     {k:'Émissions',v:'À surveiller',d:'Efficacité catalyseur en baisse (banc 1)',s:77}
   ];
   var DTC=[{c:'P0420',t:'Catalyseur — efficacité sous le seuil (banc 1)',sv:'modéré'}];
+  /* dictionnaire FR des codes défaut les plus courants (interprète aussi les codes réels lus par l'OBD) */
+  var DTC_DICT={'P0420':'Catalyseur — efficacité sous le seuil','P0430':'Catalyseur — efficacité sous le seuil (banc 2)','P0171':'Mélange trop pauvre (banc 1)','P0174':'Mélange trop pauvre (banc 2)','P0172':'Mélange trop riche (banc 1)','P0300':'Ratés d\'allumage aléatoires','P0301':'Ratés d\'allumage cylindre 1','P0302':'Ratés d\'allumage cylindre 2','P0303':'Ratés d\'allumage cylindre 3','P0304':'Ratés d\'allumage cylindre 4','P0128':'Thermostat — moteur ne chauffe pas assez','P0442':'Fuite système EVAP (petite)','P0455':'Fuite système EVAP (grosse)','P0401':'Recirculation EGR insuffisante','P0011':'Calage arbre à cames (banc 1)','P0016':'Corrélation vilebrequin / arbre à cames','P0102':'Débitmètre d\'air — signal bas','P0113':'Capteur température d\'air — signal haut','P0135':'Sonde lambda — chauffage (banc 1)','P0341':'Capteur position arbre à cames','P0700':'Défaut transmission','P0606':'Calculateur moteur (ECM)','U0100':'Perte de communication avec le calculateur moteur','C0035':'Capteur de vitesse roue avant gauche','B1318':'Tension batterie trop basse'};
+  function dtcMeaning(c){ c=(c||'').toUpperCase(); if(DTC_DICT[c])return DTC_DICT[c]; var f=c.charAt(0); var fam=f==='P'?'moteur / transmission':f==='C'?'châssis / freinage / ABS':f==='B'?'carrosserie / habitacle':f==='U'?'réseau / communication':'véhicule'; return 'Défaut '+fam+' (code '+c+')'; }
   function ledColor(s){ return s>=85?'#39d98a':s>=70?'#f5a623':'#ff5a5f'; }
   function buildDiag(){
     var avg=Math.round(DSYS.reduce(function(a,b){return a+b.s;},0)/DSYS.length);
@@ -2992,14 +2997,20 @@
       if($('plFill'))$('plFill').style.width=pct+'%'; if($('mFill'))$('mFill').style.width=pct+'%'; if($('mdFill'))$('mdFill').style.width=pct+'%';
       if($('mCur'))$('mCur').textContent=fmtT(e.currentPosition); });
   }catch(e){} }
-  function openMedia(){ $('mediaOv').classList.add('show'); initViz(); updateTrack(); buildQueue(); }
+  /* tilt 3D de la pochette : suit la souris (PC) et l'inclinaison du téléphone (mobile) */
+  var _tiltSet=false;
+  function initTilt(){ if(_tiltSet)return; var now=document.querySelector('.media-now'), cov=$('mCover'); if(!now||!cov)return; _tiltSet=true;
+    now.addEventListener('mousemove',function(e){ var r=now.getBoundingClientRect(); var px=(e.clientX-r.left)/r.width-0.5, py=(e.clientY-r.top)/r.height-0.5; cov.style.setProperty('--tiltY',(px*15).toFixed(1)+'deg'); cov.style.setProperty('--tiltX',(-py*15).toFixed(1)+'deg'); });
+    now.addEventListener('mouseleave',function(){ cov.style.setProperty('--tiltX','0deg'); cov.style.setProperty('--tiltY','0deg'); });
+    try{ window.addEventListener('deviceorientation',function(e){ if(!$('mediaOv')||!$('mediaOv').classList.contains('show'))return; var g=Math.max(-22,Math.min(22,e.gamma||0)), b=Math.max(-22,Math.min(22,(e.beta||0)-28)); cov.style.setProperty('--tiltY',(g*0.6).toFixed(1)+'deg'); cov.style.setProperty('--tiltX',(-b*0.6).toFixed(1)+'deg'); }); }catch(e){} }
+  function openMedia(){ $('mediaOv').classList.add('show'); initViz(); initTilt(); updateTrack(); buildQueue(); }
   function closeMedia(){ $('mediaOv').classList.remove('show'); }
   /* ---- Média passager : YouTube / Spotify / Apple Music par intégration (sans clé) ---- */
   var paxSrc='yt';
-  var PAX_PRESETS={ yt:[{n:'Lofi 24/7',id:'jfKfPfyJRdk'},{n:'Nature 4K',id:'BHACKCNDMW8'},{n:'Voyage relaxant',id:'1La4QzGeaaQ'}],
+  var PAX_PRESETS={ yt:[{n:'📰 France 24',live:'UCCCPCZNChQdGa9EkATeye4g'},{n:'🌍 Euronews',live:'UCW2QcKZiU8aUGg4yxCIditg'},{n:'🌐 France 24 EN',live:'UCQfwfsi5VrQ8yKZ-UWmAEFg'},{n:'🎵 Lofi',id:'jfKfPfyJRdk'},{n:'🌿 Nature 4K',id:'BHACKCNDMW8'},{n:'✈️ Voyage',id:'1La4QzGeaaQ'}],
     sp:[{n:'Top hits',u:'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'},{n:'Chill',u:'https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6'},{n:'Road trip',u:'https://open.spotify.com/playlist/37i9dQZF1DWSThc8QnxqcG'}],
     am:[{n:'Today\'s Hits',u:'https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb'}] };
-  var PAX_NOTE={ yt:'Pour les passagers / à l\'arrêt : colle un lien YouTube (ou choisis un flux). Évite de regarder en conduisant.',
+  var PAX_NOTE={ yt:'📰 Infos & TV en direct (France 24, Euronews…), musique, nature — ou colle n\'importe quel lien YouTube. Pour les passagers / à l\'arrêt : évite de regarder en conduisant.',
     sp:'Colle un lien Spotify (titre, playlist, album). Lecture complète si tu es connecté à Spotify dans ce navigateur, sinon extraits de 30 s. La lecture pilotée par la voix demanderait l\'API Spotify (compte développeur).',
     am:'Colle un lien Apple Music (album/playlist). Lecture via l\'intégration Apple ; la lecture complète demande un abonnement Apple Music actif.' };
   function paxEmbed(src,link){ link=(link||'').trim();
@@ -3007,7 +3018,7 @@
     if(src==='sp'){ var sm=link.match(/open\.spotify\.com\/(intl-\w+\/)?(track|playlist|album|episode|show)\/([\w]+)/); if(sm)return '<iframe src="https://open.spotify.com/embed/'+sm[2]+'/'+sm[3]+'" allow="autoplay; encrypted-media; clipboard-write; fullscreen"></iframe>'; return null; }
     if(src==='am'){ if(/music\.apple\.com/.test(link))return '<iframe src="'+link.replace('music.apple.com','embed.music.apple.com')+'" allow="autoplay *; encrypted-media *; fullscreen *" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-presentation"></iframe>'; return null; }
     return null; }
-  function paxRenderPresets(){ if(!$('paxPresets'))return; var arr=PAX_PRESETS[paxSrc]||[]; $('paxPresets').innerHTML=''; arr.forEach(function(p){ var b=document.createElement('button'); b.textContent=p.n; b.addEventListener('click',function(){ var h=paxEmbed(paxSrc,p.id?('https://youtu.be/'+p.id):p.u); if(h)$('paxEmbed').innerHTML=h; }); $('paxPresets').appendChild(b); }); }
+  function paxRenderPresets(){ if(!$('paxPresets'))return; var arr=PAX_PRESETS[paxSrc]||[]; $('paxPresets').innerHTML=''; arr.forEach(function(p){ var b=document.createElement('button'); b.textContent=p.n; b.addEventListener('click',function(){ [].forEach.call($('paxPresets').children,function(x){x.classList.remove('on');}); b.classList.add('on'); var h; if(p.live){ h='<iframe src="https://www.youtube.com/embed/live_stream?channel='+p.live+'&autoplay=1&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>'; } else { h=paxEmbed(paxSrc,p.id?('https://youtu.be/'+p.id):p.u); } if(h)$('paxEmbed').innerHTML=h; }); $('paxPresets').appendChild(b); }); }
   function paxSetSrc(s){ paxSrc=s; if($('paxSeg'))[].forEach.call($('paxSeg').children,function(x){x.classList.toggle('on',x.dataset.px===s);});
     if($('paxLink'))$('paxLink').placeholder='Colle un lien '+(s==='yt'?'YouTube':s==='sp'?'Spotify':'Apple Music')+' et appuie sur Entrée…';
     if($('paxNote'))$('paxNote').textContent=PAX_NOTE[s]; if($('paxEmbed'))$('paxEmbed').innerHTML=''; paxRenderPresets(); }
@@ -3113,7 +3124,9 @@
   $('diagOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
   $('diagScan').addEventListener('click',function(){ var L=$('diagCodes'),b=this; b.disabled=true; L.innerHTML='<div class="org org-sm" style="margin:10px auto"><i></i><i></i><i></i></div>';
     setTimeout(function(){ b.disabled=false; if(!DTC.length){ L.innerHTML='<div class="dc-empty">✓ Aucun code défaut actif.</div>'; if(Voice.on)Voice.say('Aucun code défaut. Véhicule sain.',2); return; }
-      L.innerHTML=''; DTC.forEach(function(d){ var el=document.createElement('div'); el.className='dc-item'; el.innerHTML='<span class="dc-code">'+d.c+'</span><span class="dc-txt">'+d.t+'</span><span class="dc-sv">'+d.sv+'</span><button class="dc-clear">Effacer</button>'; el.querySelector('.dc-clear').addEventListener('click',function(){ el.remove(); if(!L.children.length)L.innerHTML='<div class="dc-empty">✓ Codes effacés. Re-scanne pour confirmer.</div>'; }); L.appendChild(el); });
+      L.innerHTML=''; DTC.forEach(function(d){ var el=document.createElement('div'); el.className='dc-item'; var txt=d.t||dtcMeaning(d.c); el.innerHTML='<span class="dc-code">'+d.c+'</span><span class="dc-txt">'+txt+'</span><span class="dc-sv">'+(d.sv||'')+'</span><button class="dc-fix" title="Voir la réparation sur YouTube">▶ Réparation</button><button class="dc-clear">Effacer</button>';
+        el.querySelector('.dc-fix').addEventListener('click',function(){ try{ window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(d.c+' '+txt+' réparation tutoriel'),'_blank','noopener'); }catch(e){} });
+        el.querySelector('.dc-clear').addEventListener('click',function(){ el.remove(); if(!L.children.length)L.innerHTML='<div class="dc-empty">✓ Codes effacés. Re-scanne pour confirmer.</div>'; }); L.appendChild(el); });
       if(Voice.on)Voice.say(DTC.length+' code défaut trouvé. '+DTC[0].c+', catalyseur à surveiller.',2);
     },1200); });
   $('vehCtl').addEventListener('click',function(e){ var b=e.target.closest('.vc'); if(!b)return; var c=b.dataset.c, on; b.classList.toggle('on'); on=b.classList.contains('on');
