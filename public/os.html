@@ -707,7 +707,8 @@
   .ckp-num{position:relative;font-size:clamp(21px,4.4vw,29px);font-weight:300;line-height:1;}
   .ckp-num small{font-size:13px;opacity:.6;}
   .ckp-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);}
-  .ckp-scan{align-self:center;background:rgba(255,255,255,.1);border:.5px solid rgba(255,255,255,.22);color:#fff;border-radius:24px;padding:12px 26px;font-size:13px;font-weight:500;cursor:pointer;backdrop-filter:blur(12px);margin:0 0 calc(26px + env(safe-area-inset-bottom));transition:.2s;}
+  .ckp-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:calc(26px + env(safe-area-inset-bottom));}
+  .ckp-scan{background:rgba(255,255,255,.1);border:.5px solid rgba(255,255,255,.22);color:#fff;border-radius:24px;padding:12px 22px;font-size:13px;font-weight:500;cursor:pointer;backdrop-filter:blur(12px);transition:.2s;}
   .ckp-scan:hover{background:rgba(255,255,255,.18);}
   .media-ov{position:fixed;inset:0;z-index:70;display:none;background:#070708;overflow:hidden;color:#fff;}
   .media-ov.show{display:block;animation:mediaIn .42s cubic-bezier(.32,.72,0,1);}
@@ -1192,7 +1193,10 @@
     <button class="ckp-gauge" id="ckpGtemp"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpTempFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpTempV">—</div></div><div class="ckp-label">Moteur</div></button>
     <button class="ckp-gauge" id="ckpGcodes"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpCodesFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpCodesV">—</div></div><div class="ckp-label">Codes</div></button>
   </div>
-  <button class="ckp-scan" id="ckpDetails">Scanner & voir le détail</button>
+  <div class="ckp-actions">
+    <button class="ckp-scan" id="ckpDetails">Scanner & détail</button>
+    <button class="ckp-scan" id="ckpMore">Contrôles · OBD · VIN</button>
+  </div>
 </div>
 
 <div class="ov" id="diagOv">
@@ -1777,6 +1781,7 @@
   function closeCockpit(){ if($('cockpitOv'))$('cockpitOv').classList.remove('show'); }
   if($('cockpitX'))$('cockpitX').addEventListener('click',closeCockpit);
   if($('ckpDetails'))$('ckpDetails').addEventListener('click',function(){ closeCockpit(); openDiag(); });
+  if($('ckpMore'))$('ckpMore').addEventListener('click',function(){ if(typeof openVehPanel==='function')openVehPanel(); });
   if($('ckpGcodes'))$('ckpGcodes').addEventListener('click',function(){ closeCockpit(); openDiag(); setTimeout(function(){ var b=$('diagScan'); if(b)b.click(); },220); });
 
   /* ===== DRIVER DIGITAL TWIN (estimated from GPS dynamics, no biometrics) ===== */
@@ -3266,7 +3271,8 @@
   $('callDecline').addEventListener('click',endCall);
 
   /* ---------- vehicle screen ---------- */
-  function openVehicle(){ $('vehOv').classList.add('show'); }
+  function openVehicle(){ if(typeof openCockpit==='function')openCockpit(); else $('vehOv').classList.add('show'); }
+  function openVehPanel(){ closeCockpit(); $('vehOv').classList.add('show'); }
   $('vehX').addEventListener('click',function(){ $('vehOv').classList.remove('show'); });
   $('vehOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
   $('diagBtn').addEventListener('click',openCockpit);
