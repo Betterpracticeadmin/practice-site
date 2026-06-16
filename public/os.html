@@ -673,7 +673,7 @@
   .media-x:active{transform:scale(.88);}
   .media-main{flex:1;display:flex;gap:clamp(24px,4.5vw,56px);min-height:0;align-items:center;}
   .media-now{display:flex;flex-direction:column;gap:clamp(18px,2.6vh,26px);flex:1;min-width:0;max-width:480px;justify-content:center;background:rgba(255,255,255,.05);backdrop-filter:blur(38px) saturate(1.5);-webkit-backdrop-filter:blur(38px) saturate(1.5);border:.5px solid rgba(255,255,255,.13);border-radius:28px;padding:clamp(22px,3.2vh,34px);box-shadow:0 30px 70px rgba(0,0,0,.36), 0 1px 0 rgba(255,255,255,.05) inset;}
-  .media-cover{width:100%;aspect-ratio:1;max-width:320px;border-radius:16px;background:#15171c 50%/cover no-repeat;box-shadow:0 40px 90px rgba(0,0,0,.55), 0 0 70px 0 rgba(255,255,255,.07), 0 0 0 .5px rgba(255,255,255,.14) inset;align-self:center;flex-shrink:0;transition:transform .55s cubic-bezier(.32,.72,0,1),box-shadow .55s;}
+  .media-cover{width:100%;aspect-ratio:1;max-width:320px;border-radius:16px;background:#15171c 50%/cover no-repeat;box-shadow:0 40px 90px rgba(0,0,0,.55), 0 0 80px 0 var(--mAccentG,rgba(255,255,255,.07)), 0 0 0 .5px rgba(255,255,255,.14) inset;align-self:center;flex-shrink:0;transition:transform .55s cubic-bezier(.32,.72,0,1),box-shadow .9s;}
   body:not([data-mplaying]) .media-cover{transform:scale(.82);box-shadow:0 20px 56px rgba(0,0,0,.5), 0 0 0 .5px rgba(255,255,255,.06) inset;}
   .media-meta{display:flex;align-items:center;justify-content:space-between;gap:14px;}
   .media-meta .mm-tx{min-width:0;}
@@ -682,13 +682,17 @@
   .media-prog{display:flex;flex-direction:column;gap:7px;}
   .media-track{height:6px;border-radius:6px;background:rgba(255,255,255,.18);cursor:pointer;overflow:hidden;transition:height .2s;backdrop-filter:blur(6px);}
   .media-track:hover{height:10px;}
-  .media-track i{display:block;height:100%;background:linear-gradient(90deg,rgba(255,255,255,.85),#fff);border-radius:6px;width:0;box-shadow:0 0 12px rgba(255,255,255,.45);}
+  .media-track i{display:block;height:100%;background:linear-gradient(90deg,var(--mAccentT,rgba(255,255,255,.85)),var(--mAccent,#fff));border-radius:6px;width:0;box-shadow:0 0 14px var(--mAccentG,rgba(255,255,255,.45));}
   .media-time{display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;}
+  /* visualiseur audio : barres qui dansent, teintées par la couleur de la pochette */
+  .media-viz{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:26px;padding:0 2px;opacity:.95;}
+  .media-viz span{flex:1;max-width:4px;min-width:2px;background:var(--mAccent,rgba(255,255,255,.7));border-radius:4px;height:12%;box-shadow:0 0 9px var(--mAccentG,transparent);transition:height .08s linear;}
+  body:not([data-mplaying]) .media-viz{opacity:.4;}
   .media-ctl{display:flex;align-items:center;justify-content:center;gap:clamp(28px,6vw,48px);margin-top:6px;}
   .media-ctl button{background:none;border:none;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0;transition:transform .18s cubic-bezier(.34,1.5,.5,1);}
   .media-ctl button:active{transform:scale(.84);}
   .media-ctl .sec svg{width:33px;height:33px;fill:currentColor;opacity:.92;}
-  .media-ctl .play{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.97);color:#101113;box-shadow:0 14px 38px rgba(0,0,0,.42);}
+  .media-ctl .play{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.97);color:#101113;box-shadow:0 14px 38px rgba(0,0,0,.42), 0 0 46px var(--mAccentG,transparent);}
   .media-ctl .play svg{width:30px;height:30px;fill:currentColor;}
   .media-ctl .like svg path{fill:none;stroke:currentColor;stroke-width:2;transition:fill .15s;opacity:.92;}
   .media-ctl .like.on{color:#ff5b6e;animation:likePop .32s ease;}
@@ -1211,6 +1215,7 @@
       <div class="media-now">
         <div class="media-cover" id="mCover"></div>
         <div class="media-meta"><div class="ti" id="mTitle">—</div><div class="ar" id="mArtist">—</div></div>
+        <div class="media-viz" id="mViz"></div>
         <div class="media-prog">
           <div class="media-track" id="mTrack"><i id="mFill"></i></div>
           <div class="media-time"><span id="mCur">0:00</span><span id="mDur">0:00</span></div>
@@ -2936,7 +2941,26 @@
       document.body.setAttribute('data-dock','1'); $('miniDock').classList.add('show'); return; }
     if(!scWidget)return; scWidget.getSounds(function(list){ for(var i=0;i<(list||[]).length;i++){ if(list[i].id===s.id){ scWidget.skip(i); mediaSource='sc'; [].forEach.call($('mediaSeg').children,function(b){b.classList.toggle('on',b.dataset.s==='sc');}); $('mqLabel').textContent='File d\'attente'; setTimeout(function(){updateTrack();buildQueue();},400); return; } } toast('Indisponible dans la playlist actuelle.'); }); }
   /* pochette + fond flouté (signature Apple Music) synchronisés */
-  function setMCover(b){ if($('mCover'))$('mCover').style.backgroundImage=b; var m=$('mediaBlur'); if(m)m.style.backgroundImage=b; }
+  function setMCover(b){ if($('mCover'))$('mCover').style.backgroundImage=b; var m=$('mediaBlur'); if(m)m.style.backgroundImage=b; extractCover(b); }
+  /* ===== couleur extraite de la pochette -> teinte tout le lecteur ===== */
+  var _colCv=null;
+  function applyMediaColor(rgb){ var ov=$('mediaOv'); if(!ov)return; var c=rgb[0]+','+rgb[1]+','+rgb[2];
+    ov.style.setProperty('--mAccent','rgb('+c+')'); ov.style.setProperty('--mAccentT','rgba('+c+',.55)'); ov.style.setProperty('--mAccentG','rgba('+c+',.42)'); }
+  function extractCover(b){ if(!b)return; var mm=(b+'').match(/url\(["']?([^"')]+)["']?\)/); var src=mm?mm[1]:''; if(!src||src.indexOf('blob:')===0)return;
+    var img=new Image(); img.crossOrigin='anonymous';
+    img.onload=function(){ try{ var cv=_colCv||(_colCv=document.createElement('canvas')); cv.width=20; cv.height=20; var cx=cv.getContext('2d'); cx.drawImage(img,0,0,20,20); var d=cx.getImageData(0,0,20,20).data;
+      var r=0,g=0,bl=0,n=0,bestSat=0,best=null; for(var i=0;i<d.length;i+=4){ var rr=d[i],gg=d[i+1],bb=d[i+2]; r+=rr;g+=gg;bl+=bb;n++; var sat=Math.max(rr,gg,bb)-Math.min(rr,gg,bb), lum=(rr+gg+bb)/3; if(sat>bestSat&&lum>55&&lum<225){ bestSat=sat; best=[rr,gg,bb]; } }
+      var acc=(bestSat>28&&best)?best:[Math.round(r/n),Math.round(g/n),Math.round(bl/n)];
+      /* éclaircit l'accent s'il est trop sombre */ var L=(acc[0]+acc[1]+acc[2])/3; if(L<70){ acc=acc.map(function(x){return Math.min(255,Math.round(x*1.7+40));}); }
+      applyMediaColor(acc); }catch(e){ /* CORS -> garde le défaut */ } };
+    img.onerror=function(){}; img.src=src; }
+  /* ===== visualiseur audio (barres qui dansent) ===== */
+  var _viz=[], _vizRAF=null;
+  function initViz(){ var z=$('mViz'); if(!z||_viz.length)return; for(var i=0;i<24;i++){ var s=document.createElement('span'); z.appendChild(s); _viz.push(s); } if(!_vizRAF)_vizRAF=requestAnimationFrame(vizTick); }
+  function vizTick(t){ _vizRAF=requestAnimationFrame(vizTick);
+    if(!$('mediaOv')||!$('mediaOv').classList.contains('show'))return;   /* n'anime que lecteur ouvert */
+    var playing=document.body.hasAttribute('data-mplaying'), n=_viz.length;
+    for(var i=0;i<n;i++){ var h; if(playing){ var c=Math.abs(i-(n-1)/2)/((n-1)/2); var base=(Math.sin(t/230+i*0.55)*0.5+0.5)*(Math.sin(t/640+i*0.9)*0.5+0.5); h=12+base*78*(1-c*0.45); } else { h=9+Math.sin(t/900+i)*3; } _viz[i].style.height=Math.max(7,Math.min(96,h))+'%'; } }
   function setPlayIcon(p){ mPlaying=p; var pa='<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>', pl='<path d="M8 5v14l11-7z"/>';
     if(p)document.body.setAttribute('data-mplaying','1'); else document.body.removeAttribute('data-mplaying');
     [['plPlayIc',p],['mPlayIc',p],['mdPlayIc',p]].forEach(function(x){ var e=$(x[0]); if(e)e.innerHTML=x[1]?pa:pl; }); }
@@ -2968,7 +2992,7 @@
       if($('plFill'))$('plFill').style.width=pct+'%'; if($('mFill'))$('mFill').style.width=pct+'%'; if($('mdFill'))$('mdFill').style.width=pct+'%';
       if($('mCur'))$('mCur').textContent=fmtT(e.currentPosition); });
   }catch(e){} }
-  function openMedia(){ $('mediaOv').classList.add('show'); updateTrack(); buildQueue(); }
+  function openMedia(){ $('mediaOv').classList.add('show'); initViz(); updateTrack(); buildQueue(); }
   function closeMedia(){ $('mediaOv').classList.remove('show'); }
   /* ---- Média passager : YouTube / Spotify / Apple Music par intégration (sans clé) ---- */
   var paxSrc='yt';
