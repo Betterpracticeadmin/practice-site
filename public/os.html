@@ -518,12 +518,16 @@
   .cockpit-ov.show .ckp-gauges{animation-delay:.11s;}
   .cockpit-ov.show .ckp-actions{animation-delay:.17s;}
   @media(prefers-reduced-motion:reduce){.ov.show .ov-panel,.cockpit-ov.show .ckp-title,.cockpit-ov.show .ckp-car,.cockpit-ov.show .ckp-gauges,.cockpit-ov.show .ckp-actions{animation:none!important;}}
-  .contacts{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
-  .contact{display:flex;align-items:center;gap:13px;background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:12px 15px;text-decoration:none;color:var(--txt);}
-  .contact .av{width:38px;height:38px;border-radius:50%;background:var(--acc);color:#0a0a0a;display:grid;place-items:center;font-weight:600;font-family:var(--mono);}
-  .contact .cn{flex:1;font-size:14px;}
-  .contact .cc{width:20px;height:20px;stroke:var(--acc);fill:none;stroke-width:1.6;}
-  .sim-call{margin-top:14px;width:100%;background:var(--acc);color:#0a0a0a;border:none;border-radius:13px;padding:13px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer;}
+  .fav-head{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:22px 0 11px;}
+  .contacts{display:flex;flex-direction:column;gap:9px;margin-top:6px;}
+  .contact{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.05);border:.5px solid var(--border);border-radius:16px;padding:11px 14px;text-decoration:none;color:var(--txt);transition:transform .15s cubic-bezier(.34,1.5,.5,1),background .2s;}
+  .contact:hover{background:rgba(255,255,255,.10);}
+  .contact:active{transform:scale(.98);}
+  .contact .av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:16px;color:#fff;font-family:'Inter',sans-serif;background:linear-gradient(140deg,var(--c1,#6AA1FF),var(--c2,#274ea0));box-shadow:0 4px 12px -3px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.25);}
+  .contact .cn{flex:1;font-size:15px;font-weight:500;}
+  .contact .cc{width:34px;height:34px;padding:8px;border-radius:50%;background:rgba(46,194,138,.16);fill:#3fd68f;stroke:none;flex-shrink:0;}
+  .sim-call{margin-top:18px;width:100%;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));color:var(--txt);border:.5px solid var(--border);border-radius:14px;padding:13px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;cursor:pointer;transition:.18s;}
+  .sim-call:hover{background:rgba(255,255,255,.12);box-shadow:0 0 0 1px var(--acc),0 0 22px -6px var(--acc);}
   .phone-note{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:10px;text-align:center;}
   .call-screen{position:fixed;inset:0;z-index:70;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(ellipse at 50% 35%,#1a1d22,#050506 75%);}
   .call-screen.show{display:flex;}
@@ -835,18 +839,28 @@
   @media(max-width:760px){ .mini-dock.show{display:flex;} body[data-dock] .col-r{bottom:calc(132px + env(safe-area-inset-bottom));} }
 
   /* ===== phone dialer (real tel: calls) ===== */
-  .dialer{margin-bottom:16px;}
-  .dialer input{width:100%;background:transparent;border:none;border-bottom:.5px solid var(--border);color:var(--txt);font-size:25px;font-family:var(--mono);letter-spacing:.08em;text-align:center;padding:6px 0 12px;outline:none;}
-  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px;}
-  .keypad button{background:var(--card);border:.5px solid var(--border);border-radius:14px;color:var(--txt);font-size:22px;font-weight:300;padding:15px 0;cursor:pointer;font-family:var(--mono);transition:.1s;}
-  .keypad button:active{background:var(--acc);color:#000;}
-  .dial-actions{display:flex;align-items:center;justify-content:center;gap:28px;margin-top:16px;}
-  .dial-back{background:none;border:none;color:var(--dim);font-size:24px;cursor:pointer;width:48px;}
-  .dial-call{width:62px;height:62px;border-radius:50%;background:#2ec28a;display:grid;place-items:center;text-decoration:none;box-shadow:0 10px 26px rgba(46,194,138,.42);}
-  .dial-call svg{width:26px;height:26px;fill:#fff;}
-  .dial-call.disabled{opacity:.35;pointer-events:none;box-shadow:none;}
-  .recents{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px;}
-  .recents .rc{background:var(--card);border:.5px solid var(--border);border-radius:20px;padding:7px 12px;font-size:12px;font-family:var(--mono);color:var(--txt);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  /* ===== Téléphone — refonte façon Apple Phone + accent Xbox ===== */
+  .dialer{margin-bottom:6px;}
+  .dialer input{width:100%;background:transparent;border:none;color:var(--txt);font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(28px,8vw,36px);letter-spacing:.05em;text-align:center;padding:12px 0 8px;outline:none;caret-color:var(--acc);}
+  .dialer input::placeholder{color:var(--faint);font-weight:300;font-size:19px;}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,2.4vw,16px);margin:10px auto 0;max-width:300px;justify-items:center;}
+  .keypad button{position:relative;width:clamp(58px,17vw,72px);height:clamp(58px,17vw,72px);border-radius:50%;background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.10);color:var(--txt);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;overflow:hidden;-webkit-tap-highlight-color:transparent;transition:transform .12s cubic-bezier(.34,1.6,.5,1),background .2s,box-shadow .2s;}
+  .keypad button .kd-n{font-size:clamp(23px,6.5vw,28px);font-weight:400;font-family:'Inter',sans-serif;line-height:1;}
+  .keypad button .kd-l{font-size:9px;font-weight:700;letter-spacing:.2em;color:var(--dim);font-family:var(--mono);height:9px;line-height:9px;}
+  .keypad button:hover{background:rgba(255,255,255,.12);}
+  .keypad button:active{transform:scale(.9);background:var(--acc);box-shadow:0 0 26px -4px var(--acc);}
+  .keypad button:active .kd-n,.keypad button:active .kd-l{color:#0a0a0a;}
+  .dial-actions{display:flex;align-items:center;justify-content:center;gap:36px;margin-top:18px;}
+  .dial-back{background:none;border:none;color:var(--dim);font-size:23px;cursor:pointer;width:52px;height:52px;border-radius:50%;transition:.15s;}
+  .dial-back:active{background:rgba(255,255,255,.1);transform:scale(.92);}
+  .dial-call{width:66px;height:66px;border-radius:50%;background:radial-gradient(circle at 38% 30%,#5be58f,#26b56e 72%);display:grid;place-items:center;text-decoration:none;box-shadow:0 12px 30px -6px rgba(46,194,138,.6),inset 0 1px 0 rgba(255,255,255,.4);animation:phCall 2.6s ease-in-out infinite;}
+  @keyframes phCall{0%,100%{box-shadow:0 12px 30px -6px rgba(46,194,138,.5),inset 0 1px 0 rgba(255,255,255,.4);}50%{box-shadow:0 12px 40px 0 rgba(46,194,138,.85),inset 0 1px 0 rgba(255,255,255,.4);}}
+  .dial-call svg{width:28px;height:28px;fill:#fff;}
+  .dial-call.disabled{opacity:.32;pointer-events:none;box-shadow:none;animation:none;filter:grayscale(.5);}
+  @media(prefers-reduced-motion:reduce){.dial-call{animation:none;}}
+  .recents{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;justify-content:center;}
+  .recents .rc{background:rgba(255,255,255,.06);border:.5px solid var(--border);border-radius:20px;padding:8px 13px;font-size:12px;font-family:var(--mono);color:var(--txt);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.15s;}
+  .recents .rc:hover{background:rgba(255,255,255,.12);}
   .recents .rc svg{width:11px;height:11px;fill:var(--acc);}
   /* ===== Lot 1 : micro-interactions, UI adaptative vitesse, glow ambiant, mode Magma ===== */
   button,.navtabs button,.mode-btn,.icon-btn,.theme-btn,.diag-open,.seg button,.view-seg button,.fav,.mem-place,.search button{transition:transform .16s cubic-bezier(.34,1.56,.64,1),background .3s,border-color .3s,box-shadow .3s,opacity .3s;}
@@ -1130,10 +1144,18 @@
     <div class="dialer">
       <input id="dialNum" type="tel" inputmode="tel" placeholder="Saisis un numéro…" autocomplete="off" spellcheck="false"/>
       <div class="keypad" id="keypad">
-        <button>1</button><button>2</button><button>3</button>
-        <button>4</button><button>5</button><button>6</button>
-        <button>7</button><button>8</button><button>9</button>
-        <button data-k="+">+</button><button>0</button><button data-k="#">#</button>
+        <button data-k="1"><span class="kd-n">1</span><span class="kd-l"> </span></button>
+        <button data-k="2"><span class="kd-n">2</span><span class="kd-l">ABC</span></button>
+        <button data-k="3"><span class="kd-n">3</span><span class="kd-l">DEF</span></button>
+        <button data-k="4"><span class="kd-n">4</span><span class="kd-l">GHI</span></button>
+        <button data-k="5"><span class="kd-n">5</span><span class="kd-l">JKL</span></button>
+        <button data-k="6"><span class="kd-n">6</span><span class="kd-l">MNO</span></button>
+        <button data-k="7"><span class="kd-n">7</span><span class="kd-l">PQRS</span></button>
+        <button data-k="8"><span class="kd-n">8</span><span class="kd-l">TUV</span></button>
+        <button data-k="9"><span class="kd-n">9</span><span class="kd-l">WXYZ</span></button>
+        <button data-k="+"><span class="kd-n">+</span><span class="kd-l"> </span></button>
+        <button data-k="0"><span class="kd-n">0</span><span class="kd-l"> </span></button>
+        <button data-k="#"><span class="kd-n">#</span><span class="kd-l"> </span></button>
       </div>
       <div class="dial-actions">
         <span style="width:48px"></span>
@@ -1142,10 +1164,11 @@
       </div>
       <div class="recents" id="recents"></div>
     </div>
+    <div class="fav-head">Favoris</div>
     <div class="contacts">
-      <a class="contact" href="tel:+33600000000"><span class="av">L</span><span class="cn">Léa</span><svg class="cc" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
-      <a class="contact" href="tel:+33600000001"><span class="av">A</span><span class="cn">Alex</span><svg class="cc" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
-      <a class="contact" href="tel:+33600000002"><span class="av">B</span><span class="cn">Betterstate</span><svg class="cc" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
+      <a class="contact" href="tel:+33600000000"><span class="av" style="--c1:#FF6FA5;--c2:#C1396F">L</span><span class="cn">Léa</span><svg class="cc" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
+      <a class="contact" href="tel:+33600000001"><span class="av" style="--c1:#6AA1FF;--c2:#2A55B0">A</span><span class="cn">Alex</span><svg class="cc" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
+      <a class="contact" href="tel:+33600000002"><span class="av" style="--c1:#9B7BFF;--c2:#5B3FC4">B</span><span class="cn">Betterstate</span><svg class="cc" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg></a>
     </div>
     <button class="sim-call" id="simCall">▶ Simuler un appel entrant</button>
     <div class="phone-note">Sur ton téléphone, toucher un contact lance vraiment l'appel.</div>
