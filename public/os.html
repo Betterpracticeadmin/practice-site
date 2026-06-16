@@ -2396,7 +2396,13 @@
     {id:'copilot',re:/(copilot|copilote|normal|classique|standard|par d[eé]faut|[eé]quilibr|confiance|habituel|de base)/i}
   ];
   /* primary dictionary-driven matcher — returns true when it handled the utterance */
-  function vocabRun(t){
+  /* NORMALISATION : nettoie la transcription vocale AVANT analyse -> tous les détecteurs comprennent bien mieux (hésitations, politesse, contractions familières, accents). */
+  function normCmd(t){ t=(t||'').toLowerCase().trim();
+    t=t.replace(/\b(euh+|heu+|hum+|ben|bah|du coup|genre|en fait|hein|tu sais|comment dire|enfin bref|n'?est[- ]ce pas|disons|voyons)\b/g,' ');
+    t=t.replace(/\s*\b(s'?il te pla[iî]t|s'?il vous pla[iî]t|stp|svp|please|merci d'?avance|merci bien|c'?est gentil)\b\s*/g,' ');
+    t=t.replace(/\bj'?veux\b/g,'je veux').replace(/\bj'?aimerais\b/g,'j\'aimerais').replace(/\bj'?vais\b/g,'je vais').replace(/\bj'?suis\b/g,'je suis').replace(/\bt'?as\b/g,'tu as').replace(/\bt'?es\b/g,'tu es').replace(/\by'?a\b/g,'il y a').replace(/\bfaudrait\b/g,'il faudrait');
+    return t.replace(/\s+/g,' ').trim(); }
+  function vocabRun(t){ t=normCmd(t);
     /* une destination est proposée et on attend ton feu vert */
     /* confirmation / lancement de trajet — robuste ; relance aussi le dernier lieu évoqué */
     if(isGo(t)){ var tg=pendingNav||lastRef; if(tg){ pendingNav=null; clearFound(); sayVA(tr({fr:'C\'est parti, je lance le trajet vers '+tg.name+'.',en:'Let\'s go, starting the route to '+tg.name+'.',ja:tg.name+'へのルートを開始します。'})); $('dest').value=tg.name; startRouteTo(tg); return true; }
@@ -2501,7 +2507,7 @@
     for(var uk in UNWIRED){ if(lx(t,uk)){ sayVA(UNWIRED[uk]); return true; } }
     return false;
   }
-  function runCmd(t){ t=t.toLowerCase().trim(); if(!t)return;
+  function runCmd(t){ t=normCmd(t); if(!t)return;
     /* changement de langue À LA VOIX : "passe en anglais", "parle en français", "switch to japanese", ou juste "anglais"/"en japonais" */
     var _lm=t.match(/\b(?:parle(?:[- ]moi)?(?: en| moi en)?|passe(?: en)?|mets?[- ]toi en|mets en|bascule(?: en)?|switch to|speak|in)\s+(anglais|english|fran[çc]ais|french|japonais|japanese)\b/) || t.match(/^\s*(?:en\s+)?(anglais|english|fran[çc]ais|french|japonais|japanese)\s*[!.?]*$/);
     if(_lm){ var _L=_lm[1]; setLang(/anglais|english/.test(_L)?'en':(/japonais|japanese/.test(_L)?'ja':'fr')); return; }
@@ -2657,8 +2663,15 @@
   }
   /* ===== capacités exécutées EN LOCAL (sans IA) : calcul, conversions, petits jeux ===== */
   function _num(s){ return parseFloat(((s||'')+'').replace(',','.')); }
+  /* nombres écrits en lettres -> chiffres (uniquement pour le calcul) : "quinze plus vingt-sept" -> 15 + 27 */
+  function _frNum(s){ var u={'zero':0,'zéro':0,'un':1,'une':1,'deux':2,'trois':3,'quatre':4,'cinq':5,'six':6,'sept':7,'huit':8,'neuf':9,'dix':10,'onze':11,'douze':12,'treize':13,'quatorze':14,'quinze':15,'seize':16},d={'vingt':20,'trente':30,'quarante':40,'cinquante':50,'soixante':60};
+    s=s.replace(/\b(vingt|trente|quarante|cinquante|soixante)[- ](?:et[- ])?(un|une|deux|trois|quatre|cinq|six|sept|huit|neuf)\b/g,function(_m,t,o){return (d[t]+u[o]);});
+    s=s.replace(/\b(dix)[- ](sept|huit|neuf)\b/g,function(_m,_a,o){return (10+u[o]);});
+    s=s.replace(/\b(z[ée]ro|un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|onze|douze|treize|quatorze|quinze|seize)\b/g,function(w){return u[w.replace('é','e')]!=null?u[w.replace('é','e')]:(u[w]!=null?u[w]:w);});
+    s=s.replace(/\b(vingt|trente|quarante|cinquante|soixante)\b/g,function(w){return d[w];});
+    return s.replace(/\bcents?\b/g,'100').replace(/\bmille\b/g,'1000'); }
   function doMath(expr){ if(!expr)return null;
-    var s=(expr+'').toLowerCase()
+    var s=_frNum((expr+'').toLowerCase())
       .replace(/\bla racine (?:carr[ée]e )?de\s+([\d.,]+)/g,function(_m,n){ return Math.sqrt(_num(n)); })
       .replace(/([\d.,]+)\s+(?:au carr[ée]|puissance\s*2)/g,function(_m,n){ return Math.pow(_num(n),2); })
       .replace(/([\d.,]+)\s+puissance\s+([\d.,]+)/g,function(_m,a,b){ return Math.pow(_num(a),_num(b)); })
