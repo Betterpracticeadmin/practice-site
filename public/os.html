@@ -945,6 +945,10 @@
   .pax-embed iframe{width:100%;height:100%;border:0;}
   #paxNote{margin-top:0;}
 </style>
+<!-- TORUS-IMPORTMAP -->
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
 </head>
 <body data-theme="dark" class="safe">
 <div id="amb" aria-hidden="true"></div>
@@ -7355,5 +7359,538 @@ html[data-da-off] #mediaOv .media-seg button.on{ animation:none !important; }
 })();
 </script>
 <!-- MEDIAPRO-END (auto) -->
+<!-- TORUS-LOGO-START (auto) -->
+<style id="daTorusStyle">
+/* ============================================================================
+   daTorus — particle TORUS swarm logo (Three.js)  [namespace: .dtr-/dtr*]
+   Mounts a transparent WebGL canvas inside .orb / .orb.gate-orb.
+   When active, the orb gets .has-torus and its old decorations are hidden so
+   the torus reads as the logo. Falls back gracefully (CSS untouched) otherwise.
+   ========================================================================== */
+
+/* The canvas itself: fills the round orb, clipped, never eats pointer/scroll. */
+.dtr-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border-radius:inherit;     /* keep the orb's circular clip */
+  pointer-events:none;       /* logo must NOT capture pointer/scroll */
+  z-index:3;                 /* above orb bg/::before/::after + .db-canvas(2), below text */
+  display:block;
+}
+
+/* When the torus is the logo, dissolve the orb's old chrome so it reads clean. */
+.orb.has-torus{
+  /* very dark / transparent core so the pink torus pops */
+  background:radial-gradient(circle at 50% 50%, rgba(8,8,10,.55) 0%, rgba(2,2,3,.92) 80%) !important;
+}
+/* kill the spinning conic-gradient sweep (.orb::before in the host app) */
+.orb.has-torus::before{ display:none !important; animation:none !important; }
+/* keep only a whisper of the top glint so the swarm dominates */
+.orb.has-torus::after{ opacity:.18; }
+/* hide the previous daBrain depth/neural effect canvas inside a torus orb.
+   (We also stop its rAF loop in JS — this just guarantees it stays invisible
+   even if daBrain re-scans and re-attaches a fresh .db-canvas.) */
+.orb.has-torus > .db-canvas{ display:none !important; }
+
+/* Soft CSS bloom under the SMALL orb (it has NO real UnrealBloom — fake it).
+   Pink halo matching #ff0055; gentle, persistent, cheap. */
+.orb.has-torus.dtr-lite{
+  box-shadow:
+    inset 0 0 0 .5px rgba(255,0,85,.30),
+    0 0 18px rgba(255,0,85,.30),
+    0 0 38px rgba(255,0,85,.16);
+}
+/* Subtle extra glow when the assistant is actively listening. */
+body[data-listening] .orb.has-torus.dtr-lite{
+  box-shadow:
+    inset 0 0 0 .5px rgba(255,40,110,.45),
+    0 0 24px rgba(255,0,85,.42),
+    0 0 52px rgba(255,0,85,.22);
+}
+
+/* The big gate orb uses real bloom from the composer; just give it a faint
+   ambient pink seat so the round edge melts into the gate background. */
+.orb.gate-orb.has-torus{
+  box-shadow:
+    inset 0 0 0 .5px rgba(255,0,85,.22),
+    0 0 60px rgba(255,0,85,.20);
+}
+
+/* Respect the global kill-switch & reduced motion: never show our canvas. */
+html[data-da-off] .dtr-canvas{ display:none !important; }
+@media (prefers-reduced-motion: reduce){
+  .dtr-canvas{ display:none !important; }
+}
+</style>
+<script type="module">
+/* ============================================================================
+   daTorus — particle-TORUS swarm logo for Practice OS
+   ES module body. Placed inside <script type="module"> AFTER an importmap that
+   exposes "three" and "three/addons/" (three@0.160.0).
+
+   - .orb.gate-orb  -> BIG first-impression logo, full quality, UnrealBloom.
+                       Pauses when the gate is hidden / off-screen / tab hidden.
+   - .orb           -> small persistent top-bar logo, lightweight, NO composer.
+
+   Everything namespaced under window.daTorus / .dtr-* . Self-boots, re-scans,
+   pauses aggressively, disposes cleanly, and NEVER throws.
+   ========================================================================== */
+
+import * as THREE from 'three';
+
+/* Addons are imported lazily/guarded so a CDN hiccup on the bloom passes can
+   never crash the page or even the big orb (it degrades to a plain render). */
+let EffectComposer = null, RenderPass = null, UnrealBloomPass = null;
+let addonsPromise = null;
+function loadAddons() {
+  if (addonsPromise) return addonsPromise;
+  addonsPromise = Promise.all([
+    import('three/addons/postprocessing/EffectComposer.js'),
+    import('three/addons/postprocessing/RenderPass.js'),
+    import('three/addons/postprocessing/UnrealBloomPass.js')
+  ]).then(function (mods) {
+    EffectComposer  = mods[0].EffectComposer;
+    RenderPass      = mods[1].RenderPass;
+    UnrealBloomPass = mods[2].UnrealBloomPass;
+    return true;
+  }).catch(function () { return false; });
+  return addonsPromise;
+}
+
+(function () {
+  'use strict';
+
+  /* Singleton guard — never boot twice (re-runs, hot reloads, double inject). */
+  if (window.daTorus && window.daTorus.__booted) return;
+
+  /* ----------------------------- environment guards ---------------------- */
+  var rmQuery = null;
+  try { if (window.matchMedia) rmQuery = matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) {}
+
+  function reducedMotion() { try { return !!(rmQuery && rmQuery.matches); } catch (e) { return false; } }
+  function daOff() { try { return document.documentElement.hasAttribute('data-da-off'); } catch (e) { return false; } }
+  function webglOK() {
+    try {
+      var c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext &&
+        (c.getContext('webgl') || c.getContext('experimental-webgl')));
+    } catch (e) { return false; }
+  }
+
+  /* If the environment forbids the effect right now, do nothing (leave the
+     existing orb visuals untouched). We still install live listeners below so
+     toggling the kill-switch / reduced-motion later behaves sanely. */
+  var DISABLED = daOff() || reducedMotion() || !webglOK();
+
+  /* ----------------------------- shared constants ------------------------ */
+  var PINK = 0xff0055;
+  var R = 25;        // torus major radius
+  var rr = 8;        // torus minor radius
+  var WIND = 40;     // u winds 40x over the loop -> torus-knot-like swarm
+  var DPR_CAP = 1.5; // never exceed this device-pixel-ratio (perf)
+
+  var instances = [];   // every live orb instance
+  var rafId = null;     // the ONE shared rAF id (we never run >1 loop)
+  var lastT = 0;
+
+  /* ----------------------------- helpers --------------------------------- */
+  function pageHidden() { try { return document.hidden === true; } catch (e) { return false; } }
+  function dpr() { return Math.min(window.devicePixelRatio || 1, DPR_CAP); }
+
+  /* Is this orb actually paintable: connected, intersecting, context alive,
+     and no ancestor display:none / visibility:hidden (covers gate hidden via
+     hideGate() -> #gate.style.display='none'). */
+  function orbRenderable(inst) {
+    var el = inst.el;
+    if (!el || !el.isConnected) return false;
+    if (inst.destroyed || inst.contextLost) return false;
+    if (!inst.visible) return false;            // IntersectionObserver said off-screen
+    var n = el;
+    while (n && n.nodeType === 1) {
+      var cs;
+      try { cs = getComputedStyle(n); } catch (e) { return false; }
+      if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+      n = n.parentElement;
+    }
+    return true;
+  }
+
+  /* Neutralize the legacy daBrain 2D-canvas loop for an orb we are taking
+     over: its .db-canvas is CSS-hidden, but its rAF keeps DRAWING into it.
+     We disconnect that single instance so it stops burning CPU/battery.
+     Fully defensive: daBrain may not exist / may change shape. */
+  function quietLegacyBrain(el) {
+    try {
+      var db = window.daBrain;
+      if (!db || !db.instances) return;
+      for (var i = db.instances.length - 1; i >= 0; i--) {
+        var bi = db.instances[i];
+        if (bi && bi.orb === el) {
+          try { bi.io && bi.io.disconnect(); } catch (e) {}
+          try { bi.ro && bi.ro.disconnect(); } catch (e) {}
+          try { bi.visible = false; } catch (e) {}
+          try { if (bi.canvas && bi.canvas.parentNode) bi.canvas.parentNode.removeChild(bi.canvas); } catch (e) {}
+          try { el.__dbAttached = false; } catch (e) {}
+          db.instances.splice(i, 1);
+        }
+      }
+    } catch (e) {}
+  }
+
+  /* ----------------------------- the swarm ------------------------------- */
+  function buildSwarm(count, big) {
+    var geo = new THREE.TetrahedronGeometry(big ? 0.9 : 0.7, 0);
+    var mat = new THREE.MeshBasicMaterial({
+      color: PINK,
+      transparent: true,
+      opacity: big ? 0.95 : 0.92,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false
+    });
+    var mesh = new THREE.InstancedMesh(geo, mat, count);
+    mesh.frustumCulled = false;
+
+    var cur = new Float32Array(count * 3);
+    var tgt = new Float32Array(count * 3);
+    var spin = new Float32Array(count);
+    var PI2 = Math.PI * 2;
+
+    for (var i = 0; i < count; i++) {
+      var t = i / count;
+      var u = t * PI2 * WIND;
+      var v = t * PI2;
+      var cu = Math.cos(u), su = Math.sin(u);
+      var cv = Math.cos(v), sv = Math.sin(v);
+      var rad = R + rr * cu;
+      tgt[i * 3]     = rad * cv;
+      tgt[i * 3 + 1] = rad * sv;
+      tgt[i * 3 + 2] = rr * su;
+      // start scattered on a sphere so it "assembles" into the torus.
+      var ax = Math.acos(2 * ((i * 0.61803398875) % 1) - 1);
+      var az = t * PI2 * 9.0;
+      var sr = 46;
+      cur[i * 3]     = sr * Math.sin(ax) * Math.cos(az);
+      cur[i * 3 + 1] = sr * Math.sin(ax) * Math.sin(az);
+      cur[i * 3 + 2] = sr * Math.cos(ax);
+      spin[i] = t * PI2 * 30;
+    }
+
+    return { mesh: mesh, geo: geo, mat: mat, cur: cur, tgt: tgt, spin: spin, count: count, _t: 0 };
+  }
+
+  var _m = new THREE.Matrix4();
+  var _q = new THREE.Quaternion();
+  var _e = new THREE.Euler();
+  var _p = new THREE.Vector3();
+  var _s = new THREE.Vector3(1, 1, 1);
+
+  function updateSwarm(sw, listening) {
+    var cur = sw.cur, tgt = sw.tgt, spin = sw.spin, mesh = sw.mesh;
+    var k = 0.10;                                 // reference lerp factor
+    var rotSpeed = listening ? 2.2 : 1.2;
+    for (var i = 0; i < sw.count; i++) {
+      var o = i * 3;
+      cur[o]     += (tgt[o]     - cur[o])     * k;
+      cur[o + 1] += (tgt[o + 1] - cur[o + 1]) * k;
+      cur[o + 2] += (tgt[o + 2] - cur[o + 2]) * k;
+      _p.set(cur[o], cur[o + 1], cur[o + 2]);
+      var a = spin[i] + sw._t * rotSpeed;
+      _e.set(a, a * 0.7, a * 0.4);
+      _q.setFromEuler(_e);
+      _m.compose(_p, _q, _s);
+      mesh.setMatrixAt(i, _m);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+  }
+
+  /* ----------------------------- per-orb instance ------------------------ */
+  function mountOrb(el, big) {
+    if (!el || el.__dtr) return null;
+
+    var inst = {
+      el: el, big: big, visible: true, _t: 0,
+      renderer: null, scene: null, camera: null,
+      composer: null, bloom: null, swarm: null, canvas: null,
+      ro: null, io: null, mo: null,
+      destroyed: false, contextLost: false
+    };
+
+    try {
+      var w = Math.max(1, el.clientWidth || (big ? 200 : 54));
+      var h = Math.max(1, el.clientHeight || (big ? 200 : 54));
+
+      var renderer = new THREE.WebGLRenderer({
+        alpha: true, antialias: true, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false
+      });
+      renderer.setPixelRatio(dpr());
+      renderer.setSize(w, h, false);
+      renderer.setClearColor(0x000000, 0);       // fully transparent
+
+      var cv = renderer.domElement;
+      cv.className = 'dtr-canvas';
+      cv.setAttribute('aria-hidden', 'true');
+      cv.style.position = 'absolute';
+      cv.style.inset = '0';
+      cv.style.pointerEvents = 'none';            // never eats clicks/scroll
+      cv.style.borderRadius = 'inherit';
+      cv.style.zIndex = '3';
+      el.appendChild(cv);
+
+      // ---- WebGL context loss handling (mobile GPUs reclaim contexts) ----
+      var onLost = function (ev) {
+        try { ev.preventDefault(); } catch (e) {}   // allow restore
+        inst.contextLost = true;
+        kick();                                     // loop will skip this inst
+      };
+      var onRestored = function () {
+        inst.contextLost = false;
+        try {
+          inst.renderer.setPixelRatio(dpr());
+          var nw = Math.max(1, el.clientWidth || 1), nh = Math.max(1, el.clientHeight || 1);
+          inst.renderer.setSize(nw, nh, false);
+          if (inst.composer) inst.composer.setSize(nw, nh);
+          if (inst.swarm) inst.swarm.mesh.instanceMatrix.needsUpdate = true;
+        } catch (e) {}
+        kick();
+      };
+      cv.addEventListener('webglcontextlost', onLost, false);
+      cv.addEventListener('webglcontextrestored', onRestored, false);
+      inst._onLost = onLost; inst._onRestored = onRestored;
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 1000);
+      camera.position.set(0, 0, big ? 78 : 92);
+      camera.lookAt(0, 0, 0);
+
+      var count = big ? 11000 : 3200;            // big 9k-14k, small 2.5k-4k
+      var swarm = buildSwarm(count, big);
+      scene.add(swarm.mesh);
+
+      inst.renderer = renderer;
+      inst.scene = scene;
+      inst.camera = camera;
+      inst.swarm = swarm;
+      inst.canvas = cv;
+
+      // Take over the orb visually; stop the legacy 2D brain on this orb.
+      el.classList.add('has-torus');
+      if (!big) el.classList.add('dtr-lite');
+      quietLegacyBrain(el);
+
+      // ---- BIG orb only: real UnrealBloom via composer (loaded lazily). --
+      if (big) {
+        loadAddons().then(function (ok) {
+          if (!ok || inst.destroyed || !EffectComposer) return; // degrade to plain render
+          try {
+            var nw = Math.max(1, el.clientWidth || w), nh = Math.max(1, el.clientHeight || h);
+            var composer = new EffectComposer(renderer);
+            composer.setPixelRatio(dpr());
+            composer.setSize(nw, nh);
+            composer.addPass(new RenderPass(scene, camera));
+            var bloom = new UnrealBloomPass(new THREE.Vector2(nw, nh), 1.25, 0.55, 0.0);
+            bloom.strength = 1.25; bloom.radius = 0.55; bloom.threshold = 0.0;
+            composer.addPass(bloom);
+            inst.composer = composer;
+            inst.bloom = bloom;
+            kick();
+          } catch (e) { /* keep plain render */ }
+        });
+      }
+
+      // ---- resize: keep renderer/composer/camera synced to the orb box. --
+      try {
+        inst.ro = new ResizeObserver(function () {
+          if (inst.destroyed) return;
+          var nw = Math.max(1, el.clientWidth || 1);
+          var nh = Math.max(1, el.clientHeight || 1);
+          inst.renderer.setPixelRatio(dpr());
+          inst.renderer.setSize(nw, nh, false);
+          inst.camera.aspect = nw / nh;
+          inst.camera.updateProjectionMatrix();
+          if (inst.composer) inst.composer.setSize(nw, nh);
+          kick();
+        });
+        inst.ro.observe(el);
+      } catch (e) {}
+
+      // ---- visibility: pause when the orb scrolls off-screen. -----------
+      try {
+        inst.io = new IntersectionObserver(function (entries) {
+          for (var j = 0; j < entries.length; j++) inst.visible = entries[j].isIntersecting;
+          kick();
+        }, { threshold: 0.01 });
+        inst.io.observe(el);
+      } catch (e) { inst.visible = true; }
+
+      // ---- watch the gate/overlay toggling display:none so we pause. ----
+      try {
+        var watch = el.closest('.gate, .ov, .overlay') || el.parentElement;
+        if (watch) {
+          inst.mo = new MutationObserver(function () { kick(); });
+          inst.mo.observe(watch, { attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
+        }
+      } catch (e) {}
+
+      el.__dtr = inst;
+      instances.push(inst);
+      kick();
+      return inst;
+    } catch (err) {
+      try { destroyInst(inst); } catch (e) {}
+      return null;
+    }
+  }
+
+  function destroyInst(inst) {
+    if (!inst || inst.destroyed) return;
+    inst.destroyed = true;
+    try { if (inst.ro) inst.ro.disconnect(); } catch (e) {}
+    try { if (inst.io) inst.io.disconnect(); } catch (e) {}
+    try { if (inst.mo) inst.mo.disconnect(); } catch (e) {}
+    try {
+      if (inst.canvas && inst._onLost) inst.canvas.removeEventListener('webglcontextlost', inst._onLost, false);
+      if (inst.canvas && inst._onRestored) inst.canvas.removeEventListener('webglcontextrestored', inst._onRestored, false);
+    } catch (e) {}
+    try { if (inst.swarm) { inst.swarm.geo.dispose(); inst.swarm.mat.dispose(); inst.swarm.mesh.dispose(); } } catch (e) {}
+    try { if (inst.composer && inst.composer.dispose) inst.composer.dispose(); } catch (e) {}
+    try {
+      if (inst.renderer) {
+        var gl = inst.renderer.getContext && inst.renderer.getContext();
+        inst.renderer.dispose();
+        var lose = gl && gl.getExtension && gl.getExtension('WEBGL_lose_context');
+        if (lose) lose.loseContext();
+      }
+    } catch (e) {}
+    try { if (inst.canvas && inst.canvas.parentNode) inst.canvas.parentNode.removeChild(inst.canvas); } catch (e) {}
+    try { if (inst.el) { inst.el.classList.remove('has-torus', 'dtr-lite'); inst.el.__dtr = null; } } catch (e) {}
+    var ix = instances.indexOf(inst);
+    if (ix >= 0) instances.splice(ix, 1);
+  }
+
+  /* ----------------------------- shared rAF loop ------------------------- */
+  function frame(now) {
+    rafId = null;                                 // we are the only loop
+    var dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0.016;
+    lastT = now;
+
+    var anyActive = false;
+    var listening = false;
+    try { listening = document.body.hasAttribute('data-listening'); } catch (e) {}
+
+    if (!pageHidden()) {
+      // Prune instances whose orb left the DOM (no rAF/observer leaks).
+      for (var i = instances.length - 1; i >= 0; i--) {
+        if (!instances[i].el || !instances[i].el.isConnected) destroyInst(instances[i]);
+      }
+      for (var k = 0; k < instances.length; k++) {
+        var inst = instances[k];
+        if (!orbRenderable(inst)) continue;
+        anyActive = true;
+        try {
+          inst._t += dt;
+          inst.swarm._t += dt;
+          updateSwarm(inst.swarm, listening);
+          inst.scene.rotation.y += dt * (listening ? 0.55 : 0.28);
+          inst.scene.rotation.x = Math.sin(inst._t * 0.15) * 0.18;
+          if (inst.bloom) inst.bloom.strength = listening ? 1.55 : 1.25;
+          if (inst.composer) inst.composer.render();
+          else inst.renderer.render(inst.scene, inst.camera);
+        } catch (e) { destroyInst(inst); }
+      }
+    }
+
+    // Reschedule ONLY while something is actually rendering. No leak otherwise.
+    if (anyActive && !pageHidden()) rafId = requestAnimationFrame(frame);
+    else lastT = 0;
+  }
+
+  function kick() {
+    if (DISABLED) return;
+    if (rafId != null) return;                    // idempotent: one loop max
+    if (pageHidden()) return;
+    for (var i = 0; i < instances.length; i++) {
+      if (orbRenderable(instances[i])) { lastT = 0; rafId = requestAnimationFrame(frame); return; }
+    }
+  }
+
+  /* ----------------------------- scanning -------------------------------- */
+  function scan() {
+    if (DISABLED) return;
+    try {
+      var orbs = document.querySelectorAll('.orb');
+      for (var i = 0; i < orbs.length; i++) {
+        var el = orbs[i];
+        if (el.__dtr) continue;
+        mountOrb(el, el.classList.contains('gate-orb'));
+      }
+    } catch (e) {}
+  }
+
+  function teardownAll() {
+    if (rafId != null) { try { cancelAnimationFrame(rafId); } catch (e) {} rafId = null; }
+    for (var i = instances.length - 1; i >= 0; i--) destroyInst(instances[i]);
+  }
+
+  /* ----------------------------- lifecycle wiring ------------------------ */
+  document.addEventListener('visibilitychange', function () {
+    if (pageHidden()) { if (rafId != null) { try { cancelAnimationFrame(rafId); } catch (e) {} rafId = null; } }
+    else kick();
+  });
+
+  // Live kill-switch: if html[data-da-off] flips, tear down / re-enable.
+  try {
+    var rootMo = new MutationObserver(function () {
+      var off = daOff();
+      if (off && !DISABLED) { DISABLED = true; teardownAll(); }
+      else if (!off && DISABLED && !reducedMotion() && webglOK()) { DISABLED = false; scan(); kick(); }
+    });
+    rootMo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-da-off'] });
+  } catch (e) {}
+
+  // Live reduced-motion toggle: respect it at runtime.
+  try {
+    if (rmQuery) {
+      var onRM = function () {
+        if (reducedMotion() && !DISABLED) { DISABLED = true; teardownAll(); }
+        else if (!reducedMotion() && DISABLED && !daOff() && webglOK()) { DISABLED = false; scan(); kick(); }
+      };
+      if (rmQuery.addEventListener) rmQuery.addEventListener('change', onRM);
+      else if (rmQuery.addListener) rmQuery.addListener(onRM);
+    }
+  } catch (e) {}
+
+  // Re-scan when orbs are added later (top-bar + gate exist at load).
+  var rescanQueued = false;
+  try {
+    var domMo = new MutationObserver(function () {
+      if (DISABLED || rescanQueued) return;
+      rescanQueued = true;
+      requestAnimationFrame(function () { rescanQueued = false; scan(); kick(); });
+    });
+    domMo.observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+
+  /* ----------------------------- public namespace ------------------------ */
+  window.daTorus = {
+    __booted: true,
+    get disabled() { return DISABLED; },
+    scan: scan,
+    kick: kick,
+    instances: instances,
+    destroyAll: teardownAll
+  };
+
+  // Self-boot (no-op while DISABLED, but listeners above can re-enable later).
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { scan(); kick(); });
+  } else {
+    scan(); kick();
+  }
+})();
+</script>
+<!-- TORUS-LOGO-END (auto) -->
 </body>
 </html>
