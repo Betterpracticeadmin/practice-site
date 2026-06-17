@@ -3821,7 +3821,7 @@ html[data-da-off] #daParticles{ display:none !important; }
       .concat("アカサタナハマヤラ".split(""));
     function rnd(){ return GLYPHS[(Math.random()*GLYPHS.length)|0]; }
 
-    var SELECTORS = [".ov h3", ".boot-title", ".ckp-title", ".dm-perf", "[data-da-scramble]"];
+    var SELECTORS = [".ov h3", ".boot-title", ".ckp-title", ".dm-perf", ".w-title", ".bw-cat h5", "[data-da-scramble]"];
 
     var states = new WeakMap();
     var activeList = [];
@@ -7950,5 +7950,328 @@ function loadAddons() {
 })();
 </script>
 <!-- TORUS-LOGO-END (auto) -->
+<!-- FX4-MODULE-START (auto) -->
+<style id="daFx4Style">
+/* ============================================================
+   daFx4 — OVERRIDE module (MERGED + HARDENED)
+   V2: living mesh (#daFx4Mesh) — pure-CSS aurora drift, no rAF
+   V1: title scramble + accent sweep on .w-title & .bw-cat h5
+   Fully namespaced (#daFx4Mesh / .fx4-* / fx4* keyframes).
+   No collisions with da-/db-/dt-/pl-/dbo-/dl-/dvf-/dtr-/mpro/dmpro
+   nor host #amb / #daParticles. Verified vs os.html:
+     --acc=#FF5000 (varies per body[data-mode]); #amb at z-index:-1;
+     body[data-theme="light|dark"]; body[data-spd="fast"] exists;
+     .w-head is flex(space-between); .w-title is inline <span> with a
+     numbered ::before counter (margin-right:9px); .bw-cat h5 dynamic.
+   ============================================================ */
+
+/* ---------- V2: LIVING MESH (fixed, behind UI, above body gradient) ---------- */
+#daFx4Mesh{
+  position:fixed; inset:0; z-index:-1;            /* same plane as host #amb, below content */
+  pointer-events:none !important;                 /* never intercept clicks */
+  overflow:hidden;                                /* + fixed => never creates scrollbars */
+  contain:layout paint style;                     /* isolate; NO size-containment (would collapse inset:0) */
+  margin:0; padding:0; border:0;
+}
+#daFx4Mesh .fx4-blob{
+  position:absolute; border-radius:50%;
+  filter:blur(72px); opacity:.5;
+  mix-blend-mode:screen;                           /* warm additive light, subtle */
+  pointer-events:none !important;
+  will-change:transform;                           /* GPU; transform/opacity only */
+  backface-visibility:hidden;
+  contain:layout paint;
+}
+/* light theme: switch to multiply so blobs read as warm tint, not glow */
+body[data-theme="light"] #daFx4Mesh .fx4-blob{ mix-blend-mode:multiply; opacity:.34; }
+
+/* accent-tinted (adapts to per-mode --acc) */
+#daFx4Mesh .fx4-b1{
+  width:46vmax; height:46vmax; left:-8vmax; top:-10vmax;
+  background:radial-gradient(circle at 38% 34%, color-mix(in srgb, var(--acc,#FF5000) 60%, transparent), transparent 64%);
+  animation:fx4Drift1 34s ease-in-out infinite alternate;
+}
+/* warm orange #ff5a1e */
+#daFx4Mesh .fx4-b2{
+  width:40vmax; height:40vmax; right:-6vmax; top:6vmax;
+  background:radial-gradient(circle at 50% 50%, rgba(255,90,30,.50), transparent 62%);
+  animation:fx4Drift2 41s ease-in-out infinite alternate;
+}
+/* violet hint #7b5bff */
+#daFx4Mesh .fx4-b3{
+  width:42vmax; height:42vmax; left:14vmax; bottom:-14vmax;
+  background:radial-gradient(circle at 46% 40%, rgba(123,91,255,.42), transparent 60%);
+  animation:fx4Drift3 47s ease-in-out infinite alternate;
+}
+/* warm red #ff2d2d */
+#daFx4Mesh .fx4-b4{
+  width:36vmax; height:36vmax; right:4vmax; bottom:-8vmax;
+  background:radial-gradient(circle at 52% 48%, rgba(255,45,45,.38), transparent 60%);
+  animation:fx4Drift4 38s ease-in-out infinite alternate;
+}
+/* second accent, central drifter */
+#daFx4Mesh .fx4-b5{
+  width:34vmax; height:34vmax; left:30vmax; top:24vmax;
+  background:radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--acc,#FF5000) 40%, transparent), transparent 62%);
+  animation:fx4Drift5 44s ease-in-out infinite alternate;
+}
+
+/* slow translate + breathe — GPU transform only, modest (<=7vmax) so edges stay clipped */
+@keyframes fx4Drift1{0%{transform:translate3d(0,0,0) scale(1);}    100%{transform:translate3d(7vmax,5vmax,0) scale(1.18);}}
+@keyframes fx4Drift2{0%{transform:translate3d(0,0,0) scale(1.06);} 100%{transform:translate3d(-6vmax,7vmax,0) scale(.90);}}
+@keyframes fx4Drift3{0%{transform:translate3d(0,0,0) scale(.95);}  100%{transform:translate3d(5vmax,-7vmax,0) scale(1.16);}}
+@keyframes fx4Drift4{0%{transform:translate3d(0,0,0) scale(1.10);} 100%{transform:translate3d(-7vmax,-4vmax,0) scale(.92);}}
+@keyframes fx4Drift5{0%{transform:translate3d(0,0,0) scale(1);}    100%{transform:translate3d(-5vmax,6vmax,0) scale(1.20);}}
+
+/* livelier mesh while driving fast (mirrors host #amb speed cue) */
+body[data-spd="fast"] #daFx4Mesh .fx4-blob{ animation-duration:20s; }
+
+/* ---------- V1: SCRAMBLE HOST + ACCENT SWEEP BAR ---------- */
+/* .fx4-h is added by JS to each .w-title / .bw-cat h5; .fx4-scram while resolving */
+.fx4-h{ position:relative; }
+.fx4-scram{ font-variant-numeric:tabular-nums; }   /* keeps width stable while glyphs cycle */
+/* .w-title is an inline <span> in a flex .w-head; inline-block gives the bar a box
+   to anchor under without disturbing the flex row or its numbered ::before counter. */
+.w-title.fx4-h{ display:inline-block; }
+
+.fx4-h::after{
+  content:''; position:absolute; left:0; right:0; bottom:-3px; height:1.5px;
+  background:linear-gradient(90deg, transparent, var(--acc,#FF5000), transparent);
+  transform:scaleX(0); transform-origin:left center;
+  opacity:0; pointer-events:none !important; border-radius:1px;
+}
+/* keep the bar under the WORD, clearing the numbered ::before counter on .w-title */
+.w-title.fx4-h::after{ left:26px; }
+
+/* one-shot sweep on reveal */
+.fx4-h.fx4-go::after{ animation:fx4Sweep 760ms cubic-bezier(.22,.7,.2,1) 1 both; }
+@keyframes fx4Sweep{
+  0%  { transform:scaleX(0); transform-origin:left center;  opacity:0; }
+  18% { opacity:1; }
+  55% { transform:scaleX(1); transform-origin:left center;  opacity:1; }
+  56% { transform-origin:right center; }                 /* flip anchor */
+  100%{ transform:scaleX(0); transform-origin:right center; opacity:0; }
+}
+
+/* ---------- accessibility & global kill-switch ---------- */
+@media (prefers-reduced-motion: reduce){
+  #daFx4Mesh .fx4-blob{ animation:none !important; }    /* mesh static, still decorative */
+  .fx4-h::after{ display:none !important; animation:none !important; opacity:0 !important; }
+}
+html[data-da-off] #daFx4Mesh{ display:none !important; }
+html[data-da-off] .fx4-h::after{ display:none !important; animation:none !important; }
+</style>
+<script>
+(function(){
+  "use strict";
+  try{
+    if (typeof window==="undefined" || typeof document==="undefined") return;
+    var ROOT = document.documentElement;
+    if (window.daFx4) return;                 /* idempotent: never double-init */
+    window.daFx4 = { v:4 };
+
+    /* ---- reduced-motion (live) ---- */
+    var REDUCED=false, RMQ=null;
+    try{
+      if (window.matchMedia){
+        RMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+        REDUCED = !!RMQ.matches;
+        var onRM=function(){ REDUCED = !!RMQ.matches; };
+        if (RMQ.addEventListener) RMQ.addEventListener("change", onRM);
+        else if (RMQ.addListener) RMQ.addListener(onRM);
+      }
+    }catch(e){}
+
+    function off(){ try{ return !!(ROOT && ROOT.hasAttribute && ROOT.hasAttribute("data-da-off")); }catch(e){ return false; } }
+    function hidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
+    function connected(el){
+      try{
+        if ("isConnected" in el) return !!el.isConnected;
+        return !!(el.ownerDocument && el.ownerDocument.documentElement
+                  && el.ownerDocument.documentElement.contains(el));
+      }catch(e){ return true; }
+    }
+
+    /* ================= V2: living mesh — inject layer; animation is 100% CSS (no rAF) ================= */
+    function buildMesh(){
+      try{
+        if (document.getElementById("daFx4Mesh")) return;   /* idempotent */
+        if (!document.body) return;
+        var wrap = document.createElement("div");
+        wrap.id = "daFx4Mesh";
+        wrap.setAttribute("aria-hidden","true");
+        for (var i=1;i<=5;i++){                              /* capped blob count */
+          var b = document.createElement("span");
+          b.className = "fx4-blob fx4-b"+i;
+          wrap.appendChild(b);
+        }
+        /* first child => painted at the very back (below #amb, above body bg gradient) */
+        if (document.body.firstChild) document.body.insertBefore(wrap, document.body.firstChild);
+        else document.body.appendChild(wrap);
+      }catch(e){}
+    }
+
+    /* ================= V1: scramble engine (short shared rAF, auto-stops) ================= */
+    var GLYPHS = "ABCDEF0123456789#%&/<>*+=:·".split("")
+      .concat("アカサタナハマヤラ".split("")); /* tech + a little katakana */
+    function rnd(){ return GLYPHS[(Math.random()*GLYPHS.length)|0]; }
+
+    /* ONLY home dashboard card titles + library section headers.
+       Deliberately NOT .ov h3/.boot-title/.ckp-title/.dm-perf (handled elsewhere). */
+    var SEL = ".w-title, .bw-cat h5";
+
+    var seen = (typeof WeakSet!=="undefined") ? new WeakSet() : null;
+    var seenFallback = [];
+    function mark(el){ if(seen) seen.add(el); else seenFallback.push(el); }
+    function isSeen(el){ if(seen) return seen.has(el); return seenFallback.indexOf(el)>=0; }
+
+    var active = [];        /* nodes currently animating */
+    var rafId = 0;
+
+    function isPlain(el){    /* skip anything with child elements (preserve markup, e.g. ::before is fine) */
+      if(!el||el.nodeType!==1) return false;
+      var n=el.childNodes,i;
+      for(i=0;i<n.length;i++){ if(n[i].nodeType===1) return false; }
+      return true;
+    }
+    function scheduleFrame(){
+      if(rafId) return;
+      if(typeof requestAnimationFrame!=="function") return; /* env guard */
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function startScramble(el){
+      if(!el||isSeen(el)) return;            /* guard: each node ONCE */
+      mark(el);
+      el.classList.add("fx4-h");             /* enables sweep bar (CSS ::after) */
+      if(REDUCED || off()){ return; }        /* sweep + scramble suppressed (CSS hides bar too) */
+      if(!isPlain(el)) return;
+      var target = el.textContent;
+      if(!target || !target.trim()) return;
+      var chars = Array.from(target);        /* safe with accents/katakana */
+      var nonSpace=0,i;
+      for(i=0;i<chars.length;i++){ if(chars[i].trim()!=="") nonSpace++; }
+      if(!nonSpace) return;
+      var dur = Math.min(800, Math.max(600, 120+nonSpace*38)); /* ~600-800ms */
+      var sched = new Array(chars.length);
+      var order=0;
+      for(i=0;i<chars.length;i++){
+        if(chars[i].trim()===""){ sched[i]=null; continue; }  /* keep spaces verbatim */
+        var startFrac=(order/Math.max(1,nonSpace))*0.5;
+        var lenFrac=0.32+Math.random()*0.20;
+        sched[i]={start:startFrac, end:Math.min(1,startFrac+lenFrac)};
+        order++;
+      }
+      el.classList.add("fx4-scram");
+      el.classList.add("fx4-go");            /* triggers the one-shot sweep */
+      el.__fx4 = { chars:chars, sched:sched, dur:dur, start:0, target:target };
+      active.push(el);
+      scheduleFrame();
+    }
+
+    function finish(el){                      /* restore EXACT original text (accents preserved) */
+      try{
+        var a=el.__fx4;
+        if(a){ el.textContent=a.target; }
+        el.classList.remove("fx4-scram");
+      }catch(e){}
+      el.__fx4=null;
+    }
+
+    function tick(ts){
+      rafId=0;
+      if(off()){ for(var k=0;k<active.length;k++) finish(active[k]); active.length=0; return; }
+      if(hidden()){ return; }                  /* pause cleanly; visibilitychange resumes (no hidden-tab spin) */
+      var next=[];
+      for(var idx=0;idx<active.length;idx++){
+        var el=active[idx];
+        var a=el.__fx4;
+        if(!a) continue;
+        if(!connected(el)){ el.__fx4=null; continue; } /* detached by host re-render: drop, never leave glyphs */
+        if(!a.start) a.start=ts;
+        var p=(ts-a.start)/a.dur;
+        if(p>=1){ finish(el); continue; }
+        var out="",i;
+        for(i=0;i<a.chars.length;i++){
+          var s=a.sched[i];
+          if(s===null){ out+=a.chars[i]; continue; }            /* space */
+          if(p>=s.end){ out+=a.chars[i]; }                       /* resolved */
+          else if(p<s.start){ out+=(Math.random()<0.5?rnd():a.chars[i]); }
+          else{ out+=rnd(); }                                    /* scrambling */
+        }
+        try{ el.textContent=out; }catch(e){ finish(el); continue; }
+        next.push(el);
+      }
+      active=next;
+      if(active.length) scheduleFrame();       /* stops automatically when empty */
+    }
+
+    /* ---- reveal via IntersectionObserver (threshold .25) ---- */
+    var io=null;
+    function ensureIO(){
+      if(io || typeof IntersectionObserver==="undefined") return io;
+      io=new IntersectionObserver(function(ents){
+        for(var i=0;i<ents.length;i++){
+          if(ents[i].isIntersecting){
+            var el=ents[i].target;
+            try{ io.unobserve(el); }catch(_){}
+            startScramble(el);
+          }
+        }
+      },{ rootMargin:"0px 0px -8% 0px", threshold:0.25 });
+      return io;
+    }
+
+    function scan(){
+      try{
+        var nodes=document.querySelectorAll(SEL),i;
+        if(!nodes||!nodes.length) return;
+        var ob=ensureIO();
+        for(i=0;i<nodes.length;i++){
+          var el=nodes[i];
+          if(isSeen(el)||el.__fx4obs) continue;   /* don't re-observe / re-run */
+          if(!ob){ startScramble(el); continue; }  /* no IO -> just run */
+          el.__fx4obs=true;
+          try{ ob.observe(el); }catch(e){ startScramble(el); }
+        }
+      }catch(e){}
+    }
+
+    /* ---- re-scan for dynamically-added .bw-cat h5 / .w-title (debounced) ---- */
+    var mo=null, deb=0;
+    function watch(){
+      if(typeof MutationObserver==="undefined" || !document.body) return;
+      mo=new MutationObserver(function(muts){
+        for(var i=0;i<muts.length;i++){
+          if(muts[i].addedNodes && muts[i].addedNodes.length){
+            if(deb) return;
+            deb=setTimeout(function(){ deb=0; scan(); },150);
+            return;
+          }
+        }
+      });
+      try{ mo.observe(document.body,{childList:true,subtree:true}); }catch(e){}
+      daFx4._mo = mo;
+    }
+
+    function init(){
+      try{
+        buildMesh();
+        scan();
+        watch();
+        document.addEventListener("visibilitychange",function(){
+          if(!hidden() && active.length) scheduleFrame();   /* resume on return */
+        });
+      }catch(e){}
+    }
+
+    if(document.readyState==="loading"){
+      document.addEventListener("DOMContentLoaded",init,{once:true});
+    } else { init(); }                                       /* already interactive/complete */
+
+  }catch(e){}
+})();
+</script>
+<!-- FX4-MODULE-END (auto) -->
 </body>
 </html>
