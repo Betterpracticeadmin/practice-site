@@ -19,15 +19,16 @@
   body[data-theme="dark"]{--bg:#070708;--bg2:#0c0d10;--card:rgba(255,255,255,.045);--border:rgba(255,255,255,.10);--txt:#F2F3F5;--dim:#8b9298;--faint:#565b61;--mapbg:#08090b;--dotc:rgba(255,255,255,.05);}
   body[data-theme="light"]{--bg:#EDEEEF;--bg2:#F6F7F7;--card:rgba(255,255,255,.84);--border:rgba(0,0,0,.12);--txt:#0E0F11;--dim:#5f6671;--faint:#9aa0a8;--mapbg:#e6eaee;--dotc:rgba(0,0,0,.07);}
   html,body{height:100%;}
-  body{font-family:'Inter',sans-serif;background-color:var(--bg);
-    background-image:
-      radial-gradient(130% 100% at 12% -8%, color-mix(in srgb, var(--acc,#FF5000) 22%, transparent), transparent 54%),
-      radial-gradient(120% 95% at 100% 108%, color-mix(in srgb, var(--acc,#FF5000) 16%, transparent), transparent 56%),
-      linear-gradient(158deg, var(--bg2,#0c0d10) 0%, var(--bg,#070708) 55%, color-mix(in srgb, var(--acc,#FF5000) 7%, var(--bg,#070708)) 100%),
-      radial-gradient(var(--dotc,rgba(255,255,255,.05)) .7px, transparent .8px);
-    background-size:100% 100%,100% 100%,100% 100%,24px 24px;
-    background-repeat:no-repeat,no-repeat,no-repeat,repeat;
-    color:var(--txt);-webkit-font-smoothing:antialiased;overflow:hidden;transition:background .5s,color .5s;}
+  body{font-family:'Inter',sans-serif;background-color:#0a2a6e;
+    /* dégradé "ciel" vertical lisse (façon photo d'atmosphère), teinté par le mode */
+    background-image:linear-gradient(180deg,
+      color-mix(in srgb, var(--acc,#1e63d6) 42%, #00061a) 0%,
+      color-mix(in srgb, var(--acc,#1e63d6) 76%, #001246) 26%,
+      var(--acc,#1e63d6) 50%,
+      color-mix(in srgb, var(--acc,#1e63d6) 56%, #ffffff) 74%,
+      color-mix(in srgb, var(--acc,#1e63d6) 20%, #eceef3) 100%);
+    background-size:100% 100%;background-repeat:no-repeat;
+    color:var(--txt);-webkit-font-smoothing:antialiased;overflow:hidden;transition:background .6s,color .5s;}
   /* fond dégradé unifié (suit var(--acc) du mode) — défini sur body ci-dessus, pour les 2 thèmes */
   body[data-theme="dark"] .card{ background:linear-gradient(135deg, rgba(214,60,104,.11), rgba(120,28,62,.045) 58%, transparent), var(--card); }
   body[data-theme="dark"] .navtabs{ background-image:linear-gradient(135deg, rgba(214,60,104,.13), rgba(120,28,62,.05) 60%, transparent); }
