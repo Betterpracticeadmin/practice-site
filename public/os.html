@@ -453,8 +453,8 @@
   body[data-mode="copilot"] .seg.da-ready button.on, body[data-mode="night"] .seg.da-ready button.on{ color:#fff !important; text-shadow:none !important; }
   /* ===== Harmonie des images média : anneau cohérent + desaturation en modes monochromes ===== */
   #mediaOv .mq-row .c, .tvw-card, .media-cover, #mCover{ box-shadow:0 6px 16px rgba(0,0,0,.4), inset 0 0 0 .5px rgba(255,255,255,.10); }
-  body[data-mode="copilot"] .mq-row .c, body[data-mode="copilot"] .tvw-card, body[data-mode="copilot"] .media-cover, body[data-mode="copilot"] #mCover, body[data-mode="copilot"] .mq-row .pl-art,
-  body[data-mode="night"] .mq-row .c, body[data-mode="night"] .tvw-card, body[data-mode="night"] .media-cover, body[data-mode="night"] #mCover{ filter:saturate(.72) contrast(1.02); }
+  body[data-mode="copilot"] .mq-row .c, body[data-mode="copilot"] .tvw-card, body[data-mode="copilot"] .media-cover, body[data-mode="copilot"] #mCover, body[data-mode="copilot"] .mq-row .pl-art, body[data-mode="copilot"] .book-img, body[data-mode="copilot"] .st-logo,
+  body[data-mode="night"] .mq-row .c, body[data-mode="night"] .tvw-card, body[data-mode="night"] .media-cover, body[data-mode="night"] #mCover, body[data-mode="night"] .book-img, body[data-mode="night"] .st-logo{ filter:saturate(.72) contrast(1.02); }
   body[data-mode="magma"]{background-color:#1c0806 !important;background-image:radial-gradient(44% 54% at 16% 16%,rgba(255,90,30,.55),transparent 60%),radial-gradient(46% 56% at 85% 14%,rgba(230,40,20,.46),transparent 62%),radial-gradient(54% 62% at 74% 84%,rgba(255,170,60,.42),transparent 64%),radial-gradient(48% 58% at 14% 88%,rgba(140,30,10,.5),transparent 62%),linear-gradient(180deg,#160604,#1e0a06) !important;}
   /* ===== Liquid glass renforcé sur toutes les surfaces (frosted + saturation + reflet) ===== */
   .card,.ov-panel,.panel,.diag-panel,.seg,.media-seg,.navtabs,.mini-dock,.recents .rc,.contact,.fav,.tvw-regions button{-webkit-backdrop-filter:blur(26px) saturate(1.85);backdrop-filter:blur(26px) saturate(1.85);}
@@ -879,6 +879,9 @@
   .book.playing .book-cov{outline:2px solid var(--acc);outline-offset:2px;}
   .book-t{position:relative;z-index:3;font-size:18px;line-height:1.13;color:#f3ece0;font-weight:600;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;}
   .book-a{position:relative;z-index:3;font-size:11px;color:rgba(255,255,255,.62);letter-spacing:.02em;margin-top:8px;}
+  .book-img{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease;}
+  .book-cov.has-cover .book-img{opacity:1;}
+  .book-cov.has-cover .book-t,.book-cov.has-cover .book-a{opacity:0;}
   /* polices adaptées au genre */
   .bk-classic .book-t{font-family:'Playfair Display',Georgia,serif;font-weight:700;}
   .bk-wisdom  .book-t{font-family:'Cinzel',serif;font-weight:600;font-size:15px;letter-spacing:.03em;}
@@ -899,15 +902,18 @@
   .chap.on .chap-t{color:#fff;}
   /* ===== Radio — cartes stations premium + LIVE ===== */
   #mQueue.mq-stations{padding:6px 2px 22px !important;-webkit-mask-image:none !important;mask-image:none !important;display:grid;grid-template-columns:repeat(2,1fr);gap:13px;align-content:start;overflow-y:auto;}
-  .station{position:relative;aspect-ratio:1/.7;border-radius:13px;background:var(--bk,#23262e);cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;padding:14px;overflow:hidden;box-shadow:0 12px 24px -10px rgba(0,0,0,.55),inset 0 0 0 .5px rgba(255,255,255,.08);transition:transform .2s cubic-bezier(.34,1.5,.5,1),box-shadow .25s;}
-  .station::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 80% at 82% 0%,rgba(255,255,255,.14),transparent 58%),linear-gradient(120deg,rgba(255,255,255,.12),transparent 42%);}
-  .station:hover{transform:translateY(-3px);box-shadow:0 18px 32px -10px rgba(0,0,0,.62);}
+  .station{position:relative;border-radius:15px;background:var(--card);border:.5px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:11px;padding:11px 12px;overflow:hidden;box-shadow:0 10px 22px -15px rgba(0,0,0,.55);transition:transform .18s cubic-bezier(.34,1.5,.5,1),box-shadow .22s,border-color .22s;}
+  .station:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--acc) 42%,var(--border));box-shadow:0 16px 28px -16px rgba(0,0,0,.6);}
   .station:active{transform:scale(.97);}
-  .st-live{position:absolute;top:12px;left:12px;width:8px;height:8px;border-radius:50%;background:#ff4d4d;z-index:1;animation:stLive 1.7s ease-out infinite;}
-  @keyframes stLive{0%{box-shadow:0 0 0 0 rgba(255,77,77,.55);}70%{box-shadow:0 0 0 9px rgba(255,77,77,0);}100%{box-shadow:0 0 0 0 rgba(255,77,77,0);}}
-  .st-n{position:relative;z-index:1;font-size:15px;font-weight:700;color:#fff;letter-spacing:-.2px;line-height:1.15;}
-  .st-d{position:relative;z-index:1;font-size:11.5px;color:rgba(255,255,255,.64);}
-  .station.on{outline:2px solid var(--acc);outline-offset:2px;box-shadow:0 0 22px -4px var(--acc);}
+  .station.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 0 20px -7px var(--acc);}
+  .st-plate{position:relative;width:50px;height:50px;flex-shrink:0;border-radius:12px;overflow:hidden;background:linear-gradient(155deg,#fbfbfc,#e4e6e9);display:grid;place-items:center;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.1);}
+  .st-mono{font-family:var(--mono);font-size:16px;font-weight:800;letter-spacing:-.02em;color:color-mix(in srgb,var(--bk,#3a3f4a) 72%,#1a1a1a);}
+  .st-logo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:7px;}
+  .st-meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+  .st-live{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:#ff4d4d;z-index:2;animation:stLive 1.7s ease-out infinite;}
+  @keyframes stLive{0%{box-shadow:0 0 0 0 rgba(255,77,77,.55);}70%{box-shadow:0 0 0 8px rgba(255,77,77,0);}100%{box-shadow:0 0 0 0 rgba(255,77,77,0);}}
+  .st-n{font-size:13.5px;font-weight:650;color:var(--txt);letter-spacing:-.2px;line-height:1.18;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .st-d{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   /* ===== Transition de wipe au changement de source (façon wrdlss) ===== */
   .media-main{position:relative;}
   .mq-wipe{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0;transform:translateX(-101%);background:linear-gradient(90deg,transparent,var(--acc) 42%,var(--acc) 58%,transparent);mix-blend-mode:screen;}
@@ -922,11 +928,11 @@
   #mediaOv .media-ctl .sec svg{width:24px;height:24px;}
   #mediaOv .media-ctl .play{box-shadow:0 14px 38px rgba(0,0,0,.45),0 0 42px -6px var(--mAccentG,transparent);}
   /* ===== Média : famille d'icônes uniforme (transport plein, accessoires en trait) ===== */
-  #mediaOv .media-ctl .sec svg{width:24px;height:24px;fill:currentColor;stroke:none;opacity:.92;}
-  #mediaOv .media-ctl .play svg{width:28px;height:28px;fill:currentColor;stroke:none;}
+  #mediaOv .media-ctl .sec svg{width:20px;height:20px;fill:currentColor;stroke:none;opacity:.9;}
+  #mediaOv .media-ctl .play svg{width:24px;height:24px;fill:currentColor;stroke:none;}
   #mediaOv .media-ctl #mShuffle svg{fill:none !important;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   #mediaOv .media-ctl #mShuffle{opacity:.92;}
-  #mediaOv .media-ctl .like svg{width:26px;height:26px;}
+  #mediaOv .media-ctl .like svg{width:21px;height:21px;}
   #mediaOv .media-ctl .like svg path{stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   #mediaOv .mq-like svg{stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   /* barre de recherche média plus visible/premium */
@@ -1146,10 +1152,59 @@
       </div>
       <div class="wave" id="wave"></div>
     </div>
+    <div class="card w" id="dscRoot">
+      <div class="w-head"><span class="w-title">Score Practice</span><span class="lbl" id="dscPlbl">Vers Argent</span></div>
+      <div class="dsc-wrap">
+        <span class="dsc-float" id="dscFloat"></span>
+        <div class="dsc-top">
+          <div class="dsc-gauge">
+            <svg viewBox="0 0 96 96"><circle class="dsc-track" cx="48" cy="48" r="42"></circle><circle class="dsc-arc" id="dscArc" cx="48" cy="48" r="42"></circle></svg>
+            <div class="dsc-gctr"><span class="dsc-gnum" id="dscGnum">50</span><span class="dsc-glbl">Score</span></div>
+          </div>
+          <div class="dsc-right">
+            <div class="dsc-lvl"><span class="dsc-medal" id="dscMedal">&#129353;</span><span class="dsc-lname" id="dscLname">Niveau Bronze</span></div>
+            <div class="dsc-stats">
+              <div class="dsc-stat"><span class="dsc-snum" id="dscPoints">0</span><span class="dsc-slbl">Points</span></div>
+              <div class="dsc-stat dsc-streak"><span class="dsc-snum" id="dscStreak">0</span><span class="dsc-slbl">Serie</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="dsc-prog">
+          <div class="dsc-prog-head"><span class="dsc-prog-lbl">Progression</span><span class="dsc-prog-pct" id="dscPpct">500 pts</span></div>
+          <div class="dsc-bar"><div class="dsc-bar-fill" id="dscPfill"></div></div>
+        </div>
+        <div class="dsc-badges" id="dscBadges">
+          <span class="dsc-badge" data-b="smooth"><span class="dsc-bemo">&#10024;</span>Tout en douceur</span>
+          <span class="dsc-badge" data-b="focus"><span class="dsc-bemo">&#127919;</span>Concentré</span>
+          <span class="dsc-badge" data-b="eco"><span class="dsc-bemo">&#127793;</span>Éco-conduite</span>
+          <span class="dsc-badge" data-b="streak"><span class="dsc-bemo">&#128293;</span>Série en feu</span>
+        </div>
+        <div class="dsc-tip" id="dscTip"><span class="dsc-spark">&#10024;</span><span id="dscTipTxt">Bienvenue ! Roule tranquille pour gagner des points.</span></div>
+      </div>
+    </div>
     <div class="card w">
       <div class="w-head"><span class="w-title">Navigation</span><span class="lbl" id="navState">—</span></div>
       <div class="nav-eta" id="navEta">—</div>
       <div class="nav-sub" id="navSub">Entre une destination</div>
+    </div>
+    <div class="card dco-card" id="daCostCard" data-state="empty">
+      <div class="w-head"><span class="w-title">Coût du trajet</span><span class="lbl dco-dist">—</span></div>
+      <div class="dco-empty">
+        <div class="dco-eico">&#129534;</div>
+        <div class="dco-etxt">Lance un itinéraire pour estimer le coût (essence + péages).</div>
+      </div>
+      <div class="dco-body">
+        <div class="dco-total">
+          <span class="dco-amt">0,00</span><span class="dco-cur">&#8364;</span>
+          <span class="dco-eco" data-tone="eco">conduite éco</span>
+        </div>
+        <div class="dco-bar"><i></i></div>
+        <div class="dco-rows">
+          <div class="dco-row"><span class="dco-ico">&#9981;</span><span class="dco-k">Essence</span><span class="dco-v" data-dco="fuel">0,00 &#8364;</span></div>
+          <div class="dco-row"><span class="dco-ico">&#128739;</span><span class="dco-k">Péages</span><span class="dco-sub" data-dco="tollsub"></span><span class="dco-v" data-dco="toll">0,00 &#8364;</span></div>
+        </div>
+        <div class="dco-meta"><span class="dco-note">estimation — branche un OBD pour le réel</span></div>
+      </div>
     </div>
     <div class="card w" id="trafficCard">
       <div class="w-head"><span class="w-title">Trafic</span><span class="lbl" id="trSrc">estimation</span></div>
@@ -1709,6 +1764,8 @@
     var arrow=$('meArrow'); if(arrow&&hdg!=null&&!isNaN(hdg))arrow.style.transform='translateX(-50%) rotate('+hdg+'deg)';
     $('trDist').textContent=fDist(totalDist);
     updateGForce(spd,hdg,ts); updateTwin(spdK,ts); updateTwinUI();
+    if(window.daScore) daScore.update({ smooth:Twin.smooth, aggr:Twin.aggr, focus:Twin.focus, fatigue:Twin.fatigue, speeding:(spdK>110) });
+    if(window.daCost) daCost.style(Twin.aggr);
     var hf=$('hudFrame'); if(hf&&hf.contentWindow&&$('hudOv').classList.contains('show')){ try{hf.contentWindow.postMessage({type:'gps',speed:Math.max(0,spd||0),heading:hdg,lat:lat,lon:lon,acc:c.accuracy},'*');}catch(e){} }
     maybeWeather(lat,lon); loadPOI(lat,lon); loadRadars(lat,lon); checkRadars({lat:lat,lon:lon},hdg,spdK); loadIncidents(lat,lon);
     if(navActive&&route){ navigate({lat:lat,lon:lon},spdK); setActiveAgents(spdK>118?['safety']:['driving','nav']); proactiveFatigue(); }
@@ -2122,12 +2179,13 @@
     getRoutes(from,to).then(function(rts){ if(!rts||!rts.length){toast(T().netErr);setMsg(T().ready,'');return;} var rt=rts[0]; altRoute=rts[1]||null; setRouteData(rt); colorRouteTraffic(from,to); drawGhost(altRoute); setTimeout(compareRoutes,1600);
       if(destMarker)map.removeLayer(destMarker); destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
       try{map.fitBounds(routeLine.getBounds().pad(0.2));}catch(e){} follow=true;$('followBtn').textContent='⊙';
+      if(window.daCost) daCost.setRoute({ distM:rt.dist, durS:rt.dur });
       var kmN=(rt.dist/1000).toFixed(1),km=fDist(rt.dist),min=Math.round(rt.dur/60); $('routeInfo').innerHTML='<b>'+km+'</b> · '+min+' min';
       $('navEta').textContent=min+' min'; $('navSub').textContent=km; $('navState').textContent='Active';
       setState('safe');setMsg(T().go,km+' · '+min+' min');Voice.say(T().calc(kmN,min),2);
       updateTraffic(); setTimeout(announceTraffic,4200); if(demoMode)driveDemo(rt.coords);
     }).catch(function(){toast(T().netErr);setMsg(T().ready,'');}); }
-  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null;routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if(raceLayer)raceLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); refilterMarkers(); if(typeof postHudRoute==='function')postHudRoute(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
+  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null; if(window.daCost)daCost.setRoute(null);routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if(raceLayer)raceLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); refilterMarkers(); if(typeof postHudRoute==='function')postHudRoute(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
   function reroute(pos){ if(!currentDest)return; rerouting=true;setState('attention');toast(T().reroute);Voice.say(T().reroute,1);
     getRoute(pos,currentDest).then(function(rt){rerouting=false;if(rt){setRouteData(rt);colorRouteTraffic(pos,currentDest);setState('safe');}}).catch(function(){rerouting=false;}); }
   function maneuverText(step){ var m=step.maneuver||{},mod=m.modifier||'',t=m.type||'',tr=T().turns;
@@ -3401,16 +3459,16 @@
   /* ---- radio + podcasts (HTML5 audio, no key) ---- */
   var mediaSource='sc'; var rpAudio=$('rpAudio'); var rpList=[], rpIdx=-1, rpTimer=null;
   var RADIOS=[
-    {n:'FIP',d:'Éclectique',u:'https://icecast.radiofrance.fr/fip-hifi.aac'},
-    {n:'France Inter',d:'Généraliste',u:'https://icecast.radiofrance.fr/franceinter-hifi.aac'},
-    {n:'France Info',d:'Info continue',u:'https://icecast.radiofrance.fr/franceinfo-hifi.aac'},
-    {n:'France Culture',d:'Culture · idées',u:'https://icecast.radiofrance.fr/franceculture-hifi.aac'},
-    {n:'France Musique',d:'Classique · jazz',u:'https://icecast.radiofrance.fr/francemusique-hifi.aac'},
-    {n:'FIP Groove',d:'Groove · funk',u:'https://icecast.radiofrance.fr/fipgroove-hifi.aac'},
-    {n:'FIP Jazz',d:'Jazz',u:'https://icecast.radiofrance.fr/fipjazz-hifi.aac'},
-    {n:'FIP Rock',d:'Rock',u:'https://icecast.radiofrance.fr/fiprock-hifi.aac'},
-    {n:"Mouv'",d:'Hip-hop · urbain',u:'https://icecast.radiofrance.fr/mouv-hifi.aac'},
-    {n:'Radio Nova',d:'Le grand mix',u:'https://novazz.ice.infomaniak.ch/novazz-128.mp3'}
+    {n:'FIP',d:'Éclectique',u:'https://icecast.radiofrance.fr/fip-hifi.aac',g:'https://charte.radiofrance.fr/images/fip/fip.png'},
+    {n:'France Inter',d:'Généraliste',u:'https://icecast.radiofrance.fr/franceinter-hifi.aac',g:'https://www.radiofrance.fr/pikapi/images/cbfde3c3-8213-45a6-ac89-b6a3b521025c/200x200'},
+    {n:'France Info',d:'Info continue',u:'https://icecast.radiofrance.fr/franceinfo-hifi.aac',g:'https://charte.radiofrance.fr/images/franceinfo/franceinfo2.png'},
+    {n:'France Culture',d:'Culture · idées',u:'https://icecast.radiofrance.fr/franceculture-hifi.aac',g:''},
+    {n:'France Musique',d:'Classique · jazz',u:'https://icecast.radiofrance.fr/francemusique-hifi.aac',g:''},
+    {n:'FIP Groove',d:'Groove · funk',u:'https://icecast.radiofrance.fr/fipgroove-hifi.aac',g:'https://charte.radiofrance.fr/images/fip/fip.png'},
+    {n:'FIP Jazz',d:'Jazz',u:'https://icecast.radiofrance.fr/fipjazz-hifi.aac',g:'https://charte.radiofrance.fr/images/fip/fip.png'},
+    {n:'FIP Rock',d:'Rock',u:'https://icecast.radiofrance.fr/fiprock-hifi.aac',g:'https://charte.radiofrance.fr/images/fip/fip.png'},
+    {n:"Mouv'",d:'Hip-hop · urbain',u:'https://icecast.radiofrance.fr/mouv-hifi.aac',g:'https://charte.radiofrance.fr/images/mouv/mouv.png'},
+    {n:'Radio Nova',d:'Le grand mix',u:'https://novazz.ice.infomaniak.ch/novazz-128.mp3',g:'https://www.nova.fr/wp-content/uploads/sites/2/2021/02/cropped-favicon.png'}
   ];
   /* ---- Livres audio GRATUITS (domaine public, LibriVox / archive.org) ---- */
   var BOOKS=[
@@ -3451,10 +3509,11 @@
     BOOK_CATS.forEach(function(c){ var items=BOOKS.filter(function(b){return b.c===c[0] && (!q||(b.t+' '+b.a).toLowerCase().indexOf(q)>=0);}); if(!items.length)return;
       var pal=BOOK_COL[c[0]]||['#2a2c33'];
       html+='<div class="bw-cat"><h5>'+c[1]+'</h5><div class="bw-shelf">';
-      items.forEach(function(b,i){ html+='<div class="book" data-id="'+b.id+'"><div class="book-cov bk-'+c[0]+'" style="--bk:'+pal[i%pal.length]+'"><span class="book-t">'+b.t+'</span><span class="book-a">'+b.a+'</span></div></div>'; });
+      items.forEach(function(b,i){ html+='<div class="book" data-id="'+b.id+'"><div class="book-cov bk-'+c[0]+'" style="--bk:'+pal[i%pal.length]+'"><span class="book-t">'+b.t+'</span><span class="book-a">'+b.a+'</span><img class="book-img" loading="lazy" alt="" data-src="'+bookCover(b)+'"></div></div>'; });
       html+='</div></div>'; });
     html+='</div>'; L.innerHTML=html;
-    [].forEach.call(L.querySelectorAll('.book'),function(el){ el.addEventListener('click',function(){ var b=BOOKS.filter(function(x){return x.id===el.dataset.id;})[0]; if(b)playBook(b); }); });
+    [].forEach.call(L.querySelectorAll('.book'),function(el){ el.addEventListener('click',function(){ var b=BOOKS.filter(function(x){return x.id===el.dataset.id;})[0]; if(b)playBook(b); });
+      var cov=el.querySelector('.book-cov'), img=el.querySelector('.book-img'); if(img&&cov){ var src=img.getAttribute('data-src'); img.onload=function(){ if(img.naturalWidth>1)cov.classList.add('has-cover'); }; img.onerror=function(){ if(img.parentNode)img.parentNode.removeChild(img); }; if(src)img.src=src; } });
     [].forEach.call(L.querySelectorAll('.bw-shelf'),function(sh){ sh.addEventListener('wheel',function(e){ if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return; var max=sh.scrollWidth-sh.clientWidth; if(max<=0)return; if((sh.scrollLeft<=0&&e.deltaY<0)||(sh.scrollLeft>=max-1&&e.deltaY>0))return; e.preventDefault(); sh.scrollLeft+=e.deltaY; },{passive:false}); });
   }
   function renderChapters(b){ var L=$('mQueue'); if(!L)return; L.classList.remove('mq-books','mq-stations'); L.classList.add('mq-chapters'); L.innerHTML='';
@@ -3465,10 +3524,13 @@
       d.innerHTML='<span class="chap-n">'+num+'</span><span class="chap-t">'+(s.title||('Chapitre '+(i+1)))+'</span>';
       d.addEventListener('click',function(){ playAudioItem(i); }); L.appendChild(d); });
   }
+  function stMono(nm){ var w=(nm||'').replace(/[^0-9A-Za-zÀ-ÿ]+/g,' ').trim().split(/\s+/); var m=((w[0]||'').charAt(0)+(w[1]||'').charAt(0)); return (m||(nm||'•').charAt(0)).toUpperCase(); }
   function renderRadio(list){ var L=$('mQueue'); if(!L)return; L.classList.remove('mq-books','mq-chapters'); L.classList.add('mq-stations'); L.innerHTML='';
     var pal=['#1F2E4C','#244536','#4C1F2E','#33302A','#3C2A57','#2B4A5E','#5A4A2C','#3B4A40'];
     (list||[]).forEach(function(s,i){ var d=document.createElement('div'); d.className='station'; d.style.setProperty('--bk',pal[i%pal.length]);
-      d.innerHTML='<span class="st-live"></span><span class="st-n">'+(s.title||'—')+'</span><span class="st-d">'+(s.artist||'')+'</span>';
+      var nm=s.title||'—';
+      d.innerHTML='<span class="st-live"></span><div class="st-plate"><span class="st-mono">'+stMono(nm)+'</span></div><div class="st-meta"><span class="st-n">'+nm+'</span><span class="st-d">'+(s.artist||'')+'</span></div>';
+      if(s.art){ var img=new Image(); img.className='st-logo'; img.loading='lazy'; img.alt=''; img.onerror=function(){ if(img.parentNode)img.parentNode.removeChild(img); }; img.src=s.art; d.querySelector('.st-plate').appendChild(img); }
       d.addEventListener('click',function(){ playAudioItem(i); }); L.appendChild(d); });
   }
   function mqWipe(){ try{ if(document.documentElement.hasAttribute('data-da-off'))return; var mm=document.querySelector('.media-main'); if(!mm)return; var w=mm.querySelector('.mq-wipe'); if(!w){ w=document.createElement('div'); w.className='mq-wipe'; mm.appendChild(w); } w.classList.remove('go'); void w.offsetWidth; w.classList.add('go'); }catch(e){} }
@@ -3487,7 +3549,7 @@
   function fillRows(list,live){ var L=$('mQueue'); L.classList.remove('mq-books','mq-chapters','mq-stations'); L.innerHTML=''; list.forEach(function(s,i){ var row=document.createElement('div'); row.className='mq-row'; row.innerHTML=rowHTML(s.art,s.title,s.artist,'',live); row.addEventListener('click',function(){ playAudioItem(i); }); L.appendChild(row); }); }
   function setMediaSource(src){ mediaSource=src; [].forEach.call($('mediaSeg').children,function(b){b.classList.toggle('on',b.dataset.s===src);}); var sr=$('mediaSearch'); var _ml=$('mQueue'); if(_ml)_ml.classList.remove('mq-books','mq-chapters','mq-stations'); mqWipe();
     if(src==='sc'){ sr.style.display='block'; sr.placeholder='Rechercher un titre…'; sr.value=''; $('mqLabel').textContent='File d\'attente'; buildQueue(); }
-    else if(src==='radio'){ sr.style.display='block'; sr.placeholder='Rechercher une station…'; sr.value=''; $('mqLabel').textContent='Stations'; rpList=RADIOS.map(function(s){return {title:s.n,artist:s.d,url:s.u,art:'',live:true};}); renderRadio(rpList); }
+    else if(src==='radio'){ sr.style.display='block'; sr.placeholder='Rechercher une station…'; sr.value=''; $('mqLabel').textContent='Stations'; rpList=RADIOS.map(function(s){return {title:s.n,artist:s.d,url:s.u,art:s.g||'',live:true};}); renderRadio(rpList); }
     else if(src==='liked'){ sr.style.display='block'; sr.placeholder='Filtrer mes favoris…'; sr.value=''; $('mqLabel').textContent='Mes favoris ♥'; renderLiked(); }
     else { sr.style.display='block'; sr.placeholder='Rechercher un livre…'; sr.value=''; renderBooks(); } }
   function searchRadio(q){ fetch('https://de1.api.radio-browser.info/json/stations/search?limit=40&hidebroken=true&order=clickcount&reverse=true&name='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(a){
@@ -3534,7 +3596,7 @@
     if(mediaSource==='sc'){ filterSC(q); }
     else if(mediaSource==='liked'){ filterLiked(q); }
     else if(mediaSource==='podcast'){ renderBooks(q); }
-    else if(mediaSource==='radio'){ if(q.length<2){ rpList=RADIOS.map(function(s){return {title:s.n,artist:s.d,url:s.u,art:'',live:true};}); renderRadio(rpList); } else { rpTimer=setTimeout(function(){ searchRadio(q); },420); } }
+    else if(mediaSource==='radio'){ if(q.length<2){ rpList=RADIOS.map(function(s){return {title:s.n,artist:s.d,url:s.u,art:s.g||'',live:true};}); renderRadio(rpList); } else { rpTimer=setTimeout(function(){ searchRadio(q); },420); } }
   });
 
   /* ---------- phone (call screen) ---------- */
@@ -7159,7 +7221,7 @@ body[data-mplaying] #mediaOv .media-viz{ opacity:.8; }
   -webkit-backdrop-filter: blur(8px);
   -webkit-tap-highlight-color: transparent;
 }
-#mediaOv .media-ctl button.sec{ width:46px; height:46px; font-size:17px; }
+#mediaOv .media-ctl button.sec{ width:44px; height:44px; font-size:15px; }
 #mediaOv .media-ctl button:hover{
   background: rgba(255,255,255,.14);
   transform: translateY(-1px) scale(1.05);
@@ -7167,7 +7229,7 @@ body[data-mplaying] #mediaOv .media-viz{ opacity:.8; }
 #mediaOv .media-ctl button:active{ transform: scale(.92); }
 
 #mediaOv .media-ctl .play{
-  width:66px; height:66px; font-size:24px;
+  width:60px; height:60px; font-size:22px;
   color:#0c0d12;
   background: linear-gradient(180deg,#fff 0%, #e9ebf2 100%);
   border:0;
@@ -8309,5 +8371,563 @@ html[data-da-off] .fx4-h::after{ display:none !important; animation:none !import
 })();
 </script>
 <!-- FX4-MODULE-END (auto) -->
+<!-- SCORECOST-START (auto) -->
+<style id="daScStyle">
+/* ============================================================
+   DA HOME MODULES — merged stylesheet (ONE <style>)
+   Two fully-isolated namespaces concatenated:
+     1) daScore  -> .dsc-* + dsc* keyframes      (Score Practice)
+     2) daCost   -> .dco-*                        (Coût du trajet)
+   Collision audit: zero overlap between .dsc-* and .dco-* class
+   names / keyframes / ids; both only CONSUME host vars
+   (--acc,--card,--border,--txt,--dim,--faint,--mono) and both
+   respect html[data-da-off] + prefers-reduced-motion. Nothing
+   shared is written, so no cross-component fix was required.
+   ============================================================ */
+
+/* ============================================================
+   1) daScore - "Score Practice" (gamified positive driving score)
+   Fully namespaced: .dsc-* + dsc* keyframes. var(--acc) aware.
+   Dark-glass premium aesthetic, French UI, never alarming.
+   Hardened: reduced-motion + html[data-da-off] kill switch,
+   pointer-events safe, idempotent render. No layout shift.
+   ============================================================ */
+.dsc-wrap{font-family:inherit;color:var(--txt);position:relative;}
+.dsc-top{display:flex;align-items:center;gap:16px;}
+
+/* ---- circular gauge ---- */
+.dsc-gauge{position:relative;width:96px;height:96px;flex-shrink:0;}
+.dsc-gauge svg{width:96px;height:96px;transform:rotate(-90deg);display:block;}
+.dsc-gauge .dsc-track{fill:none;stroke:var(--border);stroke-width:7;}
+.dsc-gauge .dsc-arc{
+  fill:none;stroke:var(--acc);stroke-width:7;stroke-linecap:round;
+  stroke-dasharray:264;stroke-dashoffset:264;
+  filter:drop-shadow(0 0 6px color-mix(in srgb,var(--acc) 55%,transparent));
+  transition:stroke-dashoffset .9s cubic-bezier(.22,1,.36,1);
+}
+.dsc-gctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.dsc-gnum{font-family:var(--mono);font-size:27px;font-weight:700;line-height:1;letter-spacing:-.5px;color:var(--txt);}
+.dsc-glbl{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-top:3px;}
+
+/* ---- right column (level + stats) ---- */
+.dsc-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:9px;}
+.dsc-lvl{display:flex;align-items:center;gap:7px;}
+.dsc-medal{font-size:15px;line-height:1;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--acc) 40%,transparent));}
+.dsc-lname{font-size:13px;font-weight:600;color:var(--txt);letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dsc-stats{display:flex;gap:14px;}
+.dsc-stat{display:flex;flex-direction:column;gap:1px;}
+.dsc-snum{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--acc);line-height:1.1;}
+.dsc-slbl{font-family:var(--mono);font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);}
+.dsc-streak .dsc-snum{color:var(--txt);}
+
+/* ---- next-level progress bar ---- */
+.dsc-prog{margin-top:13px;}
+.dsc-prog-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:8px;}
+.dsc-prog-lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);}
+.dsc-prog-pct{font-family:var(--mono);font-size:10px;color:var(--dim);white-space:nowrap;}
+.dsc-bar{height:6px;border-radius:6px;background:var(--border);overflow:hidden;}
+.dsc-bar-fill{
+  height:100%;width:0%;border-radius:6px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 55%,transparent),var(--acc));
+  box-shadow:0 0 8px color-mix(in srgb,var(--acc) 50%,transparent);
+  transition:width .9s cubic-bezier(.22,1,.36,1);
+}
+
+/* ---- badges ---- */
+.dsc-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px;}
+.dsc-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  padding:5px 9px;border-radius:9px;
+  border:.5px solid var(--border);background:var(--card);color:var(--faint);
+  transition:color .4s,border-color .4s,background .4s,box-shadow .4s,transform .25s;
+}
+.dsc-badge .dsc-bemo{font-size:11px;}
+.dsc-badge.on{
+  color:var(--txt);border-color:color-mix(in srgb,var(--acc) 55%,var(--border));
+  background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 16%,transparent),transparent);
+  box-shadow:0 0 12px -2px color-mix(in srgb,var(--acc) 45%,transparent);
+}
+.dsc-badge.dsc-pop{animation:dscPop .6s cubic-bezier(.22,1.4,.4,1);}
+
+/* ---- encouraging line (always positive) ---- */
+.dsc-tip{
+  margin-top:13px;font-size:12px;line-height:1.45;color:var(--txt);
+  display:flex;gap:7px;align-items:flex-start;
+}
+.dsc-tip .dsc-spark{color:var(--acc);flex-shrink:0;}
+.dsc-tip.dsc-flash{animation:dscTipFlash .9s ease;}
+
+/* ---- +points float (pointer-events:none, never blocks clicks) ---- */
+.dsc-float{
+  position:absolute;right:6px;top:2px;pointer-events:none;
+  font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);
+  opacity:0;transform:translateY(0);
+}
+.dsc-float.dsc-go{animation:dscFloat 1.1s ease-out;}
+
+@keyframes dscPop{0%{transform:scale(.8)}55%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes dscFloat{0%{opacity:0;transform:translateY(4px)}18%{opacity:1}100%{opacity:0;transform:translateY(-16px)}}
+@keyframes dscTipFlash{0%{background:color-mix(in srgb,var(--acc) 12%,transparent)}100%{background:transparent}}
+
+/* reduced motion + kill switch: no animation, data/UI intact */
+@media (prefers-reduced-motion:reduce){
+  .dsc-arc,.dsc-bar-fill{transition:none;}
+  .dsc-badge.dsc-pop,.dsc-float.dsc-go,.dsc-tip.dsc-flash{animation:none;}
+}
+html[data-da-off] .dsc-arc,html[data-da-off] .dsc-bar-fill{transition:none;}
+html[data-da-off] .dsc-badge.dsc-pop,html[data-da-off] .dsc-float.dsc-go,html[data-da-off] .dsc-tip.dsc-flash{animation:none;}
+
+/* ============================================================
+   2) window.daCost - Estimateur de coût de trajet (.dco-*)
+   ============================================================ */
+.dco-card .w-title::before{content:none;} /* opt-out of host auto-numbering counter */
+.dco-body{display:flex;flex-direction:column;gap:13px;}
+
+/* big total */
+.dco-total{display:flex;align-items:baseline;gap:8px;line-height:1;}
+.dco-total .dco-amt{font-family:var(--mono);font-weight:700;font-size:34px;letter-spacing:-.02em;color:var(--txt);font-variant-numeric:tabular-nums;transition:color .35s;}
+.dco-total .dco-cur{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--dim);}
+.dco-total .dco-eco{margin-left:auto;align-self:center;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:.5px solid var(--border);color:var(--dim);white-space:nowrap;transition:color .35s,border-color .35s,background .35s;}
+.dco-total .dco-eco[data-tone="eco"]{color:#39d98a;border-color:rgba(57,217,138,.35);background:rgba(57,217,138,.08);}
+.dco-total .dco-eco[data-tone="warn"]{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 40%,transparent);background:color-mix(in srgb,var(--acc) 9%,transparent);}
+
+/* live style bar (fuel sensitivity to aggressivity) */
+.dco-bar{height:4px;border-radius:999px;background:color-mix(in srgb,var(--txt) 9%,transparent);overflow:hidden;}
+.dco-bar i{display:block;height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#39d98a,var(--acc));transition:width .6s cubic-bezier(.22,.61,.36,1);}
+
+/* kill-switch + reduced-motion: keep data/UI, drop motion */
+html[data-da-off] .dco-bar i,
+html[data-da-off] .dco-total .dco-amt,
+html[data-da-off] .dco-total .dco-eco{transition:none;}
+@media(prefers-reduced-motion:reduce){
+  .dco-bar i,.dco-total .dco-amt,.dco-total .dco-eco{transition:none;}
+}
+
+/* breakdown rows */
+.dco-rows{display:flex;flex-direction:column;gap:7px;}
+.dco-row{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--txt);}
+.dco-row .dco-ico{width:16px;text-align:center;flex-shrink:0;opacity:.9;}
+.dco-row .dco-k{color:var(--dim);}
+.dco-row .dco-v{margin-left:auto;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--txt);}
+.dco-row .dco-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--faint);margin-left:6px;}
+
+.dco-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.dco-dist{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
+.dco-note{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--faint);opacity:.85;}
+
+/* placeholder (no active route) */
+.dco-empty{display:flex;align-items:center;gap:11px;padding:4px 0;}
+.dco-empty .dco-eico{width:34px;height:34px;flex-shrink:0;border-radius:11px;display:grid;place-items:center;font-size:16px;background:var(--card);border:.5px solid var(--border);}
+.dco-empty .dco-etxt{font-size:12.5px;color:var(--dim);line-height:1.4;}
+.dco-card[data-state="empty"] .dco-body{display:none;}
+.dco-card[data-state="route"] .dco-empty{display:none;}
+</style>
+<script>
+/* ============================================================
+   DA HOME MODULES — merged script (ONE <script>, no <script> tags)
+   Two sequential, self-contained IIFEs:
+     1) window.daScore  (Score Practice)  — install-guarded
+     2) window.daCost   (Coût du trajet)  — install-guarded
+   Each is namespaced + idempotent + never throws. No shared
+   globals, no shared DOM ids, distinct localStorage keys
+   ('daScore' / 'daCost'). Boot independently on readyState.
+   ============================================================ */
+
+/* ============================================================
+   1) daScore - window.daScore API
+   .update({smooth,aggr,focus,fatigue,speeding}) ~1/s
+   .render()  .reset()  .state (read-only snapshot)
+   Persists points/level/streak/badges in localStorage 'daScore'.
+   Hardened: null/NaN safe, never throws, idempotent render,
+   reduced-motion + html[data-da-off] aware, skips animation while
+   document.hidden, positive tone only (never accuses/alarms).
+   ============================================================ */
+(function(){
+  "use strict";
+  try{
+    if (typeof window==="undefined" || typeof document==="undefined") return;
+    if (window.daScore) return;  /* idempotent boot, no namespace clobber */
+
+    var LS = 'daScore';
+    var LEVELS = [
+      {name:'Bronze',  medal:'🥉', min:0},      /* bronze */
+      {name:'Argent',  medal:'🥈', min:500},    /* silver */
+      {name:'Or',      medal:'🥇', min:1500},   /* gold */
+      {name:'Platine', medal:'💎', min:4000}    /* diamond */
+    ];
+    var BADGES = [
+      {id:'smooth', emo:'✨', label:'Tout en douceur'},
+      {id:'focus',  emo:'🎯', label:'Concentre'},
+      {id:'eco',    emo:'🌱', label:'Eco-conduite'},
+      {id:'streak', emo:'🔥', label:'Serie en feu'}
+    ];
+    /* All tips strictly positive / encouraging - never accuse, never alarm. */
+    var TIPS_GOOD = [
+      'Conduite impeccable, continue comme ca !',
+      'Super fluide - tu gagnes plein de points.',
+      'Tres bien joue, ton score grimpe en douceur.',
+      'Belle maitrise, le confort est au top.'
+    ];
+    var TIPS_NUDGE = [
+      'Roule un peu plus souple pour gagner plus de points',
+      'Anticipe les freinages - encore plus de points a la cle',
+      'Tout doux sur l’accelerateur, le score adore ca',
+      'Garde le rythme tranquille, les points suivent'
+    ];
+    var TIPS_FOCUS = ['Reste bien concentre, tu assures.','Beau niveau d’attention, bravo.'];
+
+    /* ---- helpers (null/NaN/Infinity safe) ---- */
+    function num(v,d){ v=+v; return (v===v && v!==Infinity && v!==-Infinity) ? v : d; }
+    function clamp(v,a,b){ v=num(v,a); return v<a?a:(v>b?b:v); }
+    function reduced(){ try{ return !!(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches); }catch(e){ return false; } }
+    function killed(){ try{ return document.documentElement.hasAttribute('data-da-off'); }catch(e){ return false; } }
+    function hidden(){ try{ return !!document.hidden; }catch(e){ return false; } }
+    function canAnimate(){ return !reduced() && !killed() && !hidden(); }
+
+    function def(){ return {
+      score:50, points:0, streak:0, bestStreak:0,
+      badges:{}, lastDay:null, goodSecs:0, ecoSecs:0,
+      _carry:0
+    };}
+
+    var S = def();
+    /* ---- load + sanitize persisted state (try/catch, finite-guarded) ---- */
+    try{
+      var raw = localStorage.getItem(LS);
+      if(raw){
+        var p = JSON.parse(raw);
+        if(p && typeof p==='object'){
+          S.score     = clamp(p.score, 0, 100);
+          S.points    = Math.max(0, Math.floor(num(p.points, 0)));
+          S.streak    = Math.max(0, Math.floor(num(p.streak, 0)));
+          S.bestStreak= Math.max(0, Math.floor(num(p.bestStreak, 0)));
+          S.goodSecs  = Math.max(0, Math.floor(num(p.goodSecs, 0)));
+          S.ecoSecs   = Math.max(0, Math.floor(num(p.ecoSecs, 0)));
+          S._carry    = clamp(p._carry, 0, 1);
+          S.lastDay   = (typeof p.lastDay==='string') ? p.lastDay : null;
+          if(p.badges && typeof p.badges==='object'){
+            for(var bi=0; bi<BADGES.length; bi++){ if(p.badges[BADGES[bi].id]) S.badges[BADGES[bi].id]=1; }
+          }
+        }
+      }
+    }catch(e){ S = def(); }
+
+    function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
+
+    function levelIdx(pts){ var idx=0; for(var i=0;i<LEVELS.length;i++){ if(pts>=LEVELS[i].min) idx=i; } return idx; }
+    function dayKey(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+
+    /* ---------- DOM refs ---------- */
+    var el = {};
+    function grab(){
+      el.root = document.getElementById('dscRoot');
+      if(!el.root) return false;
+      el.arc    = document.getElementById('dscArc');
+      el.gnum   = document.getElementById('dscGnum');
+      el.medal  = document.getElementById('dscMedal');
+      el.lname  = document.getElementById('dscLname');
+      el.points = document.getElementById('dscPoints');
+      el.streak = document.getElementById('dscStreak');
+      el.ppct   = document.getElementById('dscPpct');
+      el.plbl   = document.getElementById('dscPlbl');
+      el.pfill  = document.getElementById('dscPfill');
+      el.badges = document.getElementById('dscBadges');
+      el.tip    = document.getElementById('dscTip');
+      el.tiptxt = document.getElementById('dscTipTxt');
+      el.float  = document.getElementById('dscFloat');
+      return true;
+    }
+
+    /* ---------- core update (called ~1/s while driving) ---------- */
+    var pendingPts = 0;
+    function update(m){
+      try{
+        m = m || {};
+        var smooth  = clamp(m.smooth, 0, 100);
+        var aggr    = clamp(m.aggr,   0, 100);
+        var focus   = clamp(m.focus,  0, 100);
+        var fatigue = clamp(m.fatigue,0, 100);
+        var speeding= !!m.speeding;
+
+        /* goodness: mostly smooth & low-aggr & focused; fatigue softly trims */
+        var goodness = 0.45*smooth + 0.30*(100-aggr) + 0.20*focus + 0.05*(100-fatigue);
+        goodness = clamp(goodness,0,100);
+
+        /* rolling Practice Score = EMA */
+        S.score = clamp(S.score*0.90 + goodness*0.10, 0, 100);
+
+        /* points: more good driving -> more points. speeding gently lowers GAIN
+           only (never subtracts, never goes red). Positive-only by construction. */
+        var gain = Math.max(0, (goodness-45)/55);   /* 0..1, only reward >45 */
+        if(speeding) gain *= 0.55;                   /* softer gain, never negative */
+        var earned = clamp(gain*4, 0, 4);            /* up to ~4 pts/s, bounded */
+        S._carry = clamp(S._carry + earned, 0, 1e6);
+        var whole = Math.floor(S._carry);
+        if(whole>0){ S._carry -= whole; S.points += whole; pendingPts += whole; }
+
+        /* streak: seconds of sustained good driving (resets gently if rough) */
+        if(goodness>=62){ S.streak++; if(S.streak>S.bestStreak) S.bestStreak=S.streak; }
+        else if(goodness<42){ S.streak = Math.floor(S.streak*0.5); }
+        if(S.streak<0) S.streak=0;
+
+        /* day rollover for streak context */
+        var dk = dayKey();
+        if(S.lastDay!==dk){ S.lastDay=dk; }
+
+        /* badge accumulation */
+        if(smooth>=80 && aggr<=22) S.goodSecs++; else S.goodSecs=Math.max(0,S.goodSecs-1);
+        if(aggr<=18 && !speeding)  S.ecoSecs++;  else S.ecoSecs=Math.max(0,S.ecoSecs-1);
+        var newBadge = null;
+        function award(id){ if(!S.badges[id]){ S.badges[id]=1; newBadge=id; } }
+        if(S.goodSecs>=20) award('smooth');
+        if(focus>=85)      award('focus');
+        if(S.ecoSecs>=25)  award('eco');
+        if(S.streak>=60)   award('streak');
+
+        /* pick encouraging line (kind, never accusing) */
+        var tipPool;
+        if(goodness>=68){ tipPool=TIPS_GOOD; }
+        else if(focus>=82 && goodness>=55){ tipPool=TIPS_FOCUS; }
+        else { tipPool=TIPS_NUDGE; }   /* "nudge" = still positive, more-points framing */
+        var tipIdx = (num(Date.now(),0)/6000|0) % tipPool.length;
+        if(tipIdx<0) tipIdx=0;
+        S._tip = tipPool[tipIdx];
+        S._tipSpark = (tipPool===TIPS_NUDGE) ? '✨' : '👏'; /* sparkle / clap */
+
+        save();
+        render(newBadge);
+      }catch(e){ /* never throw out of the driver loop */ }
+    }
+
+    /* ---------- render (idempotent: same state -> same DOM; */
+    /*            one-shot animations only fire on a real change) ---------- */
+    function render(newBadge){
+      try{
+        if(!el.root && !grab()) return;
+        var anim = canAnimate();
+
+        var sc = Math.round(clamp(S.score,0,100));
+        if(el.gnum && el.gnum.textContent!==String(sc)) el.gnum.textContent = sc;
+        if(el.arc){ var off = (264 - (264*sc/100)).toFixed(1); if(el.arc.style.strokeDashoffset!==off) el.arc.style.strokeDashoffset = off; }
+
+        if(el.points){ var pt = S.points>=1000 ? (S.points/1000).toFixed(1).replace('.0','')+'k' : String(S.points); if(el.points.textContent!==pt) el.points.textContent=pt; }
+        if(el.streak && el.streak.textContent!==String(S.streak)) el.streak.textContent = S.streak;
+
+        var li = levelIdx(S.points);
+        var L = LEVELS[li];
+        if(el.medal && el.medal.textContent!==L.medal) el.medal.textContent = L.medal;
+        var ln = 'Niveau '+L.name;
+        if(el.lname && el.lname.textContent!==ln) el.lname.textContent = ln;
+
+        /* progress to next level (guard against div-by-zero) */
+        if(el.pfill){
+          if(li>=LEVELS.length-1){
+            if(el.plbl) el.plbl.textContent='Niveau max';
+            if(el.ppct) el.ppct.textContent='★';
+            el.pfill.style.width='100%';
+          } else {
+            var cur=L.min, nxt=LEVELS[li+1].min, span=Math.max(1,nxt-cur);
+            var pct=clamp((S.points-cur)/span*100,0,100);
+            if(el.plbl) el.plbl.textContent='Vers '+LEVELS[li+1].name;
+            if(el.ppct) el.ppct.textContent=Math.max(0,nxt-S.points)+' pts';
+            el.pfill.style.width=pct.toFixed(1)+'%';
+          }
+        }
+
+        /* badges - add/remove .on idempotently; pop only on the newly awarded one */
+        if(el.badges){
+          for(var i=0;i<BADGES.length;i++){
+            var b=BADGES[i], node=el.badges.querySelector('[data-b="'+b.id+'"]');
+            if(!node) continue;
+            var on=!!S.badges[b.id];
+            if(on){
+              if(!node.classList.contains('on')){
+                node.classList.add('on');
+                if(anim && b.id===newBadge){ node.classList.remove('dsc-pop'); void node.offsetWidth; node.classList.add('dsc-pop'); }
+              }
+            } else if(node.classList.contains('on')){ node.classList.remove('on'); }
+          }
+        }
+
+        /* tip - only flash when the text actually changes */
+        if(el.tiptxt && S._tip && el.tiptxt.textContent!==S._tip){
+          el.tiptxt.textContent = S._tip;
+          var sp=el.tip&&el.tip.querySelector('.dsc-spark'); if(sp&&S._tipSpark) sp.textContent=S._tipSpark;
+          if(anim && el.tip){ el.tip.classList.remove('dsc-flash'); void el.tip.offsetWidth; el.tip.classList.add('dsc-flash'); }
+        }
+
+        /* +points float - consume pendingPts; animate only if allowed */
+        if(pendingPts>0 && el.float){
+          el.float.textContent='+'+pendingPts; pendingPts=0;
+          if(anim){ el.float.classList.remove('dsc-go'); void el.float.offsetWidth; el.float.classList.add('dsc-go'); }
+        }
+      }catch(e){}
+    }
+
+    function reset(){ try{ S=def(); S.lastDay=dayKey(); pendingPts=0; save(); render(); }catch(e){} }
+
+    window.daScore = { update:update, render:render, reset:reset,
+      get state(){ try{ return JSON.parse(JSON.stringify(S)); }catch(e){ return def(); } } };
+
+    /* init on readyState (idempotent: grab + paint persisted state) */
+    function init(){ grab(); render(); }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  }catch(e){ /* never throw at module scope */ }
+})();
+
+/* ============================================================
+   2) daCost - window.daCost API
+   .setRoute({distM,durS})  .style(aggr0to100)  .config({...})
+   .render()  ._est (debug). Persists config only in 'daCost'.
+   Hardened: null/NaN safe, never throws, idempotent render,
+   reduced-motion + html[data-da-off] aware (CSS-driven), no rAF,
+   pointer-events safe, positive/factual tone only.
+   ============================================================ */
+(function(){
+  'use strict';
+  if(window.daCost) return;                 // idempotent install, no namespace clobber
+
+  var LS='daCost';
+  var DEF={fuelPrice:1.90, consL100:6.5, tollPerKm:0.09};
+  var cfg={fuelPrice:DEF.fuelPrice, consL100:DEF.consL100, tollPerKm:DEF.tollPerKm};
+  var route=null;            // {distM,durS} or null
+  var aggr=0;                // 0..100 live driving style
+  var el=null;               // cached card root
+
+  // ---- helpers (all null/NaN-safe; never throw) ----
+  function num(v){ v=+v; return isFinite(v)?v:NaN; }                 // -> finite number or NaN
+  function clamp(v,a,b){ v=+v; if(!isFinite(v))v=a; return v<a?a:(v>b?b:v); }
+  function eur(n){ n=+n; if(!isFinite(n)) n=0; return n.toFixed(2).replace('.',',')+' €'; }
+  function amtStr(n){ n=+n; if(!isFinite(n)) n=0; return n.toFixed(2).replace('.',','); }
+  function root(){
+    try{
+      if(el && el.isConnected!==false && document.body && document.body.contains(el)) return el;
+    }catch(e){}
+    try{ el=document.getElementById('daCostCard'); }catch(e){ el=null; }
+    return el;
+  }
+  function q(sel){ var r=root(); if(!r) return null; try{ return r.querySelector(sel); }catch(e){ return null; } }
+
+  // ---- persistence (config only; transient route/aggr never stored) ----
+  (function load(){
+    try{
+      var raw=localStorage.getItem(LS);
+      if(!raw) return;
+      var s=JSON.parse(raw);
+      if(s && typeof s==='object'){
+        ['fuelPrice','consL100','tollPerKm'].forEach(function(k){
+          var v=num(s[k]); if(!isNaN(v)) cfg[k]=v;
+        });
+        // re-clamp loaded values into sane domains
+        cfg.fuelPrice=clamp(cfg.fuelPrice,0,9);
+        cfg.consL100 =clamp(cfg.consL100,0,40);
+        cfg.tollPerKm=clamp(cfg.tollPerKm,0,1);
+      }
+    }catch(e){ /* corrupt or blocked storage -> defaults */ }
+  })();
+  function save(){
+    try{ localStorage.setItem(LS, JSON.stringify(cfg)); }catch(e){ /* quota / private mode */ }
+  }
+
+  // ---- core estimate (returns null when no valid route; otherwise all-finite) ----
+  // Fuel rises 0..+25% with aggressivity; toll heuristic on highway fraction for trips >25km.
+  function compute(){
+    if(!route) return null;
+    var distM=num(route.distM);
+    if(isNaN(distM) || distM<=0) return null;
+
+    var km=distM/1000;
+    var a=clamp(aggr,0,100)/100;
+    var factor=1+0.25*a;                              // +0..25%
+    var cons=clamp(cfg.consL100,0,40);
+    var price=clamp(cfg.fuelPrice,0,9);
+    var tpk=clamp(cfg.tollPerKm,0,1);
+
+    var litres=(km/100)*cons*factor;
+    var fuel=litres*price;
+    var hwFrac = km>25 ? 0.65 : 0;                    // assume ~65% highway on long trips
+    var hwKm=km*hwFrac;
+    var tolls=hwKm*tpk;
+    var total=fuel+tolls;
+
+    // final finite guards (defensive; inputs are already clamped/finite)
+    if(!isFinite(fuel)) fuel=0;
+    if(!isFinite(tolls)) tolls=0;
+    if(!isFinite(total)) total=fuel+tolls;
+    if(!isFinite(total)) total=0;
+
+    return { km:km, fuel:fuel, tolls:tolls, total:total, factor:factor, aggr:clamp(aggr,0,100), hwKm:hwKm };
+  }
+
+  // ---- render (idempotent: reads DOM state, writes derived values only) ----
+  function render(){
+    var r=root(); if(!r) return;
+    var c=compute();
+
+    if(!c){ r.setAttribute('data-state','empty'); return; }
+    r.setAttribute('data-state','route');
+
+    var amt=q('.dco-amt'); if(amt) amt.textContent=amtStr(c.total);
+    var fuel=q('[data-dco="fuel"]'); if(fuel) fuel.textContent=eur(c.fuel);
+    var toll=q('[data-dco="toll"]'); if(toll) toll.textContent= c.tolls>0?eur(c.tolls):'0,00 €';
+    var tsub=q('[data-dco="tollsub"]');
+    if(tsub) tsub.textContent= c.tolls>0?('~'+Math.round(c.hwKm)+' km autoroute'):'pas d’autoroute';
+    var dist=q('.dco-dist');
+    if(dist) dist.textContent=(c.km>=10?Math.round(c.km):c.km.toFixed(1))+' km';
+
+    var bar=q('.dco-bar i'); if(bar) bar.style.width=clamp(c.aggr,0,100).toFixed(0)+'%';
+
+    // POSITIVE tone: badge informs, never accuses or alarms.
+    var eco=q('.dco-eco');
+    if(eco){
+      var pct=Math.round((c.factor-1)*100); if(!isFinite(pct)||pct<0) pct=0;
+      if(c.aggr<=25){
+        eco.textContent='conduite éco';              // "conduite éco" — encouraging
+        eco.setAttribute('data-tone','eco');
+      } else if(c.aggr>=60){
+        eco.textContent='conso +'+pct+'%';                // factual, neutral wording
+        eco.setAttribute('data-tone','warn');
+      } else {
+        eco.textContent='conso +'+pct+'%';
+        eco.removeAttribute('data-tone');                 // neutral mid-zone
+      }
+    }
+  }
+
+  // ---- public API (window.daCost) ----
+  window.daCost={
+    setRoute:function(o){
+      if(o && typeof o==='object'){
+        var d=num(o.distM);
+        if(!isNaN(d) && d>0){
+          var dur=num(o.durS);
+          route={distM:d, durS:isNaN(dur)||dur<0?0:dur};
+        } else { route=null; }
+      } else { route=null; }
+      render(); return this;
+    },
+    style:function(a){ aggr=clamp(a,0,100); render(); return this; },
+    config:function(o){
+      if(o && typeof o==='object'){
+        var fp=num(o.fuelPrice), cl=num(o.consL100), tp=num(o.tollPerKm);
+        if(!isNaN(fp)) cfg.fuelPrice=clamp(fp,0,9);
+        if(!isNaN(cl)) cfg.consL100 =clamp(cl,0,40);
+        if(!isNaN(tp)) cfg.tollPerKm=clamp(tp,0,1);
+        save();
+      }
+      render();
+      return {fuelPrice:cfg.fuelPrice, consL100:cfg.consL100, tollPerKm:cfg.tollPerKm};
+    },
+    render:render,
+    _est:compute             // debug only; never throws, returns null or finite object
+  };
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',render,{once:true});
+  else render();
+})();
+</script>
+<!-- SCORECOST-END (auto) -->
 </body>
 </html>
