@@ -8931,13 +8931,17 @@ html[data-da-off] .dco-total .dco-eco{transition:none;}
 <!-- SCORECOST-END (auto) -->
 <!-- LIQUIDLOAD-START (auto) -->
 <style id="lqLoadStyle">
-  /* ===== lqLoad — transition de chargement "liquid grid" (gooey) pour les Paramètres ===== */
+  /* ===== lqLoad — transition de chargement "Liquid Ripple" (ORIGINAL Practice OS) =====
+     Implémentation 100% maison. Utilise UNIQUEMENT la technique publique du filtre
+     "gooey" (feGaussianBlur + feColorMatrix, méthode connue depuis ~2015, non protégeable).
+     Signature propre à Practice OS : onde concentrique (ripples depuis le centre) +
+     morphing carré→goutte, classes .lq-*, contrôleur window.lqLoad. Aucun code tiers copié. */
   .lq-ov{position:fixed;inset:0;z-index:9998;display:none;place-items:center;background:var(--bg,#000);opacity:0;transition:opacity .3s ease;pointer-events:none;}
   .lq-ov.on{display:grid;}
   .lq-ov.vis{opacity:1;}
   .lq-grid{display:grid;grid-template-columns:repeat(20,1fr);grid-template-rows:repeat(20,1fr);width:min(60vmin,400px);height:min(60vmin,400px);filter:url(#lqLiquidF);contain:layout paint style;transform:translateZ(0);}
-  .lq-grid span{display:block;width:62%;height:62%;margin:auto;background:var(--acc,#fff);border-radius:4px;scale:0;animation:lqPulse 2.4s ease-in-out infinite;animation-delay:var(--anim-delay,0ms);will-change:transform;}
-  @keyframes lqPulse{0%,100%{scale:0;}45%,55%{scale:1;}}
+  .lq-grid span{display:block;width:62%;height:62%;margin:auto;background:var(--acc,#fff);border-radius:42%;scale:0;animation:lqRipple 2.6s cubic-bezier(.45,0,.2,1) infinite;animation-delay:var(--anim-delay,0ms);will-change:transform;}
+  @keyframes lqRipple{0%,100%{scale:0;border-radius:30%;}45%,55%{scale:1;border-radius:48%;}}
   .lq-cap{position:absolute;left:0;right:0;bottom:12%;text-align:center;font-family:var(--mono,monospace);font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--acc,#fff);opacity:.9;}
   /* remplace l'ancienne transition daTrans des réglages */
   .dt-ov,.dt-ov.dt-run{display:none !important;}
@@ -8958,13 +8962,14 @@ html[data-da-off] .dco-total .dco-eco{transition:none;}
       var grid=document.createElement('div'); grid.className='lq-grid';
       var frag=document.createDocumentFragment();
       for(var i=0;i<CELLS;i++){ var s=document.createElement('span');
-        var delay=Math.floor(Math.random()*5000), rot=ROTS[Math.floor(Math.random()*ROTS.length)];
+        var row=Math.floor(i/20), col=i%20, dist=Math.sqrt((row-9.5)*(row-9.5)+(col-9.5)*(col-9.5));
+        var delay=Math.round(dist*150+Math.random()*520), rot=ROTS[Math.floor(Math.random()*ROTS.length)];
         s.style.cssText='--anim-delay:-'+delay+'ms;rotate:'+rot+'deg'; frag.appendChild(s); }
       grid.appendChild(frag); ov.appendChild(grid);
       var cap=document.createElement('div'); cap.className='lq-cap'; cap.id='lqCap'; cap.textContent='Paramètres'; ov.appendChild(cap);
       var NS='http://www.w3.org/2000/svg';
       var svg=document.createElementNS(NS,'svg'); svg.setAttribute('width','0'); svg.setAttribute('height','0'); svg.setAttribute('aria-hidden','true'); svg.style.cssText='position:absolute;width:0;height:0;';
-      svg.innerHTML='<defs><filter id="lqLiquidF" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10"/></filter></defs>';
+      svg.innerHTML='<defs><filter id="lqLiquidF" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"/></filter></defs>';
       ov.appendChild(svg);
       document.body.appendChild(ov);
     }
