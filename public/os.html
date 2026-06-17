@@ -441,6 +441,20 @@
   /* Nuit : accentue le sombre partout (assombrit cartes/verre + voile global) */
   body[data-mode="night"] .card,body[data-mode="night"] .ov-panel,body[data-mode="night"] .panel,body[data-mode="night"] .media-now,body[data-mode="night"] .media-queue{background-color:rgba(4,4,7,.55) !important;}
   body[data-mode="night"]::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:rgba(0,0,0,.45);}
+  /* ===== Practice (grayscale) + Nuit : onglets & segments actifs en SOMBRE (harmonie monochrome) ===== */
+  body[data-mode="copilot"] .media-seg button.on, body[data-mode="night"] .media-seg button.on,
+  body[data-mode="copilot"] .tvw-regions button.on, body[data-mode="night"] .tvw-regions button.on,
+  body[data-mode="copilot"] .seg button.on, body[data-mode="night"] .seg button.on{
+    background:rgba(26,26,28,.94) !important; color:#fff !important; box-shadow:0 0 0 .5px rgba(255,255,255,.22), 0 3px 12px rgba(0,0,0,.45) !important;
+  }
+  body[data-mode="copilot"] .seg.da-ready .da-seg-knob, body[data-mode="night"] .seg.da-ready .da-seg-knob{
+    background:linear-gradient(180deg,#3a3a3e,#161618) !important; box-shadow:0 0 0 .5px rgba(255,255,255,.20), 0 2px 8px rgba(0,0,0,.45) !important;
+  }
+  body[data-mode="copilot"] .seg.da-ready button.on, body[data-mode="night"] .seg.da-ready button.on{ color:#fff !important; text-shadow:none !important; }
+  /* ===== Harmonie des images média : anneau cohérent + desaturation en modes monochromes ===== */
+  #mediaOv .mq-row .c, .tvw-card, .media-cover, #mCover{ box-shadow:0 6px 16px rgba(0,0,0,.4), inset 0 0 0 .5px rgba(255,255,255,.10); }
+  body[data-mode="copilot"] .mq-row .c, body[data-mode="copilot"] .tvw-card, body[data-mode="copilot"] .media-cover, body[data-mode="copilot"] #mCover, body[data-mode="copilot"] .mq-row .pl-art,
+  body[data-mode="night"] .mq-row .c, body[data-mode="night"] .tvw-card, body[data-mode="night"] .media-cover, body[data-mode="night"] #mCover{ filter:saturate(.72) contrast(1.02); }
   body[data-mode="magma"]{background-color:#1c0806 !important;background-image:radial-gradient(44% 54% at 16% 16%,rgba(255,90,30,.55),transparent 60%),radial-gradient(46% 56% at 85% 14%,rgba(230,40,20,.46),transparent 62%),radial-gradient(54% 62% at 74% 84%,rgba(255,170,60,.42),transparent 64%),radial-gradient(48% 58% at 14% 88%,rgba(140,30,10,.5),transparent 62%),linear-gradient(180deg,#160604,#1e0a06) !important;}
   /* ===== Liquid glass renforcé sur toutes les surfaces (frosted + saturation + reflet) ===== */
   .card,.ov-panel,.panel,.diag-panel,.seg,.media-seg,.navtabs,.mini-dock,.recents .rc,.contact,.fav,.tvw-regions button{-webkit-backdrop-filter:blur(26px) saturate(1.85);backdrop-filter:blur(26px) saturate(1.85);}
