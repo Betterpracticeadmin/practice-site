@@ -429,6 +429,14 @@
   body[data-mode="ultra"]{--acc:#FF1F1F;}
   body[data-mode="gt"]{--acc:#E0A33A;}
   body[data-mode="night"]{--acc:#B98BFF;}
+  /* ===== dégradés "ciel" curatés par mode (profond en haut -> pâle en bas, façon photo d'atmosphère) ===== */
+  body[data-mode="copilot"]{background-image:linear-gradient(180deg,#00133b 0%,#0a3a9e 27%,#2f7be0 50%,#9cc4e8 76%,#e0e5ef 100%) !important;}
+  body[data-mode="learning"]{background-image:linear-gradient(180deg,#04241a 0%,#0a5a3a 27%,#1f9e57 50%,#8fd9b0 76%,#e4efe7 100%) !important;}
+  body[data-mode="performance"]{background-image:linear-gradient(180deg,#2a0510 0%,#7a1020 27%,#e0331f 50%,#f2a07a 76%,#f1e3da 100%) !important;}
+  body[data-mode="ultra"]{background-image:linear-gradient(180deg,#2a0008 0%,#7a0018 27%,#ff1f3a 50%,#ff8a8f 76%,#f3e0e2 100%) !important;}
+  body[data-mode="gt"]{background-image:linear-gradient(180deg,#2a1602 0%,#7a4a10 27%,#e0a33a 50%,#f0d28a 76%,#f3eddd 100%) !important;}
+  body[data-mode="night"]{background-image:linear-gradient(180deg,#080626 0%,#241c66 27%,#6a4fd0 50%,#b29ce8 76%,#e7e3f3 100%) !important;}
+  body[data-mode="magma"]{background-image:linear-gradient(180deg,#20060a 0%,#6e1d10 27%,#ff5a1e 50%,#ffb07a 76%,#f2e4db 100%) !important;}
   /* strongly-coloured identities (dark base) */
   body[data-theme="dark"][data-mode="ultra"]{--bg:#040404;--card:rgba(255,40,40,.055);--border:rgba(255,55,55,.16);--dotc:rgba(255,40,40,.05);}
   body[data-theme="dark"][data-mode="gt"]{--bg:#12100b;--bg2:#191510;--card:rgba(224,163,58,.06);--border:rgba(224,163,58,.16);--txt:#F3EEE4;--dotc:rgba(224,163,58,.05);}
@@ -792,6 +800,19 @@
   .mq-row .x .b{font-size:13px;color:rgba(255,255,255,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .mq-row.on .x .a{color:#fff;}
   .mq-row .n{font-size:13px;color:rgba(255,255,255,.4);width:20px;text-align:center;flex-shrink:0;font-variant-numeric:tabular-nums;}
+  /* ===== Média : lignes plus ergonomiques + vignettes modernes (archi-minimal) ===== */
+  #mediaOv .mq-row{gap:14px;padding:10px 12px;border-radius:15px;transition:background .2s ease,transform .14s cubic-bezier(.34,1.5,.5,1);}
+  #mediaOv .mq-row:hover{background:rgba(255,255,255,.06);}
+  #mediaOv .mq-row:active{transform:scale(.99);}
+  #mediaOv .mq-row.on{background:color-mix(in srgb, var(--acc) 15%, rgba(255,255,255,.04));}
+  #mediaOv .mq-row .c{width:52px;height:52px;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.42),inset 0 0 0 .5px rgba(255,255,255,.10);}
+  #mediaOv .mq-row .x .a{font-size:15px;font-weight:600;letter-spacing:-.1px;}
+  #mediaOv .mq-row .x .b{font-size:12.5px;color:rgba(255,255,255,.5);}
+  #mediaOv .mq-row.on .x .a{color:var(--acc);}
+  #mediaOv .mq-row .n{font-size:11px;color:rgba(255,255,255,.30);font-family:var(--mono);width:22px;}
+  #mediaOv .mq-row.on .n{color:var(--acc);}
+  #mediaOv .mq-like svg{width:17px;height:17px;}
+  #mediaOv .media-queue h4{font-weight:600;letter-spacing:-.2px;opacity:.92;}
   /* ===== Bibliothèque audio gratuite — couvertures couleur unie + typo par genre, étagères horizontales (façon Kumo) ===== */
   #mQueue.mq-books{padding:4px 0 24px !important;-webkit-mask-image:none !important;mask-image:none !important;}
   .bookwall{display:flex;flex-direction:column;gap:26px;}
