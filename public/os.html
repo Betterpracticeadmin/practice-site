@@ -11,7 +11,7 @@
 <title>PRACTICE OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=DotGothic16&family=Playfair+Display:wght@600;700;800&family=Cinzel:wght@500;600;700&family=Orbitron:wght@600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=DotGothic16&family=Playfair+Display:wght@600;700;800&family=Cinzel:wght@500;600;700&family=Orbitron:wght@600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -3320,7 +3320,7 @@
   function playLiked(s){ if(typeof s.id==='string'&&/^https?:/.test(s.id)){ try{if(scWidget)scWidget.pause();}catch(e){} rpAudio.src=s.id; rpAudio.play().catch(function(){}); mediaSource='podcast';
       ['mTitle','mdTitle'].forEach(function(id){var e=$(id);if(e)e.textContent=s.title;}); ['mArtist','mdArtist'].forEach(function(id){var e=$(id);if(e)e.textContent=s.artist||'';}); setMCover(s.art?'url('+s.art+')':''); if($('mdCover'))$('mdCover').style.backgroundImage=s.art?'url('+s.art+')':'';
       document.body.setAttribute('data-dock','1'); $('miniDock').classList.add('show'); return; }
-    if(!scWidget)return; scWidget.getSounds(function(list){ for(var i=0;i<(list||[]).length;i++){ if(list[i].id===s.id){ scWidget.skip(i); mediaSource='sc'; [].forEach.call($('mediaSeg').children,function(b){b.classList.toggle('on',b.dataset.s==='sc');}); $('mqLabel').textContent='File d\'attente'; setTimeout(function(){updateTrack();buildQueue();},400); return; } } toast('Indisponible dans la playlist actuelle.'); }); }
+    if(!scWidget)return; scWidget.getSounds(function(list){ for(var i=0;i<(list||[]).length;i++){ if(list[i].id===s.id){ scWidget.skip(i); mediaSource='sc'; [].forEach.call($('mediaSeg').children,function(b){b.classList.toggle('on',b.dataset.s==='sc');}); $('mqLabel').textContent='File d\'attente'; setTimeout(function(){updateTrack();openSCList();},400); return; } } toast('Indisponible dans la playlist actuelle.'); }); }
   /* pochette + fond flouté (signature Apple Music) synchronisés */
   function setMCover(b){ if($('mCover'))$('mCover').style.backgroundImage=b; var m=$('mediaBlur'); if(m)m.style.backgroundImage=b; extractCover(b); }
   /* ===== couleur extraite de la pochette -> teinte tout le lecteur ===== */
@@ -3355,7 +3355,7 @@
       if($('mLike'))$('mLike').classList.toggle('on',s.id&&likedIdx(s.id)>=0);
       document.body.setAttribute('data-dock','1'); $('miniDock').classList.add('show');
     });
-    scWidget.getCurrentSoundIndex(function(i){ mIdx=i; highlightQueue(); }); }
+    scWidget.getCurrentSoundIndex(function(i){ mIdx=i; highlightQueue(); if(_llCtx==='sc'&&window.llSetActive)window.llSetActive($('mQueue'),i); }); }
   function buildQueue(){ if(!scWidget||!$('mQueue'))return; scWidget.getSounds(function(list){ mQueue=list||[]; var L=$('mQueue'); L.innerHTML='';
       mQueue.forEach(function(s,i){ var row=document.createElement('div'); row.className='mq-row'+(i===mIdx?' on':''); row.dataset.i=i;
         var a=art(s,'120x120'); row.innerHTML='<span class="n">'+(i+1)+'</span><span class="c" style="background-image:'+(a?'url('+a+')':'none')+'"></span><span class="x"><span class="a">'+(s.title||'—')+'</span><span class="b">'+((s.user&&s.user.username)||'')+'</span></span><button class="mq-like'+(likedIdx(s.id)>=0?' on':'')+'" title="Aimer">'+HEART+'</button>';
@@ -3365,10 +3365,10 @@
   function highlightQueue(){ var L=$('mQueue'); if(!L)return; [].forEach.call(L.children,function(r){ r.classList.toggle('on',+r.dataset.i===mIdx); var on=+r.dataset.i===mIdx; if(on)r.scrollIntoView({block:'nearest'}); }); }
   function initPlayer(){ if(typeof SC==='undefined'||!$('scFrame'))return; try{
     scWidget=SC.Widget($('scFrame'));
-    scWidget.bind(SC.Widget.Events.READY,function(){ updateTrack(); buildQueue(); });
+    scWidget.bind(SC.Widget.Events.READY,function(){ updateTrack(); scWidget.getSounds(function(list){ mQueue=list||[]; }); });
     scWidget.bind(SC.Widget.Events.PLAY,function(){ mediaSource='sc'; try{var ra=$('rpAudio');if(ra)ra.pause();}catch(e){} setPlayIcon(true); updateTrack(); });
     scWidget.bind(SC.Widget.Events.PAUSE,function(){ setPlayIcon(false); });
-    scWidget.bind(SC.Widget.Events.FINISH,function(){ scWidget.next(); });
+    scWidget.bind(SC.Widget.Events.FINISH,function(){ if(flowOn){var i=_rndIdx();if(i>=0){scWidget.skip(i);return;}} scWidget.next(); });
     scWidget.bind(SC.Widget.Events.PLAY_PROGRESS,function(e){ var pct=Math.round((e.relativePosition||0)*100);
       if($('plFill'))$('plFill').style.width=pct+'%'; if($('mFill'))$('mFill').style.width=pct+'%'; if($('mdFill'))$('mdFill').style.width=pct+'%';
       if($('mCur'))$('mCur').textContent=fmtT(e.currentPosition); });
@@ -3379,7 +3379,7 @@
     now.addEventListener('mousemove',function(e){ var r=now.getBoundingClientRect(); var px=(e.clientX-r.left)/r.width-0.5, py=(e.clientY-r.top)/r.height-0.5; cov.style.setProperty('--tiltY',(px*15).toFixed(1)+'deg'); cov.style.setProperty('--tiltX',(-py*15).toFixed(1)+'deg'); });
     now.addEventListener('mouseleave',function(){ cov.style.setProperty('--tiltX','0deg'); cov.style.setProperty('--tiltY','0deg'); });
     try{ window.addEventListener('deviceorientation',function(e){ if(!$('mediaOv')||!$('mediaOv').classList.contains('show'))return; var g=Math.max(-22,Math.min(22,e.gamma||0)), b=Math.max(-22,Math.min(22,(e.beta||0)-28)); cov.style.setProperty('--tiltY',(g*0.6).toFixed(1)+'deg'); cov.style.setProperty('--tiltX',(-b*0.6).toFixed(1)+'deg'); }); }catch(e){} }
-  function openMedia(){ $('mediaOv').classList.add('show'); initViz(); initTilt(); updateTrack(); buildQueue(); }
+  function openMedia(){ $('mediaOv').classList.add('show'); initViz(); initTilt(); updateTrack(); setMediaSource(mediaSource||'sc'); }
   function closeMedia(){ $('mediaOv').classList.remove('show'); }
   /* ---- Média passager : YouTube / Spotify / Apple Music par intégration (sans clé) ---- */
   var paxSrc='yt';
@@ -3547,11 +3547,33 @@
   }
   function rowHTML(art,a,b,n,live){ return '<span class="n">'+(n||'')+'</span><span class="c" style="background-image:'+(art?'url('+art+')':'none')+'"></span><span class="x"><span class="a">'+a+'</span><span class="b">'+(b||'')+'</span></span>'+(live?'<span class="mq-live">LIVE</span>':''); }
   function fillRows(list,live){ var L=$('mQueue'); L.classList.remove('mq-books','mq-chapters','mq-stations'); L.innerHTML=''; list.forEach(function(s,i){ var row=document.createElement('div'); row.className='mq-row'; row.innerHTML=rowHTML(s.art,s.title,s.artist,'',live); row.addEventListener('click',function(){ playAudioItem(i); }); L.appendChild(row); }); }
-  function setMediaSource(src){ mediaSource=src; [].forEach.call($('mediaSeg').children,function(b){b.classList.toggle('on',b.dataset.s===src);}); var sr=$('mediaSearch'); var _ml=$('mQueue'); if(_ml)_ml.classList.remove('mq-books','mq-chapters','mq-stations'); mqWipe();
-    if(src==='sc'){ sr.style.display='block'; sr.placeholder='Rechercher un titre…'; sr.value=''; $('mqLabel').textContent='File d\'attente'; buildQueue(); }
+  /* ===== Liquid media — hub (playlists/catégories) + listes Bricolage + Flow ===== */
+  var flowOn=false, _llCtx='';
+  function _scItems(){ return (mQueue||[]).map(function(s,i){ return { title:s.title||'—', sub:(s.user&&s.user.username)||'SoundCloud', cover:art(s,'120x120'), onPlay:function(){ flowOff(); mediaSource='sc'; if(scWidget){scWidget.skip(i);setTimeout(updateTrack,400);} if(window.llSetActive)window.llSetActive($('mQueue'),i); } }; }); }
+  function _likedItems(){ return (mLikes||[]).map(function(s){ return { title:s.title||'—', sub:s.artist||'', cover:s.art||'', onPlay:function(){ flowOff(); playLiked(s); } }; }); }
+  function _bookItems(catKey){ return (BOOKS||[]).filter(function(b){return b.c===catKey;}).map(function(b){ return { title:b.t, sub:b.a, cover:bookCover(b), onPlay:function(){ playBook(b); } }; }); }
+  function showMusicHub(){ var mq=$('mQueue'); if(!mq||!window.llHub)return; _llCtx='hub-music'; mediaSource='sc'; if($('mqLabel'))$('mqLabel').textContent='Musique';
+    var scCov=(mQueue||[]).slice(0,4).map(function(s){return art(s,'120x120');}).filter(Boolean);
+    var favCov=(mLikes||[]).slice(0,4).map(function(s){return s.art;}).filter(Boolean);
+    var cards=[ {flow:true,title:'Flow',count:0,covers:[],onOpen:startFlow},
+      {title:'Pigeons & Planes',count:(mQueue||[]).length,noun:'titres',covers:scCov,onOpen:openSCList} ];
+    if((mLikes||[]).length) cards.push({title:'Mes favoris ♥',count:mLikes.length,noun:'titres',covers:favCov,onOpen:function(){openLikedList({back:showMusicHub});}});
+    window.llHub(mq,cards); }
+  function openSCList(){ var mq=$('mQueue'); if(!mq||!window.llList)return; _llCtx='sc'; mediaSource='sc'; window.llList(mq,_scItems(),{title:'Pigeons & Planes',back:showMusicHub}); if(typeof mIdx==='number'&&mIdx>=0&&window.llSetActive)window.llSetActive(mq,mIdx); }
+  function openLikedList(opts){ opts=opts||{}; var mq=$('mQueue'); if(!mq||!window.llList)return; _llCtx='liked'; window.llList(mq,_likedItems(),{title:'Mes favoris ♥',back:opts.back}); }
+  function showBooksHub(){ var mq=$('mQueue'); if(!mq||!window.llHub)return; _llCtx='hub-books'; if($('mqLabel'))$('mqLabel').textContent='Livres audio · gratuit';
+    var cards=(BOOK_CATS||[]).map(function(c){ var items=(BOOKS||[]).filter(function(b){return b.c===c[0];}); return { title:c[1], count:items.length, noun:'livres', covers:items.slice(0,4).map(bookCover), onOpen:function(){ openBookCat(c); } }; });
+    window.llHub(mq,cards); }
+  function openBookCat(c){ var mq=$('mQueue'); if(!mq||!window.llList)return; _llCtx='book'; window.llList(mq,_bookItems(c[0]),{title:c[1],back:showBooksHub}); }
+  function _rndIdx(){ var n=(mQueue||[]).length; return n?Math.floor(Math.random()*n):-1; }
+  function startFlow(){ if(!scWidget)return; if(!(mQueue||[]).length){ scWidget.getSounds(function(list){ mQueue=list||[]; startFlow(); }); return; }
+    flowOn=true; mediaSource='sc'; document.body.setAttribute('data-flow','1'); var i=_rndIdx(); if(i>=0){ scWidget.skip(i); try{scWidget.play();}catch(e){} setTimeout(updateTrack,400); } if(typeof toast==='function')toast('Flow — lecture infinie ⚡'); }
+  function flowOff(){ if(flowOn){ flowOn=false; document.body.removeAttribute('data-flow'); } }
+  function setMediaSource(src){ mediaSource=src; _llCtx=''; [].forEach.call($('mediaSeg').children,function(b){b.classList.toggle('on',b.dataset.s===src);}); var sr=$('mediaSearch'); var _ml=$('mQueue'); if(_ml)_ml.classList.remove('mq-books','mq-chapters','mq-stations'); mqWipe();
+    if(src==='sc'){ sr.style.display='block'; sr.placeholder='Rechercher un titre…'; sr.value=''; if(!(mQueue||[]).length&&scWidget){ scWidget.getSounds(function(list){ mQueue=list||[]; showMusicHub(); }); } else showMusicHub(); }
     else if(src==='radio'){ sr.style.display='block'; sr.placeholder='Rechercher une station…'; sr.value=''; $('mqLabel').textContent='Stations'; rpList=RADIOS.map(function(s){return {title:s.n,artist:s.d,url:s.u,art:s.g||'',live:true};}); renderRadio(rpList); }
-    else if(src==='liked'){ sr.style.display='block'; sr.placeholder='Filtrer mes favoris…'; sr.value=''; $('mqLabel').textContent='Mes favoris ♥'; renderLiked(); }
-    else { sr.style.display='block'; sr.placeholder='Rechercher un livre…'; sr.value=''; renderBooks(); } }
+    else if(src==='liked'){ sr.style.display='block'; sr.placeholder='Filtrer mes favoris…'; sr.value=''; openLikedList(); }
+    else { sr.style.display='block'; sr.placeholder='Rechercher un livre…'; sr.value=''; showBooksHub(); } }
   function searchRadio(q){ fetch('https://de1.api.radio-browser.info/json/stations/search?limit=40&hidebroken=true&order=clickcount&reverse=true&name='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(a){
       rpList=(a||[]).filter(function(s){return /^https:/.test(s.url_resolved||s.url||'');}).slice(0,30).map(function(s){return {title:s.name,artist:(s.country||'')+(s.bitrate?' · '+s.bitrate+'k':''),url:s.url_resolved||s.url,art:s.favicon||'',live:true};});
       if(!rpList.length){$('mQueue').innerHTML='<div style="color:var(--dim);font-size:12px;padding:10px 4px">Aucune station HTTPS trouvée.</div>';return;} renderRadio(rpList); }).catch(function(){}); }
@@ -3569,8 +3591,8 @@
     document.body.setAttribute('data-dock','1'); $('miniDock').classList.add('show');
     [].forEach.call($('mQueue').children,function(r,k){ if(r.classList)r.classList.toggle('on',k===i); }); }
   function mediaToggle(){ if(mediaSource==='sc'){ if(scWidget)scWidget.toggle(); } else { if(rpAudio.paused){ if(!rpAudio.src&&rpList.length)playAudioItem(0); else rpAudio.play().catch(function(){}); } else rpAudio.pause(); } }
-  function mediaNext(){ if(mediaSource==='sc'){ if(scWidget){scWidget.next();setTimeout(updateTrack,500);} } else if(rpList.length){ playAudioItem((rpIdx+1)%rpList.length); } }
-  function mediaPrev(){ if(mediaSource==='sc'){ if(scWidget){scWidget.prev();setTimeout(updateTrack,500);} } else if(rpList.length){ playAudioItem((rpIdx-1+rpList.length)%rpList.length); } }
+  function mediaNext(){ if(mediaSource==='sc'){ if(scWidget){ if(flowOn){var i=_rndIdx();if(i>=0)scWidget.skip(i);else scWidget.next();}else scWidget.next(); setTimeout(updateTrack,500);} } else if(rpList.length){ playAudioItem((rpIdx+1)%rpList.length); } }
+  function mediaPrev(){ if(mediaSource==='sc'){ if(scWidget){ if(flowOn){var j=_rndIdx();if(j>=0)scWidget.skip(j);else scWidget.prev();}else scWidget.prev(); setTimeout(updateTrack,500);} } else if(rpList.length){ playAudioItem((rpIdx-1+rpList.length)%rpList.length); } }
   rpAudio.addEventListener('play',function(){ setPlayIcon(true); });
   rpAudio.addEventListener('pause',function(){ setPlayIcon(false); });
   rpAudio.addEventListener('ended',function(){ if(mediaSource==='podcast')mediaNext(); });
@@ -3592,10 +3614,11 @@
     if(!res.length){ L.innerHTML='<div style="color:var(--dim);font-size:12px;padding:12px 4px">Aucun favori trouvé.</div>'; return; }
     res.forEach(function(s){ var row=document.createElement('div'); row.className='mq-row'; row.innerHTML='<span class="c" style="background-image:'+(s.art?'url('+s.art+')':'none')+'"></span><span class="x"><span class="a">'+(s.title||'—')+'</span><span class="b">'+(s.artist||'')+'</span></span>'; row.addEventListener('click',function(){ playLiked(s); }); L.appendChild(row); });
   }
-  $('mediaSearch').addEventListener('input',function(){ var q=this.value.trim(); clearTimeout(rpTimer);
-    if(mediaSource==='sc'){ filterSC(q); }
-    else if(mediaSource==='liked'){ filterLiked(q); }
-    else if(mediaSource==='podcast'){ renderBooks(q); }
+  function _filterItems(items,q){ q=(q||'').toLowerCase(); return items.filter(function(it){ return ((it.title||'')+' '+(it.sub||'')).toLowerCase().indexOf(q)>=0; }); }
+  $('mediaSearch').addEventListener('input',function(){ var q=this.value.trim(); clearTimeout(rpTimer); var mq=$('mQueue');
+    if(mediaSource==='sc'){ if(!q){ showMusicHub(); } else { _llCtx='sc'; window.llList(mq,_filterItems(_scItems(),q),{title:'Recherche'}); } }
+    else if(mediaSource==='liked'){ if(!q){ openLikedList(); } else { _llCtx='liked'; window.llList(mq,_filterItems(_likedItems(),q),{title:'Favoris'}); } }
+    else if(mediaSource==='podcast'){ if(!q){ showBooksHub(); } else { _llCtx='book'; var all=[]; (BOOK_CATS||[]).forEach(function(c){ all=all.concat(_bookItems(c[0])); }); window.llList(mq,_filterItems(all,q),{title:'Recherche'}); } }
     else if(mediaSource==='radio'){ if(q.length<2){ rpList=RADIOS.map(function(s){return {title:s.n,artist:s.d,url:s.u,art:s.g||'',live:true};}); renderRadio(rpList); } else { rpTimer=setTimeout(function(){ searchRadio(q); },420); } }
   });
 
@@ -6938,7 +6961,16 @@ html[data-da-off] .dvf-fx .dvf-rev{ color:inherit; text-shadow:none; }
   --mAccent: var(--mAccent, #6f7bd6);
   --mAccentT: var(--mAccentT, rgba(111,123,214,.22));
   --mAccentG: var(--mAccentG, rgba(111,123,214,.55));
+  /* l'overlay média est TOUJOURS sombre (façon Apple Music) : on force un
+     contexte de variables sombres pour que listes/cartes/stations restent
+     lisibles même quand l'app est en thème clair. --acc (accent mode) inchangé. */
+  --txt:#F4F5F7; --dim:rgba(255,255,255,.62); --faint:rgba(255,255,255,.42);
+  --card:rgba(255,255,255,.06); --border:rgba(255,255,255,.12);
+  --bg:#0b0b0d; --bg2:#16171a;
 }
+/* en thème clair, l'accent (souvent foncé) deviendrait illisible sur l'overlay
+   sombre : on le relève vers un argent clair pour les surbrillances média. */
+body[data-theme="light"] #mediaOv{ --acc:#cfd2d7; }
 
 /* =========================================================
    1. FLOWING AMBIENT MESH BACKGROUND (album color)
@@ -8993,5 +9025,667 @@ html[data-da-off] .dco-total .dco-eco{transition:none;}
 })();
 </script>
 <!-- LIQUIDLOAD-END (auto) -->
+<!-- LIQUIDLIST-START (auto) -->
+<style id="llStyle">
+/* ============ Practice OS — Liquid Media (list + hub) merged ============ */
+/* Namespaced .ll-* / keyframes ll*. Host theme vars only. No brand hardcoding.
+   ONE shared floating cover (.ll-float). Monograms split by context:
+   .ll-thmono (list thumb) / .ll-cmono (hub mosaic) / .ll-fmono (shared float). */
+
+/* ===================== shared primitives ===================== */
+.ll-wrap,.ll-hub{position:relative;width:100%;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.ll-wrap{padding:4px 0 28px}
+.ll-hub{display:block;padding:4px 2px 28px;font-family:"Bricolage Grotesque",system-ui,sans-serif;color:var(--txt)}
+.ll-wrap *,.ll-hub *,.ll-hub *::before,.ll-hub *::after{box-sizing:border-box}
+
+/* shared empty state (works for both list + hub) */
+.ll-empty{padding:40px 22px;color:var(--dim);font-size:14px;font-family:var(--mono),ui-monospace,monospace;letter-spacing:.03em}
+
+/* shared trailing play affordance + equalizer (list rows AND hub active card) */
+.ll-go{flex:0 0 auto;width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--dim);opacity:0;transform:scale(.85);transition:opacity .2s,transform .2s,color .2s,background .2s}
+.ll-go svg{width:14px;height:14px;display:block}
+.ll-eq{display:inline-flex;align-items:flex-end;gap:2px;height:13px}
+.ll-eq i{width:2.5px;background:var(--acc);border-radius:2px;height:30%;animation:llEq .9s ease-in-out infinite}
+.ll-eq i:nth-child(2){animation-delay:.25s}
+.ll-eq i:nth-child(3){animation-delay:.5s}
+@keyframes llEq{0%,100%{height:25%}50%{height:100%}}
+
+/* ===================== LIST ===================== */
+.ll-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;padding:6px 22px 18px}
+.ll-htitle{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(26px,4.2vw,40px);line-height:.96;letter-spacing:-.02em;color:var(--txt);margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.ll-back{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono),ui-monospace,monospace;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);background:transparent;border:1px solid var(--border);border-radius:999px;padding:7px 13px;cursor:pointer;transition:color .18s,border-color .18s,background .18s;white-space:nowrap;flex:0 0 auto}
+.ll-back:hover{color:var(--txt);border-color:var(--acc);background:color-mix(in srgb,var(--acc) 9%,transparent)}
+.ll-back:active{transform:translateY(1px)}
+.ll-back:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+.ll-list{list-style:none;margin:0;padding:0;display:block}
+.ll-row{position:relative;display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--border);padding:18px 22px;cursor:pointer;color:var(--txt);font:inherit;transition:opacity .28s ease,transform .28s ease;will-change:opacity}
+.ll-row:last-child{border-bottom:1px solid var(--border)}
+.ll-row:focus-visible{outline:2px solid var(--acc);outline-offset:-2px;border-radius:6px}
+
+.ll-rail{flex:0 0 auto;width:3px;align-self:stretch;border-radius:3px;background:transparent;transition:background .2s}
+
+.ll-thumb{flex:0 0 auto;width:58px;height:58px;border-radius:13px;overflow:hidden;position:relative;background:color-mix(in srgb,var(--acc) 16%,var(--card));border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.ll-thumb img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0}
+.ll-thmono{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:20px;letter-spacing:-.01em;color:var(--acc);text-transform:uppercase;line-height:1;user-select:none}
+
+.ll-body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ll-title{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:clamp(19px,2.6vw,27px);line-height:1.05;letter-spacing:-.015em;color:var(--txt);transition:color .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.ll-sub{font-size:13px;letter-spacing:.01em;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+
+.ll-row.ll-on .ll-rail{background:var(--acc)}
+.ll-row.ll-on .ll-title{color:var(--acc)}
+.ll-row.ll-on .ll-go{opacity:1;transform:scale(1);color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent)}
+
+/* ===================== HUB ===================== */
+.ll-flow{position:relative;width:100%;display:flex;align-items:center;gap:18px;margin:0 0 22px;padding:22px 24px;min-height:118px;border:0;cursor:pointer;border-radius:22px;overflow:hidden;color:#fff;text-align:left;font-family:"Bricolage Grotesque",system-ui,sans-serif;background:radial-gradient(120% 160% at 0% 0%, color-mix(in srgb,var(--acc) 92%,#fff) 0%, transparent 55%),linear-gradient(135deg, var(--acc) 0%, color-mix(in srgb,var(--acc) 62%,#000) 100%);box-shadow:0 18px 40px -18px color-mix(in srgb,var(--acc) 80%,transparent),inset 0 1px 0 rgba(255,255,255,.22);transition:transform .32s cubic-bezier(.2,.8,.2,1), box-shadow .32s, filter .28s;-webkit-appearance:none;appearance:none}
+.ll-flow::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(80% 120% at 100% 110%, rgba(255,255,255,.18), transparent 60%);mix-blend-mode:screen}
+.ll-flow:hover{transform:translateY(-3px);box-shadow:0 26px 54px -18px color-mix(in srgb,var(--acc) 90%,transparent),inset 0 1px 0 rgba(255,255,255,.28)}
+.ll-flow:active{transform:translateY(0) scale(.992)}
+.ll-flow:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.ll-flow>*{position:relative;z-index:1}
+.ll-flowGlyph{flex:0 0 auto;width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.ll-flowTxt{min-width:0;display:flex;flex-direction:column;gap:3px}
+.ll-flowKick{font-family:var(--mono),ui-monospace,monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.82}
+.ll-flowTitle{font-size:30px;font-weight:800;line-height:1;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ll-flowSub{font-size:13px;opacity:.9;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ll-flowArrow{margin-left:auto;flex:0 0 auto;color:#fff;opacity:.9;width:30px;height:30px;transition:transform .3s}
+.ll-flowArrow svg{width:18px;height:18px}
+.ll-flow:hover .ll-flowArrow{transform:translateX(4px)}
+
+.ll-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+@media(min-width:560px){.ll-grid{grid-template-columns:repeat(auto-fill,minmax(176px,1fr))}}
+@media(min-width:900px){.ll-grid{gap:18px}}
+
+.ll-card{position:relative;display:flex;flex-direction:column;cursor:pointer;padding:0;border:1px solid var(--border);border-radius:18px;overflow:hidden;text-align:left;background:var(--card);color:var(--txt);width:100%;-webkit-appearance:none;appearance:none;font-family:inherit;transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .3s}
+.ll-card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--acc) 55%,var(--border));box-shadow:0 22px 44px -22px rgba(0,0,0,.55),0 0 0 1px color-mix(in srgb,var(--acc) 22%,transparent)}
+.ll-card:active{transform:translateY(-1px) scale(.994)}
+.ll-card:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+.ll-mosaic{position:relative;width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;background:var(--bg2);overflow:hidden}
+.ll-mosaic.ll-m1{grid-template-columns:1fr;grid-template-rows:1fr}
+.ll-cell{position:relative;overflow:hidden;background:linear-gradient(135deg, color-mix(in srgb,var(--acc) 16%,var(--bg2)), color-mix(in srgb,var(--acc) 4%,var(--bg2)))}
+.ll-cell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--bg2);z-index:1}
+.ll-cmono{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;letter-spacing:-.02em;color:color-mix(in srgb,var(--acc) 78%,var(--txt));font-size:clamp(20px,7vw,34px);font-family:"Bricolage Grotesque",sans-serif;text-transform:uppercase;user-select:none;z-index:0}
+.ll-mosaic.ll-m1 .ll-cmono{font-size:clamp(30px,12vw,56px)}
+.ll-mscrim{position:absolute;left:0;right:0;bottom:0;height:46%;pointer-events:none;z-index:2;background:linear-gradient(to top, color-mix(in srgb,var(--card) 92%,transparent), transparent)}
+.ll-playPin{position:absolute;right:12px;bottom:12px;width:42px;height:42px;z-index:3;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;background:var(--acc);box-shadow:0 8px 20px -6px color-mix(in srgb,var(--acc) 85%,transparent);opacity:0;transform:translateY(8px) scale(.85);transition:opacity .26s,transform .26s;pointer-events:none}
+.ll-card:hover .ll-playPin{opacity:1;transform:translateY(0) scale(1)}
+
+.ll-meta{padding:12px 14px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.ll-ttl{font-size:16px;font-weight:700;line-height:1.18;letter-spacing:-.01em;color:var(--txt);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical}
+.ll-cnt{font-family:var(--mono),ui-monospace,monospace;font-size:11.5px;letter-spacing:.06em;color:var(--dim);text-transform:uppercase}
+
+.ll-card.ll-on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc), 0 18px 40px -22px color-mix(in srgb,var(--acc) 70%,transparent)}
+.ll-card.ll-on .ll-cnt{color:var(--acc)}
+.ll-card.ll-on .ll-playPin{opacity:1;transform:none}
+.ll-card.ll-on .ll-go{display:flex!important;opacity:1;transform:scale(1);color:var(--acc)}
+.ll-flow.ll-on{box-shadow:0 0 0 2px #fff,0 26px 54px -18px color-mix(in srgb,var(--acc) 90%,transparent),inset 0 1px 0 rgba(255,255,255,.28)}
+
+/* ===================== SHARED floating cover (desktop hover) ===================== */
+.ll-float{position:fixed;top:0;left:0;width:168px;height:168px;border-radius:18px;overflow:hidden;pointer-events:none;z-index:9999;opacity:0;transform:translate3d(-9999px,-9999px,0) scale(.92);transition:opacity .22s ease,transform .22s cubic-bezier(.2,.8,.2,1);border:1px solid var(--border);background:var(--card);box-shadow:0 24px 60px -18px rgba(0,0,0,.55)}
+.ll-float.ll-vis{opacity:1}
+.ll-float img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0}
+.ll-float .ll-fmono{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:46px;color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,var(--card));text-transform:uppercase;user-select:none}
+
+/* ===================== DESKTOP (precise pointer + hover) ===================== */
+@media (hover:hover) and (pointer:fine){
+  .ll-thumb{display:none}
+  .ll-list.ll-hovering .ll-row{opacity:.4}
+  .ll-list.ll-hovering .ll-row:hover{opacity:1}
+  .ll-row:hover .ll-title{color:var(--acc)}
+  .ll-row:hover .ll-rail{background:var(--acc)}
+  .ll-row:hover .ll-go{opacity:1;transform:scale(1);color:var(--acc)}
+  .ll-row:hover{transform:translateX(6px)}
+}
+
+/* ===================== TOUCH / coarse ===================== */
+@media (hover:none),(pointer:coarse){
+  .ll-float{display:none!important}
+  .ll-go{opacity:.55;transform:scale(1)}
+  .ll-row:active{background:color-mix(in srgb,var(--acc) 8%,transparent)}
+}
+
+/* ===================== reduced motion / DA off ===================== */
+@media (prefers-reduced-motion:reduce){
+  .ll-hub *,.ll-row,.ll-title,.ll-go,.ll-float,.ll-rail,.ll-back,.ll-thumb{transition:none!important;animation:none!important}
+  .ll-row:hover,.ll-card:hover,.ll-flow:hover{transform:none!important}
+  .ll-eq i{animation:none!important;height:60%!important}
+}
+html[data-da-off] .ll-hub *,
+html[data-da-off] .ll-row,
+html[data-da-off] .ll-title,
+html[data-da-off] .ll-go,
+html[data-da-off] .ll-rail,
+html[data-da-off] .ll-back,
+html[data-da-off] .ll-thumb,
+html[data-da-off] .ll-float{transition:none!important;animation:none!important}
+html[data-da-off] .ll-row:hover,
+html[data-da-off] .ll-card:hover,
+html[data-da-off] .ll-flow:hover{transform:none!important}
+html[data-da-off] .ll-eq i{animation:none!important;height:60%!important}
+</style>
+<script>
+/* ============ Practice OS — Liquid Media (list + hub) merged injectable ============ */
+/* Globals: window.llList, window.llHub, window.llSetActive, window.llDestroy.
+   Idempotent, null/NaN-safe, never throws. Namespaced .ll-* / keyframes ll*.
+   ONE shared floating-cover element + ONE shared cleanup registry. */
+(function(){
+  "use strict";
+  if (window.llList && window.llHub && window.llDestroy) return; /* idempotent define */
+
+  var DOC = document;
+
+  var PLAY_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 5l12 7-12 7V5z" fill="currentColor"/></svg>';
+  var EQ_HTML  = '<span class="ll-eq" aria-hidden="true"><i></i><i></i><i></i></span>';
+
+  /* ---------- shared helpers ---------- */
+  function esc(s){ return String(s==null?"":s); }
+  function isUrl(u){ return typeof u==="string" && u.length>0; }
+
+  function monogram(title){
+    var t = esc(title).trim();
+    if(!t) return "?";
+    var parts = t.split(/\s+/);
+    var a = parts[0] ? parts[0].charAt(0) : "";
+    var b = parts.length>1 ? parts[1].charAt(0) : (parts[0]?parts[0].charAt(1):"");
+    var out = (a + (b||"")).toUpperCase();
+    return out || "?";
+  }
+
+  function isDesktop(){
+    try{ return !!(window.matchMedia && window.matchMedia("(hover:hover) and (pointer:fine)").matches); }
+    catch(e){ return false; }
+  }
+  function motionOff(){
+    try{
+      if(DOC.documentElement && DOC.documentElement.hasAttribute("data-da-off")) return true;
+      return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion:reduce)").matches);
+    }catch(e){ return false; }
+  }
+
+  /* safe <img>: on error removes itself (CSS/monogram fallback shows) + optional onFail.
+     onerror wired BEFORE src so a synchronously-failing cached image is caught.
+     NEVER sets src to '' (empty src reloads document URL in some browsers). */
+  function makeImg(src, onFail){
+    if(!isUrl(src)) return null;
+    var img = DOC.createElement("img");
+    img.alt = ""; img.loading = "lazy"; img.decoding = "async";
+    img.onerror = function(){
+      img.onerror = null;
+      if(img.parentNode){ img.parentNode.removeChild(img); }
+      if(typeof onFail === "function"){ try{ onFail(); }catch(e){} }
+    };
+    try{ img.src = src; }catch(e){ return null; }
+    return img;
+  }
+
+  /* ============================================================
+     SHARED CLEANUP REGISTRY
+     Re-rendering ANYTHING on a container first tears down whatever
+     was there (list OR hub), so the two never leak into each other
+     when the host reuses #mQueue.
+     ============================================================ */
+  function runCleanup(container){
+    if(container && typeof container.__llCleanup === "function"){
+      try{ container.__llCleanup(); }catch(e){}
+    }
+    if(container){ container.__llCleanup = null; }
+  }
+
+  /* ============================================================
+     SHARED FLOATING COVER PREVIEW (desktop hover only)
+     One element on <body>, reference-counted across components.
+     Either component drives it via floatAcquire()/floatRelease().
+     ============================================================ */
+  var FLOAT = null;       /* shared .ll-float element */
+  var FLOAT_USERS = 0;    /* active acquisitions */
+  var FRAF = 0;           /* rAF id for follow easing */
+  var ftx=0, fty=0, fcx=0, fcy=0, fprimed=false, fnoMotion=false;
+
+  function floatEnsure(){
+    if(FLOAT && FLOAT.parentNode) return FLOAT;
+    FLOAT = DOC.createElement("div");
+    FLOAT.className = "ll-float";
+    if(DOC.body){ DOC.body.appendChild(FLOAT); }
+    return FLOAT;
+  }
+  function floatAcquire(){
+    floatEnsure();
+    FLOAT_USERS++;
+    fnoMotion = motionOff();
+  }
+  function floatRelease(){
+    FLOAT_USERS--;
+    if(FLOAT_USERS<=0){
+      FLOAT_USERS = 0;
+      floatHide();
+      if(FRAF){ try{ cancelAnimationFrame(FRAF); }catch(e){} FRAF=0; }
+      if(FLOAT && FLOAT.parentNode){
+        try{ FLOAT.parentNode.removeChild(FLOAT); }catch(e){}
+      }
+      FLOAT = null;
+    }
+  }
+  function floatFmono(title){
+    var m = DOC.createElement("div");
+    m.className = "ll-fmono";
+    m.textContent = monogram(title);
+    return m;
+  }
+  /* content: cover url ('' => monogram) + title for the monogram fallback */
+  function floatSet(cover, title){
+    if(!FLOAT) return;
+    FLOAT.innerHTML = "";
+    if(isUrl(cover)){
+      var img = makeImg(cover, function(){
+        if(FLOAT){ FLOAT.innerHTML = ""; FLOAT.appendChild(floatFmono(title)); }
+      });
+      if(img){ FLOAT.appendChild(img); }
+      else { FLOAT.appendChild(floatFmono(title)); }
+    } else {
+      FLOAT.appendChild(floatFmono(title));
+    }
+  }
+  function floatShow(cover, title){
+    floatEnsure();
+    floatSet(cover, title);
+    FLOAT.classList.add("ll-vis");
+    fprimed = false; /* next move snaps to cursor, then eases */
+  }
+  function floatHide(){ if(FLOAT){ FLOAT.classList.remove("ll-vis"); } }
+  function floatApply(){
+    if(!FLOAT) return;
+    FLOAT.style.transform = "translate3d("+fcx+"px,"+fcy+"px,0) scale(1)";
+  }
+  function floatTick(){
+    FRAF = 0;
+    if(!FLOAT) return;
+    if(fnoMotion){ fcx=ftx; fcy=fty; floatApply(); return; }
+    fcx += (ftx - fcx) * 0.22;
+    fcy += (fty - fcy) * 0.22;
+    floatApply();
+    if(Math.abs(ftx-fcx)>0.4 || Math.abs(fty-fcy)>0.4){ FRAF = requestAnimationFrame(floatTick); }
+  }
+  function floatMove(clientX, clientY){
+    if(!FLOAT) return;
+    var off = 22;
+    var fw = FLOAT.offsetWidth || 168, fh = FLOAT.offsetHeight || 168;
+    var vw = window.innerWidth || DOC.documentElement.clientWidth || 0;
+    var vh = window.innerHeight || DOC.documentElement.clientHeight || 0;
+    var nx = clientX + off, ny = clientY - fh/2;
+    if(nx + fw > vw - 8) nx = clientX - fw - off;
+    if(nx < 8) nx = 8;
+    if(ny < 8) ny = 8;
+    if(ny + fh > vh - 8) ny = vh - fh - 8;
+    ftx = isFinite(nx) ? nx : 0;
+    fty = isFinite(ny) ? ny : 0;
+    if(fnoMotion || !fprimed){ fcx=ftx; fcy=fty; fprimed=true; floatApply(); }
+    else if(!FRAF){ FRAF = requestAnimationFrame(floatTick); }
+  }
+
+  /* ============================================================
+     LIST  —  window.llList
+     ============================================================ */
+  window.llList = function(container, items, opts){
+    if(!container || !container.nodeType) return;
+    opts = opts || {};
+    var safe = [];
+    if(items && typeof items.length === "number"){
+      for(var n=0;n<items.length;n++){ if(items[n]) safe.push(items[n]); }
+    }
+    items = safe;
+
+    runCleanup(container);
+    container.innerHTML = "";
+
+    var wrap = DOC.createElement("div");
+    wrap.className = "ll-wrap";
+
+    if((opts.title!=null && esc(opts.title)!=="") || typeof opts.back === "function"){
+      var head = DOC.createElement("div");
+      head.className = "ll-head";
+      var h = DOC.createElement("h2");
+      h.className = "ll-htitle";
+      h.textContent = esc(opts.title);
+      head.appendChild(h);
+      if(typeof opts.back === "function"){
+        var bk = DOC.createElement("button");
+        bk.type = "button";
+        bk.className = "ll-back";
+        bk.innerHTML = '<span aria-hidden="true">&larr;</span> Retour';
+        bk.addEventListener("click", function(ev){
+          if(ev){ ev.preventDefault(); }
+          try{ opts.back(); }catch(e){}
+        });
+        head.appendChild(bk);
+      }
+      wrap.appendChild(head);
+    }
+
+    if(!items.length){
+      var em = DOC.createElement("div");
+      em.className = "ll-empty";
+      em.textContent = "Aucun element a afficher.";
+      wrap.appendChild(em);
+      container.appendChild(wrap);
+      container.__llCleanup = function(){};
+      return;
+    }
+
+    var ul = DOC.createElement("ul");
+    ul.className = "ll-list";
+
+    var desktop = isDesktop();
+    var rows = [];
+
+    for(var i=0;i<items.length;i++){
+      (function(item){
+        var li = DOC.createElement("li");
+        var row = DOC.createElement("button");
+        row.type = "button";
+        row.className = "ll-row";
+
+        var rail = DOC.createElement("span");
+        rail.className = "ll-rail";
+        rail.setAttribute("aria-hidden","true");
+        row.appendChild(rail);
+
+        var thumb = DOC.createElement("span");
+        thumb.className = "ll-thumb";
+        var mono = DOC.createElement("span");
+        mono.className = "ll-thmono";
+        mono.textContent = monogram(item.title);
+        thumb.appendChild(mono);
+        var cover = esc(item.cover);
+        if(cover){ var ti = makeImg(cover); if(ti){ thumb.appendChild(ti); } }
+        row.appendChild(thumb);
+
+        var body = DOC.createElement("span");
+        body.className = "ll-body";
+        var t = DOC.createElement("span");
+        t.className = "ll-title";
+        var ttl = esc(item.title);
+        t.textContent = ttl || "Sans titre";
+        body.appendChild(t);
+        var subTxt = esc(item.sub);
+        if(subTxt){
+          var s = DOC.createElement("span");
+          s.className = "ll-sub";
+          s.textContent = subTxt;
+          body.appendChild(s);
+        }
+        row.appendChild(body);
+
+        var go = DOC.createElement("span");
+        go.className = "ll-go";
+        go.setAttribute("aria-hidden","true");
+        go.innerHTML = PLAY_SVG;
+        row.appendChild(go);
+
+        row.setAttribute("aria-label", "Lire " + (ttl||"") + (subTxt?(" — "+subTxt):""));
+        row.__cover = cover;
+        row.__title = ttl;
+
+        row.addEventListener("click", function(ev){
+          if(ev){ ev.preventDefault(); }
+          if(typeof item.onPlay === "function"){ try{ item.onPlay(); }catch(e){} }
+        });
+
+        li.appendChild(row);
+        ul.appendChild(li);
+        rows.push(row);
+      })(items[i]);
+    }
+
+    wrap.appendChild(ul);
+    container.appendChild(wrap);
+
+    var docHandlers = [];
+    function addDoc(target,type,fn,o){
+      target.addEventListener(type,fn,o);
+      docHandlers.push({t:target,ty:type,fn:fn,o:o});
+    }
+
+    var usingFloat = false;
+    if(desktop){
+      floatAcquire();
+      usingFloat = true;
+
+      var onMove = function(e){ floatMove(e.clientX, e.clientY); };
+      function rowEnter(row){
+        return function(){
+          ul.classList.add("ll-hovering");
+          floatShow(row.__cover, row.__title);
+        };
+      }
+      function listLeave(){
+        ul.classList.remove("ll-hovering");
+        floatHide();
+      }
+      for(var r=0;r<rows.length;r++){
+        (function(row){ addDoc(row, "mouseenter", rowEnter(row)); })(rows[r]);
+      }
+      addDoc(ul, "mouseleave", listLeave);
+      addDoc(DOC, "mousemove", onMove, {passive:true});
+    }
+
+    container.__llCleanup = function(){
+      for(var k=0;k<docHandlers.length;k++){
+        try{ docHandlers[k].t.removeEventListener(docHandlers[k].ty, docHandlers[k].fn, docHandlers[k].o); }catch(e){}
+      }
+      docHandlers.length = 0;
+      if(usingFloat){ usingFloat = false; floatRelease(); }
+      container.__llCleanup = null;
+    };
+  };
+
+  /* Mark active row + animated equalizer; clear the previous.
+     match = numeric index OR exact title string. Works on .ll-row,
+     .ll-card and .ll-flow. Re-entrant / idempotent. */
+  window.llSetActive = function(container, match){
+    if(!container || !container.querySelectorAll) return;
+    var els = container.querySelectorAll(".ll-row, .ll-card, .ll-flow");
+    var byIndex = (typeof match === "number" && !isNaN(match));
+    for(var i=0;i<els.length;i++){
+      var el = els[i];
+      var on = byIndex ? (i===match)
+             : (match!=null && (el.__title === String(match)));
+      var go = el.querySelector ? el.querySelector(".ll-go") : null;
+      if(on){
+        if(!el.classList.contains("ll-on")){ el.classList.add("ll-on"); }
+        if(go && !go.querySelector(".ll-eq")){ go.innerHTML = EQ_HTML; }
+      } else if(el.classList.contains("ll-on")){
+        el.classList.remove("ll-on");
+        if(go){ go.innerHTML = PLAY_SVG; }
+      }
+    }
+  };
+
+  /* ============================================================
+     HUB  —  window.llHub
+     ============================================================ */
+  function buildCell(url, mono){
+    var cell = DOC.createElement("div");
+    cell.className = "ll-cell";
+    var m = DOC.createElement("span");
+    m.className = "ll-cmono"; m.textContent = mono;
+    cell.appendChild(m);
+    var img = makeImg(url);
+    if(img){ cell.appendChild(img); }
+    return cell;
+  }
+
+  function pickCovers(card){
+    var out = [];
+    var arr = (card && card.covers && card.covers.length) ? card.covers : null;
+    if(!arr) return out;
+    var seen = {};
+    for(var i=0;i<arr.length && out.length<4;i++){
+      var u = arr[i];
+      if(isUrl(u) && !seen[u]){ seen[u]=1; out.push(u); }
+    }
+    return out;
+  }
+
+  function buildMosaic(card){
+    var covers = pickCovers(card);
+    var mono = monogram(card && card.title);
+    var w = DOC.createElement("div");
+    w.className = "ll-mosaic";
+    if(covers.length <= 1){
+      w.classList.add("ll-m1");
+      w.appendChild(buildCell(covers[0]||"", mono));
+    } else {
+      for(var j=0;j<4;j++){ w.appendChild(buildCell(covers[j]||"", mono)); }
+    }
+    var scrim = DOC.createElement("div"); scrim.className = "ll-mscrim";
+    w.appendChild(scrim);
+    var pin = DOC.createElement("div"); pin.className = "ll-playPin"; pin.textContent = "▶";
+    w.appendChild(pin);
+    return { wrap:w, cover:(covers[0]||""), mono:mono };
+  }
+
+  function fmtCount(card){
+    var count = (card && typeof card.count==="number" && isFinite(card.count)) ? card.count : 0;
+    if(count < 0) count = 0;
+    count = Math.floor(count);
+    var noun = (card && typeof card.noun==="string" && card.noun) ? card.noun : "titres";
+    return count + " " + noun;
+  }
+
+  function wireOpen(btn, card){
+    btn.addEventListener("click", function(){
+      if(card && typeof card.onOpen==="function"){ try{ card.onOpen(); }catch(e){} }
+    });
+  }
+
+  function buildFlow(card){
+    var b = DOC.createElement("button");
+    b.type = "button"; b.className = "ll-flow";
+    b.setAttribute("aria-label","Flow — lecture infinie");
+    b.innerHTML =
+      '<span class="ll-flowGlyph" aria-hidden="true">⚡</span>'+
+      '<span class="ll-flowTxt">'+
+        '<span class="ll-flowKick">Flow</span>'+
+        '<span class="ll-flowTitle"></span>'+
+        '<span class="ll-flowSub">Lecture infinie · mélange tout</span>'+
+      '</span>'+
+      '<span class="ll-go ll-flowArrow" aria-hidden="true">'+PLAY_SVG+'</span>';
+    var ttl = b.querySelector(".ll-flowTitle");
+    var tt = esc(card && card.title) || "Flow";
+    if(ttl){ ttl.textContent = tt; } /* textContent: XSS-safe */
+    b.__title = tt;
+    wireOpen(b, card);
+    return b;
+  }
+
+  function buildCard(card, desktop, addDoc){
+    var b = DOC.createElement("button");
+    b.type = "button"; b.className = "ll-card";
+    var title = esc(card && card.title) || "Sans titre";
+    var cntLabel = fmtCount(card);
+    b.setAttribute("aria-label", title + " — " + cntLabel);
+
+    var mo = buildMosaic(card);
+    b.appendChild(mo.wrap);
+
+    var meta = DOC.createElement("div"); meta.className = "ll-meta";
+    var t = DOC.createElement("div"); t.className = "ll-ttl"; t.textContent = title;
+    var c = DOC.createElement("div"); c.className = "ll-cnt"; c.textContent = cntLabel;
+    meta.appendChild(t); meta.appendChild(c);
+    b.appendChild(meta);
+
+    b.__title = title;
+    /* a trailing .ll-go lets llSetActive swap in an equalizer on the active card */
+    var go = DOC.createElement("span"); go.className = "ll-go"; go.setAttribute("aria-hidden","true");
+    go.innerHTML = PLAY_SVG; go.style.display = "none";
+    b.appendChild(go);
+
+    wireOpen(b, card);
+
+    if(desktop){
+      addDoc(b, "mouseenter", function(){ floatShow(mo.cover, title); });
+      addDoc(b, "mouseleave", floatHide);
+    }
+    return b;
+  }
+
+  window.llHub = function(container, cards){
+    if(!container || !container.nodeType) return;
+
+    runCleanup(container);
+    container.innerHTML = "";
+
+    var hub = DOC.createElement("div");
+    hub.className = "ll-hub";
+    container.appendChild(hub);
+
+    var list = (cards && cards.length) ? cards : [];
+    var flowCard = null, normal = [];
+    for(var i=0;i<list.length;i++){
+      var cd = list[i];
+      if(!cd) continue;
+      if(cd.flow && !flowCard) flowCard = cd; else normal.push(cd);
+    }
+
+    var desktop = isDesktop();
+    var docHandlers = [];
+    function addDoc(target,type,fn,o){
+      target.addEventListener(type,fn,o);
+      docHandlers.push({t:target,ty:type,fn:fn,o:o});
+    }
+
+    if(flowCard){ try{ hub.appendChild(buildFlow(flowCard)); }catch(e){} }
+
+    if(normal.length){
+      var grid = DOC.createElement("div"); grid.className = "ll-grid";
+      for(var k=0;k<normal.length;k++){
+        try{ grid.appendChild(buildCard(normal[k], desktop, addDoc)); }catch(e){}
+      }
+      hub.appendChild(grid);
+    }
+
+    if(!flowCard && !normal.length){
+      var emp = DOC.createElement("div"); emp.className = "ll-empty";
+      emp.textContent = "Aucune playlist pour l’instant";
+      hub.appendChild(emp);
+    }
+
+    var usingFloat = false;
+    if(desktop){
+      floatAcquire();
+      usingFloat = true;
+      addDoc(DOC, "mousemove", function(e){ floatMove(e.clientX, e.clientY); }, {passive:true});
+    }
+
+    container.__llCleanup = function(){
+      for(var d=0;d<docHandlers.length;d++){
+        try{ docHandlers[d].t.removeEventListener(docHandlers[d].ty, docHandlers[d].fn, docHandlers[d].o); }catch(e){}
+      }
+      docHandlers.length = 0;
+      if(usingFloat){ usingFloat = false; floatRelease(); }
+      container.__llCleanup = null;
+    };
+  };
+
+  /* ============================================================
+     window.llDestroy([container])
+     With a container: clean just it. Without: force-release the
+     shared float + detach it. Safe to call anytime.
+     ============================================================ */
+  window.llDestroy = function(container){
+    if(container){ runCleanup(container); return; }
+    FLOAT_USERS = 0;
+    floatHide();
+    if(FRAF){ try{ cancelAnimationFrame(FRAF); }catch(e){} FRAF=0; }
+    if(FLOAT && FLOAT.parentNode){
+      try{ FLOAT.parentNode.removeChild(FLOAT); }catch(e){}
+    }
+    FLOAT = null;
+  };
+})();
+</script>
+<!-- LIQUIDLIST-END (auto) -->
 </body>
 </html>
