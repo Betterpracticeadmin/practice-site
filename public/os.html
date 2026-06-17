@@ -780,7 +780,7 @@
   .mq-like svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;transition:.15s;}
   .mq-like:hover{color:rgba(255,255,255,.7);}
   .mq-like.on{color:#ff5b6e;} .mq-like.on svg{fill:#ff5b6e;stroke:#ff5b6e;}
-  .media-queue{flex:1;min-width:0;max-width:440px;display:flex;flex-direction:column;min-height:0;background:rgba(255,255,255,.045);backdrop-filter:blur(38px) saturate(1.5);-webkit-backdrop-filter:blur(38px) saturate(1.5);border:.5px solid rgba(255,255,255,.11);border-radius:28px;padding:clamp(16px,2.4vh,24px);box-shadow:0 30px 70px rgba(0,0,0,.34), 0 1px 0 rgba(255,255,255,.05) inset;}
+  .media-queue{flex:1;min-width:0;max-width:440px;display:flex;flex-direction:column;min-height:0;align-self:stretch;background:rgba(255,255,255,.045);backdrop-filter:blur(38px) saturate(1.5);-webkit-backdrop-filter:blur(38px) saturate(1.5);border:.5px solid rgba(255,255,255,.11);border-radius:28px;padding:clamp(16px,2.4vh,24px);box-shadow:0 30px 70px rgba(0,0,0,.34), 0 1px 0 rgba(255,255,255,.05) inset;}
   .media-queue h4{font-size:19px;font-weight:700;letter-spacing:-.4px;color:#fff;margin:0 0 12px;padding:0 4px;}
   .mq-list{overflow-y:auto;display:flex;flex-direction:column;gap:2px;-webkit-overflow-scrolling:touch;padding-right:4px;}
   .mq-row{display:flex;align-items:center;gap:13px;padding:9px 11px;border-radius:13px;cursor:pointer;transition:background .18s;}
@@ -815,10 +815,11 @@
   .bw-back{cursor:pointer;color:var(--acc);font-weight:600;}
   @media(prefers-reduced-motion:reduce){.book-cov{transition:none;}.book:hover .book-cov{transform:none;}}
   @media(max-width:760px){
-    .media-main{flex-direction:column;overflow-y:auto;gap:18px;}
-    .media-now{max-width:none;justify-content:flex-start;}
-    .media-cover{max-width:74vw;}
-    .media-queue{max-width:none;}
+    .media-main{flex-direction:column;overflow-y:auto;gap:18px;-webkit-overflow-scrolling:touch;}
+    .media-now{max-width:none;justify-content:flex-start;flex:0 0 auto;}
+    .media-cover{max-width:60vw;}
+    .media-queue{max-width:none;flex:0 0 auto;height:58vh;min-height:320px;}
+    .media-queue .mq-list{flex:1;min-height:0;}
   }
 
   /* mini now-playing dock (mobile, over the map) */
@@ -6716,7 +6717,7 @@ html[data-da-off] .dvf-fx .dvf-rev{ color:inherit; text-shadow:none; }
    behind the foreground without escaping the player.
    ========================================================= */
 #mediaOv .media-screen{
-  position:relative;
+  position:absolute;inset:0;
   isolation:isolate;
   overflow:hidden;
   background:
