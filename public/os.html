@@ -8929,5 +8929,64 @@ html[data-da-off] .dco-total .dco-eco{transition:none;}
 })();
 </script>
 <!-- SCORECOST-END (auto) -->
+<!-- LIQUIDLOAD-START (auto) -->
+<style id="lqLoadStyle">
+  /* ===== lqLoad — transition de chargement "liquid grid" (gooey) pour les Paramètres ===== */
+  .lq-ov{position:fixed;inset:0;z-index:9998;display:none;place-items:center;background:var(--bg,#000);opacity:0;transition:opacity .3s ease;pointer-events:none;}
+  .lq-ov.on{display:grid;}
+  .lq-ov.vis{opacity:1;}
+  .lq-grid{display:grid;grid-template-columns:repeat(20,1fr);grid-template-rows:repeat(20,1fr);width:min(60vmin,400px);height:min(60vmin,400px);filter:url(#lqLiquidF);contain:layout paint style;transform:translateZ(0);}
+  .lq-grid span{display:block;width:62%;height:62%;margin:auto;background:var(--acc,#fff);border-radius:4px;scale:0;animation:lqPulse 2.4s ease-in-out infinite;animation-delay:var(--anim-delay,0ms);will-change:transform;}
+  @keyframes lqPulse{0%,100%{scale:0;}45%,55%{scale:1;}}
+  .lq-cap{position:absolute;left:0;right:0;bottom:12%;text-align:center;font-family:var(--mono,monospace);font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--acc,#fff);opacity:.9;}
+  /* remplace l'ancienne transition daTrans des réglages */
+  .dt-ov,.dt-ov.dt-run{display:none !important;}
+  /* animations réduites / reduced-motion : flash bref, pas de grille bouillonnante */
+  @media (prefers-reduced-motion:reduce){ .lq-grid span{animation:none;scale:.9;} }
+  html[data-da-off] .lq-ov{transition:none;}
+  html[data-da-off] .lq-grid span{animation:none;scale:.9;}
+</style>
+<script id="lqLoadScript">
+(function(){
+  "use strict";
+  try{
+    if(window.lqLoad) return;
+    var ROTS=[-270,-180,-90,0,90,180,270], CELLS=400, hideT=null, faded=null;
+    function build(){
+      if(document.getElementById('lqOv')||!document.body) return;
+      var ov=document.createElement('div'); ov.className='lq-ov'; ov.id='lqOv'; ov.setAttribute('aria-hidden','true');
+      var grid=document.createElement('div'); grid.className='lq-grid';
+      var frag=document.createDocumentFragment();
+      for(var i=0;i<CELLS;i++){ var s=document.createElement('span');
+        var delay=Math.floor(Math.random()*5000), rot=ROTS[Math.floor(Math.random()*ROTS.length)];
+        s.style.cssText='--anim-delay:-'+delay+'ms;rotate:'+rot+'deg'; frag.appendChild(s); }
+      grid.appendChild(frag); ov.appendChild(grid);
+      var cap=document.createElement('div'); cap.className='lq-cap'; cap.id='lqCap'; cap.textContent='Paramètres'; ov.appendChild(cap);
+      var NS='http://www.w3.org/2000/svg';
+      var svg=document.createElementNS(NS,'svg'); svg.setAttribute('width','0'); svg.setAttribute('height','0'); svg.setAttribute('aria-hidden','true'); svg.style.cssText='position:absolute;width:0;height:0;';
+      svg.innerHTML='<defs><filter id="lqLiquidF" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10"/></filter></defs>';
+      ov.appendChild(svg);
+      document.body.appendChild(ov);
+    }
+    function reduced(){ try{ return document.documentElement.hasAttribute('data-da-off') || (window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches); }catch(e){ return false; } }
+    function show(label,ms){ try{ build(); var ov=document.getElementById('lqOv'); if(!ov)return;
+      var cap=document.getElementById('lqCap'); if(cap&&label)cap.textContent=label;
+      if(faded){clearTimeout(faded);faded=null;}
+      ov.classList.add('on'); void ov.offsetWidth; ov.classList.add('vis');
+      if(hideT)clearTimeout(hideT); hideT=setTimeout(hide, ms||(reduced()?420:900)); }catch(e){} }
+    function hide(){ try{ var ov=document.getElementById('lqOv'); if(!ov)return; ov.classList.remove('vis');
+      if(hideT){clearTimeout(hideT);hideT=null;}
+      if(faded)clearTimeout(faded);
+      faded=setTimeout(function(){ if(ov&&!ov.classList.contains('vis'))ov.classList.remove('on'); },340); }catch(e){} }
+    window.lqLoad={show:show,hide:hide};
+    function watch(){ try{ var bg=document.getElementById('panelBg'); if(!bg||!('MutationObserver' in window))return;
+      var was=bg.classList.contains('show');
+      new MutationObserver(function(){ var now=bg.classList.contains('show'); if(now&&!was) show('Paramètres'); was=now; }).observe(bg,{attributes:true,attributeFilter:['class']}); }catch(e){} }
+    function init(){ build(); watch(); }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  }catch(e){}
+})();
+</script>
+<!-- LIQUIDLOAD-END (auto) -->
 </body>
 </html>
