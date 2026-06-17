@@ -429,14 +429,19 @@
   body[data-mode="ultra"]{--acc:#FF1F1F;}
   body[data-mode="gt"]{--acc:#E0A33A;}
   body[data-mode="night"]{--acc:#B98BFF;}
-  /* ===== dégradés "ciel" curatés par mode (profond en haut -> pâle en bas, façon photo d'atmosphère) ===== */
-  body[data-mode="copilot"]{background-image:linear-gradient(180deg,#00133b 0%,#0a3a9e 27%,#2f7be0 50%,#9cc4e8 76%,#e0e5ef 100%) !important;}
-  body[data-mode="learning"]{background-image:linear-gradient(180deg,#04241a 0%,#0a5a3a 27%,#1f9e57 50%,#8fd9b0 76%,#e4efe7 100%) !important;}
-  body[data-mode="performance"]{background-image:linear-gradient(180deg,#2a0510 0%,#7a1020 27%,#e0331f 50%,#f2a07a 76%,#f1e3da 100%) !important;}
-  body[data-mode="ultra"]{background-image:linear-gradient(180deg,#2a0008 0%,#7a0018 27%,#ff1f3a 50%,#ff8a8f 76%,#f3e0e2 100%) !important;}
-  body[data-mode="gt"]{background-image:linear-gradient(180deg,#2a1602 0%,#7a4a10 27%,#e0a33a 50%,#f0d28a 76%,#f3eddd 100%) !important;}
-  body[data-mode="night"]{background-image:linear-gradient(180deg,#080626 0%,#241c66 27%,#6a4fd0 50%,#b29ce8 76%,#e7e3f3 100%) !important;}
-  body[data-mode="magma"]{background-image:linear-gradient(180deg,#20060a 0%,#6e1d10 27%,#ff5a1e 50%,#ffb07a 76%,#f2e4db 100%) !important;}
+  /* ===== mesh gradients oniriques par mode (façon fonds dégradés Unsplash) : plusieurs blobs de couleur fondus ===== */
+  body[data-mode="copilot"]{background-color:#050a1c !important;background-image:radial-gradient(42% 52% at 16% 16%,rgba(70,125,255,.55),transparent 60%),radial-gradient(46% 56% at 85% 12%,rgba(130,95,255,.45),transparent 62%),radial-gradient(52% 60% at 74% 84%,rgba(40,185,235,.42),transparent 64%),radial-gradient(48% 58% at 14% 88%,rgba(95,65,210,.40),transparent 62%),linear-gradient(180deg,#04081a,#060c22) !important;}
+  body[data-mode="learning"]{background-color:#04150f !important;background-image:radial-gradient(42% 52% at 18% 16%,rgba(40,200,120,.50),transparent 60%),radial-gradient(46% 56% at 84% 14%,rgba(30,165,150,.45),transparent 62%),radial-gradient(52% 60% at 72% 84%,rgba(120,215,90,.38),transparent 64%),radial-gradient(48% 58% at 14% 88%,rgba(20,120,90,.42),transparent 62%),linear-gradient(180deg,#04120c,#06160f) !important;}
+  body[data-mode="performance"]{background-color:#1a0408 !important;background-image:radial-gradient(44% 54% at 16% 16%,rgba(255,60,40,.52),transparent 60%),radial-gradient(46% 56% at 85% 14%,rgba(230,40,120,.44),transparent 62%),radial-gradient(54% 62% at 74% 84%,rgba(255,140,40,.42),transparent 64%),radial-gradient(48% 58% at 14% 88%,rgba(150,20,40,.45),transparent 62%),linear-gradient(180deg,#16050a,#1c0810) !important;}
+  body[data-mode="ultra"]{background-color:#1c0008 !important;background-image:radial-gradient(44% 54% at 16% 16%,rgba(255,40,70,.55),transparent 60%),radial-gradient(46% 56% at 85% 14%,rgba(255,90,160,.46),transparent 62%),radial-gradient(54% 62% at 74% 84%,rgba(255,120,90,.42),transparent 64%),radial-gradient(48% 58% at 14% 88%,rgba(160,0,40,.5),transparent 62%),linear-gradient(180deg,#160006,#1e000a) !important;}
+  body[data-mode="gt"]{background-color:#1a1003 !important;background-image:radial-gradient(44% 54% at 16% 16%,rgba(255,180,70,.52),transparent 60%),radial-gradient(46% 56% at 85% 14%,rgba(230,140,50,.45),transparent 62%),radial-gradient(54% 62% at 74% 84%,rgba(255,210,120,.40),transparent 64%),radial-gradient(48% 58% at 14% 88%,rgba(150,90,20,.45),transparent 62%),linear-gradient(180deg,#140d04,#1a1206) !important;}
+  body[data-mode="night"]{background-color:#0a0726 !important;background-image:radial-gradient(44% 54% at 16% 16%,rgba(120,90,255,.52),transparent 60%),radial-gradient(46% 56% at 85% 14%,rgba(190,100,230,.44),transparent 62%),radial-gradient(54% 62% at 74% 84%,rgba(80,110,255,.42),transparent 64%),radial-gradient(48% 58% at 14% 88%,rgba(70,40,160,.48),transparent 62%),linear-gradient(180deg,#070522,#0b0830) !important;}
+  body[data-mode="magma"]{background-color:#1c0806 !important;background-image:radial-gradient(44% 54% at 16% 16%,rgba(255,90,30,.55),transparent 60%),radial-gradient(46% 56% at 85% 14%,rgba(230,40,20,.46),transparent 62%),radial-gradient(54% 62% at 74% 84%,rgba(255,170,60,.42),transparent 64%),radial-gradient(48% 58% at 14% 88%,rgba(140,30,10,.5),transparent 62%),linear-gradient(180deg,#160604,#1e0a06) !important;}
+  /* ===== Liquid glass renforcé sur toutes les surfaces (frosted + saturation + reflet) ===== */
+  .card,.ov-panel,.panel,.diag-panel,.seg,.media-seg,.navtabs,.mini-dock,.recents .rc,.contact,.fav,.tvw-regions button{-webkit-backdrop-filter:blur(26px) saturate(1.85);backdrop-filter:blur(26px) saturate(1.85);}
+  .ov-panel,.panel,.diag-panel{background:color-mix(in srgb, var(--bg2,#0c0d11) 66%, transparent) !important;border:.5px solid rgba(255,255,255,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 30px 80px -10px rgba(0,0,0,.6);}
+  body[data-theme="light"] .ov-panel,body[data-theme="light"] .panel,body[data-theme="light"] .diag-panel{background:color-mix(in srgb, var(--bg2,#F6F7F7) 74%, transparent) !important;border-color:rgba(0,0,0,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 30px 80px -10px rgba(0,0,0,.25);}
+  .card{border:.5px solid rgba(255,255,255,.13);}
   /* strongly-coloured identities (dark base) */
   body[data-theme="dark"][data-mode="ultra"]{--bg:#040404;--card:rgba(255,40,40,.055);--border:rgba(255,55,55,.16);--dotc:rgba(255,40,40,.05);}
   body[data-theme="dark"][data-mode="gt"]{--bg:#12100b;--bg2:#191510;--card:rgba(224,163,58,.06);--border:rgba(224,163,58,.16);--txt:#F3EEE4;--dotc:rgba(224,163,58,.05);}
@@ -502,7 +507,10 @@
   .sc-hidden{position:absolute!important;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;top:0;border:0;}
 
   /* ===== transparency / clean pass (radio.betterstate.fm vibe) ===== */
-  .card,.search,.navbar,.copilot,.navtabs,.icon-btn{backdrop-filter:blur(30px) saturate(1.2);}
+  .card,.search,.navbar,.copilot,.navtabs,.icon-btn,.seg,.media-seg,.mini-dock,.bottombar,.recents .rc,.contact,.fav,.ckp-scan,.tvw-regions button{backdrop-filter:blur(36px) saturate(1.9);-webkit-backdrop-filter:blur(36px) saturate(1.9);}
+  /* reflet spéculaire "liquid glass" (bord lumineux haut) sur les surfaces vitrées */
+  .card,.seg,.mini-dock,.navtabs,.recents .rc,.contact{box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.05),0 10px 30px -12px rgba(0,0,0,.45);}
+  body[data-theme="light"] .card,body[data-theme="light"] .seg,body[data-theme="light"] .mini-dock,body[data-theme="light"] .navtabs{box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 10px 30px -12px rgba(0,0,0,.18);}
   body[data-theme="dark"]{--card:rgba(255,255,255,.035);}
   body[data-theme="light"]{--card:rgba(255,255,255,.55);}
   /* subtle film grain */
