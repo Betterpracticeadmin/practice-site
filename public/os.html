@@ -34,6 +34,7 @@
   body[data-theme="dark"] .navtabs{ background-image:linear-gradient(135deg, rgba(214,60,104,.13), rgba(120,28,62,.05) 60%, transparent); }
   /* ===== per-mode map colours (parks stay green, water stays blue; tint follows the AI mode) ===== */
   .leaflet-tile-pane{transition:filter .35s ease;}
+  .leaflet-tile-pane .leaflet-layer{transition:opacity .45s ease;}
   /* day modes (copilot/learning, light theme): natural coloured Voyager — no filter */
   /* night / any dark-theme mode: coloured DARK map (invert+hue-rotate keeps green parks & blue water) */
   body[data-theme="dark"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(.92) saturate(.95);}
@@ -1911,7 +1912,7 @@
 
   /* ---------- map ---------- */
   function initMap(){
-    map=L.map('map',{zoomControl:false,attributionControl:true}).setView([46.6,2.4],5);
+    map=L.map('map',{zoomControl:false,attributionControl:true,zoomSnap:.5,wheelPxPerZoomLevel:110,wheelDebounceTime:28,inertia:true,inertiaDeceleration:2600,fadeAnimation:true,zoomAnimation:true,markerZoomAnimation:true,zoomAnimationThreshold:6}).setView([46.6,2.4],5);
     var t=effectiveTheme();
     tileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+THEMES[t]+'/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',updateWhenIdle:false,updateWhenZooming:false,keepBuffer:6,detectRetina:false}).addTo(map);
     routeLine=L.polyline([],{color:t==='dark'?'#fff':'#111',weight:6,opacity:.92,lineJoin:'round'}).addTo(map);
@@ -1940,10 +1941,12 @@
   };
   function updateMapLayerBtns(){ [].forEach.call(document.querySelectorAll('#mapLayers button'),function(b){ b.classList.toggle('on',b.dataset.ml===mapStyle); }); }
   function setMapStyle(s){ if(!map)return; if(s!=='satellite'&&s!=='relief')s='plan'; mapStyle=s; document.body.setAttribute('data-mapstyle',s);
-    if(tileLayer){ try{map.removeLayer(tileLayer);}catch(e){} }
-    if(s==='plan'){ tileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',keepBuffer:6}); }
-    else { var d=TILEDEF[s]; tileLayer=L.tileLayer(d.url,d.opts); }
-    tileLayer.addTo(map); try{tileLayer.bringToBack();}catch(e){}
+    var old=tileLayer, nl;
+    if(s==='plan'){ nl=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',keepBuffer:6}); }
+    else { var d=TILEDEF[s]; nl=L.tileLayer(d.url,d.opts); }
+    nl.setOpacity(0); nl.addTo(map); tileLayer=nl; try{nl.bringToBack();}catch(e){}
+    var done=false; function fade(){ if(done)return; done=true; try{nl.setOpacity(1);}catch(e){} if(old){ setTimeout(function(){ try{map.removeLayer(old);}catch(e){} },480); } }
+    nl.once('load',fade); setTimeout(fade,700); /* fallback si chargement lent */
     updateMapLayerBtns(); if(Mem&&Mem.prefs){ Mem.prefs.mapStyle=s; saveMem(); }
   }
   function refreshScale(){ if(!map||!window.L||!L.control||!L.control.scale)return; if(scaleCtl){ try{map.removeControl(scaleCtl);}catch(e){} }
@@ -9458,5 +9461,853 @@ html[data-da-off] .ll-eq i{animation:none!important;height:60%!important}
 })();
 </script>
 <!-- LIQUIDLIST-END (auto) -->
+<!-- DAMOTION-START (auto) -->
+<style id="daMotionStyle">
+/* ============================================================
+   DA MOTION + MEDIA DASHBOARD — merged premium module
+   GPU-only (transform+opacity). Honors prefers-reduced-motion
+   AND html[data-da-off]. Namespaced .dm-* / @keyframes dm*.
+   Appended last so it wins at equal/higher specificity.
+   ============================================================ */
+:root{
+  --dm-out: cubic-bezier(.22,1,.36,1);
+  --dm-inout: cubic-bezier(.65,0,.35,1);
+  --dm-spring: cubic-bezier(.34,1.4,.5,1);
+  --dm-t-enter: .42s;
+  --dm-t-exit: .18s;
+}
+
+/* ---------- ENTER keyframes ---------- */
+@keyframes dmBackdropIn{ from{opacity:0} to{opacity:1} }
+@keyframes dmBackdropOut{ from{opacity:1} to{opacity:0} }
+@keyframes dmPanelIn{
+  from{ opacity:0; transform:translateY(10px) scale(.96) }
+  to{   opacity:1; transform:translateY(0)    scale(1) }
+}
+@keyframes dmPanelOut{
+  from{ opacity:1; transform:translateY(0)   scale(1) }
+  to{   opacity:0; transform:translateY(6px) scale(.97) }
+}
+@keyframes dmSideIn{
+  from{ opacity:0; transform:translateX(22px) scale(.99) }
+  to{   opacity:1; transform:translateX(0)    scale(1) }
+}
+@keyframes dmSideOut{
+  from{ opacity:1; transform:translateX(0)    scale(1) }
+  to{   opacity:0; transform:translateX(16px) scale(.995) }
+}
+
+/* ---------- ENTER: backdrop fade (overlay container) ----------
+   NOTE: #mediaOv is intentionally EXCLUDED here. The host already
+   animates .media-ov.show with `mediaIn` (line 898) and the media
+   exit is owned by the dedicated #mediaOv observer (dmMediaOut).
+   Adding a second container animation would fight mediaIn. */
+.ov.show, .panel-bg.show, .discover-ov.show{
+  animation: dmBackdropIn var(--dm-t-enter) var(--dm-out) both;
+  will-change: opacity;
+}
+
+/* ---------- ENTER: inner panels (REAL host class names) ----------
+   Host inners: .ov -> .ov-panel ; #panelBg(.panel-bg) -> .panel ;
+   #discoverOv(.ov.discover-ov) -> .discover-panel.
+   The host already plays `daPop` on .ov.show .ov-panel (line 655),
+   so we DO NOT animate .ov-panel here (avoids a double-animation
+   fight). We add depth only to .panel-bg/.discover panels which
+   the host does NOT animate. */
+.panel-bg.show > .panel,
+.discover-ov.show > .discover-panel{
+  animation: dmPanelIn var(--dm-t-enter) var(--dm-spring) both;
+  transform-origin: 50% 46%;
+  will-change: transform, opacity;
+}
+/* side-style: settings/right info panel slides from the edge */
+.panel-bg.show > .col-r,
+.panel-bg.show > .set-wrap,
+.panel-bg.show > .settings{
+  animation: dmSideIn var(--dm-t-enter) var(--dm-out) both;
+  will-change: transform, opacity;
+}
+
+/* Retire will-change once the enter animation settles (.dm-rest by JS) */
+.dm-rest, .dm-rest > *{ will-change: auto !important; }
+
+/* ---------- EXIT (JS adds .dm-closing) for .ov/.panel-bg/.discover ----------
+   #mediaOv uses its own .dm-exiting sentinel + dmMediaOut, handled
+   in the media section below — never .dm-closing. */
+.dm-closing{ animation: dmBackdropOut var(--dm-t-exit) var(--dm-out) both !important; }
+.dm-closing > .ov-panel,
+.dm-closing > .panel,
+.dm-closing > .discover-panel,
+.dm-closing > .col-r,
+.dm-closing > .set-wrap,
+.dm-closing > .settings{
+  animation: dmPanelOut var(--dm-t-exit) var(--dm-inout) both !important;
+}
+.dm-closing{ pointer-events: none !important; }
+
+/* ---------- Settings sub-page transition ---------- */
+@keyframes dmSecIn{
+  from{ opacity:0; transform:translateX(14px) }
+  to{   opacity:1; transform:translateX(0) }
+}
+body[data-setpage] .set-sec{
+  animation: dmSecIn .34s var(--dm-out) both;
+}
+
+/* ---------- Micro-interactions: cards (buttons keep host :active) ----------
+   Host already defines transitions on many buttons (line 651) and
+   :active scale (line 652). We attach timing to non-button cards
+   and rows only, to avoid clobbering host button transitions. */
+.card, .tile, .row, .mq-item{
+  transition: transform .26s var(--dm-spring), opacity .2s var(--dm-out);
+}
+@media (hover:hover) and (pointer:fine){
+  .card:hover, .tile:hover{ transform: translateY(-2px) scale(1.012); }
+  .mq-item:hover, .row:hover{ transform: translateX(2px); }
+}
+.card:active, .tile:active, .mq-item:active, .row:active{
+  transform: scale(.975);
+  transition: transform .09s var(--dm-out);
+}
+
+/* ---------- Lists: smooth momentum ---------- */
+.mq-list, .media-queue, .ov, .panel-bg, .col-r, .set-wrap, .discover-ov{
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+.mq-list > .mq-item{
+  content-visibility: auto;
+  contain-intrinsic-size: auto 56px;
+}
+
+/* ---------- Media player ENTER accents (run alongside host mediaIn) ----------
+   These target inner pieces only (NOT the .media-ov container), so
+   they coexist with the host's container-level `mediaIn`. */
+.media-ov.show #mediaBlur{ animation: dmBackdropIn .6s var(--dm-out) both; }
+.media-ov.show .media-now > *{
+  animation: dmPanelIn .5s var(--dm-spring) both;
+}
+/* Cover owns a 3D tilt transform + JS hooks; let dmPanelIn skip it so
+   the perspective/rotate/scale tilt is never overridden on enter. */
+.media-ov.show .media-cover{ animation: none !important; }
+.media-ov.show .media-now > *:nth-child(2){ animation-delay:.04s }
+.media-ov.show .media-now > *:nth-child(3){ animation-delay:.08s }
+.media-ov.show .media-now > *:nth-child(4){ animation-delay:.10s }
+.media-ov.show .media-now > *:nth-child(5){ animation-delay:.12s }
+
+/* GPU hint where it animates */
+.dm-gpu{ transform: translateZ(0); }
+
+/* =============================================================================
+   MEDIA PLAYER — premium dashboard refresh of #mediaOv (HARDENED).
+   REFINES the existing #mediaOv. No restructure, no renames.
+   ============================================================================= */
+#mediaOv{
+  --dmAcc:  var(--mAccent, var(--acc, #6f7bd6));
+  --dmAccT: var(--mAccentT, color-mix(in srgb, var(--dmAcc) 22%, transparent));
+  --dmAccG: var(--mAccentG, color-mix(in srgb, var(--dmAcc) 50%, transparent));
+  --dmCard: rgba(255,255,255,.045);
+  --dmCard2: rgba(255,255,255,.07);
+  --dmLine: rgba(255,255,255,.10);
+  --dmTxt:  #F4F5F7;
+  --dmDim:  rgba(255,255,255,.62);
+  --dmFaint: rgba(255,255,255,.40);
+  --dmR: 26px;
+  --dmRr: 16px;
+  --dmRs: 13px;
+}
+
+/* 0. EXIT ANIMATION — GPU-only, observer-driven via .dm-exiting */
+@keyframes dmMediaOut{
+  from{ opacity:1; transform:none; }
+  to  { opacity:0; transform:scale(.985); }
+}
+#mediaOv.dm-exiting{ pointer-events:none; }
+
+/* 1. SCREEN PADDING */
+#mediaOv .media-screen{
+  padding:
+    calc(22px + env(safe-area-inset-top))
+    clamp(20px, 5vw, 60px)
+    calc(26px + env(safe-area-inset-bottom));
+}
+
+/* 2. HEAD */
+#mediaOv .media-head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px;
+  margin:0 0 clamp(12px, 2.2vh, 18px);
+  flex-shrink:0;
+  position:relative; z-index:4;
+}
+#mediaOv .media-seg{ min-width:0; flex:0 1 auto; }
+#mediaOv .media-x{ flex:0 0 auto; }
+
+/* 3. SEARCH — overlap fix. Host JS owns inline display (block/none);
+      we never set `display` here. */
+#mediaOv .media-search{
+  clear:both;
+  box-sizing:border-box;
+  width:100%;
+  margin:2px 0 clamp(16px, 2.6vh, 24px);
+  padding:13px 18px;
+  font-size:15px; line-height:1.2;
+  color:var(--dmTxt);
+  background:var(--dmCard2);
+  border:1px solid var(--dmLine);
+  border-radius:var(--dmRr);
+  outline:0;
+  position:relative; z-index:3;
+  flex-shrink:0;
+  -webkit-backdrop-filter:blur(10px);
+          backdrop-filter:blur(10px);
+  transition:border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+#mediaOv .media-search::placeholder{ color:var(--dmFaint); }
+#mediaOv .media-search:focus{
+  border-color:var(--dmAcc);
+  background:rgba(255,255,255,.085);
+  box-shadow:0 0 0 3px var(--dmAccT);
+}
+
+/* 4. MAIN */
+#mediaOv .media-main{
+  flex:1; min-height:0;
+  display:flex; align-items:stretch;
+  gap:clamp(20px, 3.6vw, 44px);
+  position:relative; z-index:2;
+}
+
+/* 5. NOW PLAYING */
+#mediaOv .media-now{
+  flex:1 1 0; min-width:0; max-width:520px;
+  display:flex; flex-direction:column;
+  gap:clamp(16px, 2.4vh, 24px);
+  justify-content:center;
+  padding:clamp(22px, 3vh, 34px);
+  border-radius:var(--dmR);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+  border:1px solid var(--dmLine);
+  box-shadow:
+    0 28px 64px -28px rgba(0,0,0,.62),
+    0 1px 0 rgba(255,255,255,.05) inset;
+  position:relative; z-index:2;
+}
+#mediaOv .media-cover{
+  width:100%; aspect-ratio:1; max-width:340px;
+  align-self:center; flex-shrink:0;
+  border-radius:var(--dmRr);
+  background-size:cover; background-position:center; background-repeat:no-repeat;
+  box-shadow:
+    0 36px 80px -26px rgba(0,0,0,.72),
+    0 12px 36px -10px var(--dmAccG),
+    0 0 0 1px rgba(255,255,255,.07) inset;
+  transition:box-shadow .5s ease, transform .14s ease;
+}
+#mediaOv .media-cover::before{
+  content:""; position:absolute; inset:-10%;
+  z-index:-1; pointer-events:none;
+  border-radius:calc(var(--dmRr) + 12px);
+  background:radial-gradient(60% 60% at 50% 48%, var(--dmAccG), transparent 70%);
+  filter:blur(30px);
+  opacity:.8;
+}
+body:not([data-mplaying]) #mediaOv .media-cover{
+  box-shadow:
+    0 22px 56px -26px rgba(0,0,0,.6),
+    0 0 0 1px rgba(255,255,255,.05) inset;
+}
+
+/* META */
+#mediaOv .media-meta{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+#mediaOv .media-meta .ti{
+  font-family:"Bricolage Grotesque", system-ui, sans-serif;
+  font-weight:600; font-size:clamp(22px, 2.6vw, 30px);
+  line-height:1.12; letter-spacing:-.018em;
+  color:#fff;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  text-shadow:0 2px 16px rgba(0,0,0,.45);
+}
+#mediaOv .media-meta .ar{
+  font-size:14.5px; font-weight:400; letter-spacing:.005em;
+  color:var(--dmDim); margin-top:1px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* VIZ */
+#mediaOv .media-viz{
+  display:flex; align-items:center; justify-content:center;
+  gap:3px; height:34px; margin:2px 0;
+  opacity:.45; transition:opacity .5s ease;
+  pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+          mask-image:linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+}
+body[data-mplaying] #mediaOv .media-viz{ opacity:.82; }
+#mediaOv .media-viz span{
+  flex:0 0 auto; width:3px; min-height:2px; border-radius:3px;
+  align-self:center;
+  background:linear-gradient(180deg, #fff, var(--dmAcc) 75%);
+  box-shadow:0 0 7px var(--dmAccG);
+}
+
+/* PROGRESS */
+#mediaOv .media-prog{ display:flex; flex-direction:column; gap:8px; margin-top:2px; }
+#mediaOv .media-track{
+  position:relative; height:5px; border-radius:999px;
+  background:rgba(255,255,255,.12);
+  cursor:pointer; overflow:visible;
+  transition:height .18s ease;
+}
+#mediaOv .media-track:hover{ height:8px; }
+#mediaOv .media-track i#mFill{
+  display:block; height:100%; width:0; border-radius:999px;
+  background:linear-gradient(90deg, #fff, var(--dmAcc));
+  box-shadow:0 0 10px var(--dmAccG);
+}
+#mediaOv .media-track i#mFill::after{
+  content:""; position:absolute; right:-5px; top:50%;
+  width:11px; height:11px; border-radius:50%; background:#fff;
+  box-shadow:0 0 0 4px var(--dmAccT), 0 2px 8px rgba(0,0,0,.5);
+  transform:translateY(-50%) scale(.4); opacity:0;
+  transition:opacity .22s ease, transform .22s ease;
+  pointer-events:none;
+}
+#mediaOv .media-track:hover i#mFill::after{
+  opacity:1; transform:translateY(-50%) scale(1);
+}
+#mediaOv .media-time{
+  display:flex; justify-content:space-between;
+  font-size:11.5px; font-variant-numeric:tabular-nums;
+  color:var(--dmFaint);
+}
+
+/* CONTROLS */
+#mediaOv .media-ctl{
+  display:flex; align-items:center; justify-content:center;
+  gap:clamp(14px, 3.4vw, 22px); margin-top:6px;
+}
+#mediaOv .media-ctl button{
+  border:0; cursor:pointer; color:#fff; padding:0;
+  display:grid; place-items:center; border-radius:50%;
+  background:var(--dmCard2);
+  border:1px solid var(--dmLine);
+  transition:transform .18s cubic-bezier(.22,1,.36,1), background .22s ease, box-shadow .25s ease, color .2s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+#mediaOv .media-ctl button.sec,
+#mediaOv .media-ctl button.like{ width:46px; height:46px; }
+#mediaOv .media-ctl button.sec svg,
+#mediaOv .media-ctl button.like svg{ width:21px; height:21px; }
+#mediaOv .media-ctl button:hover{
+  background:rgba(255,255,255,.15);
+  transform:translateY(-1px) scale(1.05);
+}
+#mediaOv .media-ctl button:active{ transform:scale(.9); }
+#mediaOv .media-ctl .play{
+  width:64px; height:64px;
+  color:#0c0d12;
+  background:linear-gradient(180deg,#fff, #e9ebf2);
+  border:0;
+  box-shadow:
+    0 10px 28px -6px rgba(0,0,0,.5),
+    0 0 30px var(--dmAccG);
+}
+#mediaOv .media-ctl .play svg{ width:26px; height:26px; }
+#mediaOv .media-ctl .play:hover{
+  transform:scale(1.06);
+  box-shadow:0 12px 32px -6px rgba(0,0,0,.55), 0 0 42px var(--dmAccG);
+}
+#mediaOv .media-ctl .like.on{
+  color:#ff4d6d;
+  background:rgba(255,77,109,.14);
+  border-color:rgba(255,77,109,.38);
+}
+
+/* 6. QUEUE — styles BOTH .mq-row rows and .ll-* editorial lists. */
+#mediaOv .media-queue{
+  flex:1 1 0; min-width:0; max-width:460px;
+  display:flex; flex-direction:column; min-height:0;
+  align-self:stretch;
+  padding:clamp(16px, 2.2vh, 22px) clamp(10px, 1.4vw, 14px);
+  border-radius:var(--dmR);
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+  border:1px solid var(--dmLine);
+  box-shadow:
+    0 28px 64px -30px rgba(0,0,0,.6),
+    0 1px 0 rgba(255,255,255,.05) inset;
+  position:relative; z-index:2;
+}
+#mediaOv .media-queue h4#mqLabel,
+#mediaOv .media-queue h4{
+  margin:0 0 clamp(10px,1.6vh,14px); padding:0 8px;
+  font-family:"Bricolage Grotesque", system-ui, sans-serif;
+  font-size:13px; font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--dmDim);
+}
+#mediaOv .mq-list{
+  flex:1; min-height:0;
+  display:flex; flex-direction:column; gap:3px;
+  overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  padding-right:4px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.16) transparent;
+}
+#mediaOv .mq-list::-webkit-scrollbar{ width:7px; }
+#mediaOv .mq-list::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.16); border-radius:999px;
+}
+#mediaOv .mq-row{
+  display:flex; align-items:center; gap:13px;
+  padding:9px 11px; border-radius:var(--dmRs);
+  cursor:pointer;
+  transition:background .2s ease, transform .14s cubic-bezier(.34,1.4,.5,1);
+}
+#mediaOv .mq-row:hover{ background:rgba(255,255,255,.06); }
+#mediaOv .mq-row:active{ transform:scale(.99); }
+#mediaOv .mq-row.on{
+  background:color-mix(in srgb, var(--dmAcc) 15%, rgba(255,255,255,.04));
+}
+#mediaOv .mq-row .c{
+  width:50px; height:50px; border-radius:12px; flex-shrink:0;
+  background-size:cover; background-position:center;
+  box-shadow:0 5px 14px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.08);
+}
+#mediaOv .mq-row .x{ flex:1; min-width:0; }
+#mediaOv .mq-row .x .a{
+  font-size:14.5px; font-weight:600; letter-spacing:-.01em; color:#fff;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#mediaOv .mq-row .x .b{
+  font-size:12.5px; color:var(--dmFaint);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#mediaOv .mq-row.on .x .a{ color:var(--dmAcc); }
+#mediaOv .mq-row .n{
+  font-size:11px; font-family:var(--mono); width:22px;
+  text-align:center; flex-shrink:0; color:var(--dmFaint);
+  font-variant-numeric:tabular-nums;
+}
+#mediaOv .mq-row.on .n{ color:var(--dmAcc); }
+#mediaOv .mq-row .mq-like{
+  flex:0 0 auto; background:none; border:0; cursor:pointer;
+  color:var(--dmFaint); padding:4px; line-height:0; border-radius:50%;
+  transition:transform .16s cubic-bezier(.34,1.4,.5,1), color .2s ease;
+}
+#mediaOv .mq-row .mq-like:active{ transform:scale(.86); }
+#mediaOv .mq-row .mq-like.on{ color:#ff4d6d; }
+
+/* variant B: .ll-* editorial list */
+#mediaOv .media-queue .ll-list{ margin:0; padding:0; }
+#mediaOv .media-queue .ll-row{
+  border-top-color:rgba(255,255,255,.08);
+  padding:14px 12px; gap:13px;
+  border-radius:12px;
+}
+#mediaOv .media-queue .ll-row:last-child{ border-bottom-color:transparent; }
+#mediaOv .media-queue .ll-row:hover{ background:rgba(255,255,255,.05); }
+#mediaOv .media-queue .ll-thumb{
+  width:50px; height:50px; border-radius:12px;
+  border-color:rgba(255,255,255,.10);
+}
+#mediaOv .media-queue .ll-title{ color:#fff; font-size:clamp(16px,1.9vw,19px); }
+#mediaOv .media-queue .ll-sub{ color:var(--dmFaint); }
+#mediaOv .media-queue .ll-row.ll-on .ll-rail,
+#mediaOv .media-queue .ll-row.ll-on .ll-title{ color:var(--dmAcc); }
+#mediaOv .media-queue .ll-row.ll-on .ll-rail{ background:var(--dmAcc); }
+
+/* 7. SAFETY — interactive zones above decorative layers. */
+#mediaOv .media-head,
+#mediaOv .media-seg,
+#mediaOv .media-x,
+#mediaOv .media-search,
+#mediaOv .media-main,
+#mediaOv .media-now > .media-meta,
+#mediaOv .media-prog,
+#mediaOv .media-ctl,
+#mediaOv .media-queue{ position:relative; }
+#mediaOv .media-screen{ position:absolute; z-index:2; }
+#mediaOv #mediaBlur{ z-index:0; pointer-events:none; }
+
+/* 8. RESPONSIVE — mobile stacks. */
+@media (max-width: 760px){
+  #mediaOv .media-main{
+    flex-direction:column;
+    overflow-y:auto; gap:16px;
+    -webkit-overflow-scrolling:touch;
+  }
+  #mediaOv .media-now{ max-width:none; flex:0 0 auto; justify-content:flex-start; }
+  #mediaOv .media-cover{ max-width:62vw; }
+  #mediaOv .media-meta{ align-items:flex-start; }
+  #mediaOv .media-queue{ max-width:none; flex:0 0 auto; height:56vh; min-height:300px; }
+  #mediaOv .media-ctl .play{ width:60px; height:60px; }
+  #mediaOv .media-ctl button.sec,
+  #mediaOv .media-ctl button.like{ width:44px; height:44px; }
+  #mediaOv .media-meta .ti{ font-size:21px; }
+  #mediaOv .media-search{ margin-bottom:clamp(12px,2.4vh,18px); }
+}
+
+/* ============================================================
+   DISABLE MOTION — reduced-motion OR html[data-da-off]
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  .ov.show,.panel-bg.show,.media-ov.show,.discover-ov.show,
+  .ov.show > *,.panel-bg.show > *,.media-ov.show > *,.discover-ov.show > *,
+  .dm-closing,.dm-closing > *,
+  body[data-setpage] .set-sec,
+  .media-ov.show .media-now > *,
+  .card,.tile,.row,.mq-item{
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .dm-closing{ pointer-events: auto !important; }
+  #mediaOv,
+  #mediaOv.show,
+  #mediaOv.dm-exiting,
+  #mediaOv #mediaBlur,
+  #mediaOv .media-cover,
+  #mediaOv .media-track,
+  #mediaOv .media-ctl button,
+  #mediaOv .media-viz,
+  #mediaOv .media-track i#mFill::after{
+    animation:none !important; transition:none !important;
+  }
+}
+html[data-da-off] .ov.show,
+html[data-da-off] .panel-bg.show,
+html[data-da-off] .media-ov.show,
+html[data-da-off] .discover-ov.show,
+html[data-da-off] .ov.show > *,
+html[data-da-off] .panel-bg.show > *,
+html[data-da-off] .media-ov.show > *,
+html[data-da-off] .discover-ov.show > *,
+html[data-da-off] .dm-closing,
+html[data-da-off] .dm-closing > *,
+html[data-da-off] body[data-setpage] .set-sec,
+html[data-da-off] .media-ov.show .media-now > *,
+html[data-da-off] .card,
+html[data-da-off] .tile,
+html[data-da-off] .row,
+html[data-da-off] .mq-item{
+  animation: none !important;
+  transition: none !important;
+  will-change: auto !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+html[data-da-off] .dm-closing{ pointer-events: auto !important; }
+html[data-da-off] #mediaOv,
+html[data-da-off] #mediaOv.show,
+html[data-da-off] #mediaOv.dm-exiting,
+html[data-da-off] #mediaOv #mediaBlur,
+html[data-da-off] #mediaOv .media-cover,
+html[data-da-off] #mediaOv .media-track,
+html[data-da-off] #mediaOv .media-ctl button,
+html[data-da-off] #mediaOv .media-search,
+html[data-da-off] #mediaOv .media-viz,
+html[data-da-off] #mediaOv .media-cover::before,
+html[data-da-off] #mediaOv .media-track i#mFill::after{
+  transition:none !important; animation:none !important;
+}
+html[data-da-off] #mediaOv .media-cover::before{ opacity:.55; }
+html[data-da-off] #mediaOv .media-cover{ transform:none !important; }
+</style>
+<script>
+/* ============================================================
+   window.daMotion — merged motion + media-dashboard module.
+   Two cooperating, non-overlapping observers:
+     (A) GENERIC overlays: .ov:not(.media-ov), .panel-bg, .discover-ov
+         -> exit anim via .dm-closing (dmBackdropOut/dmPanelOut).
+         #mediaOv / .media-ov are DELIBERATELY EXCLUDED here.
+     (B) #mediaOv ONLY -> exit anim via .dm-exiting (dmMediaOut).
+   This split is the core collision fix: the two never both react
+   to closeMedia() removing .show.
+   Loop-safe, idempotent, null-safe, never throws. No globals
+   except window.daMotion.
+   ============================================================ */
+window.daMotion = window.daMotion || {};
+
+/* ---------- (A) generic overlay exit motion ---------- */
+(function(){
+  "use strict";
+  if (window.daMotion.__v) {
+    /* already installed: skip re-installing the generic observer */
+  } else {
+  /* EXCLUDE media overlays here — they are owned by section (B). */
+  var SEL = ".ov:not(.media-ov), .panel-bg, .discover-ov";
+  var EXIT_MS = 260;
+  var selfDepth = 0;
+  var closing = new WeakSet();
+
+  function reduced(){
+    try{
+      if (document.documentElement.hasAttribute("data-da-off")) return true;
+      return !!(window.matchMedia &&
+             window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    }catch(e){ return false; }
+  }
+  function matches(el){
+    try{
+      return !!(el && el.nodeType === 1 &&
+        typeof el.matches === "function" && el.matches(SEL));
+    }catch(e){ return false; }
+  }
+  function write(fn){
+    selfDepth++;
+    try{ fn(); }
+    catch(e){}
+    finally{
+      Promise.resolve().then(function(){
+        if (selfDepth > 0) selfDepth--;
+      });
+    }
+  }
+
+  function playExit(el){
+    if (!matches(el) || closing.has(el)) return;
+    if (reduced()){
+      write(function(){
+        el.classList.remove("dm-closing", "dm-rest");
+        el.style.display = "";
+      });
+      return;
+    }
+    closing.add(el);
+    var timer = 0;
+    var done = false;
+
+    function cleanup(){
+      if (done) return; done = true;
+      try{ el.removeEventListener("animationend", onEnd, true); }catch(e){}
+      if (timer){ clearTimeout(timer); timer = 0; }
+      write(function(){
+        el.classList.remove("dm-closing", "dm-rest");
+        el.style.display = "";
+      });
+      closing.delete(el);
+    }
+    function onEnd(e){
+      if (e.target !== el) return;
+      cleanup();
+    }
+
+    write(function(){
+      var disp = el.dataset.dmDisp || "";
+      if (!disp){
+        /* host: .ov & .panel-bg show as grid */
+        disp = "grid";
+      }
+      el.style.display = disp;
+      el.classList.remove("dm-rest");
+      el.classList.add("dm-closing");
+    });
+
+    try{ el.addEventListener("animationend", onEnd, true); }catch(e){ cleanup(); return; }
+    timer = setTimeout(cleanup, EXIT_MS + 60);
+  }
+
+  function onContainerEnterEnd(e){
+    var el = e.target;
+    if (!matches(el)) return;
+    if (el.classList.contains("dm-closing")) return;
+    if (!el.classList.contains("show")) return;
+    write(function(){ el.classList.add("dm-rest"); });
+  }
+
+  function enter(el){
+    if (!matches(el) || reduced()) return;
+    write(function(){
+      el.classList.remove("dm-closing", "dm-rest");
+      el.style.animation = "none";
+      void el.offsetWidth;
+      el.style.animation = "";
+    });
+  }
+  function exit(el){
+    if (!matches(el)) return;
+    if (reduced()){
+      write(function(){
+        el.classList.remove("show", "dm-closing", "dm-rest");
+        el.style.display = "";
+      });
+      return;
+    }
+    if (el.classList.contains("show")){
+      write(function(){ el.classList.remove("show"); });
+    }
+    playExit(el);
+  }
+
+  var obs = new MutationObserver(function(muts){
+    if (selfDepth > 0) return;
+    for (var i=0;i<muts.length;i++){
+      var m = muts[i];
+      if (m.type !== "attributes" || m.attributeName !== "class") continue;
+      var el = m.target;
+      if (!matches(el)) continue;
+      var old = m.oldValue || "";
+      var had = (" "+old+" ").indexOf(" show ") !== -1;
+      var has = el.classList.contains("show");
+      if (had && !has && !el.classList.contains("dm-closing")){
+        if (reduced()) continue;
+        playExit(el);
+      } else if (!had && has){
+        if (closing.has(el)) closing.delete(el);
+        if (el.classList.contains("dm-closing") || el.classList.contains("dm-rest")){
+          write(function(){ el.classList.remove("dm-closing", "dm-rest"); });
+        }
+      }
+    }
+  });
+
+  function start(){
+    try{
+      obs.observe(document.documentElement, {
+        subtree:true, attributes:true,
+        attributeFilter:["class"], attributeOldValue:true
+      });
+    }catch(e){}
+    try{
+      document.addEventListener("animationend", onContainerEnterEnd, true);
+    }catch(e){}
+  }
+  if (document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", start, {once:true});
+  } else { start(); }
+
+  window.daMotion.__v = 1;
+  window.daMotion.enter = enter;
+  window.daMotion.exit = exit;
+  window.daMotion._playExit = playExit;
+  }
+})();
+
+/* ---------- (B) #mediaOv-only exit motion ---------- */
+(function(){
+  "use strict";
+  try{
+    if (window.daMotion.mediaDash && window.daMotion.mediaDash.v >= 2) return;
+
+    var OV_ID   = 'mediaOv';
+    var SHOW    = 'show';
+    var EXIT    = 'dm-exiting';
+    var EXIT_MS = 360;
+
+    var state = { guard:false, timer:0, obs:null, raf:0 };
+
+    function motionOff(){
+      try{
+        if (document.documentElement.hasAttribute('data-da-off')) return true;
+        if (window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
+      }catch(e){}
+      return false;
+    }
+    function clearTimers(){
+      if (state.timer){ clearTimeout(state.timer); state.timer = 0; }
+      if (state.raf){ try{ cancelAnimationFrame(state.raf); }catch(e){} state.raf = 0; }
+    }
+    function releaseGuard(){
+      try{ state.raf = requestAnimationFrame(function(){ state.guard = false; }); }
+      catch(e){ state.guard = false; }
+    }
+    function finishHide(ov){
+      if (!ov) return;
+      clearTimers();
+      state.guard = true;
+      try{
+        ov.classList.remove(EXIT);
+        ov.classList.remove(SHOW);
+        ov.style.removeProperty('animation');
+      }catch(e){}
+      releaseGuard();
+    }
+    function beginExit(ov){
+      if (!ov) return;
+      if (motionOff()){ finishHide(ov); return; }
+      state.guard = true;
+      try{
+        ov.classList.add(EXIT);
+        ov.classList.add(SHOW);
+        ov.style.setProperty('animation',
+          'dmMediaOut ' + EXIT_MS + 'ms cubic-bezier(.4,0,1,1) forwards');
+      }catch(e){}
+      releaseGuard();
+
+      clearTimeout(state.timer);
+      state.timer = setTimeout(function(){ finishHide(ov); }, EXIT_MS + 140);
+
+      var onEnd = function(ev){
+        if (ev && ev.target !== ov) return;
+        if (ev && ev.animationName && ev.animationName !== 'dmMediaOut') return;
+        try{
+          ov.removeEventListener('animationend', onEnd);
+          ov.removeEventListener('animationcancel', onEnd);
+        }catch(e){}
+        finishHide(ov);
+      };
+      try{
+        ov.addEventListener('animationend', onEnd);
+        ov.addEventListener('animationcancel', onEnd);
+      }catch(e){ finishHide(ov); }
+    }
+    function onMutation(records){
+      if (state.guard) return;
+      var ov = document.getElementById(OV_ID);
+      if (!ov) return;
+      for (var i=0;i<records.length;i++){
+        var r = records[i];
+        if (r.type !== 'attributes' || r.attributeName !== 'class') continue;
+        var had = (r.oldValue || '').split(/\s+/).indexOf(SHOW) >= 0;
+        var has = ov.classList.contains(SHOW);
+        var exiting = ov.classList.contains(EXIT);
+        if (had && !has && !exiting){
+          if (motionOff()) finishHide(ov);
+          else beginExit(ov);
+        }
+        else if (has && exiting){
+          clearTimers();
+          state.guard = true;
+          try{
+            ov.classList.remove(EXIT);
+            ov.style.removeProperty('animation');
+          }catch(e){}
+          releaseGuard();
+        }
+      }
+    }
+    function init(){
+      try{
+        var ov = document.getElementById(OV_ID);
+        if (ov){
+          ov.setAttribute('data-dm-dash', '1');
+          if (window.daMotion.mediaDash && window.daMotion.mediaDash._obs){
+            try{ window.daMotion.mediaDash._obs.disconnect(); }catch(e){}
+          }
+          if (typeof MutationObserver === 'function'){
+            state.obs = new MutationObserver(onMutation);
+            state.obs.observe(ov, {
+              attributes:true, attributeFilter:['class'], attributeOldValue:true
+            });
+          }
+        }
+        window.daMotion.mediaDash = { v:2, _obs: state.obs };
+      }catch(e){}
+    }
+    if (document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', init, { once:true });
+    } else {
+      init();
+    }
+  }catch(err){}
+})();
+</script>
+<!-- DAMOTION-END (auto) -->
 </body>
 </html>
