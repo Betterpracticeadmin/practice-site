@@ -523,6 +523,71 @@
   .panel h3{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:18px 0 10px;}
   .panel h3:first-child{margin-top:0;}
   .panel .x{float:right;background:transparent;border:.5px solid var(--border);color:var(--dim);border-radius:9px;width:30px;height:28px;cursor:pointer;}
+  /* ===== Réglages en catégories (page d'accueil + sous-pages) ===== */
+  .set-h{font-family:"Bricolage Grotesque",var(--mono);font-size:24px!important;font-weight:700!important;letter-spacing:-.02em!important;text-transform:none!important;color:var(--txt)!important;margin:2px 0 16px!important;}
+  .set-cats{display:flex;flex-direction:column;gap:8px;}
+  .set-cat{display:flex;align-items:center;gap:13px;background:var(--card);border:.5px solid var(--border);border-radius:15px;padding:14px 16px;cursor:pointer;color:var(--txt);text-align:left;transition:transform .14s,border-color .18s,background .18s;}
+  .set-cat:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--acc) 45%,var(--border));background:color-mix(in srgb,var(--acc) 7%,var(--card));}
+  .set-cat:active{transform:scale(.985);}
+  .set-cat .sc-ic{font-size:21px;width:30px;text-align:center;flex:0 0 auto;}
+  .set-cat .sc-tx{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+  .set-cat .sc-tx b{font-size:14.5px;font-weight:600;letter-spacing:-.01em;}
+  .set-cat .sc-tx i{font-size:11.5px;color:var(--dim);font-style:normal;}
+  .set-cat .sc-ar{color:var(--faint);font-size:20px;flex:0 0 auto;}
+  .set-backbar{display:none;align-items:center;gap:10px;margin-bottom:6px;}
+  .set-back{background:transparent;border:.5px solid var(--border);color:var(--dim);border-radius:999px;padding:7px 14px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;cursor:pointer;transition:color .15s,border-color .15s;}
+  .set-back:hover{color:var(--txt);border-color:var(--acc);}
+  .set-pgtitle{font-family:"Bricolage Grotesque",sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em;color:var(--txt);margin:0;}
+  .set-sec{display:none;}
+  body[data-setpage] .set-home{display:none;}
+  body[data-setpage] .set-backbar{display:flex;}
+  body[data-setpage="profil"] .set-sec[data-cat="profil"],
+  body[data-setpage="conduite"] .set-sec[data-cat="conduite"],
+  body[data-setpage="carte"] .set-sec[data-cat="carte"],
+  body[data-setpage="affichage"] .set-sec[data-cat="affichage"],
+  body[data-setpage="voix"] .set-sec[data-cat="voix"],
+  body[data-setpage="langue"] .set-sec[data-cat="langue"],
+  body[data-setpage="pause"] .set-sec[data-cat="pause"],
+  body[data-setpage="memoire"] .set-sec[data-cat="memoire"],
+  body[data-setpage="partage"] .set-sec[data-cat="partage"]{display:block;}
+  /* ===== Profil conducteur ===== */
+  .dp-hero{display:flex;align-items:center;gap:18px;margin:4px 0 18px;}
+  .dp-ring{position:relative;width:96px;height:96px;flex:0 0 auto;}
+  .dp-ring svg{width:96px;height:96px;transform:rotate(-90deg);}
+  .dp-track{fill:none;stroke:var(--border);stroke-width:7;}
+  .dp-arc{fill:none;stroke:var(--acc);stroke-width:7;stroke-linecap:round;stroke-dasharray:264;stroke-dashoffset:264;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--acc) 55%,transparent));transition:stroke-dashoffset .9s cubic-bezier(.22,1,.36,1);}
+  .dp-rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .dp-rc span{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--txt);line-height:1;}
+  .dp-rc i{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);font-style:normal;margin-top:3px;}
+  .dp-lv{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;}
+  .dp-medal{font-size:20px;}
+  .dp-lname{font-family:"Bricolage Grotesque",sans-serif;font-size:18px;font-weight:700;color:var(--txt);letter-spacing:-.01em;}
+  .dp-prog{display:flex;flex-direction:column;gap:5px;}
+  .dp-bar{height:7px;border-radius:7px;background:var(--border);overflow:hidden;}
+  .dp-bar i{display:block;height:100%;width:0%;border-radius:7px;background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 55%,transparent),var(--acc));box-shadow:0 0 8px color-mix(in srgb,var(--acc) 50%,transparent);transition:width .9s cubic-bezier(.22,1,.36,1);}
+  .dp-next{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--dim);}
+  .dp-stats{display:flex;gap:10px;margin-bottom:6px;}
+  .dp-stat{flex:1;background:var(--card);border:.5px solid var(--border);border-radius:13px;padding:12px 10px;text-align:center;}
+  .dp-stat b{display:block;font-family:var(--mono);font-size:20px;font-weight:700;color:var(--acc);}
+  .dp-stat i{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-style:normal;}
+  .dp-badges{display:flex;flex-direction:column;gap:7px;}
+  .dp-badge{display:flex;align-items:center;gap:9px;background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:11px 14px;font-size:13px;color:var(--faint);}
+  .dp-badge span{font-size:17px;filter:grayscale(1);opacity:.5;}
+  .dp-badge.on{color:var(--txt);border-color:color-mix(in srgb,var(--acc) 50%,var(--border));background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 14%,transparent),transparent);}
+  .dp-badge.on span{filter:none;opacity:1;}
+  /* ===== Découvrir (parcours touristiques) ===== */
+  .discover-panel{width:min(560px,94vw);max-height:88vh;display:flex;flex-direction:column;background:var(--bg2);border:.5px solid var(--border);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden;}
+  .dsc-hd{padding:22px 22px 12px;position:relative;flex:0 0 auto;}
+  .dsc-kick{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);}
+  .dsc-hd h2{font-family:"Bricolage Grotesque",sans-serif;font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--txt);margin:6px 0 4px;line-height:1.05;}
+  .dsc-hd p{font-size:12.5px;color:var(--dim);margin:0;}
+  #discoverX{position:absolute;top:18px;right:18px;background:transparent;border:.5px solid var(--border);color:var(--dim);border-radius:9px;width:30px;height:28px;cursor:pointer;}
+  .dsc-filters{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:4px 22px 12px;flex:0 0 auto;}
+  .dsc-filters::-webkit-scrollbar{display:none;}
+  .dsc-filters button{flex:0 0 auto;background:var(--card);border:.5px solid var(--border);color:var(--txt);font-size:12px;padding:7px 13px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s;}
+  .dsc-filters button.on{background:var(--acc);color:#0a0a0a;border-color:var(--acc);font-weight:600;}
+  .dsc-list{flex:1;overflow-y:auto;padding:0 6px 14px;-webkit-overflow-scrolling:touch;}
+  .dsc-chip{color:var(--acc)!important;border-color:color-mix(in srgb,var(--acc) 45%,var(--border))!important;font-weight:600;}
   .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .mode-btn{text-align:left;background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:13px 15px;cursor:pointer;color:var(--txt);transition:.15s;}
   .mode-btn:hover{border-color:rgba(255,255,255,.3);}
@@ -1133,6 +1198,7 @@
       <button class="theme-btn" id="followBtn" style="padding:0 14px;">⊕</button>
     </div>
     <div class="quick-cats" id="quickCats">
+      <button data-cat="discover" class="dsc-chip">✨ Découvrir</button>
       <button data-cat="restaurant">🍽️ Restaurants</button>
       <button data-cat="supermarket">🛒 Supermarchés</button>
       <button data-cat="parking">🅿️ Parkings</button>
@@ -1301,6 +1367,34 @@
 <div class="panel-bg" id="panelBg">
   <div class="panel">
     <button class="x" id="panelX">✕</button>
+    <div class="set-backbar" id="setBackBar"><button class="set-back" id="setBack">‹ Paramètres</button><h2 class="set-pgtitle" id="setPgTitle"></h2></div>
+    <div class="set-home" id="setHome">
+      <h3 class="set-h">Paramètres</h3>
+      <div class="set-cats" id="setCats">
+        <button class="set-cat" data-go="profil"><span class="sc-ic">🏆</span><span class="sc-tx"><b>Profil conducteur</b><i>Niveau, points, récompenses</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="conduite"><span class="sc-ic">🚗</span><span class="sc-tx"><b>Conduite</b><i>Mode & identité de l'app</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="carte"><span class="sc-ic">🗺️</span><span class="sc-tx"><b>Carte & navigation</b><i>Unités, trafic</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="affichage"><span class="sc-ic">🎨</span><span class="sc-tx"><b>Affichage</b><i>Thème & animations</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="voix"><span class="sc-ic">🎙️</span><span class="sc-tx"><b>Voix & assistant</b><i>Voix, micro, cerveau local</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="langue"><span class="sc-ic">🌐</span><span class="sc-tx"><b>Langue</b><i>Français · English · 日本語</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="pause"><span class="sc-ic">☕</span><span class="sc-tx"><b>Pauses & sécurité</b><i>Rappels de pause</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="memoire"><span class="sc-ic">🧠</span><span class="sc-tx"><b>Mémoire & données</b><i>Lieux, dernier trajet</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="partage"><span class="sc-ic">📱</span><span class="sc-tx"><b>Passager (BYOD)</b><i>Partage par QR</i></span><span class="sc-ar">›</span></button>
+      </div>
+    </div>
+    <section class="set-sec" data-cat="profil">
+      <div class="dp-wrap" id="dpWrap">
+        <div class="dp-hero">
+          <div class="dp-ring"><svg viewBox="0 0 96 96"><circle class="dp-track" cx="48" cy="48" r="42"></circle><circle class="dp-arc" id="dpArc" cx="48" cy="48" r="42"></circle></svg><div class="dp-rc"><span id="dpScore">50</span><i>Score</i></div></div>
+          <div class="dp-lv"><span class="dp-medal" id="dpMedal">&#129353;</span><span class="dp-lname" id="dpLname">Niveau Bronze</span><div class="dp-prog"><div class="dp-bar"><i id="dpFill"></i></div><span class="dp-next" id="dpNext">— pts vers Argent</span></div></div>
+        </div>
+        <div class="dp-stats"><div class="dp-stat"><b id="dpPoints">0</b><i>Points XP</i></div><div class="dp-stat"><b id="dpStreak">0</b><i>Série</i></div><div class="dp-stat"><b id="dpBest">0</b><i>Record</i></div></div>
+        <h3>Récompenses</h3>
+        <div class="dp-badges" id="dpBadges"></div>
+        <div class="key-note">Ton score grandit quand tu conduis <b>souple, concentré et détendu</b> — jamais de malus, juste des points en plus. Maintiens de bonnes habitudes pour débloquer des badges et monter en niveau (Bronze → Argent → Or → Platine).</div>
+      </div>
+    </section>
+    <section class="set-sec" data-cat="conduite">
     <h3>Mode de conduite — chaque mode change toute l'identité</h3>
     <div class="mode-grid" id="modeGrid">
       <button class="mode-btn" data-m="copilot"><span class="mn"><span class="dot" style="background:#6AA1FF"></span>Copilot</span><div class="md">Confiance · pédagogue · carte simple</div></button>
@@ -1312,10 +1406,16 @@
       <button class="mode-btn" data-m="magma"><span class="mn"><span class="dot" style="background:#FF5A1E"></span>Magma</span><div class="md">Genesis Magma · orange incandescent · racing</div></button>
       <button class="mode-btn" data-m="rally"><span class="mn"><span class="dot" style="background:#C8893F"></span>Rally</span><div class="md">Désert · Dakar · drift &amp; style libre</div></button>
     </div>
+    </section>
+    <section class="set-sec" data-cat="affichage">
     <h3>Thème</h3>
     <div class="seg" id="themeSeg2"><button data-t="auto">Auto</button><button data-t="dark">Nuit</button><button data-t="light">Jour</button></div>
+    </section>
+    <section class="set-sec" data-cat="langue">
     <h3>Langue</h3>
     <div class="seg" id="langSeg2"><button data-l="fr">Français</button><button data-l="en">English</button><button data-l="ja">日本語</button></div>
+    </section>
+    <section class="set-sec" data-cat="voix">
     <h3>Voix</h3>
     <div class="seg" id="voiceSeg"><button data-v="on">Activée</button><button data-v="off">Coupée</button></div>
     <h3>Assistant vocal — commande « Practice… »</h3>
@@ -1341,26 +1441,53 @@
     <button id="localBrainBtn" class="key-in" style="margin-top:4px;cursor:pointer;text-align:center;font-weight:600;background:var(--acc);color:#000;border:none;">🧠 Activer le cerveau local</button>
     <div id="localBrainStat" class="key-note">Désactivé. Une IA open-source qui tourne <b>100 % sur ton appareil</b> — aucune autre IA, aucune clé, privé. Elle <b>raisonne vraiment</b> (plus un organigramme). Au 1er lancement : <b>~0,8 Go à télécharger</b> (gardé en cache ensuite), <b>Chrome/Edge récent + WebGPU</b> requis (PC ou Android récent ; pas sur iPhone). Plus faible que ChatGPT/Gemini — mais c'est <b>le tien</b>.</div>
     <div class="key-note">Practice <b>dort</b> et ne répond que quand tu dis son nom : « <b>Practice</b> » + ton ordre. Après, tu peux <b>enchaîner sans répéter « Practice »</b> pendant ~14 s (mode conversation), puis il se <b>rendort</b> jusqu'au prochain « Practice ». Dis « merci / au revoir » pour le rendormir tout de suite. Comprend le <b>français et l'anglais</b>, tient une petite conversation, et exécute : mode, thème, destination, favoris, média, HUD/Pulse, radar… ainsi que des questions (trafic, ETA, météo, position, heure, titre). Fonctionne sur <b>Chrome / Android</b> (iOS Safari ne gère pas la reconnaissance vocale web).</div>
+    </section>
+    <section class="set-sec" data-cat="carte">
     <h3>Trafic temps réel (optionnel)</h3>
     <input id="ttKey" class="key-in" type="text" placeholder="Clé API TomTom — débloque le trafic live" autocomplete="off"/>
     <div class="key-note">Sans clé : estimation honnête selon les heures de pointe (jour/heure). Avec une clé <b>TomTom</b> gratuite (2 500 req/jour), le niveau de trafic, le retard et l'ETA deviennent <b>live</b>, comme Waze.</div>
     <h3>Unités</h3>
     <div class="seg" id="unitSeg"><button data-u="km" class="on">Kilomètres</button><button data-u="mi">Miles</button></div>
+    </section>
+    <section class="set-sec" data-cat="affichage">
     <h3>Animations &amp; effets</h3>
     <div class="seg" id="fxSeg"><button data-fx="on" class="on">Complètes</button><button data-fx="off">Réduites (perf)</button></div>
     <div class="key-note">« Réduites » désactive les effets lourds (logo 3D, grain, particules, mesh animé, scramble, flous) pour un maximum de fluidité sur les appareils moins puissants.</div>
+    </section>
+    <section class="set-sec" data-cat="pause">
     <h3>Rappel de pause</h3>
     <div class="seg" id="pauseSeg"><button data-ps="on" class="on">Activé</button><button data-ps="off">Désactivé</button></div>
     <div class="slider-row"><label>Intervalle entre pauses <b id="paIntVal">2h00</b></label><input type="range" id="paIntSlider" min="30" max="180" step="15" value="120"/></div>
     <div class="slider-row"><label>Pauses max par trajet <b id="paMaxVal">3</b></label><input type="range" id="paMaxSlider" min="1" max="6" step="1" value="3"/></div>
     <div class="key-note">Sur les longs trajets, Practice te suggère une <b>pause</b> : annonce vocale + bandeau discret en haut, <b>sans bouton</b>. Règle l'<b>intervalle</b> entre deux pauses et le <b>nombre max</b> par trajet. Le compteur se remet à zéro après un vrai arrêt (plus de 4 min). Recommandation sécurité : une pause toutes les 2 h.</div>
+    </section>
+    <section class="set-sec" data-cat="memoire">
     <h3>Mémoire</h3>
     <div id="memBox" class="mem-box"></div>
     <div class="seg" id="memActions"><button id="memResume">↻ Reprendre le dernier</button><button id="memClear">Effacer la mémoire</button></div>
     <div class="key-note">Practice se souvient de tes réglages (mode, thème, langue, voix) et de tes lieux fréquents — en local sur cet appareil, rien n'est envoyé.</div>
+    </section>
+    <section class="set-sec" data-cat="partage">
     <h3>Mode passager · BYOD</h3>
     <div class="pax-row"><img id="paxQR" class="pax-qr" alt="QR pour ouvrir Practice" loading="lazy"/><div class="pax-txt">Un passager <b>scanne ce QR</b> et ouvre Practice sur son propre téléphone — sans app à installer. Chacun son copilote.<br/><button id="paxCopy" class="pax-copy">📋 Copier le lien</button></div></div>
     <div class="key-note">Onboarding zéro effort (façon Cinemo Connect). Le partage temps réel (ajouter à la file du conducteur, proposer une destination) nécessite un petit backend — dis-moi si tu veux qu'on l'ajoute.</div>
+    </section>
+  </div>
+</div>
+
+<!-- DÉCOUVRIR (parcours touristiques) -->
+<div class="ov discover-ov" id="discoverOv">
+  <div class="discover-panel">
+    <button class="x media-x" id="discoverX">✕</button>
+    <div class="dsc-hd"><span class="dsc-kick">✨ Parcours touristique</span><h2 id="dscCity">Autour de toi</h2><p id="dscSub">Les meilleurs lieux à proximité — touche pour y aller</p></div>
+    <div class="dsc-filters" id="dscFilters">
+      <button data-df="all" class="on">Tout</button>
+      <button data-df="sights">Sites & monuments</button>
+      <button data-df="museum">Musées</button>
+      <button data-df="view">Points de vue</button>
+      <button data-df="food">Restos locaux</button>
+    </div>
+    <div class="dsc-list" id="dscList"></div>
   </div>
 </div>
 
@@ -1833,7 +1960,7 @@
     attraction:{q:'nwr["tourism"="attraction"]',ic:'📸',nm:'Attraction'}
   };
   function updateCatChips(){ [].forEach.call(document.querySelectorAll('#quickCats button'),function(b){ b.classList.toggle('on',b.dataset.cat===catActive); }); }
-  function showCategory(cat){ var d=CATQ[cat]; if(!d||!map)return;
+  function showCategory(cat){ if(cat==='discover'){ openDiscover(); return; } var d=CATQ[cat]; if(!d||!map)return;
     if(catActive===cat){ catActive=''; if(catLayer)catLayer.clearLayers(); updateCatChips(); return; }
     catActive=cat; updateCatChips();
     var pos=pts.length?pts[pts.length-1]:{lat:map.getCenter().lat,lon:map.getCenter().lng};
@@ -1869,6 +1996,31 @@
     var qc=$('quickCats'); if(qc)qc.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; showCategory(b.dataset.cat); });
     var dst=$('dest'); if(dst){ dst.addEventListener('focus',function(){ document.body.setAttribute('data-searching','1'); }); dst.addEventListener('blur',function(){ setTimeout(function(){ document.body.removeAttribute('data-searching'); },180); }); }
     var ms=(Mem&&Mem.prefs&&Mem.prefs.mapStyle)||'plan'; document.body.setAttribute('data-mapstyle',ms); if(ms!=='plan')setMapStyle(ms); else updateMapLayerBtns();
+    var dx=$('discoverX'); if(dx)dx.addEventListener('click',function(){ $('discoverOv').classList.remove('show'); });
+    var dov=$('discoverOv'); if(dov)dov.addEventListener('click',function(e){ if(e.target===this)this.classList.remove('show'); });
+    var df=$('dscFilters'); if(df)df.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; [].forEach.call(df.children,function(x){x.classList.toggle('on',x===b);}); renderDiscover(b.dataset.df); });
+  }
+  /* ===== Découvrir : parcours touristiques (Overpass + nominatim, sans clé) ===== */
+  var dscData=[], dscPos=null;
+  function openDiscover(){ var pos=pts.length?pts[pts.length-1]:(map?{lat:map.getCenter().lat,lon:map.getCenter().lng}:null); if(!pos){ toast('Active ta position pour découvrir autour de toi.'); return; }
+    dscPos=pos; $('discoverOv').classList.add('show');
+    [].forEach.call(document.querySelectorAll('#dscFilters button'),function(x){x.classList.toggle('on',x.dataset.df==='all');});
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=12&lat='+pos.lat+'&lon='+pos.lon).then(function(r){return r.json();}).then(function(j){ var a=j&&j.address; var city=a&&(a.city||a.town||a.village||a.county||a.state); if($('dscCity'))$('dscCity').textContent=city?('Découvrir '+city):'Autour de toi'; }).catch(function(){});
+    loadDiscover(pos);
+  }
+  function loadDiscover(pos){ var L=$('dscList'); if(L)L.innerHTML='<div class="ll-empty">Recherche des meilleurs lieux…</div>';
+    var q='[out:json][timeout:25];(node["tourism"~"^(attraction|museum|viewpoint|artwork|gallery|theme_park|zoo)$"](around:7000,'+pos.lat+','+pos.lon+');node["historic"~"^(monument|memorial|castle|monastery|ruins|fort|archaeological_site)$"](around:7000,'+pos.lat+','+pos.lon+');node["amenity"="restaurant"]["cuisine"](around:2500,'+pos.lat+','+pos.lon+'););out 150;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+      dscData=(j.elements||[]).filter(function(e){return e.lat&&e.lon&&e.tags&&e.tags.name;}).map(function(e){ var t=e.tags; var kind=t.tourism||t.historic||(t.amenity==='restaurant'?'restaurant':''); return {lat:e.lat,lon:e.lon,nm:t.name,kind:kind,d:haversine(pos,{lat:e.lat,lon:e.lon})}; });
+      renderDiscover('all');
+    }).catch(function(){ if(L)L.innerHTML='<div class="ll-empty">Découverte indisponible (réseau).</div>'; });
+  }
+  function renderDiscover(filter){ var KMAP={sights:['attraction','monument','memorial','castle','monastery','ruins','fort','archaeological_site','artwork','theme_park','zoo'],museum:['museum','gallery'],view:['viewpoint'],food:['restaurant']};
+    var KLBL={attraction:'Site',monument:'Monument',memorial:'Mémorial',castle:'Château',monastery:'Monastère',ruins:'Ruines',fort:'Fort',archaeological_site:'Site archéo.',artwork:'Œuvre',theme_park:'Parc',zoo:'Zoo',museum:'Musée',gallery:'Galerie',viewpoint:'Point de vue',restaurant:'Resto local'};
+    var items=(dscData||[]).filter(function(x){ if(filter==='all')return x.kind!=='restaurant'||true; var arr=KMAP[filter]||[]; return arr.indexOf(x.kind)>=0; }).sort(function(a,b){return a.d-b.d;}).slice(0,40);
+    var list=items.map(function(x){ return { title:x.nm, sub:(KLBL[x.kind]||'Lieu')+' · '+fDist(x.d), cover:'', onPlay:function(){ $('discoverOv').classList.remove('show'); mapPickPoint({lat:x.lat,lng:x.lon},x.nm); } }; });
+    if(window.llList)window.llList($('dscList'),list,{}); else if($('dscList'))$('dscList').innerHTML='<div class="ll-empty">Liste indisponible.</div>';
+    if(!list.length&&$('dscList'))$('dscList').innerHTML='<div class="ll-empty">Aucun lieu trouvé dans cette catégorie ici.</div>';
   }
 
   /* ---------- position ---------- */
@@ -2467,7 +2619,25 @@
   });
 
   /* ---------- mode / settings panel ---------- */
-  function openPanel(){ syncPanel(); renderMem(); $('panelBg').classList.add('show'); }
+  function openPanel(){ syncPanel(); renderMem(); setSettingsPage(null); $('panelBg').classList.add('show'); }
+  /* ===== Réglages : navigation catégories <-> sous-pages ===== */
+  function setSettingsPage(p){ if(p){ document.body.setAttribute('data-setpage',p); var t=$('setPgTitle'); if(t){ var nm={profil:'Profil conducteur',conduite:'Conduite',carte:'Carte & navigation',affichage:'Affichage',voix:'Voix & assistant',langue:'Langue',pause:'Pauses & sécurité',memoire:'Mémoire & données',partage:'Passager (BYOD)'}; t.textContent=nm[p]||'Paramètres'; } if(p==='profil')renderDriverProfile(); }
+    else { document.body.removeAttribute('data-setpage'); }
+    var pn=document.querySelector('#panelBg .panel'); if(pn)pn.scrollTop=0; }
+  function renderDriverProfile(){ if(!window.daScore){return;} var s=daScore.state||{};
+    var LV=[['Bronze','🥉',0],['Argent','🥈',500],['Or','🥇',1500],['Platine','💎',4000]];
+    var pts=Math.max(0,Math.floor(s.points||0)), li=0; for(var i=0;i<LV.length;i++){ if(pts>=LV[i][2])li=i; }
+    var sc=Math.round(s.score||50);
+    if($('dpScore'))$('dpScore').textContent=sc; var arc=$('dpArc'); if(arc)arc.style.strokeDashoffset=(264-264*Math.max(0,Math.min(100,sc))/100).toFixed(1);
+    if($('dpMedal'))$('dpMedal').textContent=LV[li][1]; if($('dpLname'))$('dpLname').textContent='Niveau '+LV[li][0];
+    if($('dpPoints'))$('dpPoints').textContent=pts>=1000?(pts/1000).toFixed(1).replace('.0','')+'k':pts;
+    if($('dpStreak'))$('dpStreak').textContent=s.streak||0; if($('dpBest'))$('dpBest').textContent=s.bestStreak||0;
+    if(li>=LV.length-1){ if($('dpFill'))$('dpFill').style.width='100%'; if($('dpNext'))$('dpNext').textContent='Niveau max ★'; }
+    else { var cur=LV[li][2],nxt=LV[li+1][2],pct=Math.max(0,Math.min(100,(pts-cur)/(nxt-cur)*100)); if($('dpFill'))$('dpFill').style.width=pct.toFixed(0)+'%'; if($('dpNext'))$('dpNext').textContent=Math.max(0,nxt-pts)+' pts vers '+LV[li+1][0]; }
+    var BD=[['smooth','✨','Tout en douceur'],['focus','🎯','Concentré'],['eco','🌱','Éco-conduite'],['streak','🔥','Série en feu']];
+    var bw=$('dpBadges'); if(bw){ bw.innerHTML=''; BD.forEach(function(b){ var on=s.badges&&s.badges[b[0]]; var d=document.createElement('div'); d.className='dp-badge'+(on?' on':''); d.innerHTML='<span>'+b[1]+'</span>'+b[2]+(on?'':' · à débloquer'); bw.appendChild(d); }); } }
+  if($('setCats'))$('setCats').addEventListener('click',function(e){ var b=e.target.closest('.set-cat'); if(b)setSettingsPage(b.dataset.go); });
+  if($('setBack'))$('setBack').addEventListener('click',function(){ setSettingsPage(null); });
   if($('pauseSeg'))$('pauseSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; pauseOn=(b.dataset.ps==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); if(Mem.prefs)Mem.prefs.pause=pauseOn; saveMem(); toast(pauseOn?'Rappel de pause activé':'Rappel de pause désactivé'); });
   if($('fxSeg'))$('fxSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var on=(b.dataset.fx==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); document.documentElement.toggleAttribute('data-da-off',!on); if(Mem.prefs)Mem.prefs.fx=on; saveMem(); toast(on?'Animations complètes':'Animations réduites — perf max'); });
   if($('unitSeg'))$('unitSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; UMI=(b.dataset.u==='mi'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); if(Mem.prefs)Mem.prefs.units=UMI?'mi':'km'; saveMem(); applyUnitsUI(); if(typeof refreshScale==='function')refreshScale(); toast(UMI?'Unités : miles':'Unités : kilomètres'); });
