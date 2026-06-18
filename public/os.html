@@ -10351,8 +10351,8 @@ window.daMotion = window.daMotion || {};
   --gz-bg:    #0A0E16;
   --gz-card:  #121826;
   --gz-card2: #161D2E;
-  --gz-acc:   #C6F24A;
-  --gz-ink:   #0A0E16;   /* text/icon ON lime */
+  --gz-acc:   var(--acc, #C6F24A);   /* suit l'accent du MODE (copilot/learning/perf/night...) */
+  --gz-ink:   #0A0E16;   /* text/icon ON accent */
   --gz-txt:   #F4F7FB;
   --gz-dim:   rgba(255,255,255,.60);
   --gz-faint: rgba(255,255,255,.40);
@@ -10372,8 +10372,7 @@ window.daMotion = window.daMotion || {};
   --dmRr: 18px !important;
   --dmRs: 14px !important;
 
-  /* drive the shared --acc-based ll-* rules + base media */
-  --acc:      var(--gz-acc) !important;
+  /* --acc N'EST PAS forcé ici -> le média hérite de l'accent du mode (média adaptatif) */
   --mAccent:  var(--gz-acc) !important;
   --mAccentT: color-mix(in srgb, var(--gz-acc) 22%, transparent) !important;
   --mAccentG: color-mix(in srgb, var(--gz-acc) 34%, transparent) !important;
@@ -10426,6 +10425,9 @@ window.daMotion = window.daMotion || {};
 /* la zone scrollable dégage la barre d'onglets en bas */
 #mediaOv .media-main{ padding-bottom:96px !important; }
 #mediaOv .media-queue{ padding-bottom:8px !important; }
+/* en thème clair, garder un accent lisible & fidèle au mode sur le média sombre */
+body[data-theme="light"][data-mode="learning"] #mediaOv{ --gz-acc:#46C265 !important; }
+body[data-theme="light"][data-mode="copilot"] #mediaOv{ --gz-acc:#C9CDD3 !important; }
 #mediaOv .media-x{
   width:40px; height:40px; border-radius:50% !important;
   background:var(--gz-card) !important;
