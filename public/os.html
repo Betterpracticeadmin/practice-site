@@ -95,6 +95,31 @@
   .map-quick button.on{background:var(--acc);color:#0a0a0a;border-color:var(--acc);}
   @media(max-width:760px){ .map-quick{top:calc(106px + env(safe-area-inset-top));} }
   body[data-navfocus] .map-quick{display:none;}
+  /* ===== Navigation Pro : couches, zoom, suggestions, altitude ===== */
+  #zoomInBtn,#zoomOutBtn{font-size:22px!important;font-weight:300;}
+  .map-layers{position:absolute;right:62px;top:66px;z-index:8;display:none;flex-direction:column;gap:4px;background:var(--card);border:.5px solid var(--border);border-radius:13px;padding:6px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 10px 30px -8px rgba(0,0,0,.5);}
+  .map-layers.show{display:flex;}
+  .map-layers button{display:flex;align-items:center;gap:8px;background:transparent;border:none;color:var(--txt);font-size:13px;padding:9px 14px;border-radius:9px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s,color .15s;}
+  .map-layers button:hover{background:color-mix(in srgb,var(--acc) 14%,transparent);}
+  .map-layers button.on{background:var(--acc);color:#0a0a0a;font-weight:600;}
+  .quick-cats{position:absolute;left:14px;right:64px;top:60px;z-index:6;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:3px 0;}
+  .quick-cats::-webkit-scrollbar{display:none;}
+  .quick-cats button{flex:0 0 auto;background:var(--card);border:.5px solid var(--border);color:var(--txt);font-size:12px;padding:7px 13px;border-radius:999px;cursor:pointer;white-space:nowrap;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 3px 12px rgba(0,0,0,.2);transition:transform .14s,background .14s,color .14s,border-color .14s;}
+  .quick-cats button:active{transform:scale(.94);}
+  .quick-cats button.on{background:var(--acc);color:#0a0a0a;border-color:var(--acc);}
+  body[data-navfocus] .quick-cats,body[data-searching] .quick-cats{display:none;}
+  .alt-ind{position:absolute;left:14px;bottom:112px;z-index:6;display:inline-flex;align-items:center;gap:6px;background:var(--card);border:.5px solid var(--border);color:var(--txt);font-family:var(--mono);font-size:12px;padding:6px 11px;border-radius:999px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 3px 12px rgba(0,0,0,.22);}
+  .alt-ind .ai-ic{opacity:.7;}
+  body[data-navfocus] .alt-ind{display:none;}
+  .poi-cat{background:var(--acc);color:#0a0a0a;border-radius:50%;width:100%;height:100%;display:grid;place-items:center;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.45);}
+  .pick-pop{display:flex;flex-direction:column;gap:3px;min-width:160px;font-family:var(--mono);}
+  .pick-pop b{font-size:13px;}
+  .pick-pop span{font-size:10px;color:var(--dim);}
+  .pick-go{margin-top:7px;background:var(--acc);color:#0a0a0a;border:none;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:600;cursor:pointer;}
+  html body[data-mapstyle="satellite"] .leaflet-tile-pane,html body[data-mapstyle="relief"] .leaflet-tile-pane{filter:none !important;}
+  .leaflet-control-scale{margin-bottom:78px!important;margin-left:14px!important;}
+  .leaflet-control-scale-line{background:var(--card)!important;border-color:var(--border)!important;color:var(--txt)!important;font-family:var(--mono)!important;font-size:9px!important;padding:2px 6px!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
+  @media(max-width:760px){ .map-layers{top:calc(106px + env(safe-area-inset-top));} .quick-cats{top:calc(100px + env(safe-area-inset-top));} }
   .search{flex:1;display:flex;gap:6px;background:var(--card);backdrop-filter:blur(22px);border:.5px solid var(--border);border-radius:14px;padding:5px 5px 5px 14px;align-items:center;}
   .search input{flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-size:14px;}
   .search input::placeholder{color:var(--faint);}
@@ -1107,12 +1132,32 @@
       <button class="theme-btn on" id="radarBtn" style="padding:0 12px;" title="Radars">📷</button>
       <button class="theme-btn" id="followBtn" style="padding:0 14px;">⊕</button>
     </div>
+    <div class="quick-cats" id="quickCats">
+      <button data-cat="restaurant">🍽️ Restaurants</button>
+      <button data-cat="supermarket">🛒 Supermarchés</button>
+      <button data-cat="parking">🅿️ Parkings</button>
+      <button data-cat="fuel">⛽ Stations</button>
+      <button data-cat="hotel">🏨 Hôtels</button>
+      <button data-cat="charging">⚡ Recharge</button>
+      <button data-cat="pharmacy">💊 Pharmacies</button>
+      <button data-cat="hospital">🏥 Hôpitaux</button>
+      <button data-cat="attraction">📸 Attractions</button>
+    </div>
     <div class="map-quick" id="mapQuick">
       <button id="recenterBtn" title="Me recentrer sur ma position">📍</button>
+      <button id="layersBtn" title="Type de carte (plan / satellite / relief)">▦</button>
+      <button id="zoomInBtn" title="Zoom avant">+</button>
+      <button id="zoomOutBtn" title="Zoom arrière">−</button>
       <button id="mapHud" title="Mode Nav (HUD plein écran)">◈</button>
       <button id="mapPulse" title="Vue Pulse">◉</button>
       <button id="northBtn" class="on" title="Nord verrouillé (carte orientée nord)">🧭</button>
     </div>
+    <div class="map-layers" id="mapLayers">
+      <button data-ml="plan" class="on">🗺️ Plan</button>
+      <button data-ml="satellite">🛰️ Satellite</button>
+      <button data-ml="relief">⛰️ Relief</button>
+    </div>
+    <div class="alt-ind" id="altInd" title="Altitude"><span class="ai-ic">⛰</span><span id="altVal">—</span></div>
     <div class="favs" id="favs"></div>
     <div class="suggest" id="suggest"></div>
     <div class="navbar" id="navbar">
@@ -1673,7 +1718,7 @@
   if(Voice.supported){ speechSynthesis.onvoiceschanged=function(){Voice.pick();}; }
 
   /* ---------- state ---------- */
-  var map, tileLayer, meMarker, accCircle, routeLine, destMarker, poiLayer;
+  var map, tileLayer, meMarker, accCircle, routeLine, destMarker, poiLayer, catLayer, scaleCtl, pickMarker, mapStyle='plan', catActive='';
   var poiAt=0, poiLL=null, poiOn=true, favs=[];
   var radarLayer=null, radarAt=0, radarLL=null, radarOn=true, radars=[], radarSaid={};
   var incLayer=null, incAt=0, incLL=null, incidents=[];
@@ -1724,14 +1769,14 @@
   function applyTheme(){
     var t=effectiveTheme(); document.body.setAttribute('data-theme',t);
     $('themeBtn').textContent = themeMode==='auto'?'◐ Auto':(themeMode==='dark'?'● Nuit':'○ Jour');
-    if(map&&tileLayer){ tileLayer.setUrl('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}.png'); }
+    if(map&&tileLayer&&mapStyle==='plan'){ tileLayer.setUrl('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}.png'); }
     if(routeLine){ var dk=(t==='dark')||mode==='night'||mode==='ultra'||mode==='performance'; routeLine.setStyle({color: dk?'#ffffff':'#111111'}); }
   }
   setInterval(function(){ if(themeMode==='auto') applyTheme(); }, 60000);
 
   /* ---------- map ---------- */
   function initMap(){
-    map=L.map('map',{zoomControl:true,attributionControl:true}).setView([46.6,2.4],5);
+    map=L.map('map',{zoomControl:false,attributionControl:true}).setView([46.6,2.4],5);
     var t=effectiveTheme();
     tileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+THEMES[t]+'/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',updateWhenIdle:false,updateWhenZooming:false,keepBuffer:6,detectRetina:false}).addTo(map);
     routeLine=L.polyline([],{color:t==='dark'?'#fff':'#111',weight:6,opacity:.92,lineJoin:'round'}).addTo(map);
@@ -1744,9 +1789,86 @@
     incLayer=L.layerGroup().addTo(map);
     var icon=L.divIcon({className:'',html:'<div class="me-wrap"><div class="me-arrow" id="meArrow"></div><div class="me-dot"></div></div>',iconSize:[20,20],iconAnchor:[10,10]});
     meMarker=L.marker([46.6,2.4],{icon:icon,interactive:false}).addTo(map); meMarker.setOpacity(0);
+    catLayer=L.layerGroup().addTo(map);
+    refreshScale();
     map.on('dragstart',function(){follow=false;$('followBtn').textContent='⊕';hideSuggest();document.body.removeAttribute('data-sheet');});
     map.on('click',function(){document.body.removeAttribute('data-sheet');});
+    /* appui long (mobile) / clic droit (desktop) -> choisir une destination sur la carte */
+    map.on('contextmenu',function(e){ if(e&&e.latlng)mapPickPoint(e.latlng); });
     setTimeout(function(){map.invalidateSize();},250); window.addEventListener('resize',function(){map.invalidateSize();});
+    initNavPro();
+  }
+  /* ===================== NAVIGATION PRO (couches, zoom, échelle, altitude, suggestions, appui long) ===================== */
+  var TILEDEF={
+    satellite:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',opts:{maxZoom:19,attribution:'Imagery &copy; Esri'}},
+    relief:{url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',opts:{maxZoom:17,subdomains:'abc',attribution:'&copy; OpenTopoMap (CC-BY-SA)'}}
+  };
+  function updateMapLayerBtns(){ [].forEach.call(document.querySelectorAll('#mapLayers button'),function(b){ b.classList.toggle('on',b.dataset.ml===mapStyle); }); }
+  function setMapStyle(s){ if(!map)return; if(s!=='satellite'&&s!=='relief')s='plan'; mapStyle=s; document.body.setAttribute('data-mapstyle',s);
+    if(tileLayer){ try{map.removeLayer(tileLayer);}catch(e){} }
+    if(s==='plan'){ tileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',keepBuffer:6}); }
+    else { var d=TILEDEF[s]; tileLayer=L.tileLayer(d.url,d.opts); }
+    tileLayer.addTo(map); try{tileLayer.bringToBack();}catch(e){}
+    updateMapLayerBtns(); if(Mem&&Mem.prefs){ Mem.prefs.mapStyle=s; saveMem(); }
+  }
+  function refreshScale(){ if(!map||!window.L||!L.control||!L.control.scale)return; if(scaleCtl){ try{map.removeControl(scaleCtl);}catch(e){} }
+    try{ scaleCtl=L.control.scale({position:'bottomleft',metric:!UMI,imperial:!!UMI,maxWidth:130,updateWhenIdle:false}); scaleCtl.addTo(map); }catch(e){} }
+  /* ---- altitude (GPS si dispo, sinon API open-meteo elevation, sans clé) ---- */
+  var altCache={}, altAt=0;
+  function fetchAlt(lat,lon,cb){ var k=lat.toFixed(3)+','+lon.toFixed(3); if(altCache[k]!==undefined){cb(altCache[k]);return;}
+    fetch('https://api.open-meteo.com/v1/elevation?latitude='+lat.toFixed(4)+'&longitude='+lon.toFixed(4)).then(function(r){return r.json();}).then(function(j){ var a=(j&&j.elevation&&j.elevation.length&&j.elevation[0]!=null)?j.elevation[0]:null; altCache[k]=a; cb(a); }).catch(function(){ cb(null); }); }
+  function updateAlt(lat,lon,gpsAlt){ var el=$('altVal'); if(!el)return;
+    if(gpsAlt!=null&&!isNaN(gpsAlt)){ el.textContent=Math.round(gpsAlt)+(UMI?' ft':' m'); if(UMI)el.textContent=Math.round(gpsAlt*3.281)+' ft'; return; }
+    var now=Date.now(); if(now-altAt<60000)return; altAt=now; fetchAlt(lat,lon,function(a){ if(a!=null)el.textContent=UMI?(Math.round(a*3.281)+' ft'):(Math.round(a)+' m'); }); }
+  /* ---- suggestions de catégories (Overpass/OSM, sans clé) ---- */
+  var CATQ={
+    restaurant:{q:'node["amenity"="restaurant"]',ic:'🍽️',nm:'Restaurant'},
+    supermarket:{q:'nwr["shop"="supermarket"]',ic:'🛒',nm:'Supermarché'},
+    parking:{q:'nwr["amenity"="parking"]',ic:'🅿️',nm:'Parking'},
+    fuel:{q:'node["amenity"="fuel"]',ic:'⛽',nm:'Station-service'},
+    hotel:{q:'nwr["tourism"="hotel"]',ic:'🏨',nm:'Hôtel'},
+    charging:{q:'node["amenity"="charging_station"]',ic:'⚡',nm:'Borne de recharge'},
+    pharmacy:{q:'node["amenity"="pharmacy"]',ic:'💊',nm:'Pharmacie'},
+    hospital:{q:'nwr["amenity"="hospital"]',ic:'🏥',nm:'Hôpital'},
+    attraction:{q:'nwr["tourism"="attraction"]',ic:'📸',nm:'Attraction'}
+  };
+  function updateCatChips(){ [].forEach.call(document.querySelectorAll('#quickCats button'),function(b){ b.classList.toggle('on',b.dataset.cat===catActive); }); }
+  function showCategory(cat){ var d=CATQ[cat]; if(!d||!map)return;
+    if(catActive===cat){ catActive=''; if(catLayer)catLayer.clearLayers(); updateCatChips(); return; }
+    catActive=cat; updateCatChips();
+    var pos=pts.length?pts[pts.length-1]:{lat:map.getCenter().lat,lon:map.getCenter().lng};
+    if(window.daLoader)daLoader.show('Recherche · '+d.nm);
+    var q='[out:json][timeout:20];('+d.q+'(around:3000,'+pos.lat+','+pos.lon+'););out center 60;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+      if(window.daLoader)daLoader.hide();
+      var els=(j.elements||[]).map(function(e){ var la=e.lat||(e.center&&e.center.lat), lo=e.lon||(e.center&&e.center.lon); return la&&lo?{lat:la,lon:lo,nm:(e.tags&&(e.tags.name||e.tags.brand))||d.nm}:null; }).filter(Boolean);
+      if(catLayer)catLayer.clearLayers();
+      if(!els.length){ toast('Aucun résultat à proximité.'); catActive=''; updateCatChips(); return; }
+      var bnds=[];
+      els.slice(0,40).forEach(function(e){ var ic=L.divIcon({className:'',html:'<div class="poi poi-cat">'+d.ic+'</div>',iconSize:[26,26],iconAnchor:[13,13]});
+        var m=L.marker([e.lat,e.lon],{icon:ic}).bindTooltip(e.nm,{direction:'top',offset:[0,-8]}); m.on('click',function(){ mapPickPoint({lat:e.lat,lng:e.lon},e.nm); }); m.addTo(catLayer); bnds.push([e.lat,e.lon]); });
+      toast(els.length+' · '+d.nm.toLowerCase());
+      try{ if(bnds.length>1)map.fitBounds(L.latLngBounds(bnds).pad(0.2)); else if(bnds.length)map.setView(bnds[0],15); }catch(e){}
+    }).catch(function(){ if(window.daLoader)daLoader.hide(); toast('Recherche indisponible.'); catActive=''; updateCatChips(); });
+  }
+  /* ---- choisir un point sur la carte -> repère + altitude + "Y aller" ---- */
+  function mapPickPoint(latlng,nm){ if(!map||!latlng)return; var lat=latlng.lat, lon=(latlng.lng!=null?latlng.lng:latlng.lon);
+    if(pickMarker){ try{map.removeLayer(pickMarker);}catch(e){} }
+    pickMarker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
+    pickMarker.bindPopup('<div class="pick-pop"><b>'+(nm||'Point sélectionné')+'</b><span>'+lat.toFixed(4)+', '+lon.toFixed(4)+' · <i id="pickAlt">altitude…</i></span><button class="pick-go">Y aller</button></div>',{className:'pick-popup',closeButton:true}).openPopup();
+    fetchAlt(lat,lon,function(a){ var pa=document.getElementById('pickAlt'); if(pa)pa.textContent=(a!=null)?(UMI?(Math.round(a*3.281)+' ft'):(Math.round(a)+' m')):'altitude n/d'; });
+    setTimeout(function(){ var btn=document.querySelector('.leaflet-popup .pick-go'); if(btn)btn.addEventListener('click',function(){ try{map.closePopup();}catch(e){} if(pickMarker){try{map.removeLayer(pickMarker);}catch(e){}pickMarker=null;} startRouteTo({lat:lat,lon:lon,name:nm||'Point sur la carte'}); }); },80);
+  }
+  function initNavPro(){
+    var zi=$('zoomInBtn'); if(zi)zi.addEventListener('click',function(){ if(map)map.zoomIn(); });
+    var zo=$('zoomOutBtn'); if(zo)zo.addEventListener('click',function(){ if(map)map.zoomOut(); });
+    var lb=$('layersBtn'), lm=$('mapLayers');
+    if(lb&&lm){ lb.addEventListener('click',function(e){ e.stopPropagation(); lm.classList.toggle('show'); });
+      lm.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; e.stopPropagation(); setMapStyle(b.dataset.ml); lm.classList.remove('show'); });
+      document.addEventListener('click',function(){ lm.classList.remove('show'); }); }
+    var qc=$('quickCats'); if(qc)qc.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; showCategory(b.dataset.cat); });
+    var dst=$('dest'); if(dst){ dst.addEventListener('focus',function(){ document.body.setAttribute('data-searching','1'); }); dst.addEventListener('blur',function(){ setTimeout(function(){ document.body.removeAttribute('data-searching'); },180); }); }
+    var ms=(Mem&&Mem.prefs&&Mem.prefs.mapStyle)||'plan'; document.body.setAttribute('data-mapstyle',ms); if(ms!=='plan')setMapStyle(ms); else updateMapLayerBtns();
   }
 
   /* ---------- position ---------- */
@@ -1755,6 +1877,7 @@
     var moved=last?haversine(last,{lat:lat,lon:lon}):0;
     if(!last||moved>=1.0){ if(last)totalDist+=moved; pts.push({lat:lat,lon:lon,t:ts}); if(pts.length>9000)pts.shift(); }
     meMarker.setLatLng([lat,lon]).setOpacity(1); accCircle.setLatLng([lat,lon]).setRadius(c.accuracy||0);
+    if(typeof updateAlt==='function')updateAlt(lat,lon,c.altitude);
     if(follow) map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true});
     var spd=c.speed; if(spd==null||isNaN(spd)){ if(last){var dt=(ts-last.t)/1000;spd=dt>0?moved/dt:0;}else spd=0; }
     var spdK=Math.max(0,spd*3.6); if(spdK>maxSpd)maxSpd=spdK; liveSpd=spdK;
@@ -2347,7 +2470,7 @@
   function openPanel(){ syncPanel(); renderMem(); $('panelBg').classList.add('show'); }
   if($('pauseSeg'))$('pauseSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; pauseOn=(b.dataset.ps==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); if(Mem.prefs)Mem.prefs.pause=pauseOn; saveMem(); toast(pauseOn?'Rappel de pause activé':'Rappel de pause désactivé'); });
   if($('fxSeg'))$('fxSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var on=(b.dataset.fx==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); document.documentElement.toggleAttribute('data-da-off',!on); if(Mem.prefs)Mem.prefs.fx=on; saveMem(); toast(on?'Animations complètes':'Animations réduites — perf max'); });
-  if($('unitSeg'))$('unitSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; UMI=(b.dataset.u==='mi'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); if(Mem.prefs)Mem.prefs.units=UMI?'mi':'km'; saveMem(); applyUnitsUI(); toast(UMI?'Unités : miles':'Unités : kilomètres'); });
+  if($('unitSeg'))$('unitSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; UMI=(b.dataset.u==='mi'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); if(Mem.prefs)Mem.prefs.units=UMI?'mi':'km'; saveMem(); applyUnitsUI(); if(typeof refreshScale==='function')refreshScale(); toast(UMI?'Unités : miles':'Unités : kilomètres'); });
   if($('paIntSlider')){ $('paIntSlider').addEventListener('input',function(){ pauseInterval=+this.value; if($('paIntVal'))$('paIntVal').textContent=fmtDur(pauseInterval); }); $('paIntSlider').addEventListener('change',function(){ pauseInterval=+this.value; nextPauseAt=driveMs+pauseInterval*60000; if(Mem.prefs)Mem.prefs.pauseInterval=pauseInterval; saveMem(); }); }
   if($('paMaxSlider')){ $('paMaxSlider').addEventListener('input',function(){ pauseMax=+this.value; if($('paMaxVal'))$('paMaxVal').textContent=pauseMax; }); $('paMaxSlider').addEventListener('change',function(){ pauseMax=+this.value; if(Mem.prefs)Mem.prefs.pauseMax=pauseMax; saveMem(); }); }
   (function paxInit(){ var url=location.origin+'/os.html'; var q=$('paxQR'); if(q)q.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&qzone=1&bgcolor=ffffff&data='+encodeURIComponent(url); var c=$('paxCopy'); if(c)c.addEventListener('click',function(){ try{ navigator.clipboard.writeText(url).then(function(){toast('Lien copié');},function(){toast(url);}); }catch(e){ toast(url); } }); })();
