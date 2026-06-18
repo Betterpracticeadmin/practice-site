@@ -10328,5 +10328,299 @@ window.daMotion = window.daMotion || {};
 })();
 </script>
 <!-- DAMOTION-END (auto) -->
+<!-- GEEZO-SKIN-START (auto) -->
+<style id="geezoSkin">
+/* ============================================================
+   GEEZO — music-app skin for #mediaOv. Appended LAST so it
+   wins by source order at equal specificity. Re-tints the
+   existing premium media CSS (the #mediaOv-scoped --dm* engine
+   defined at host line ~9625) to the fixed Geezo palette, then
+   hard-overrides the spots that hardcode white (#fff play btn,
+   viz/#mFill gradients) and beats the three night/copilot
+   !important rules (.media-now/.media-queue bg, .media-seg
+   button.on). Scoped strictly to #mediaOv — host JS untouched.
+   VERIFIED against practice-site/public/os.html:
+   - --dm* engine is real + #mediaOv-scoped -> re-tint works.
+   - host already full-widths .media-search (clear:both,width:100%,
+     z-index:3, margins) and owns its inline display via JS
+     (sr.style.display) -> we never set display; no overlap.
+   - play/viz/#mFill fade-to-#fff gradients -> forced lime.
+   - .ll-* base rules read var(--acc) -> remapped to lime here.
+   ============================================================ */
+
+/* 1. PALETTE — fixed Geezo identity, independent of app mode.
+      Redefining the host's --dm* custom props (with !important to
+      beat the host's #mediaOv{--dmAcc:…} at line 9625) re-tints
+      every inherited rule that reads them. */
+#mediaOv{
+  --gz-bg:#0A0E16;
+  --gz-card:#121826;
+  --gz-card2:rgba(255,255,255,.055);
+  --gz-card3:rgba(255,255,255,.04);
+  --gz-line:rgba(255,255,255,.085);
+  --gz-line2:rgba(255,255,255,.13);
+  --gz-lime:#C6F24A;
+  --gz-lime-d:#0A0E16;            /* text/icon on lime */
+  --gz-txt:#F4F7FB;
+  --gz-dim:rgba(255,255,255,.6);
+  --gz-faint:rgba(255,255,255,.38);
+
+  /* feed the existing --dm* engine the Geezo values */
+  --dmAcc:var(--gz-lime) !important;
+  --dmAccT:rgba(198,242,74,.22) !important;
+  --dmAccG:rgba(198,242,74,.42) !important;
+  --dmCard:var(--gz-card3) !important;
+  --dmCard2:var(--gz-card2) !important;
+  --dmLine:var(--gz-line) !important;
+  --dmTxt:var(--gz-txt) !important;
+  --dmDim:var(--gz-dim) !important;
+  --dmFaint:var(--gz-faint) !important;
+  --dmR:26px !important;
+  --dmRr:24px !important;
+  --dmRs:14px !important;
+
+  /* grid-card / station / book / .ll-* variants read --acc;
+     map it to lime inside the media space. */
+  --acc:var(--gz-lime);
+}
+
+/* 2. BACKDROP — deep blue-black base, regardless of app mode.
+      Keep #mediaBlur ambient but cheap (single blur, dimmed —
+      not stacked). */
+#mediaOv,
+#mediaOv.show{
+  background:
+    radial-gradient(140% 95% at 50% 0%, #131A2A 0%, #0B1018 48%, #070A11 100%)
+    !important;
+  color:var(--gz-txt);
+}
+#mediaOv #mediaBlur{
+  filter:blur(46px) saturate(1.7) brightness(.42) !important;
+  opacity:.5;
+}
+#mediaOv::after{
+  background:radial-gradient(130% 90% at 50% 8%,
+    rgba(10,14,22,0), rgba(8,11,18,.46) 56%, rgba(5,7,12,.9)) !important;
+}
+
+/* 3. TABS — pill segment; active = lime with dark text.
+      Mode-prefixed selectors at (0,4,0) beat the night/copilot
+      `.media-seg button.on` (0,3,0) !important rules. */
+#mediaOv .media-seg{
+  background:rgba(255,255,255,.045) !important;
+  border:1px solid var(--gz-line) !important;
+  border-radius:999px;
+  padding:4px;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+}
+#mediaOv .media-seg button{
+  color:var(--gz-dim);
+  font-weight:550;
+  border-radius:999px;
+  padding:8px 16px;
+}
+#mediaOv .media-seg button:hover{ color:var(--gz-txt); }
+#mediaOv .media-seg button.on,
+body[data-mode="night"] #mediaOv .media-seg button.on,
+body[data-mode="copilot"] #mediaOv .media-seg button.on{
+  background:var(--gz-lime) !important;
+  color:var(--gz-lime-d) !important;
+  font-weight:700 !important;
+  box-shadow:0 4px 16px -4px rgba(198,242,74,.55),
+             0 1px 0 rgba(255,255,255,.25) inset !important;
+  text-shadow:none !important;
+}
+
+/* 4. CLOSE — subtle dark round button */
+#mediaOv .media-x{
+  background:rgba(255,255,255,.06) !important;
+  border:1px solid var(--gz-line) !important;
+  color:var(--gz-txt);
+  width:44px; height:44px;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+}
+#mediaOv .media-x:hover{ background:rgba(255,255,255,.13) !important; }
+
+/* 5. SEARCH — clean rounded dark pill. We only restyle the
+      surface; the host rule keeps full-width/clear:both/z-index/
+      margins so it never overlaps tabs or close. NEVER set
+      `display` (host JS owns inline block/none). */
+#mediaOv .media-search{
+  background:rgba(255,255,255,.05) !important;
+  border:1px solid var(--gz-line) !important;
+  border-radius:999px !important;
+  color:var(--gz-txt);
+  padding:14px 20px !important;
+}
+#mediaOv .media-search::placeholder{ color:var(--gz-faint); }
+#mediaOv .media-search:focus{
+  border-color:var(--gz-lime) !important;
+  background:rgba(255,255,255,.075) !important;
+  box-shadow:0 0 0 3px rgba(198,242,74,.18) !important;
+}
+
+/* 6. NOW-PLAYING card — large rounded surface, deep shadow,
+      hairline border. Plain `#mediaOv .media-main .media-now`
+      (0,3,0) and the mode-prefixed selector both beat the
+      night-mode `background-color … !important` at line 492. */
+#mediaOv .media-main .media-now,
+body[data-mode="night"] #mediaOv .media-now,
+body[data-mode="copilot"] #mediaOv .media-now{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.018))
+    , var(--gz-card) !important;
+  border:1px solid var(--gz-line2) !important;
+  border-radius:28px !important;
+  box-shadow:
+    0 32px 70px -34px rgba(0,0,0,.7),
+    0 1px 0 rgba(255,255,255,.05) inset !important;
+}
+
+/* COVER — big rounded album, soft shadow + faint lime glow.
+      Host's ::before (position:absolute;inset:-10%;z-index:-1)
+      already establishes its containing block via the cover's
+      transform; we only retint its bloom -> no layout change. */
+#mediaOv .media-cover{
+  border-radius:24px !important;
+  box-shadow:
+    0 40px 84px -28px rgba(0,0,0,.78),
+    0 14px 40px -12px rgba(198,242,74,.22),
+    0 0 0 1px rgba(255,255,255,.06) inset !important;
+}
+#mediaOv .media-cover::before{
+  background:radial-gradient(60% 60% at 50% 50%,
+    rgba(198,242,74,.30), transparent 70%) !important;
+  opacity:.7 !important;
+}
+
+/* TITLE / ARTIST */
+#mediaOv .media-meta .ti{ color:var(--gz-txt); }
+#mediaOv .media-meta .ar{ color:var(--gz-dim); }
+
+/* 7. VISUALIZER — lime bars (host gradient fades to #fff). */
+#mediaOv .media-viz span{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--gz-lime) 55%, #fff), var(--gz-lime) 70%) !important;
+  box-shadow:0 0 8px rgba(198,242,74,.5) !important;
+}
+
+/* 8. PROGRESS — slim lime fill (host gradient fades to #fff) +
+      draggable-looking lime knob. */
+#mediaOv .media-track{ background:rgba(255,255,255,.1) !important; }
+#mediaOv .media-track i#mFill{
+  background:linear-gradient(90deg,
+    color-mix(in srgb, var(--gz-lime) 78%, #fff), var(--gz-lime)) !important;
+  box-shadow:0 0 12px rgba(198,242,74,.5) !important;
+}
+#mediaOv .media-track i#mFill::after{
+  background:var(--gz-lime) !important;
+  box-shadow:0 0 0 4px rgba(198,242,74,.25),
+             0 2px 8px rgba(0,0,0,.55) !important;
+}
+#mediaOv .media-time{ color:var(--gz-faint); }
+
+/* 9. CONTROLS — secondary/like are subtle dark round buttons;
+      .play is a solid LIME circle with dark icon (host hardcodes
+      a white #fff->#e9ebf2 gradient at line 9830). */
+#mediaOv .media-ctl button{
+  background:rgba(255,255,255,.055) !important;
+  border:1px solid var(--gz-line) !important;
+  color:var(--gz-txt);
+}
+#mediaOv .media-ctl button:hover{
+  background:rgba(255,255,255,.12) !important;
+  box-shadow:0 0 18px -6px rgba(198,242,74,.4) !important;
+}
+#mediaOv .media-ctl .play{
+  width:68px; height:68px;
+  background:var(--gz-lime) !important;
+  border:0 !important;
+  color:var(--gz-lime-d) !important;
+  box-shadow:
+    0 14px 34px -8px rgba(0,0,0,.55),
+    0 0 38px -4px rgba(198,242,74,.55) !important;
+}
+#mediaOv .media-ctl .play svg{ fill:var(--gz-lime-d) !important; }
+#mediaOv .media-ctl .play:hover{
+  background:color-mix(in srgb, var(--gz-lime) 90%, #fff) !important;
+  box-shadow:
+    0 16px 38px -8px rgba(0,0,0,.6),
+    0 0 48px -2px rgba(198,242,74,.7) !important;
+}
+/* like keeps its host red active-state; resting = subtle dark */
+#mediaOv .media-ctl .like.on{
+  color:#ff5b7a !important;
+  background:rgba(255,91,122,.14) !important;
+  border-color:rgba(255,91,122,.4) !important;
+}
+
+/* 10. QUEUE card — clean dashboard surface + refined header.
+       Beats night-mode bg !important the same way as .media-now. */
+#mediaOv .media-main .media-queue,
+body[data-mode="night"] #mediaOv .media-queue,
+body[data-mode="copilot"] #mediaOv .media-queue{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.012))
+    , var(--gz-card) !important;
+  border:1px solid var(--gz-line) !important;
+  border-radius:28px !important;
+  box-shadow:
+    0 32px 70px -36px rgba(0,0,0,.66),
+    0 1px 0 rgba(255,255,255,.04) inset !important;
+}
+#mediaOv .media-queue h4#mqLabel,
+#mediaOv .media-queue h4{
+  color:var(--gz-dim);
+  font-weight:700;
+  letter-spacing:.08em;
+}
+
+/* mq-row list — lime active state, dark art tiles */
+#mediaOv .mq-row.on{
+  background:color-mix(in srgb, var(--gz-lime) 14%, rgba(255,255,255,.03)) !important;
+}
+#mediaOv .mq-row.on .x .a,
+#mediaOv .mq-row.on .n{ color:var(--gz-lime) !important; }
+#mediaOv .mq-row .x .a{ color:var(--gz-txt); }
+#mediaOv .mq-row .x .b,
+#mediaOv .mq-row .n{ color:var(--gz-faint); }
+#mediaOv .mq-row .c{
+  border-radius:13px;
+  box-shadow:0 5px 14px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.07) !important;
+}
+#mediaOv .mq-row .mq-like.on{ color:#ff5b7a !important; }
+
+/* .ll-* editorial list — active row goes lime (base rules read
+   var(--acc), now remapped to lime; we also override explicitly). */
+#mediaOv .media-queue .ll-title{ color:var(--gz-txt) !important; }
+#mediaOv .media-queue .ll-sub{ color:var(--gz-faint) !important; }
+#mediaOv .media-queue .ll-thumb{
+  background:color-mix(in srgb, var(--gz-lime) 12%, var(--gz-card)) !important;
+  border-color:var(--gz-line) !important;
+  border-radius:13px;
+}
+#mediaOv .media-queue .ll-row.ll-on .ll-title,
+#mediaOv .media-queue .ll-row.ll-on .ll-rail{ color:var(--gz-lime) !important; }
+#mediaOv .media-queue .ll-row.ll-on .ll-rail{ background:var(--gz-lime) !important; }
+#mediaOv .media-queue .ll-row.ll-on .ll-go{
+  color:var(--gz-lime) !important;
+  background:rgba(198,242,74,.14) !important;
+}
+#mediaOv .media-queue .ll-row:hover{ background:rgba(255,255,255,.045) !important; }
+#mediaOv .media-queue .ll-row:hover .ll-title,
+#mediaOv .media-queue .ll-row:hover .ll-rail{ color:var(--gz-lime) !important; }
+#mediaOv .media-queue .ll-row:hover .ll-rail{ background:var(--gz-lime) !important; }
+
+/* 11. MOTION OFF — reduced-motion OR html[data-da-off].
+       Calm ambient backdrop drift + cover transition; add NO
+       motion. (Host already kills these; we reinforce.) */
+@media (prefers-reduced-motion:reduce){
+  #mediaOv #mediaBlur{ animation:none !important; }
+  #mediaOv .media-cover{ transition:none !important; }
+}
+html[data-da-off] #mediaOv #mediaBlur{ animation:none !important; transform:none !important; }
+html[data-da-off] #mediaOv .media-cover{ transition:none !important; }
+</style>
+<!-- GEEZO-SKIN-END (auto) -->
 </body>
 </html>
