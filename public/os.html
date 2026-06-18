@@ -532,8 +532,8 @@
   /* density: ULTRA RACE strips the superfluous — only the essentials remain */
   body[data-mode="ultra"] .col-l .card:first-child,body[data-mode="ultra"] #mediaCard,body[data-mode="ultra"] #wxCard{opacity:.18;filter:grayscale(.7);pointer-events:none;}
   body[data-mode="ultra"] .speed-ov .v{font-size:92px;}
-  /* racing modes surface the data: hide the decorative car photo, keep the mode switch */
-  body[data-mode="performance"] #dmCard .glitch-car,body[data-mode="ultra"] #dmCard .glitch-car{opacity:.6;}
+  /* l'image de la voiture reste pleinement visible dans tous les modes (correctif) */
+  body[data-mode="performance"] #dmCard .glitch-car,body[data-mode="ultra"] #dmCard .glitch-car{opacity:1;}
   body[data-mode="performance"] .col-l,body[data-mode="ultra"] .col-l{gap:10px;}
   body[data-mode="night"]{filter:brightness(.84);}
   body[data-mode="performance"] .w,body[data-mode="ultra"] .w{padding:13px 15px;}
