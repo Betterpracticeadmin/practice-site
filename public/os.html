@@ -10336,6 +10336,32 @@ window.daMotion = window.daMotion || {};
 })();
 </script>
 <!-- DAMOTION-END (auto) -->
+<!-- NOTHINGICONS-START (auto) -->
+<style id="nothingIcons">
+  /* ===== DA « Nothing » : icônes/emojis en MONOCHROME (désaturés) ===== */
+  /* icônes seules (sûr) : grades, 7 façons, catégories réglages, coût, badges score/profil, altitude */
+  .sw-ic, .sg-medal, .si-bigmedal,
+  .dsc-medal, .dsc-bemo,
+  .dp-medal, .dp-badge > span,
+  .sc-ic,
+  .dco-ico, .dco-eico,
+  .alt-ind .ai-ic,
+  .pick-pop b::first-letter{
+    -webkit-filter:grayscale(1) contrast(.9) brightness(1.12);
+            filter:grayscale(1) contrast(.9) brightness(1.12);
+  }
+  /* boutons à emoji inline : monochrome quand INACTIFS (l'état actif garde sa couleur d'accent) */
+  .quick-cats button:not(.on),
+  .media-seg button:not(.on),
+  .tvw-regions button:not(.on),
+  #paxSeg button:not(.on){
+    -webkit-filter:grayscale(1);
+            filter:grayscale(1);
+  }
+  /* le hub média (cartes playlists/flow) et la liste : monogrammes/play déjà mono, on désature d'éventuels emojis */
+  .ll-flowGlyph, .ll-playPin{ -webkit-filter:grayscale(1); filter:grayscale(1); }
+</style>
+<!-- NOTHINGICONS-END (auto) -->
 <!-- SCOREINFO-START (auto) -->
 <style id="scoreInfoStyle">
   .si-panel{width:min(520px,94vw);max-height:88vh;display:flex;flex-direction:column;position:relative;background:var(--bg2);border:.5px solid var(--border);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden;}
