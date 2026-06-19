@@ -10340,8 +10340,11 @@ window.daMotion = window.daMotion || {};
   #mediaOv #dmproRefl{ display:none !important; }
   /* clippe les couches décoratives (mesh inset:-30%, halos) -> plus de barre de défilement horizontale */
   #mediaOv .media-screen{ overflow:hidden !important; }
-  /* la carte now-playing reçoit un dégradé sobre + de l'air en bas pour les contrôles */
-  #mediaOv .media-now{ padding-bottom:clamp(20px,3vh,30px) !important; overflow:visible !important; }
+  /* la carte now-playing : rien ne déborde (boutons toujours DEDANS) */
+  #mediaOv .media-now{ padding-bottom:clamp(14px,2.2vh,24px) !important; overflow:hidden !important; gap:clamp(10px,1.6vh,16px) !important; justify-content:center !important; }
+  /* pochette pilotée par la hauteur d'écran -> le bloc (cover+meta+contrôles) tient toujours, même fenêtre courte */
+  #mediaOv .media-now .media-cover{ height:clamp(150px,30vh,300px) !important; width:auto !important; aspect-ratio:1/1 !important; max-width:min(86%,320px) !important; align-self:center !important; margin:0 auto !important; flex:0 0 auto !important; }
+  #mediaOv .media-viz{ height:20px !important; }
   /* rangée de contrôles : centrée, contenue */
   #mediaOv .media-ctl{ gap:clamp(12px,3.2vw,20px) !important; margin-top:clamp(8px,1.6vh,14px) !important; padding:0 2px !important; flex-wrap:nowrap; }
   /* boutons secondaires + like : verre dégradé, liseré net, ombre douce */
