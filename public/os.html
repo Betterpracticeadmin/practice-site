@@ -10331,5 +10331,53 @@ window.daMotion = window.daMotion || {};
 })();
 </script>
 <!-- DAMOTION-END (auto) -->
+<!-- MEDIAPOLISH-START (auto) -->
+<style id="mediaPolish">
+  /* ===== Média : contrôles plus design + bien intégrés (rien ne dépasse) + fond flou retiré ===== */
+  /* fond flou « double image » de l'album -> retiré (on s'en passe) */
+  #mediaOv #mediaBlur{ display:none !important; }
+  /* reflet flottant (vestige ancien layout 2-col) -> retiré : causait un débordement horizontal */
+  #mediaOv #dmproRefl{ display:none !important; }
+  /* clippe les couches décoratives (mesh inset:-30%, halos) -> plus de barre de défilement horizontale */
+  #mediaOv .media-screen{ overflow:hidden !important; }
+  /* la carte now-playing reçoit un dégradé sobre + de l'air en bas pour les contrôles */
+  #mediaOv .media-now{ padding-bottom:clamp(20px,3vh,30px) !important; overflow:visible !important; }
+  /* rangée de contrôles : centrée, contenue */
+  #mediaOv .media-ctl{ gap:clamp(12px,3.2vw,20px) !important; margin-top:clamp(8px,1.6vh,14px) !important; padding:0 2px !important; flex-wrap:nowrap; }
+  /* boutons secondaires + like : verre dégradé, liseré net, ombre douce */
+  #mediaOv .media-ctl button.sec,
+  #mediaOv .media-ctl button.like{
+    width:46px !important; height:46px !important;
+    background:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.035)) !important;
+    border:1px solid rgba(255,255,255,.13) !important;
+    box-shadow:0 5px 14px -7px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.14) !important;
+    color:#fff !important;
+  }
+  #mediaOv .media-ctl button.sec:hover,
+  #mediaOv .media-ctl button.like:hover{
+    background:linear-gradient(180deg, rgba(255,255,255,.19), rgba(255,255,255,.07)) !important;
+    transform:translateY(-1px) scale(1.06);
+    box-shadow:0 7px 18px -7px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.18) !important;
+  }
+  #mediaOv .media-ctl button:active{ transform:scale(.92); }
+  /* PLAY : disque premium, reflet doux, halo CONTENU */
+  #mediaOv .media-ctl .play{
+    width:62px !important; height:62px !important;
+    background:radial-gradient(125% 120% at 32% 24%, #ffffff 0%, #eef0f4 60%, #e2e5ec 100%) !important;
+    color:#0c0d12 !important; border:0 !important;
+    box-shadow:0 12px 26px -10px rgba(0,0,0,.6), 0 0 20px -10px var(--mAccentG, rgba(255,255,255,.4)), inset 0 1px 0 rgba(255,255,255,.85) !important;
+  }
+  #mediaOv .media-ctl .play:hover{ transform:scale(1.05); }
+  #mediaOv .media-ctl .play:active{ transform:scale(.94); }
+  /* LIKE actif : halo INTÉRIEUR (ne déborde pas de la carte) au lieu d'un glow extérieur */
+  #mediaOv .media-ctl button.like.on{
+    color:#ff5b76 !important;
+    background:radial-gradient(120% 120% at 50% 45%, rgba(255,80,115,.30), rgba(255,80,115,.10)) !important;
+    border-color:rgba(255,100,130,.55) !important;
+    box-shadow:0 0 0 1px rgba(255,80,115,.30), inset 0 0 13px rgba(255,80,115,.38) !important;
+  }
+  html[data-da-off] #mediaOv .media-ctl button{ transition:none !important; }
+</style>
+<!-- MEDIAPOLISH-END (auto) -->
 </body>
 </html>
