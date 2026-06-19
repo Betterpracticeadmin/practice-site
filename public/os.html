@@ -10331,6 +10331,50 @@ window.daMotion = window.daMotion || {};
 })();
 </script>
 <!-- DAMOTION-END (auto) -->
+<!-- ORBLIQUID-START (auto) -->
+<style id="orbLiquidStyle">
+  /* ===== Logo Practice = grille « liquid ripple » (gooey) dans l'orbe, couleur du mode ===== */
+  .orb-lq{position:absolute;inset:0;z-index:3;display:grid;filter:url(#olqGoo);pointer-events:none;border-radius:inherit;}
+  .orb-lq span{width:62%;height:62%;margin:auto;background:color-mix(in srgb, var(--acc,#cfd2d7) 70%, #fff);border-radius:42%;scale:0;animation:olqRipple 2.6s cubic-bezier(.45,0,.2,1) infinite;animation-delay:var(--d,0ms);will-change:transform;}
+  @keyframes olqRipple{0%,100%{scale:0;border-radius:30%;}45%,55%{scale:1;border-radius:48%;}}
+  /* l'orbe : fond sombre net, on masque le disque argenté (shimmer) + le cerveau */
+  .orb.has-olq{background:radial-gradient(circle at 50% 50%, rgba(10,10,12,.55), rgba(3,3,4,.94) 82%) !important;}
+  .orb.has-olq::before{display:none !important;animation:none !important;}
+  .orb.has-olq::after{opacity:.16;}
+  .orb.has-olq > .db-canvas{display:none !important;}
+  @media(prefers-reduced-motion:reduce){ .orb-lq span{animation:none;scale:.82;} }
+  html[data-da-off] .orb-lq span{animation:none;scale:.82;}
+  html[data-da-off] .orb-lq{filter:none;}
+</style>
+<script id="orbLiquidScript">
+(function(){
+  "use strict";
+  try{
+    if(window.daOrbLiquid) return;
+    var NS='http://www.w3.org/2000/svg';
+    function ensureFilter(){ if(document.getElementById('olqGoo')||!document.body)return;
+      var svg=document.createElementNS(NS,'svg'); svg.setAttribute('width','0'); svg.setAttribute('height','0'); svg.setAttribute('aria-hidden','true'); svg.style.cssText='position:absolute;width:0;height:0;overflow:hidden;';
+      svg.innerHTML='<defs><filter id="olqGoo" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"/></filter></defs>';
+      document.body.appendChild(svg);
+    }
+    function mount(orb){ if(!orb||orb.__olq)return; orb.__olq=1;
+      var gate=orb.classList.contains('gate-orb'); var n=gate?16:7;
+      var g=document.createElement('div'); g.className='orb-lq';
+      g.style.gridTemplateColumns='repeat('+n+',1fr)'; g.style.gridTemplateRows='repeat('+n+',1fr)';
+      var c=(n-1)/2, frag=document.createDocumentFragment();
+      for(var i=0;i<n*n;i++){ var row=Math.floor(i/n), col=i%n; var dist=Math.sqrt((row-c)*(row-c)+(col-c)*(col-c));
+        var d=Math.round(dist*150 + Math.random()*420);
+        var s=document.createElement('span'); s.style.setProperty('--d','-'+d+'ms'); frag.appendChild(s); }
+      g.appendChild(frag); orb.appendChild(g); orb.classList.add('has-olq');
+    }
+    function scan(){ ensureFilter(); var orbs=document.querySelectorAll('.orb'); for(var i=0;i<orbs.length;i++){ try{mount(orbs[i]);}catch(e){} } }
+    window.daOrbLiquid={scan:scan};
+    function init(){ scan(); setTimeout(scan,700); setTimeout(scan,2200); }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  }catch(e){}
+})();
+</script>
+<!-- ORBLIQUID-END (auto) -->
 <!-- MEDIAPOLISH-START (auto) -->
 <style id="mediaPolish">
   /* ===== Média : contrôles plus design + bien intégrés (rien ne dépasse) + fond flou retiré ===== */
