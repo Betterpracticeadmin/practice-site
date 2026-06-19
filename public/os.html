@@ -2665,7 +2665,7 @@
     else { document.body.removeAttribute('data-setpage'); }
     var pn=document.querySelector('#panelBg .panel'); if(pn)pn.scrollTop=0; }
   function renderDriverProfile(){ if(!window.daScore){return;} var s=daScore.state||{};
-    var LV=[['Bronze','🥉',0],['Argent','🥈',500],['Or','🥇',1500],['Platine','💎',4000]];
+    var LV=[['Bronze','🥉',0],['Argent','🥈',500],['Or','🥇',1500],['Platine','🏆',4000],['Diamant','💎',9000]];
     var pts=Math.max(0,Math.floor(s.points||0)), li=0; for(var i=0;i<LV.length;i++){ if(pts>=LV[i][2])li=i; }
     var sc=Math.round(s.score||50);
     if($('dpScore'))$('dpScore').textContent=sc; var arc=$('dpArc'); if(arc)arc.style.strokeDashoffset=(264-264*Math.max(0,Math.min(100,sc))/100).toFixed(1);
@@ -8383,10 +8383,11 @@ html[data-da-off] .dco-total .dco-eco{transition:none;}
 
     var LS = 'daScore';
     var LEVELS = [
-      {name:'Bronze',  medal:'🥉', min:0},      /* bronze */
-      {name:'Argent',  medal:'🥈', min:500},    /* silver */
-      {name:'Or',      medal:'🥇', min:1500},   /* gold */
-      {name:'Platine', medal:'💎', min:4000}    /* diamond */
+      {name:'Bronze',  medal:'🥉', min:0},
+      {name:'Argent',  medal:'🥈', min:500},
+      {name:'Or',      medal:'🥇', min:1500},
+      {name:'Platine', medal:'🏆', min:4000},
+      {name:'Diamant', medal:'💎', min:9000}
     ];
     var BADGES = [
       {id:'smooth', emo:'✨', label:'Tout en douceur'},
@@ -10335,6 +10336,87 @@ window.daMotion = window.daMotion || {};
 })();
 </script>
 <!-- DAMOTION-END (auto) -->
+<!-- SCOREINFO-START (auto) -->
+<style id="scoreInfoStyle">
+  .si-panel{width:min(520px,94vw);max-height:88vh;display:flex;flex-direction:column;position:relative;background:var(--bg2);border:.5px solid var(--border);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden;}
+  .score-info-ov.show .si-panel{animation:siPop .42s cubic-bezier(.34,1.4,.5,1) both;}
+  @keyframes siPop{from{opacity:0;transform:translateY(10px) scale(.96);}to{opacity:1;transform:none;}}
+  .si-x{position:absolute;top:16px;right:16px;z-index:2;background:var(--card);border:.5px solid var(--border);color:var(--dim);border-radius:9px;width:30px;height:28px;cursor:pointer;}
+  .si-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:22px;}
+  .si-head{display:flex;align-items:center;gap:14px;}
+  .si-bigmedal{font-size:34px;line-height:1;}
+  .si-head h3{font-family:"Bricolage Grotesque",sans-serif;font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--txt);margin:0;}
+  .si-summary{font-size:12.5px;color:var(--dim);margin:3px 0 0;}
+  .si-sec{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:22px 0 12px;}
+  .si-grades{display:flex;flex-direction:column;gap:8px;}
+  .si-grade{display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:14px;background:var(--card);border:.5px solid var(--border);opacity:.62;transition:opacity .2s;}
+  .si-grade.reached{opacity:1;}
+  .si-grade.cur{opacity:1;border-color:color-mix(in srgb,var(--acc) 55%,var(--border));background:color-mix(in srgb,var(--acc) 12%,var(--card));box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 35%,transparent);}
+  .sg-medal{font-size:23px;width:34px;text-align:center;flex:0 0 auto;}
+  .sg-tx{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .sg-tx b{font-size:15px;font-weight:600;color:var(--txt);letter-spacing:-.01em;}
+  .sg-tx i{font-size:11.5px;font-style:normal;color:var(--dim);}
+  .sg-tag{flex:0 0 auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#0a0a0a;background:var(--acc);padding:5px 10px;border-radius:999px;font-weight:600;}
+  .sg-ok{flex:0 0 auto;color:#39d98a;font-size:16px;}
+  .si-ways{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .si-way{background:var(--card);border:.5px solid var(--border);border-radius:14px;padding:13px;transition:transform .14s,border-color .18s;}
+  .si-way:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--acc) 40%,var(--border));}
+  .sw-ic{font-size:20px;line-height:1;}
+  .si-way b{display:block;font-size:13.5px;font-weight:600;color:var(--txt);margin:7px 0 3px;letter-spacing:-.01em;}
+  .si-way i{font-size:11px;font-style:normal;color:var(--dim);line-height:1.42;}
+  @media(max-width:520px){ .si-ways{grid-template-columns:1fr;} }
+</style>
+<div class="ov score-info-ov" id="scoreInfoOv">
+  <div class="si-panel">
+    <button class="x si-x" id="scoreInfoX">✕</button>
+    <div class="si-scroll">
+      <div class="si-head"><span class="si-bigmedal" id="siMedal">&#129353;</span><div><h3>Score Practice</h3><p class="si-summary" id="siSummary">—</p></div></div>
+      <div class="si-sec">Échelle des grades</div>
+      <div class="si-grades" id="siGrades"></div>
+      <div class="si-sec">7 façons de gagner des points</div>
+      <div class="si-ways">
+        <div class="si-way"><span class="sw-ic">🌱</span><b>Éco-conduite</b><i>Consommation maîtrisée, accélérations douces.</i></div>
+        <div class="si-way"><span class="sw-ic">💧</span><b>Fluidité</b><i>Freinages et accélérations tout en souplesse.</i></div>
+        <div class="si-way"><span class="sw-ic">🎯</span><b>Maîtrise</b><i>Trajectoires nettes et contrôle en virage.</i></div>
+        <div class="si-way"><span class="sw-ic">🛣️</span><b>Endurance</b><i>Kilomètres parcourus sur tes trajets.</i></div>
+        <div class="si-way"><span class="sw-ic">🧭</span><b>Exploration</b><i>Nouveaux lieux et destinations découverts.</i></div>
+        <div class="si-way"><span class="sw-ic">👁️</span><b>Vigilance</b><i>Concentration soutenue, sans signe de fatigue.</i></div>
+        <div class="si-way"><span class="sw-ic">🔥</span><b>Régularité</b><i>Séries entretenues, trajets réguliers.</i></div>
+      </div>
+      <div class="key-note">Plus tu conduis <b>bien et régulièrement</b>, plus tu montes en grade. <b>Aucun malus</b> — uniquement des points en plus. ✨</div>
+    </div>
+  </div>
+</div>
+<script id="scoreInfoScript">
+(function(){
+  "use strict";
+  try{
+    if(window.daScoreInfo) return;
+    var G=[['Bronze','🥉',0],['Argent','🥈',500],['Or','🥇',1500],['Platine','🏆',4000],['Diamant','💎',9000]];
+    function $(id){return document.getElementById(id);}
+    function render(){ var s=(window.daScore&&daScore.state)||{}; var pts=Math.max(0,Math.floor(+s.points||0)); var li=0; for(var i=0;i<G.length;i++){ if(pts>=G[i][2])li=i; }
+      if($('siMedal'))$('siMedal').textContent=G[li][1];
+      if($('siSummary'))$('siSummary').textContent='Niveau '+G[li][0]+' · '+pts+' pts'+(li<G.length-1?(' · '+(G[li+1][2]-pts)+' pts vers '+G[li+1][0]):' · grade max ★');
+      var box=$('siGrades'); if(box){ box.innerHTML=''; G.forEach(function(g,i){ var reached=pts>=g[2], cur=(i===li);
+        var d=document.createElement('div'); d.className='si-grade'+(cur?' cur':'')+((reached&&!cur)?' reached':'');
+        var sub= cur?(i<G.length-1?('encore '+(G[i+1][2]-pts)+' pts → '+G[i+1][0]):'grade maximal ★'):(reached?'atteint':(g[2]+' pts requis'));
+        d.innerHTML='<span class="sg-medal">'+g[1]+'</span><span class="sg-tx"><b>'+g[0]+'</b><i>'+sub+'</i></span>'+(cur?'<span class="sg-tag">Actuel</span>':(reached?'<span class="sg-ok">✓</span>':''));
+        box.appendChild(d); }); }
+    }
+    function open(){ render(); var ov=$('scoreInfoOv'); if(ov)ov.classList.add('show'); }
+    function close(){ var ov=$('scoreInfoOv'); if(ov)ov.classList.remove('show'); }
+    function init(){
+      var card=$('dscRoot'); if(card){ card.style.cursor='pointer'; card.setAttribute('title','Voir les grades & comment gagner des points'); card.addEventListener('click',open); }
+      var x=$('scoreInfoX'); if(x)x.addEventListener('click',close);
+      var ov=$('scoreInfoOv'); if(ov)ov.addEventListener('click',function(e){ if(e.target===ov)close(); });
+      document.addEventListener('keydown',function(e){ if((e.key==='Escape'||e.key==='Esc')&&$('scoreInfoOv')&&$('scoreInfoOv').classList.contains('show'))close(); });
+    }
+    window.daScoreInfo={open:open,render:render};
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  }catch(e){}
+})();
+</script>
+<!-- SCOREINFO-END (auto) -->
 <!-- ORBLIQUID-START (auto) -->
 <style id="orbLiquidStyle">
   /* ===== Logo Practice = grille « liquid ripple » (gooey) dans l'orbe, couleur du mode ===== */
