@@ -431,7 +431,7 @@
   .dm-perf{font-size:18px;font-weight:300;letter-spacing:.08em;text-transform:uppercase;margin-top:3px;}
   /* PHOTO de la voiture, glitchée façon Nothing : monochrome + dot-matrix + slices + scanline */
   .glitch-car{position:relative;margin-top:10px;border-radius:12px;overflow:hidden;background:#050506;}
-  .glitch-car .gc-photo{width:100%;display:block;filter:grayscale(1) contrast(1.12) brightness(.92);}
+  .glitch-car .gc-photo{width:100%;display:block;filter:grayscale(1) contrast(1.22) brightness(1.08);}
   .glitch-car .gc-l1,.glitch-car .gc-l2{position:absolute;inset:0;background:var(--gcimg) center/cover no-repeat;filter:grayscale(1) contrast(1.2);mix-blend-mode:screen;opacity:0;pointer-events:none;z-index:2;}
   .glitch-car .gc-l1{animation:gcS1 5.5s steps(1,end) infinite;}
   .glitch-car .gc-l2{animation:gcS2 5.5s steps(1,end) infinite;}
@@ -534,6 +534,9 @@
   body[data-mode="ultra"] .speed-ov .v{font-size:92px;}
   /* l'image de la voiture reste pleinement visible dans tous les modes (correctif) */
   body[data-mode="performance"] #dmCard .glitch-car,body[data-mode="ultra"] #dmCard .glitch-car{opacity:1;}
+  /* en modes racing, la carte voiture a un fond sombre -> le rouge devient un accent, plus un voile qui noie la voiture */
+  body[data-mode="ultra"] #dmCard,body[data-mode="performance"] #dmCard,body[data-mode="magma"] #dmCard,body[data-mode="rally"] #dmCard{ background:linear-gradient(180deg,rgba(14,5,8,.62),rgba(10,4,6,.5)) !important; }
+  body[data-mode="ultra"] #dmCard .glitch-car,body[data-mode="performance"] #dmCard .glitch-car,body[data-mode="magma"] #dmCard .glitch-car,body[data-mode="rally"] #dmCard .glitch-car{ box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
   body[data-mode="performance"] .col-l,body[data-mode="ultra"] .col-l{gap:10px;}
   body[data-mode="night"]{filter:brightness(.84);}
   body[data-mode="performance"] .w,body[data-mode="ultra"] .w{padding:13px 15px;}
@@ -889,7 +892,7 @@
   .ckp-car{display:flex;justify-content:center;align-items:center;flex:1;min-height:120px;padding:6px 16px;}
   /* voiture du cockpit : PHOTO réelle + effet Nothing (réutilise le composant .glitch-car) */
   .ckp-glitch{width:min(84vw,660px);margin:0 auto;border-radius:16px;box-shadow:0 26px 50px rgba(0,0,0,.55);}
-  .ckp-glitch .gc-photo{filter:grayscale(1) contrast(1.24) brightness(.8);}
+  .ckp-glitch .gc-photo{filter:grayscale(1) contrast(1.22) brightness(1);}
   .ckp-glitch::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:16px;background:radial-gradient(125% 95% at 50% 44%,transparent 52%,rgba(5,5,6,.9) 100%);}
   .ckp-glitch .gc-red{top:9px;right:11px;left:auto;}
   .ckp-gauges{display:flex;justify-content:center;gap:clamp(12px,4vw,46px);flex-wrap:wrap;padding:20px 16px 14px;border-top:.5px solid rgba(255,255,255,.13);}
@@ -2749,7 +2752,7 @@
     vaSpeaking=true; clearTimeout(speakSafety); speakSafety=setTimeout(markSpeakEnd, Math.min(12000, 1400+((t&&t.length)||0)*85));
     if(neuralOff||Voice.neural===false){ if(!quiet)toast('🔈 voix navigateur · '+t); webSpeak(t); return; }
     if(!quiet)toast('🎙 '+t);
-    speakNeural(t).catch(function(err){ if(!quiet)toast('🔈 repli ('+err+')'); if(err==='no_key'||err==='no_text'||err==='tts'||err==='upstream'){ neuralOff=true; } webSpeak(t); }); }
+    speakNeural(t).catch(function(err){ if(!quiet){ var msg=(err==='no_key')?'Voix réaliste : ajoute ta clé ElevenLabs sur Vercel':(err==='tts'||err==='upstream')?'Voix réaliste indisponible (quota ElevenLabs épuisé) — voix navigateur':'Voix navigateur'; toast('🔈 '+msg); } if(err==='no_key'||err==='no_text'||err==='tts'||err==='upstream'){ neuralOff=true; } webSpeak(t); }); }
   /* ---- wake-word conversation state machine (sleeps until "Practice") ---- */
   var awake=false, awakeTimer=null;
   function vaTxt(k){ var D={
