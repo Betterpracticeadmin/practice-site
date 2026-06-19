@@ -1575,38 +1575,138 @@
 <!-- VEHICLE -->
 <div class="ov" id="vehOv">
   <div class="ov-panel veh-panel">
-    <button class="x" id="vehX">✕</button>
-    <div class="veh-top">
-      <div><div class="lbl">Autonomie</div><div class="veh-big">412 km</div></div>
-      <div class="veh-batt"><span style="width:78%"></span></div>
-      <div style="text-align:right"><div class="lbl">Batterie</div><div class="veh-big">78%</div></div>
+<button class="x" id="vehX" aria-label="Fermer le panneau Mon véhicule">✕</button>
+
+<div class="veh-scroll">
+
+  <!-- HÉRO COCKPIT -->
+  <section class="veh-hero">
+    <figure class="veh-photo">
+      <img src="/hypercar.jpg" alt="Practice One" loading="lazy">
+      <span class="veh-glow"></span>
+      <div class="veh-hero-grad"></div>
+
+      <div class="veh-hero-head">
+        <div class="veh-hero-id">
+          <span class="veh-eyebrow">MON VÉHICULE</span>
+          <h2 class="veh-title">Practice One</h2>
+          <span class="veh-sub">Hypercar · Électrique</span>
+        </div>
+        <div class="veh-vin">
+          <span class="veh-vin-l">RÉF</span>
+          <span class="veh-vin-v">PRC-01</span>
+        </div>
+      </div>
+
+      <div class="veh-hero-stats">
+        <div class="veh-hstat">
+          <span class="veh-hstat-l">AUTONOMIE</span>
+          <span class="veh-hstat-v dot">412<small>km</small></span>
+        </div>
+        <span class="veh-hstat-sep" aria-hidden="true"></span>
+        <div class="veh-hstat">
+          <span class="veh-hstat-l">BATTERIE</span>
+          <span class="veh-hstat-v dot">78<small>%</small></span>
+        </div>
+      </div>
+    </figure>
+
+    <div class="veh-dots" aria-hidden="true">
+      <i class="on"></i><i></i><i></i><i></i>
     </div>
-    <div class="veh-car">
-      <svg viewBox="0 0 200 320" class="veh-svg">
-        <path class="arc a1" d="M40 70 A80 80 0 0 1 160 70"/>
-        <path class="arc a2" d="M30 250 A85 85 0 0 0 170 250"/>
-        <g class="car-top">
-          <rect x="62" y="40" width="76" height="240" rx="34" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.25)"/>
-          <rect x="72" y="78" width="56" height="70" rx="14" fill="rgba(255,255,255,.10)"/>
-          <rect x="72" y="170" width="56" height="60" rx="12" fill="rgba(255,255,255,.06)"/>
-          <rect x="50" y="92" width="10" height="34" rx="4" class="wheel"/><rect x="140" y="92" width="10" height="34" rx="4" class="wheel"/>
-          <rect x="50" y="200" width="10" height="34" rx="4" class="wheel"/><rect x="140" y="200" width="10" height="34" rx="4" class="wheel"/>
-          <circle class="hl hl1" cx="80" cy="46" r="3"/><circle class="hl hl2" cx="120" cy="46" r="3"/>
-        </g>
-      </svg>
-      <span class="tire t-fl">2.4</span><span class="tire t-fr">2.4</span><span class="tire t-rl">2.3</span><span class="tire t-rr">2.3</span>
+  </section>
+
+  <!-- GRILLE 2 COLONNES -->
+  <div class="veh-grid">
+
+    <!-- COLONNE PRINCIPALE : SPECS -->
+    <div class="veh-main">
+
+      <div class="veh-row2">
+        <article class="veh-card hi">
+          <span class="veh-lab">CARBURANT</span>
+          <span class="veh-big dot">62<small>L</small></span>
+        </article>
+        <article class="veh-card hi">
+          <span class="veh-lab">HUILE</span>
+          <span class="veh-big dot">102<small>°C</small></span>
+        </article>
+      </div>
+
+      <article class="veh-card">
+        <div class="veh-card-top">
+          <span class="veh-lab">BATTERIE</span>
+          <span class="veh-pct dot">78<small>%</small></span>
+        </div>
+        <div class="veh-bar"><span style="width:78%"></span></div>
+      </article>
+
+      <article class="veh-card">
+        <div class="veh-card-top">
+          <span class="veh-lab">PRESSION PNEUS · bar</span>
+          <span class="veh-mini-tag">FREINS · Bon</span>
+        </div>
+        <div class="veh-tyres">
+          <div class="veh-tyre"><span class="veh-tyre-l">AVG</span><span class="veh-tyre-v dot">2.4</span></div>
+          <div class="veh-tyre"><span class="veh-tyre-l">AVD</span><span class="veh-tyre-v dot">2.4</span></div>
+          <div class="veh-tyre"><span class="veh-tyre-l">ARG</span><span class="veh-tyre-v dot">2.3</span></div>
+          <div class="veh-tyre"><span class="veh-tyre-l">ARD</span><span class="veh-tyre-v dot">2.3</span></div>
+        </div>
+      </article>
+
+      <!-- CONTRÔLES sous les specs (pleine largeur colonne) -->
+      <div class="veh-ctl-wrap">
+        <span class="veh-lab">CONTRÔLES</span>
+        <div class="veh-ctl" id="vehCtl">
+          <button class="vc on" data-c="lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Verrouillé</span></button>
+          <button class="vc" data-c="lights"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Phares</span></button>
+          <button class="vc" data-c="climate"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7l14 10M19 7L5 17"/></svg><span>Clim 21°</span></button>
+          <button class="vc" data-c="trunk"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="11" rx="2"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Coffre</span></button>
+          <button class="vc" data-c="charge"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Recharge</span></button>
+          <button class="vc" data-c="defrost"><svg viewBox="0 0 24 24"><path d="M12 2v20M4 7l16 10M20 7 4 17M2 12h20"/></svg><span>Dégivrage</span></button>
+        </div>
+      </div>
+
     </div>
-    <div class="veh-ctl" id="vehCtl">
-      <button class="vc on" data-c="lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Verrouillé</span></button>
-      <button class="vc" data-c="lights"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Phares</span></button>
-      <button class="vc" data-c="climate"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7l14 10M19 7L5 17"/></svg><span>Clim 21°</span></button>
-      <button class="vc" data-c="trunk"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="11" rx="2"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span>Coffre</span></button>
-      <button class="vc" data-c="charge"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Recharge</span></button>
-      <button class="vc" data-c="defrost"><svg viewBox="0 0 24 24"><path d="M12 2v20M4 7l16 10M20 7 4 17M2 12h20"/></svg><span>Dégivrage</span></button>
-    </div>
-    <button class="diag-open" id="diagBtn">⚙ Diagnostic complet — santé & codes (OBD)</button>
-    <button class="diag-open" id="obdBtn">🔌 Connecter mon lecteur OBD réel (Bluetooth)</button>
-    <button class="diag-open" id="vinBtn">🔎 Décoder le VIN — fiche complète</button>
+
+    <!-- COLONNE LATÉRALE SOMBRE : SANTÉ -->
+    <aside class="veh-side">
+      <section class="veh-health">
+        <span class="veh-lab acc">SANTÉ</span>
+        <div class="veh-score">
+          <span class="veh-score-n dot">92</span>
+          <span class="veh-score-d">/100</span>
+        </div>
+        <ul class="veh-health-list">
+          <li><span>Moteur</span><b>OK</b></li>
+          <li><span>Codes défaut</span><b class="dot">0</b></li>
+          <li><span>Niveau huile</span><b>OK</b></li>
+          <li><span>Prochain entretien</span><b class="dot">1 200<small>km</small></b></li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+
+  <!-- ACTIONS DIAGNOSTIC (pleine largeur) -->
+  <div class="veh-actions">
+    <button class="diag-open" id="diagBtn" aria-label="Diagnostic complet — santé et codes défaut OBD">
+      <span class="da-i dot">OBD</span>
+      <span class="da-t">Diagnostic complet<small>Santé & codes défaut</small></span>
+      <span class="da-arr" aria-hidden="true">→</span>
+    </button>
+    <button class="diag-open" id="obdBtn" aria-label="Connecter mon lecteur OBD réel par Bluetooth">
+      <span class="da-i dot">BT</span>
+      <span class="da-t">Connecter mon lecteur OBD réel<small>Bluetooth</small></span>
+      <span class="da-arr" aria-hidden="true">→</span>
+    </button>
+    <button class="diag-open" id="vinBtn" aria-label="Décoder le VIN — fiche complète">
+      <span class="da-i dot">VIN</span>
+      <span class="da-t">Décoder le VIN<small>Fiche complète</small></span>
+      <span class="da-arr" aria-hidden="true">→</span>
+    </button>
+  </div>
+
+</div>
   </div>
 </div>
 
@@ -3980,7 +4080,7 @@
   $('callDecline').addEventListener('click',endCall);
 
   /* ---------- vehicle screen ---------- */
-  function openVehicle(){ if(typeof openCockpit==='function')openCockpit(); else $('vehOv').classList.add('show'); }
+  function openVehicle(){ $('vehOv').classList.add('show'); }
   function openVehPanel(){ closeCockpit(); $('vehOv').classList.add('show'); }
   $('vehX').addEventListener('click',function(){ $('vehOv').classList.remove('show'); });
   $('vehOv').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
@@ -10611,5 +10711,396 @@ window.daMotion = window.daMotion || {};
   html[data-da-off] #mediaOv .media-ctl button{ transition:none !important; }
 </style>
 <!-- MEDIAPOLISH-END (auto) -->
+<!-- VEHDASH-START (auto) -->
+<style id="vehDashStyle">
+/* ===== PANNEAU MON VÉHICULE — "fiche technique premium" Nothing ===== */
+#vehOv .veh-panel{
+  width:min(940px,95vw);
+  max-height:90vh;
+  padding:0;
+  position:relative;
+  overflow:hidden;
+  border-radius:22px;
+  border:.5px solid var(--border);
+  background:var(--bg2);
+  display:flex;
+  flex-direction:column;
+}
+
+#vehOv .veh-panel .x#vehX{
+  position:absolute;
+  top:14px; right:14px;
+  z-index:6;
+  width:34px; height:34px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%;
+  border:.5px solid var(--border);
+  background:rgba(0,0,0,.32);
+  color:#fff;
+  font-size:13px; line-height:1;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+  transition:.18s;
+}
+#vehOv .veh-panel .x#vehX:hover{ background:rgba(0,0,0,.5); }
+#vehOv .veh-panel .x#vehX:focus-visible{
+  outline:2px solid var(--acc);
+  outline-offset:2px;
+}
+
+/* scroll interne */
+#vehOv .veh-scroll{
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+#vehOv .veh-scroll::-webkit-scrollbar{ width:8px; }
+#vehOv .veh-scroll::-webkit-scrollbar-thumb{ background:var(--border); border-radius:8px; }
+
+/* utilitaires typo */
+#vehOv .dot{ font-family:var(--dot); color:var(--dotc); }
+#vehOv .veh-lab{
+  font-family:var(--mono);
+  text-transform:uppercase;
+  letter-spacing:.16em;
+  font-size:10px;
+  color:var(--dim);
+}
+#vehOv .veh-lab.acc{ color:var(--acc); }
+
+/* ===== HÉRO COCKPIT plein-cadre ===== */
+#vehOv .veh-hero{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+#vehOv .veh-photo{
+  position:relative;
+  margin:0;
+  aspect-ratio:16/9;
+  border-radius:18px;
+  overflow:hidden;
+  border:.5px solid var(--border);
+  background:var(--card);
+  display:flex; align-items:center; justify-content:center;
+}
+#vehOv .veh-photo img{
+  width:100%; height:100%;
+  object-fit:cover;
+  object-position:center 58%;
+  filter:contrast(1.05) saturate(1.02);
+}
+/* reflet / glow sol */
+#vehOv .veh-photo .veh-glow{
+  position:absolute; left:50%; bottom:-26%;
+  transform:translateX(-50%);
+  width:72%; height:48%;
+  background:radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,.10), transparent 70%);
+  pointer-events:none;
+}
+/* dégradé lisibilité haut + bas */
+#vehOv .veh-photo .veh-hero-grad{
+  position:absolute; inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 32%),
+    linear-gradient(0deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,0) 40%);
+}
+
+#vehOv .veh-hero-head{
+  position:absolute; top:0; left:0; right:0;
+  z-index:2;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 16px 0;
+}
+#vehOv .veh-eyebrow{
+  font-family:var(--mono);
+  text-transform:uppercase;
+  letter-spacing:.22em;
+  font-size:9px;
+  color:rgba(255,255,255,.6);
+}
+#vehOv .veh-title{
+  font-family:"Bricolage Grotesque",sans-serif;
+  font-weight:600;
+  font-size:30px;
+  line-height:1.02;
+  color:#fff;
+  margin:4px 0 3px;
+  letter-spacing:-.01em;
+}
+#vehOv .veh-sub{
+  font-family:var(--mono);
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  font-size:10px;
+  color:rgba(255,255,255,.72);
+}
+#vehOv .veh-vin{
+  display:flex; flex-direction:column; align-items:flex-end; gap:2px;
+  padding:7px 11px; margin-right:42px;
+  border:.5px solid rgba(255,255,255,.22);
+  border-radius:11px;
+  background:rgba(0,0,0,.3);
+  backdrop-filter:blur(6px);
+}
+#vehOv .veh-vin-l{ font-family:var(--mono); font-size:8px; letter-spacing:.2em; color:rgba(255,255,255,.55); }
+#vehOv .veh-vin-v{ font-family:var(--dot); color:#fff; font-size:15px; }
+
+/* overlay stats bas du héro */
+#vehOv .veh-hero-stats{
+  position:absolute; left:16px; bottom:14px;
+  z-index:2;
+  display:flex; align-items:center; gap:16px;
+}
+#vehOv .veh-hstat{ display:flex; flex-direction:column; gap:2px; }
+#vehOv .veh-hstat-l{
+  font-family:var(--mono); text-transform:uppercase;
+  letter-spacing:.16em; font-size:8px; color:rgba(255,255,255,.6);
+}
+#vehOv .veh-hstat-v{
+  font-family:var(--dot); color:#fff;
+  font-size:24px; line-height:.9;
+  display:flex; align-items:baseline; gap:3px;
+}
+#vehOv .veh-hstat-v small{
+  font-family:var(--mono); font-size:10px; letter-spacing:.06em; color:rgba(255,255,255,.7);
+}
+#vehOv .veh-hstat-sep{
+  width:.5px; height:30px; background:rgba(255,255,255,.25);
+}
+
+#vehOv .veh-dots{
+  display:flex; gap:7px; justify-content:center;
+}
+#vehOv .veh-dots i{
+  width:5px; height:5px; border-radius:50%;
+  background:var(--border);
+  transition:.2s;
+}
+#vehOv .veh-dots i.on{ background:var(--txt); width:18px; border-radius:3px; }
+
+/* ===== GRILLE 2 COLONNES ===== */
+#vehOv .veh-grid{
+  display:grid;
+  grid-template-columns:1.55fr 1fr;
+  gap:16px;
+  align-items:start;
+}
+#vehOv .veh-main{ display:flex; flex-direction:column; gap:12px; }
+#vehOv .veh-row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* cartes specs */
+#vehOv .veh-card{
+  border:.5px solid var(--border);
+  border-radius:14px;
+  background:var(--card);
+  padding:14px 15px;
+  display:flex; flex-direction:column; gap:9px;
+  backdrop-filter:blur(6px);
+}
+#vehOv .veh-card.hi{ gap:6px; }
+#vehOv .veh-big{
+  font-size:32px; line-height:.9; color:var(--dotc);
+  display:flex; align-items:baseline; gap:4px;
+}
+#vehOv .veh-big small,
+#vehOv .veh-pct small{
+  font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--dim);
+}
+
+#vehOv .veh-card-top{
+  display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+}
+#vehOv .veh-pct{ font-size:26px; line-height:1; color:var(--dotc); display:flex; align-items:baseline; gap:2px; }
+#vehOv .veh-mini-tag{
+  font-family:var(--mono); text-transform:uppercase;
+  letter-spacing:.1em; font-size:9px; color:var(--dim);
+}
+#vehOv .veh-bar{
+  height:7px; border-radius:99px;
+  background:rgba(255,255,255,.08);
+  border:.5px solid var(--border);
+  overflow:hidden;
+}
+#vehOv .veh-bar span{
+  display:block; height:100%;
+  background:var(--txt);
+  border-radius:99px;
+}
+
+/* pneus — taille dot minimale garantie pour lisibilité */
+#vehOv .veh-tyres{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+}
+#vehOv .veh-tyre{
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:9px 4px;
+  border:.5px solid var(--border);
+  border-radius:10px;
+  background:rgba(255,255,255,.02);
+}
+#vehOv .veh-tyre-l{ font-family:var(--mono); font-size:8px; letter-spacing:.14em; color:var(--faint); }
+#vehOv .veh-tyre-v{ font-family:var(--dot); color:var(--dotc); font-size:17px; }
+
+/* wrapper contrôles (sous les specs) */
+#vehOv .veh-ctl-wrap{ display:flex; flex-direction:column; gap:9px; }
+#vehOv .veh-ctl-wrap .veh-ctl{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+/* ===== COLONNE LATÉRALE SOMBRE — SANTÉ ===== */
+#vehOv .veh-side{
+  display:flex; flex-direction:column; gap:14px;
+  padding:14px;
+  border-radius:16px;
+  border:.5px solid var(--border);
+  background:linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.42));
+  position:sticky; top:0;
+}
+#vehOv .veh-health{
+  border:.5px solid var(--acc);
+  border-radius:14px;
+  padding:15px;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(255,255,255,.05), transparent 60%),
+    color-mix(in srgb, var(--acc) 16%, transparent);
+  display:flex; flex-direction:column; gap:11px;
+}
+#vehOv .veh-score{ display:flex; align-items:baseline; gap:3px; }
+#vehOv .veh-score-n{
+  font-family:var(--dot);
+  font-size:52px; line-height:.85;
+  color:var(--acc);
+}
+#vehOv .veh-score-d{
+  font-family:var(--mono); font-size:13px; letter-spacing:.08em; color:var(--dim);
+}
+#vehOv .veh-health-list{
+  list-style:none; margin:2px 0 0; padding:0;
+  display:flex; flex-direction:column; gap:0;
+}
+#vehOv .veh-health-list li{
+  display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+  padding:8px 0;
+  border-top:.5px solid var(--border);
+}
+#vehOv .veh-health-list li:first-child{ border-top:0; }
+#vehOv .veh-health-list li span{
+  font-family:var(--mono); text-transform:uppercase;
+  letter-spacing:.1em; font-size:9px; color:var(--dim);
+}
+#vehOv .veh-health-list li b{
+  font-family:"Bricolage Grotesque",sans-serif; font-weight:600;
+  font-size:13px; color:var(--txt);
+  display:flex; align-items:baseline; gap:3px;
+}
+/* accent parcimonieux : seul le label SANTÉ + le score sont en var(--acc).
+   Les valeurs dot de la liste restent en --dotc neutre. */
+#vehOv .veh-health-list li b.dot{ font-family:var(--dot); font-weight:400; color:var(--dotc); font-size:16px; }
+#vehOv .veh-health-list li b small{
+  font-family:var(--mono); font-size:9px; letter-spacing:.05em; color:var(--dim);
+}
+
+/* ===== ACTIONS DIAGNOSTIC (pleine largeur sous la grille) ===== */
+#vehOv .veh-actions{
+  display:flex; flex-direction:column; gap:9px;
+}
+#vehOv .diag-open{
+  display:flex; align-items:center; gap:13px;
+  width:100%;
+  text-align:left;
+  padding:13px 15px;
+  border:.5px solid var(--border);
+  border-radius:13px;
+  background:var(--card);
+  color:var(--txt);
+  cursor:pointer;
+  transition:.18s;
+}
+#vehOv .diag-open:hover{
+  border-color:var(--txt);
+  background:rgba(255,255,255,.04);
+}
+#vehOv .diag-open:focus-visible{
+  outline:2px solid var(--acc);
+  outline-offset:2px;
+}
+#vehOv .diag-open .da-i{
+  flex:0 0 auto;
+  min-width:42px;
+  text-align:center;
+  font-family:var(--dot); color:var(--dotc);
+  font-size:14px;
+  padding:7px 8px;
+  border:.5px solid var(--border);
+  border-radius:9px;
+  background:rgba(255,255,255,.03);
+}
+#vehOv .diag-open .da-t{
+  flex:1 1 auto;
+  min-width:0;
+  display:flex; flex-direction:column; gap:2px;
+  font-family:"Bricolage Grotesque",sans-serif; font-weight:600;
+  font-size:14px;
+}
+#vehOv .diag-open .da-t small{
+  font-family:var(--mono); font-weight:400;
+  text-transform:uppercase; letter-spacing:.12em;
+  font-size:9px; color:var(--dim);
+}
+#vehOv .diag-open .da-arr{
+  flex:0 0 auto;
+  font-size:16px; color:var(--dim);
+  transition:.18s;
+}
+#vehOv .diag-open:hover .da-arr{ transform:translateX(3px); color:var(--txt); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:760px){
+  #vehOv .veh-grid{ grid-template-columns:1fr; }
+  #vehOv .veh-side{ position:static; }
+  #vehOv .veh-title{ font-size:24px; }
+  #vehOv .veh-score-n{ font-size:46px; }
+  #vehOv .veh-hstat-v{ font-size:20px; }
+  #vehOv .veh-scroll{ padding:14px; gap:14px; }
+}
+@media (max-width:420px){
+  #vehOv .veh-row2{ grid-template-columns:1fr; }
+  #vehOv .veh-tyres{ grid-template-columns:1fr 1fr; }
+  #vehOv .veh-ctl-wrap .veh-ctl{ grid-template-columns:1fr 1fr; }
+  #vehOv .veh-hero-head{ padding:12px 12px 0; }
+  #vehOv .veh-title{ font-size:21px; }
+  #vehOv .veh-vin{ margin-right:38px; }
+  /* taille dot minimale : ne jamais descendre sous 15px pour rester lisible */
+  #vehOv .veh-tyre-v{ font-size:15px; }
+  #vehOv .veh-big{ font-size:28px; }
+}
+
+/* hauteur réduite (clavier mobile) : compresse le héros, le scroll absorbe le reste */
+@media (max-height:560px){
+  #vehOv .veh-photo{ aspect-ratio:16/7; }
+  #vehOv .veh-score-n{ font-size:40px; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  #vehOv .diag-open,
+  #vehOv .diag-open .da-arr,
+  #vehOv .veh-panel .x#vehX,
+  #vehOv .veh-dots i{ transition:none; }
+}
+</style>
+<!-- VEHDASH-END (auto) -->
 </body>
 </html>
