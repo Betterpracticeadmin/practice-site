@@ -10338,9 +10338,10 @@ window.daMotion = window.daMotion || {};
   .orb-lq span{width:62%;height:62%;margin:auto;background:color-mix(in srgb, var(--acc,#cfd2d7) 70%, #fff);border-radius:42%;scale:0;animation:olqRipple 2.6s cubic-bezier(.45,0,.2,1) infinite;animation-delay:var(--d,0ms);will-change:transform;}
   @keyframes olqRipple{0%,100%{scale:0;border-radius:30%;}45%,55%{scale:1;border-radius:48%;}}
   /* l'orbe : fond sombre net, on masque le disque argenté (shimmer) + le cerveau */
-  .orb.has-olq{background:radial-gradient(circle at 50% 50%, rgba(10,10,12,.55), rgba(3,3,4,.94) 82%) !important;}
+  /* pas de cercle : orbe transparent, sans contour ni halo -> on ne voit QUE les points */
+  .orb.has-olq{background:transparent !important;box-shadow:none !important;overflow:visible !important;}
   .orb.has-olq::before{display:none !important;animation:none !important;}
-  .orb.has-olq::after{opacity:.16;}
+  .orb.has-olq::after{display:none !important;}
   .orb.has-olq > .db-canvas{display:none !important;}
   @media(prefers-reduced-motion:reduce){ .orb-lq span{animation:none;scale:.82;} }
   html[data-da-off] .orb-lq span{animation:none;scale:.82;}
