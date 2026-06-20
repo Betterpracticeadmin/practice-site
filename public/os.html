@@ -1725,27 +1725,39 @@
 <!-- DIAGNOSTICS (Carly-style) -->
 <!-- COCKPIT DIAGNOSTIC premium (facon Bentley Sport Mode) -->
 <div class="cockpit-ov" id="cockpitOv">
-  <button class="media-x" id="cockpitX">✕</button>
-  <div class="ckp-title">Diagnostic</div>
-  <div class="ckp-sub" id="ckpVerdict">santé du véhicule</div>
-  <div class="ckp-car">
-   <div class="glitch-car ckp-glitch" style="--gcimg:url('/hypercar.jpg')">
-    <img class="gc-photo" src="/hypercar.jpg" alt="Hypercar Practice" loading="lazy"/>
-    <span class="gc-l1"></span>
-    <span class="gc-l2"></span>
-    <span class="gc-dots"></span>
-    <span class="gc-red"></span>
-   </div>
-  </div>
-  <div class="ckp-gauges">
-    <button class="ckp-gauge" id="ckpGsante"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpHealthFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpHealthV">—</div></div><div class="ckp-label">Santé</div></button>
-    <button class="ckp-gauge" id="ckpGbatt"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpBattFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpBattV">—</div></div><div class="ckp-label">Batterie</div></button>
-    <button class="ckp-gauge" id="ckpGtemp"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpTempFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpTempV">—</div></div><div class="ckp-label">Moteur</div></button>
-    <button class="ckp-gauge" id="ckpGcodes"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpCodesFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpCodesV">—</div></div><div class="ckp-label">Codes</div></button>
-  </div>
-  <div class="ckp-actions">
-    <button class="ckp-scan" id="ckpDetails">Scanner & détail</button>
-    <button class="ckp-scan" id="ckpMore">Contrôles · OBD · VIN</button>
+  <div class="ckp-panel">
+    <button class="x" id="cockpitX" aria-label="Fermer le diagnostic">✕</button>
+    <div class="ckp-scroll">
+
+      <section class="ckp-hero">
+        <figure class="ckp-photo">
+          <img src="/hypercar.jpg" alt="Practice One" loading="lazy"/>
+          <span class="ckp-glow"></span>
+          <div class="ckp-hero-grad"></div>
+          <div class="ckp-hero-head">
+            <div class="ckp-hero-id">
+              <span class="ckp-eyebrow">DIAGNOSTIC</span>
+              <h2 class="ckp-title">Santé du véhicule</h2>
+              <span class="ckp-sub" id="ckpVerdict">santé du véhicule</span>
+            </div>
+            <div class="ckp-stamp"><span class="ckp-stamp-l">OBD-II</span><span class="ckp-stamp-v">LIVE</span></div>
+          </div>
+        </figure>
+      </section>
+
+      <div class="ckp-gauges">
+        <button class="ckp-gauge" id="ckpGsante"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpHealthFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpHealthV">—</div></div><div class="ckp-label">Santé</div></button>
+        <button class="ckp-gauge" id="ckpGbatt"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpBattFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpBattV">—</div></div><div class="ckp-label">Batterie</div></button>
+        <button class="ckp-gauge" id="ckpGtemp"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpTempFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpTempV">—</div></div><div class="ckp-label">Moteur</div></button>
+        <button class="ckp-gauge" id="ckpGcodes"><div class="ckp-dial"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ckpCodesFg" cx="50" cy="50" r="44"/></svg><div class="ckp-num" id="ckpCodesV">—</div></div><div class="ckp-label">Codes</div></button>
+      </div>
+
+      <div class="ckp-actions">
+        <button class="diag-open" id="ckpDetails"><span class="da-i">SCAN</span><span class="da-t">Scanner &amp; détail<small>Systèmes &amp; codes défaut</small></span><span class="da-arr" aria-hidden="true">→</span></button>
+        <button class="diag-open" id="ckpMore"><span class="da-i">CTRL</span><span class="da-t">Contrôles · OBD · VIN<small>Panneau véhicule</small></span><span class="da-arr" aria-hidden="true">→</span></button>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -11147,5 +11159,59 @@ window.daMotion = window.daMotion || {};
 }
 </style>
 <!-- VEHFIX-END (auto) -->
+<!-- CKPDASH-START (auto) -->
+<style id="ckpDashStyle">
+/* ===== COCKPIT DIAGNOSTIC — meme esthetique que le dashboard vehicule ===== */
+#cockpitOv.cockpit-ov{ position:fixed; inset:0; z-index:73; display:none; place-items:center; color:var(--txt); background:rgba(0,0,0,.5); background-image:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+#cockpitOv.cockpit-ov.show{ display:grid; animation:none; }
+#cockpitOv .ckp-panel{ width:min(940px,95vw); max-height:90vh; position:relative; overflow:hidden; border-radius:22px; border:.5px solid var(--border); background:var(--bg2); display:flex; flex-direction:column; box-shadow:0 30px 80px rgba(0,0,0,.6); animation:daPop .5s cubic-bezier(.2,.85,.25,1) both; }
+#cockpitOv .x#cockpitX{ position:absolute; top:14px; right:14px; z-index:6; width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:.5px solid var(--border); background:rgba(0,0,0,.32); color:#fff; font-size:13px; line-height:1; cursor:pointer; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); transition:.18s; }
+#cockpitOv .x#cockpitX:hover{ background:rgba(0,0,0,.5); }
+#cockpitOv .ckp-scroll{ overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; scroll-behavior:smooth; padding:18px; display:flex; flex-direction:column; gap:18px; }
+#cockpitOv .ckp-scroll::-webkit-scrollbar{ width:8px; }
+#cockpitOv .ckp-scroll::-webkit-scrollbar-thumb{ background:var(--border); border-radius:8px; }
+
+#cockpitOv .ckp-hero{ position:relative; }
+#cockpitOv .ckp-photo{ position:relative; margin:0; height:clamp(166px,26vh,244px); border-radius:18px; overflow:hidden; border:.5px solid var(--border); background:var(--card); display:flex; align-items:center; justify-content:center; }
+#cockpitOv .ckp-photo img{ width:100%; height:100%; object-fit:cover; object-position:center 54%; filter:contrast(1.05) saturate(1.02); }
+#cockpitOv .ckp-glow{ position:absolute; left:50%; bottom:-26%; transform:translateX(-50%); width:72%; height:48%; background:radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,.10), transparent 70%); pointer-events:none; }
+#cockpitOv .ckp-hero-grad{ position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 34%), linear-gradient(0deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,0) 42%); }
+#cockpitOv .ckp-hero-head{ position:absolute; inset:0; z-index:2; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:16px 16px 0; }
+#cockpitOv .ckp-hero-id{ display:flex; flex-direction:column; }
+#cockpitOv .ckp-eyebrow{ font-family:var(--mono); text-transform:uppercase; letter-spacing:.22em; font-size:10px; color:rgba(255,255,255,.78); }
+#cockpitOv .ckp-title{ font-family:"Bricolage Grotesque",sans-serif; font-weight:600; font-size:26px; line-height:1.04; color:#fff; margin:5px 0 4px; letter-spacing:-.01em; text-align:left; padding:0; text-transform:none; animation:none; }
+#cockpitOv .ckp-sub{ font-family:var(--mono); text-transform:uppercase; letter-spacing:.14em; font-size:10px; color:rgba(255,255,255,.82); text-align:left; margin:0; }
+#cockpitOv .ckp-stamp{ display:flex; flex-direction:column; align-items:flex-end; gap:2px; margin-right:42px; padding:7px 11px; border:.5px solid rgba(255,255,255,.22); border-radius:11px; background:rgba(0,0,0,.3); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+#cockpitOv .ckp-stamp-l{ font-family:var(--mono); font-size:8px; letter-spacing:.2em; color:rgba(255,255,255,.55); }
+#cockpitOv .ckp-stamp-v{ font-family:var(--dot); color:#fff; font-size:15px; letter-spacing:.05em; }
+
+#cockpitOv .ckp-gauges{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:0; border:0; }
+#cockpitOv .ckp-gauge{ background:var(--card); border:.5px solid var(--border); border-radius:14px; padding:14px 8px 12px; cursor:pointer; color:var(--txt); display:flex; flex-direction:column; align-items:center; gap:10px; transition:transform .2s cubic-bezier(.34,1.4,.64,1), border-color .2s, box-shadow .2s; }
+#cockpitOv .ckp-gauge:hover{ transform:translateY(-2px); border-color:color-mix(in srgb,var(--txt) 26%,var(--border)); box-shadow:0 10px 26px -16px rgba(0,0,0,.5); }
+#cockpitOv .ckp-dial{ position:relative; width:clamp(74px,9vw,92px); height:clamp(74px,9vw,92px); border-radius:50%; background:none; box-shadow:none; display:grid; place-items:center; }
+#cockpitOv .ckp-dial svg{ position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
+#cockpitOv .ckp-dial .bg{ fill:none; stroke:var(--border); stroke-width:6; }
+#cockpitOv .ckp-dial .fg{ fill:none; stroke-width:6; stroke-linecap:round; stroke-dasharray:276; stroke-dashoffset:276; transition:stroke-dashoffset .9s cubic-bezier(.32,.72,0,1),stroke .4s; }
+#cockpitOv .ckp-num{ position:relative; font-family:var(--dot); color:var(--txt); font-size:21px; line-height:1; }
+#cockpitOv .ckp-num small{ font-family:var(--mono); font-size:10px; color:var(--dim); opacity:1; }
+#cockpitOv .ckp-label{ font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+
+#cockpitOv .ckp-actions{ display:flex; flex-direction:column; gap:9px; margin:0; }
+#cockpitOv .ckp-actions .diag-open{ display:flex; align-items:center; gap:13px; width:100%; text-align:left; margin:0; padding:13px 15px; border:.5px solid var(--border); border-radius:13px; background:var(--card); color:var(--txt); cursor:pointer; transition:.18s; }
+#cockpitOv .ckp-actions .diag-open:hover{ border-color:var(--txt); background:rgba(255,255,255,.04); }
+#cockpitOv .ckp-actions .da-i{ flex:0 0 auto; min-width:48px; text-align:center; font-family:var(--dot); color:var(--txt); font-size:13px; padding:8px; border:.5px solid var(--border); border-radius:9px; background:rgba(255,255,255,.03); }
+#cockpitOv .ckp-actions .da-t{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px; font-family:"Bricolage Grotesque",sans-serif; font-weight:600; font-size:14px; }
+#cockpitOv .ckp-actions .da-t small{ font-family:var(--mono); font-weight:400; text-transform:uppercase; letter-spacing:.12em; font-size:9px; color:var(--dim); }
+#cockpitOv .ckp-actions .da-arr{ flex:0 0 auto; font-size:16px; color:var(--dim); transition:.18s; }
+#cockpitOv .ckp-actions .diag-open:hover .da-arr{ transform:translateX(3px); color:var(--txt); }
+
+#cockpitOv.show .ckp-hero{ animation:vehIn .5s cubic-bezier(.2,.8,.25,1) both; }
+#cockpitOv.show .ckp-gauges{ animation:vehIn .55s cubic-bezier(.2,.8,.25,1) .08s both; }
+#cockpitOv.show .ckp-actions{ animation:vehIn .55s cubic-bezier(.2,.8,.25,1) .16s both; }
+
+@media (max-width:600px){ #cockpitOv .ckp-gauges{ grid-template-columns:1fr 1fr; } #cockpitOv .ckp-title{ font-size:22px; } }
+@media (prefers-reduced-motion:reduce){ #cockpitOv .ckp-panel,#cockpitOv.show .ckp-hero,#cockpitOv.show .ckp-gauges,#cockpitOv.show .ckp-actions{ animation:none !important; } #cockpitOv .ckp-scroll{ scroll-behavior:auto; } #cockpitOv .ckp-gauge:hover{ transform:none; } }
+</style>
+<!-- CKPDASH-END (auto) -->
 </body>
 </html>
