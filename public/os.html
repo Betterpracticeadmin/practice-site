@@ -11102,5 +11102,50 @@ window.daMotion = window.daMotion || {};
 }
 </style>
 <!-- VEHDASH-END (auto) -->
+<!-- VEHFIX-START (auto) -->
+<style id="vehFixStyle">
+/* ===== VEHFIX — lisibilité + fluidité ===== */
+/* 1) BUG: les chiffres utilisaient var(--dotc) ~7% d'opacite (invisibles). -> --txt */
+#vehOv .dot{ color:var(--txt); }
+#vehOv .veh-big,
+#vehOv .veh-pct,
+#vehOv .veh-tyre-v,
+#vehOv .diag-open .da-i,
+#vehOv .veh-health-list li b.dot{ color:var(--txt) !important; }
+#vehOv .veh-hstat-v, #vehOv .veh-vin-v{ color:#fff !important; }
+#vehOv .veh-score-n{ color:var(--acc) !important; }
+
+/* 2) Heros plus compact: specs visibles sans scroller */
+#vehOv .veh-photo{ aspect-ratio:auto !important; height:clamp(166px,26vh,244px) !important; }
+#vehOv .veh-photo img{ object-position:center 54%; }
+
+/* 3) Labels plus grands & contrastes */
+#vehOv .veh-lab{ font-size:11px; color:var(--dim); }
+#vehOv .veh-eyebrow{ font-size:10px; letter-spacing:.18em; color:rgba(255,255,255,.78); }
+#vehOv .veh-sub{ color:rgba(255,255,255,.88); }
+#vehOv .veh-tyre-l{ font-size:9px; color:var(--dim); }
+#vehOv .veh-tyre-v{ font-size:18px; }
+#vehOv .veh-mini-tag{ font-size:10px; color:var(--dim); }
+#vehOv .veh-health-list li span{ font-size:10px; color:var(--dim); }
+#vehOv .veh-health-list li b{ font-size:14px; }
+#vehOv .veh-hstat-l, #vehOv .veh-vin-l{ color:rgba(255,255,255,.7); }
+#vehOv .diag-open .da-t small{ font-size:10px; }
+
+/* 4) Fluidite: scroll doux, entree echelonnee, lift au survol */
+#vehOv .veh-scroll{ scroll-behavior:smooth; }
+#vehOv.show .veh-hero{ animation:vehIn .5s cubic-bezier(.2,.8,.25,1) both; }
+#vehOv.show .veh-grid{ animation:vehIn .55s cubic-bezier(.2,.8,.25,1) .08s both; }
+#vehOv.show .veh-actions{ animation:vehIn .55s cubic-bezier(.2,.8,.25,1) .16s both; }
+@keyframes vehIn{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:none;} }
+#vehOv .veh-card, #vehOv .diag-open{ transition:transform .2s cubic-bezier(.34,1.4,.64,1), border-color .2s ease, background .2s ease, box-shadow .2s ease; }
+#vehOv .veh-card:hover{ transform:translateY(-2px); border-color:color-mix(in srgb, var(--txt) 26%, var(--border)); box-shadow:0 10px 26px -16px rgba(0,0,0,.5); }
+#vehOv .veh-dots i{ transition:width .25s ease, background .25s ease; }
+@media (prefers-reduced-motion:reduce){
+  #vehOv.show .veh-hero, #vehOv.show .veh-grid, #vehOv.show .veh-actions{ animation:none !important; }
+  #vehOv .veh-scroll{ scroll-behavior:auto; }
+  #vehOv .veh-card:hover{ transform:none; }
+}
+</style>
+<!-- VEHFIX-END (auto) -->
 </body>
 </html>
