@@ -1333,7 +1333,7 @@
       <div class="nav-sub" id="navSub">Entre une destination</div>
     </div>
     <div class="card dco-card" id="daCostCard" data-state="empty">
-      <div class="w-head"><span class="w-title">Coût du trajet</span><span class="lbl dco-dist">—</span></div>
+      <div class="w-head"><span class="w-title">Coût du trajet</span><button class="trip-recap-btn" id="tripRecapBtn" type="button">Récap</button><span class="lbl dco-dist">—</span></div>
       <div class="dco-empty">
         <div class="dco-eico">&#129534;</div>
         <div class="dco-etxt">Lance un itinéraire pour estimer le coût (essence + péages).</div>
@@ -2185,6 +2185,14 @@
     if(follow) map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true});
     var spd=c.speed; if(spd==null||isNaN(spd)){ if(last){var dt=(ts-last.t)/1000;spd=dt>0?moved/dt:0;}else spd=0; }
     var spdK=Math.max(0,spd*3.6); if(spdK>maxSpd)maxSpd=spdK; liveSpd=spdK;
+    /* stats récap de trajet (lecture par le pop-up via window.__trip) */
+    (function(){ var T=window.__trip||(window.__trip={dist:0,max:0,t0:ts,move0:null,harshA:0,harshB:0,last:spdK,lt:ts});
+      T.dist=totalDist; T.max=maxSpd;
+      if(spdK>3&&T.move0==null)T.move0=ts;
+      var dts=(ts-T.lt)/1000; if(dts>0.25){ var dv=(spdK-T.last)/dts; if(dv>9)T.harshA++; else if(dv<-11)T.harshB++; T.last=spdK; T.lt=ts; }
+      T.durS=(ts-(T.move0||T.t0))/1000; T.avg=T.durS>0?(totalDist/1000)/(T.durS/3600):0;
+      T.eco=Math.round((window.daScore&&daScore.state&&daScore.state.smooth)||Twin.smooth||0);
+    })();
     var spdTier=spdK<6?'idle':(spdK>=90?'fast':'city'); if(document.body.getAttribute('data-spd')!==spdTier)document.body.setAttribute('data-spd',spdTier);
     var hdg=c.heading; if((hdg==null||isNaN(hdg))&&last&&moved>0.5){var dy=lat-last.lat,dx=(lon-last.lon)*Math.cos(lat*Math.PI/180);hdg=(Math.atan2(dx,dy)*180/Math.PI+360)%360;}
     $('spd').textContent=(UMI?Math.round(spdK/1.60934):Math.round(spdK)).toString();
@@ -11214,5 +11222,72 @@ window.daMotion = window.daMotion || {};
 @media (prefers-reduced-motion:reduce){ #cockpitOv .ckp-panel,#cockpitOv.show .ckp-hero,#cockpitOv.show .ckp-gauges,#cockpitOv.show .ckp-actions{ animation:none !important; } #cockpitOv .ckp-scroll{ scroll-behavior:auto; } #cockpitOv .ckp-gauge:hover{ transform:none; } }
 </style>
 <!-- CKPDASH-END (auto) -->
+<!-- TRIPRECAP-START (auto) -->
+<style id="tripRecapStyle">
+.trip-recap-btn{ margin-left:auto; font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); background:var(--card); border:.5px solid var(--border); border-radius:8px; padding:4px 9px; cursor:pointer; transition:.15s; }
+.trip-recap-btn:hover{ color:var(--txt); border-color:var(--txt); }
+#tripRecapOv .trip-recap-panel{ width:min(420px,94vw); }
+#tripRecapOv .tr-eyebrow{ font-family:var(--mono); font-size:10px; letter-spacing:.2em; color:var(--dim); }
+#tripRecapOv .tr-title{ font-family:"Bricolage Grotesque",sans-serif; font-weight:600; font-size:20px; margin:3px 0 14px; color:var(--txt); }
+#tripRecapOv .tr-hero{ display:flex; flex-direction:column; gap:3px; padding:14px 16px; border:.5px solid var(--acc); border-radius:14px; background:color-mix(in srgb,var(--acc) 14%,transparent); margin-bottom:12px; }
+#tripRecapOv .tr-hero-l{ font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--dim); }
+#tripRecapOv .tr-hero-v{ font-family:var(--dot); font-size:40px; line-height:1; color:var(--acc); display:flex; align-items:baseline; gap:5px; }
+#tripRecapOv .tr-hero-v small{ font-family:var(--mono); font-size:13px; color:var(--dim); }
+#tripRecapOv .tr-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+#tripRecapOv .tr-cell{ border:.5px solid var(--border); border-radius:12px; background:var(--card); padding:11px 13px; }
+#tripRecapOv .tr-k{ display:block; font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:5px; }
+#tripRecapOv .tr-cell b{ font-family:var(--dot); font-size:18px; color:var(--txt); font-weight:400; }
+#tripRecapOv .tr-eco{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; border:.5px solid var(--border); border-radius:12px; background:var(--card); padding:11px 13px; margin-bottom:12px; }
+#tripRecapOv .tr-eco .tr-k{ margin:0; }
+#tripRecapOv .tr-ecobar{ height:7px; border-radius:99px; background:rgba(128,128,128,.18); overflow:hidden; }
+#tripRecapOv .tr-ecobar i{ display:block; height:100%; width:0; background:var(--acc); border-radius:99px; transition:width .5s; }
+#tripRecapOv .tr-eco b{ font-family:var(--dot); color:var(--acc); font-size:18px; }
+#tripRecapOv .tr-events{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+#tripRecapOv .tr-ev{ text-align:center; border:.5px solid var(--border); border-radius:12px; background:var(--card); padding:12px; }
+#tripRecapOv .tr-ev-n{ display:block; font-family:var(--dot); font-size:26px; color:var(--txt); }
+#tripRecapOv .tr-ev-l{ font-family:var(--mono); font-size:9px; letter-spacing:.05em; color:var(--dim); }
+#tripRecapOv .tr-note{ font-family:var(--mono); font-size:10px; color:var(--faint); line-height:1.5; }
+</style>
+<div class="ov" id="tripRecapOv">
+  <div class="ov-panel trip-recap-panel">
+    <button class="x" id="tripRecapX">✕</button>
+    <div class="tr-head"><span class="tr-eyebrow">RÉCAP DE TRAJET</span><h2 class="tr-title" id="trTitle">Trajet en cours</h2></div>
+    <div class="tr-hero"><span class="tr-hero-l">DISTANCE</span><span class="tr-hero-v" id="trDistV">0,0<small>km</small></span></div>
+    <div class="tr-grid">
+      <div class="tr-cell"><span class="tr-k">Durée</span><b id="trDur">—</b></div>
+      <div class="tr-cell"><span class="tr-k">Vit. moyenne</span><b id="trAvg">—</b></div>
+      <div class="tr-cell"><span class="tr-k">Vit. max</span><b id="trMax">—</b></div>
+      <div class="tr-cell"><span class="tr-k">Conso estimée</span><b id="trFuel">—</b></div>
+    </div>
+    <div class="tr-eco"><span class="tr-k">Score éco / douceur</span><div class="tr-ecobar"><i id="trEcoBar"></i></div><b id="trEco">—</b></div>
+    <div class="tr-events">
+      <div class="tr-ev"><span class="tr-ev-n" id="trHA">0</span><span class="tr-ev-l">accélérations brusques</span></div>
+      <div class="tr-ev"><span class="tr-ev-n" id="trHB">0</span><span class="tr-ev-l">freinages brusques</span></div>
+    </div>
+    <div class="tr-note">Mesuré pendant ce trajet (GPS). Conso estimée — branche un OBD pour le réel.</div>
+  </div>
+</div>
+<script id="tripRecapScript">
+(function(){ var $=function(id){return document.getElementById(id);};
+  function fdur(s){ s=Math.max(0,Math.round(s)); var h=(s/3600)|0,m=((s%3600)/60)|0,ss=s%60; return h?(h+' h '+(m<10?'0':'')+m):(m+' min '+(ss<10?'0':'')+ss+' s'); }
+  function open(){ var T=window.__trip||{}; var km=(T.dist||0)/1000;
+    $('trDistV').innerHTML=km.toFixed(1).replace('.',',')+'<small>km</small>';
+    $('trDur').textContent=fdur(T.durS||0);
+    $('trAvg').textContent=Math.round(T.avg||0)+' km/h';
+    $('trMax').textContent=Math.round(T.max||0)+' km/h';
+    $('trFuel').textContent=(km*0.065).toFixed(2).replace('.',',')+' L';
+    var eco=Math.max(0,Math.min(100,Math.round(T.eco||0)));
+    $('trEco').textContent=eco; $('trEcoBar').style.width=eco+'%';
+    $('trHA').textContent=T.harshA||0; $('trHB').textContent=T.harshB||0;
+    $('trTitle').textContent=km<0.05?'Pas encore de trajet':'Trajet en cours';
+    $('tripRecapOv').classList.add('show');
+  }
+  function close(){ $('tripRecapOv').classList.remove('show'); }
+  var b=$('tripRecapBtn'); if(b)b.addEventListener('click',open);
+  var x=$('tripRecapX'); if(x)x.addEventListener('click',close);
+  var ov=$('tripRecapOv'); if(ov)ov.addEventListener('click',function(e){ if(e.target===this)close(); });
+})();
+</script>
+<!-- TRIPRECAP-END (auto) -->
 </body>
 </html>
