@@ -21,6 +21,8 @@
   .conn{display:flex;align-items:center;gap:10px;background:var(--card);backdrop-filter:blur(20px);border:.5px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;}
   .conn .dot{width:10px;height:10px;border-radius:50%;background:#565b61;box-shadow:0 0 8px currentColor;color:#565b61;flex-shrink:0;}
   .conn.on .dot{background:var(--safe);color:var(--safe);}
+  .conn.busy .dot{background:var(--alert);color:var(--alert);animation:obdPulse 1s ease-in-out infinite;}
+  @keyframes obdPulse{0%,100%{opacity:.4}50%{opacity:1}}
   .conn .st{flex:1;font-size:13px;}
   .conn .st small{display:block;color:var(--dim);font-size:11px;font-family:var(--mono);margin-top:2px;}
   .btn{background:var(--acc);color:#000;border:none;border-radius:12px;padding:11px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter';}
@@ -89,11 +91,21 @@
   var $=function(id){return document.getElementById(id);};
   var log=function(m){ var l=$('log'); l.textContent=(l.textContent+'\n'+m).split('\n').slice(-40).join('\n'); l.scrollTop=l.scrollHeight; };
 
-  // Known BLE serial services exposed by ELM327 clones (Vgate, Veepeak, OBDLink LX, etc.)
-  var UART='6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-  var SERVICES=[0xFFE0,0xFFF0,0xFFE5,0xFEE7, UART, '0000ffe0-0000-1000-8000-00805f9b34fb','0000fff0-0000-1000-8000-00805f9b34fb'];
+  // Known BLE serial services exposed by ELM327-class OBD adapters (Vgate, Veepeak, OBDLink, V-Link, Konnwei…)
+  var UART='6e400001-b5a3-f393-e0a9-e50e24dcca9e';         // Nordic UART (V-Link & co)
+  var ISSC='49535343-fe7d-4ae5-8fa9-9fafd205e455';         // Microchip/ISSC Transparent UART (OBDLink MX+ BLE, Konnwei)
+  var SERVICES=[
+    0xFFE0,0xFFF0,0xFFE5,0xFFC0,0xFEE7,0x18F0,0xFFB0,0xFD00,
+    UART, ISSC,
+    '0000ffe0-0000-1000-8000-00805f9b34fb',
+    '0000fff0-0000-1000-8000-00805f9b34fb',
+    '0000ffe5-0000-1000-8000-00805f9b34fb',
+    '0000ffc0-0000-1000-8000-00805f9b34fb',
+    '0000fee7-0000-1000-8000-00805f9b34fb'
+  ];
 
   var dev=null, gatt=null, wCh=null, nCh=null, buf='', queue=[], pending=null, connected=false;
+  var userDisconnect=false, reconnectTries=0, pollTok=0;
 
   // feature detection — Web Bluetooth is Android Chrome / desktop Chrome / Bluefy(iOS). Not Safari.
   var isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -104,7 +116,7 @@
       : '<b>Navigateur non compatible Web Bluetooth.</b> Utilise <b>Chrome sur Android</b> (ou Chrome/Edge desktop) pour connecter le lecteur OBD.';
     $('connectBtn').disabled=true;
   }
-  $('hint').innerHTML='Compatible avec les adaptateurs <b>ELM327 Bluetooth LE</b> (Vgate iCar Pro BLE, Veepeak BLE+, OBDLink…). Branche le lecteur sur la prise OBD, contact mis, puis « Connecter ». L\'adaptateur Carly d\'origine est chiffré et peut ne pas répondre — un ELM327 BLE générique est recommandé.';
+  $('hint').innerHTML='Compatible avec les adaptateurs <b>ELM327 Bluetooth LE</b> (Vgate iCar Pro BLE, Veepeak BLE+, OBDLink CX/MX+, V‑Link…). Branche le lecteur sur la prise OBD, contact mis, puis « Connecter ». <b>Reconnexion automatique</b> si la liaison se coupe. L\'adaptateur Carly d\'origine est chiffré et ne répondra pas — un ELM327 BLE générique est recommandé.';
 
   function writeCmd(cmd){ // returns Promise resolved with full response (up to '>')
     return new Promise(function(res,rej){
@@ -120,29 +132,68 @@
     if(buf.indexOf('>')>=0 && pending){ clearTimeout(pending._to); var p=pending; pending=null; p.res(buf.replace('>','').trim()); pump(); }
   }
 
-  async function connect(){
+  function setConn(state,txt,sub){ var c=$('conn'); c.classList.remove('on','busy');
+    if(state==='on')c.classList.add('on'); else if(state==='busy')c.classList.add('busy');
+    if(txt)$('connTxt').textContent=txt; if(sub!=null)$('connSub').textContent=sub; }
+
+  // choisit un couple écriture/notification DANS LE MÊME service (privilégie une seule caractéristique mixte)
+  async function pickChars(svcs){ var gW=null,gN=null;
+    for(var i=0;i<svcs.length;i++){ var chs; try{ chs=await svcs[i].getCharacteristics(); }catch(e){ continue; }
+      var w=null,n=null,both=null;
+      for(var j=0;j<chs.length;j++){ var c=chs[j],p=c.properties;
+        if((p.write||p.writeWithoutResponse)&&(p.notify||p.indicate))both=both||c;
+        if(p.notify||p.indicate)n=n||c;
+        if(p.write||p.writeWithoutResponse)w=w||c; }
+      if(both)return {w:both,n:both};
+      if(w&&n)return {w:w,n:n};
+      gW=gW||w; gN=gN||n; }
+    return (gW&&gN)?{w:gW,n:gN}:null; }
+
+  async function initELM(){ var seq=['ATZ','ATE0','ATL0','ATS0','ATH0','ATSP0'];
+    for(var k=0;k<seq.length;k++){ try{ await writeCmd(seq[k]); }catch(e){} await sleep(seq[k]==='ATZ'?420:90); }
+    try{ await writeCmd('0100'); }catch(e){} }
+
+  async function setupGatt(){
+    gatt=await dev.gatt.connect();
+    var svcs=await gatt.getPrimaryServices();
+    var ch=await pickChars(svcs);
+    if(!ch){ var e=new Error('NO_SERIAL'); e.code='NO_SERIAL'; throw e; }
+    wCh=ch.w; nCh=ch.n; queue=[]; pending=null; buf='';
+    await nCh.startNotifications(); nCh.addEventListener('characteristicvaluechanged',onNotify);
+    await initELM(); connected=true; reconnectTries=0;
+    $('scanBtn').disabled=false; $('clearBtn').disabled=false; }
+
+  function startPoll(){ pollTok++; poll(pollTok); }
+
+  async function connect(){ userDisconnect=false;
     try{
-      log('recherche de l\'adaptateur…');
+      setConn('busy','Recherche du lecteur…','Sélectionne ton adaptateur OBD'); log('recherche de l\'adaptateur…');
       dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SERVICES});
-      log('appairage : '+(dev.name||'OBD')); $('connSub').textContent=dev.name||'OBD';
-      dev.addEventListener('gattserverdisconnected',function(){ connected=false; $('conn').classList.remove('on'); $('connTxt').textContent='Déconnecté'; log('déconnecté.'); });
-      gatt=await dev.gatt.connect();
-      var svcs=await gatt.getPrimaryServices();
-      for(var i=0;i<svcs.length && (!wCh||!nCh);i++){ var chs=await svcs[i].getCharacteristics();
-        for(var j=0;j<chs.length;j++){ var c=chs[j], p=c.properties;
-          if((p.notify||p.indicate)&&!nCh){ nCh=c; }
-          if((p.write||p.writeWithoutResponse)&&!wCh){ wCh=c; }
-        } }
-      if(!wCh||!nCh){ log('caractéristiques série introuvables sur cet adaptateur.'); return; }
-      await nCh.startNotifications(); nCh.addEventListener('characteristicvaluechanged',onNotify);
-      log('canal série ouvert. initialisation ELM327…');
-      // ELM327 init
-      for(var k=0;k<['ATZ','ATE0','ATL0','ATS0','ATSP0'].length;k++){ await writeCmd(['ATZ','ATE0','ATL0','ATS0','ATSP0'][k]); await sleep(120); }
-      connected=true; $('conn').classList.add('on'); $('connTxt').textContent='Lecteur connecté'; $('connectBtn').textContent='Déconnecter';
-      $('scanBtn').disabled=false; $('clearBtn').disabled=false;
-      log('connecté ✓ — lecture des PID en direct.');
-      poll();
-    }catch(e){ log('échec : '+(e.message||e)); }
+      dev.addEventListener('gattserverdisconnected',onDisconnect);
+      setConn('busy','Connexion…',dev.name||'OBD'); log('appairage : '+(dev.name||'OBD')+' — ouverture du canal série…');
+      await setupGatt();
+      setConn('on','Lecteur connecté',dev.name||'OBD'); $('connectBtn').textContent='Déconnecter';
+      log('connecté ✓ — lecture des PID en direct.'); startPoll();
+    }catch(e){ handleErr(e); }
+  }
+
+  function onDisconnect(){ connected=false; wCh=null; nCh=null; pending=null; queue=[]; $('conn').classList.remove('on');
+    if(userDisconnect){ setConn('off','Lecteur non connecté','Adaptateur ELM327 Bluetooth LE requis'); return; }
+    if(dev && reconnectTries<4){ reconnectTries++;
+      setConn('busy','Reconnexion ('+reconnectTries+'/4)…',dev.name||'OBD'); log('liaison perdue — reconnexion '+reconnectTries+'/4…');
+      setTimeout(function(){ if(userDisconnect)return;
+        setupGatt().then(function(){ setConn('on','Lecteur reconnecté',dev.name||'OBD'); log('reconnecté ✓'); startPoll(); })
+                   .catch(function(){ onDisconnect(); }); }, 700*reconnectTries);
+    } else { setConn('off','Déconnecté','Reconnecte le lecteur puis « Connecter »'); $('connectBtn').textContent='Connecter'; $('scanBtn').disabled=true; $('clearBtn').disabled=true; log('reconnexion abandonnée.'); }
+  }
+
+  function handleErr(e){ var msg=(e&&e.message)||String(e), name=(e&&e.name)||'', u;
+    if(name==='NotFoundError'||/cancel|chooser|User cancelled/i.test(msg)) u='Aucun appareil sélectionné. Réessaie et choisis ton adaptateur dans la liste.';
+    else if((e&&e.code==='NO_SERIAL')||/NO_SERIAL/.test(msg)) u='Canal série introuvable sur cet adaptateur — il est peut-être chiffré (type Carly) ou non‑ELM327. Utilise un ELM327 BLE générique (Vgate iCar Pro BLE, Veepeak BLE+, OBDLink CX).';
+    else if(name==='SecurityError') u='Bluetooth bloqué — autorise le Bluetooth pour ce site (et ouvre la page en HTTPS).';
+    else if(name==='NetworkError'||/GATT|connection|connect/i.test(msg)) u='Connexion GATT échouée — rapproche le téléphone du lecteur, coupe puis remets le contact, et réessaie.';
+    else u='Échec : '+msg;
+    setConn('off','Échec de connexion',u); $('connectBtn').textContent='Connecter'; log('✕ '+u);
   }
 
   var PIDS=[
@@ -163,10 +214,10 @@
     }
     var b=[]; for(var j=i+2;j<hex.length;j++){ var n=parseInt(hex[j],16); if(!isNaN(n))b.push(n); } return b;
   }
-  async function poll(){ if(!connected)return;
+  async function poll(tok){ if(!connected||tok!==pollTok)return;
     for(var i=0;i<PIDS.length;i++){ var P=PIDS[i]; try{ var r=await writeCmd(P.pid); var b=parseBytes(r,P.pid); if(b&&b.length){ var val=P.f(b); setG(P.id,val,P.max); } }catch(e){} }
     try{ var v=await writeCmd('ATRV'); var m=(v.match(/([0-9]+\.?[0-9]*)/)); if(m){ setG('volt',parseFloat(m[1]),15); } }catch(e){}
-    if(connected) setTimeout(poll,350);
+    if(connected&&tok===pollTok) setTimeout(function(){poll(tok);},350);
   }
   function setG(id,val,max){ var v=Math.round(val*10)/10; $(id).textContent=(id==='volt')?v.toFixed(1):Math.round(v);
     var b=$(id+'B'); if(b){ var pct=Math.max(0,Math.min(100,val/max*100)); b.style.width=pct+'%';
@@ -183,7 +234,11 @@
   async function clearDTC(){ if(!confirm('Effacer les codes défaut du véhicule ? (éteint aussi le voyant moteur)'))return; log('effacement (mode 04)…'); try{ await writeCmd('04'); $('dtcList').innerHTML='<span class="muted">✓ Codes effacés. Re-scanne pour confirmer.</span>'; log('codes effacés.'); }catch(e){ log('effacement échoué'); } }
 
   function sleep(ms){ return new Promise(function(r){setTimeout(r,ms);}); }
-  $('connectBtn').addEventListener('click',function(){ if(connected&&gatt){ gatt.disconnect(); connected=false; this.textContent='Connecter'; $('conn').classList.remove('on'); $('connTxt').textContent='Lecteur non connecté'; $('scanBtn').disabled=true; $('clearBtn').disabled=true; } else connect(); });
+  $('connectBtn').addEventListener('click',function(){
+    if(connected&&gatt){ userDisconnect=true; pollTok++; connected=false; try{gatt.disconnect();}catch(e){}
+      this.textContent='Connecter'; setConn('off','Lecteur non connecté','Adaptateur ELM327 Bluetooth LE requis'); $('scanBtn').disabled=true; $('clearBtn').disabled=true; }
+    else connect();
+  });
   $('scanBtn').addEventListener('click',scan);
   $('clearBtn').addEventListener('click',clearDTC);
 })();
