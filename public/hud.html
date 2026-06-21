@@ -142,6 +142,14 @@
   @media(max-width:900px){ #tactic{width:185px;top:calc(238px + env(safe-area-inset-top));} }
   @media(max-width:760px){ #tactic{display:none;} }
 </style>
+<style>
+  /* ---- Hub LIVE / DÉMO ---- */
+  #liveBadge{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:42;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.2em;padding:5px 13px;border-radius:20px;border:.5px solid rgba(255,255,255,.16);background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);pointer-events:none;transition:color .3s,border-color .3s,box-shadow .3s;}
+  #liveBadge.live{color:#39d98a;border-color:rgba(57,217,138,.55);box-shadow:0 0 16px -4px rgba(57,217,138,.6);}
+  #liveBadge.demo{color:#f5a623;border-color:rgba(245,166,35,.5);}
+  /* contrôles de simulation masqués en LIVE (ils n'ont plus de sens) */
+  body[data-live] #bAuto,body[data-live] #bFaster,body[data-live] #bSlower,body[data-live] #bCut,body[data-live] #bPed{display:none;}
+</style>
 </head>
 <body data-lvl="SAFE">
 <div id="wrap">
@@ -192,6 +200,8 @@
     <div class="tac-foot">graphe ego + véhicules · symétrie G/D · inspiré de TacticAI (DeepMind)</div>
   </div>
 
+  <div id="liveBadge" class="demo">DÉMO</div>
+
   <div class="panel" id="voice"><span class="ic"></span><span id="voiceTxt"></span></div>
 
   <div class="panel" id="ctl">
@@ -215,7 +225,7 @@
     <div id="hz"><span>Horizon</span><input id="hzR" type="range" min="1" max="5" step="1" value="3"/><span id="hzV">3s</span></div>
   </div>
 
-  <div class="note">📍 GPS = vitesse réelle · 🔌 OBD2 = données moteur live · ⛶ + AirPlay (Recopie d'écran iOS) pour l'écran voiture · le trafic reste simulé (pas de capteurs)</div>
+  <div class="note">Active le <b>GPS</b> pour passer en <b>LIVE</b> : position, vitesse et bâtiments réels. Sans GPS = mode <b>DÉMO</b>. 🔌 OBD2 = données moteur live · ⛶ + AirPlay pour l'écran voiture · le trafic autour n'est pas détecté (un téléphone n'a pas de capteurs).</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -243,6 +253,8 @@
   };
   var real={speed:null,rpm:null,cool:null,src:null,at:0};   // real speed source (OBD/GPS)
   var gpsWatch=null;
+  var lastLive=null;
+  function isLive(){ return !!(real.src && (Date.now()-real.at)<5000); }  // vraie donnée (GPS/OBD) récente
   var VIEW_M=95;            // metres of road shown ahead
   function laneX(lane){ var roadW=Math.min(W*0.52,360), x0=W/2-roadW/2, lw=roadW/world.lanes; return x0+lw*(lane+0.5); }
   function roadGeom(){ var roadW=Math.min(W*0.52,360); return {roadW:roadW, x0:W/2-roadW/2, lw:roadW/world.lanes, egoY:H-130, topY:60}; }
@@ -376,16 +388,24 @@
     if(tStart==null)tStart=now;
     var grip=world.weather==='rain'?0.72:world.weather==='snow'?0.5:0.95;
 
-    /* move world by ego speed; update entities (closing) */
-    world.cars.forEach(function(c){ c.dist-=(world.egoV-c.v)*dt; });
-    /* comportement: certaines voitures déboîtent (à détecter) */
-    if(world.lanes>1 && world.cars.length && Math.random()<0.006){ var rc=world.cars[(Math.random()*world.cars.length)|0]; if(rc&&rc.dist>20&&rc.changedAt==null&&!rc.cut){ var nl=rc.lane+(Math.random()<0.5?-1:1); if(nl>=0&&nl<world.lanes){ rc.lane=nl; rc.changedAt=world.t; } } }
-    scrollScenery(dt);
-    world.cars=world.cars.filter(function(c){return c.dist>-6 && c.dist<VIEW_M*1.1;});
-    world.peds.forEach(function(p){ p.dist-=world.egoV*dt; if(p.intent)p.prog+=dt*0.35; });
-    world.peds=world.peds.filter(function(p){return p.dist>-4 && p.prog<1.2;});
-    world.spawnAt-=dt; if(world.spawnAt<=0 && world.cars.length<5){spawnCar();world.spawnAt=1.4+Math.random()*1.8;}
-    world.pedAt-=dt; if(world.pedAt<=0){ if(Math.random()<0.5)spawnPed(); world.pedAt=4+Math.random()*5; }
+    /* bascule LIVE / DÉMO */
+    var lv=isLive(); if(lv!==lastLive){ lastLive=lv; document.body.setAttribute('data-live',lv?'1':'');
+      var lb=$('liveBadge'); if(lb){ lb.textContent=lv?'● LIVE':'DÉMO'; lb.className=lv?'live':'demo'; } }
+
+    /* LIVE: aucun trafic simulé (pas de capteurs autour) — on n'affiche que le réel. DÉMO: simulation. */
+    if(lv){ if(world.cars.length)world.cars.length=0; if(world.peds.length)world.peds.length=0; }
+    else {
+      /* move world by ego speed; update entities (closing) */
+      world.cars.forEach(function(c){ c.dist-=(world.egoV-c.v)*dt; });
+      /* comportement: certaines voitures déboîtent (à détecter) */
+      if(world.lanes>1 && world.cars.length && Math.random()<0.006){ var rc=world.cars[(Math.random()*world.cars.length)|0]; if(rc&&rc.dist>20&&rc.changedAt==null&&!rc.cut){ var nl=rc.lane+(Math.random()<0.5?-1:1); if(nl>=0&&nl<world.lanes){ rc.lane=nl; rc.changedAt=world.t; } } }
+      scrollScenery(dt);
+      world.cars=world.cars.filter(function(c){return c.dist>-6 && c.dist<VIEW_M*1.1;});
+      world.peds.forEach(function(p){ p.dist-=world.egoV*dt; if(p.intent)p.prog+=dt*0.35; });
+      world.peds=world.peds.filter(function(p){return p.dist>-4 && p.prog<1.2;});
+      world.spawnAt-=dt; if(world.spawnAt<=0 && world.cars.length<5){spawnCar();world.spawnAt=1.4+Math.random()*1.8;}
+      world.pedAt-=dt; if(world.pedAt<=0){ if(Math.random()<0.5)spawnPed(); world.pedAt=4+Math.random()*5; }
+    }
 
     /* PERCEPTION + PREDICTION: entities in ego lane / closing */
     var pred=[];
@@ -487,6 +507,8 @@
       ctx.globalAlpha=(0.18+f*0.7)*ms.dim*pul; ctx.fillStyle=rlc; ctx.beginPath(); ctx.moveTo(elx,yy-sz); ctx.lineTo(elx-sz*0.85,yy+sz*0.55); ctx.lineTo(elx+sz*0.85,yy+sz*0.55); ctx.closePath(); ctx.fill(); } }
     ctx.globalAlpha=1;
 
+    // trafic simulé — dessiné UNIQUEMENT en démo (aucun capteur ne détecte les véhicules/piétons autour)
+    if(!isLive()){
     // ghosted surrounding cars (Tesla autopilot style)
     world.cars.forEach(function(c){ var cx=laneX(c.lane), cy=mToY(c.dist); var w=Math.max(17,31-(c.dist/VIEW_M)*11), h=w*1.85, rd=w*0.34;
       var closing=world.egoV-c.v;
@@ -503,6 +525,7 @@
       ctx.fillStyle=p.intent?'#f5a623':'#8b9298'; ctx.beginPath(); ctx.arc(px,py,5,0,7); ctx.fill();
       if(p.intent){ ctx.strokeStyle='#f5a623'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px-p.off*26,py); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(px-p.off*26,py); ctx.lineTo(px-p.off*20,py-5); ctx.lineTo(px-p.off*20,py+5); ctx.closePath(); ctx.fill(); } });
+    } /* fin trafic simulé (démo) */
 
     var ex=elx, ey=g.egoY;
     // subtle risk field only when it matters (kept clean)
