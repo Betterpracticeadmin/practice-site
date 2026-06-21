@@ -10535,10 +10535,11 @@ window.daMotion = window.daMotion || {};
     function doSolo(el){ var key=norm(el.textContent); if(!key)return; var svg=MAP[key]; if(!svg)return; if(el.querySelector&&el.querySelector('.ni-svg')&&el.getAttribute('data-ni')===key)return; el.innerHTML=wrap(svg); el.setAttribute('data-ni',key); }
     function doLead(btn){ if(btn.getAttribute('data-ni')==='1')return; var txt=btn.textContent||''; var m=txt.match(/^\s*(\S+?)️?\s+([\s\S]*)$/); if(!m)return; var key=norm(m[1]); var svg=MAP[key]; if(!svg)return; btn.innerHTML="<span class='ni-ic'>"+wrap(svg)+"</span> "+esc(m[2].trim()); btn.setAttribute('data-ni','1'); }
     function scan(root){ root=root||document; try{ var s=root.querySelectorAll(SOLO); for(var i=0;i<s.length;i++)doSolo(s[i]); var l=root.querySelectorAll(LEAD); for(var j=0;j<l.length;j++)doLead(l[j]); }catch(e){} }
-    var sched=false; function schedule(){ if(sched)return; sched=true; var raf=window.requestAnimationFrame||function(f){return setTimeout(f,16);}; raf(function(){ sched=false; scan(document); }); }
+    var sched=false; function schedule(){ if(sched)return; sched=true; setTimeout(function(){ sched=false; scan(document); },60); }  /* setTimeout, pas rAF : marche même onglet en arrière-plan */
     function init(){ scan(document);
       try{ if('MutationObserver' in window){ new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,characterData:true}); } }catch(e){}
-      setTimeout(function(){scan(document);},700); setTimeout(function(){scan(document);},2200);
+      [300,800,1600,3000,5000].forEach(function(t){ setTimeout(function(){scan(document);},t); });
+      setInterval(function(){scan(document);},2500);  /* filet de sécurité : réapplique les icônes même si rAF/observer ont été gelés */
     }
     window.daNothingIcons={scan:scan,icons:ICONS};
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
