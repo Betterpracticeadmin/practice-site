@@ -169,6 +169,9 @@
     <div class="trow"><span class="lbl">Cap</span><span class="v" id="hdg">—</span></div>
     <div class="trow"><span class="lbl">Position</span><span class="v" id="loc">—</span></div>
     <div class="trow"><span class="lbl">Adhérence</span><span class="v" id="grip">0.95</span></div>
+    <div class="trow"><span class="lbl">Fix GPS</span><span class="v" id="gpsAge">—</span></div>
+    <div class="trow"><span class="lbl">Météo</span><span class="v" id="wxv">—</span></div>
+    <div class="trow"><span class="lbl">Itinéraire</span><span class="v" id="routev">—</span></div>
   </div>
 
   <div class="panel" id="mapPanel">
@@ -255,6 +258,8 @@
   var gpsWatch=null;
   var lastLive=null;
   function isLive(){ return !!(real.src && (Date.now()-real.at)<5000); }  // vraie donnée (GPS/OBD) récente
+  /* santé des données + météo/jour-nuit RÉELS */
+  var wxLabel='—', wxAt=0, wxLL=null, wxRealAt=0, wxManual=false, nightManual=false, gpsErr=false, gpsStarted=false, lastAcc=null;
   var VIEW_M=95;            // metres of road shown ahead
   function laneX(lane){ var roadW=Math.min(W*0.52,360), x0=W/2-roadW/2, lw=roadW/world.lanes; return x0+lw*(lane+0.5); }
   function roadGeom(){ var roadW=Math.min(W*0.52,360); return {roadW:roadW, x0:W/2-roadW/2, lw:roadW/world.lanes, egoY:H-130, topY:60}; }
@@ -604,7 +609,7 @@
   var TWcol={calm:['Calme','#46C28E'],focused:['Focalisé','#6AA1FF'],stressed:['Tendu','#E0A33A'],aggressive:['Agressif','#E2554F'],fatigued:['Fatigué','#B98BFF']};
   function paint(S){
     $('spd').textContent=Math.round(world.egoV*3.6);
-    $('srcBadge').textContent=real.src||'SIM'; $('srcBadge').style.color=real.src?'var(--safe)':'var(--faint)';
+    updateHealth();
     if(real.rpm!=null)$('teleRpm').textContent=Math.round(real.rpm)+' tr/min';
     if(real.cool!=null)$('teleCool').textContent=Math.round(real.cool)+' °C';
     $('acc').textContent=(egoAccel>=0?'+':'')+egoAccel.toFixed(1)+' m/s²';
@@ -638,8 +643,8 @@
   $('bSlower').addEventListener('click',function(){auto=false;$('bAuto').classList.remove('on');$('bAuto').textContent='○ Manuel';world.egoV=clamp(world.egoV-4,0,60);});
   $('bCut').addEventListener('click',cutIn);
   $('bPed').addEventListener('click',function(){world.peds.push({dist:34,off:1,prog:0,intent:true});});
-  $('bRain').addEventListener('click',function(){world.weather=world.weather==='rain'?'clear':'rain';this.classList.toggle('on',world.weather==='rain');});
-  $('bNight').addEventListener('click',function(){world.night=!world.night;this.classList.toggle('on',world.night);});
+  $('bRain').addEventListener('click',function(){wxManual=true;world.weather=world.weather==='rain'?'clear':'rain';this.classList.toggle('on',world.weather==='rain');});
+  $('bNight').addEventListener('click',function(){nightManual=true;world.night=!world.night;this.classList.toggle('on',world.night);});
   $('bVoice').addEventListener('click',function(){voiceOn=!voiceOn;this.classList.toggle('on',voiceOn);if(!voiceOn&&'speechSynthesis'in window)speechSynthesis.cancel();});
   $('hzR').addEventListener('input',function(){horizon=+this.value;$('hzV').textContent=horizon+'s';});
   /* ---- real speed: GPS + OBD + fullscreen + wake lock ---- */
@@ -667,23 +672,54 @@
       if(!radarSaid[r.id]||Date.now()-radarSaid[r.id]>120000){ radarSaid[r.id]=Date.now(); var dd=Math.max(50,Math.round(d/50)*50);
         var v=$('voice'); $('voiceTxt').textContent='📷 Radar à '+dd+' m'; v.classList.add('show'); clearTimeout(v._t); v._t=setTimeout(function(){v.classList.remove('show');},3000);
         if(voiceOn&&'speechSynthesis'in window){try{var u=new SpeechSynthesisUtterance('Radar dans '+dd+' mètres.');u.lang='fr-FR';u.rate=1.0;speechSynthesis.speak(u);}catch(e){}} return; } } } }
+  /* météo + jour/nuit RÉELS depuis la position (Open-Meteo, gratuit, sans clé) */
+  function loadWeather(lat,lon){ var now=Date.now();
+    if(wxLL && Math.abs(lat-wxLL.lat)<0.05 && Math.abs(lon-wxLL.lon)<0.05 && now-wxAt<600000) return;
+    wxAt=now; wxLL={lat:lat,lon:lon};
+    fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat.toFixed(3)+'&longitude='+lon.toFixed(3)+'&current=weather_code,is_day')
+      .then(function(r){return r.json();}).then(function(j){ var c=j&&j.current; if(!c)return;
+        var code=c.weather_code, cond='clear', lab='Dégagé';
+        if((code>=71&&code<=77)||code===85||code===86){cond='snow';lab='Neige';}
+        else if((code>=51&&code<=67)||(code>=80&&code<=82)||code>=95){cond='rain';lab=(code>=95)?'Orage':'Pluie';}
+        else if(code===45||code===48){cond='fog';lab='Brouillard';}
+        else if(code>=1&&code<=3){cond='clear';lab='Nuageux';}
+        wxLabel=lab; wxRealAt=Date.now();
+        if(!wxManual) world.weather=cond;
+        if(!nightManual && c.is_day!=null){ world.night=(c.is_day===0); $('bNight').classList.toggle('on',world.night); }
+        updateHealth();
+      }).catch(function(){ if(!nightManual){ var h=new Date().getHours(); world.night=(h<7||h>=20); } });
+  }
+  /* santé des données = vrai apport "centre de contrôle" */
+  function updateHealth(){ var now=Date.now(), fresh=!!(real.src && now-real.at<5000);
+    var sb=$('srcBadge'); if(sb){ var t,c;
+      if(fresh){ t=(real.src==='OBD')?'OBD · LIVE':'GPS · LIVE'; c='var(--safe)'; }
+      else if(gpsErr){ t='GPS REFUSÉ'; c='var(--crit)'; }
+      else if(gpsStarted){ t='ACQUISITION…'; c='var(--alert)'; }
+      else { t='DÉMO'; c='var(--faint)'; }
+      sb.textContent=t; sb.style.color=c; }
+    var ga=$('gpsAge'); if(ga){ if(real.src && real.at){ var s=Math.round((now-real.at)/1000); ga.textContent=(lastAcc!=null?('±'+Math.round(lastAcc)+' m · '):'')+(s<2?'à jour':('il y a '+s+' s')); }
+      else ga.textContent= gpsErr?'refusé':(gpsStarted?'acquisition…':'—'); }
+    var wv=$('wxv'); if(wv) wv.textContent= wxRealAt?(wxLabel+(world.night?' · nuit':' · jour')):'—';
+    var rv=$('routev'); if(rv) rv.textContent= hubRoute?('actif · '+hubRoute.length+' pts'):'—';
+  }
   function onGeo(lat,lon,spd,hdg,acc){
-    real.at=Date.now();
+    real.at=Date.now(); gpsErr=false;
     if(spd!=null&&!isNaN(spd)){ real.speed=Math.max(0,spd); if(real.src!=='OBD')real.src='GPS'; }
     if(hdg!=null&&!isNaN(hdg)) $('hdg').textContent=Math.round(hdg)+'°';
-    if(acc!=null) $('gpsAcc').textContent='±'+Math.round(acc)+' m';
+    if(acc!=null){ lastAcc=acc; $('gpsAcc').textContent='±'+Math.round(acc)+' m'; }
     $('bGps').classList.add('on');
-    if(lat!=null){ egoLL={lat:lat,lon:lon}; if(hdg!=null&&!isNaN(hdg))egoHdg=hdg; loadSurroundings(lat,lon);
+    if(lat!=null){ egoLL={lat:lat,lon:lon}; if(hdg!=null&&!isNaN(hdg))egoHdg=hdg; loadSurroundings(lat,lon); loadWeather(lat,lon);
       if(view3d&&map3d&&b3dReady){ map3d.easeTo({center:[lon,lat],bearing:northLock?0:((hdg!=null&&!isNaN(hdg))?hdg:map3d.getBearing()),pitch:64,zoom:17,duration:900}); load3DBuildings(lat,lon); } }
     if(map&&lat!=null){ meMarker.setLatLng([lat,lon]); map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true}); loadHudRadars(lat,lon); checkHudRadars(lat,lon,hdg); }
     // reverse geocode locality (throttled, every 25s)
     if(lat!=null && Date.now()-geoAt>25000){ geoAt=Date.now();
       fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=14&lat='+lat+'&lon='+lon).then(function(r){return r.json();}).then(function(j){ var a=j&&j.address; if(a){ $('loc').textContent=(a.road||a.suburb||a.city||a.town||a.village||a.county||'—').slice(0,20); } }).catch(function(){});
     }
+    updateHealth();
   }
-  function startGPS(){ if(!navigator.geolocation){log('GPS indisponible sur ce navigateur');return;} $('bGps').classList.add('on'); wake();
+  function startGPS(){ if(!navigator.geolocation){log('GPS indisponible sur ce navigateur');return;} $('bGps').classList.add('on'); gpsStarted=true; gpsErr=false; updateHealth(); wake();
     gpsWatch=navigator.geolocation.watchPosition(function(p){ var c=p.coords; onGeo(c.latitude,c.longitude,c.speed,c.heading,c.accuracy); },
-      function(e){ log('GPS: '+(e.message||'refusé')); $('bGps').classList.remove('on'); },{enableHighAccuracy:true,maximumAge:1000,timeout:20000}); }
+      function(e){ log('GPS: '+(e.message||'refusé')); $('bGps').classList.remove('on'); gpsErr=true; updateHealth(); },{enableHighAccuracy:true,maximumAge:1000,timeout:20000}); }
   function stopGPS(){ if(gpsWatch!=null){navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;} $('bGps').classList.remove('on'); if(real.src==='GPS'){real.speed=null;real.src=null;} }
   // embedded in cockpit: accept full GPS (lat/lon/speed/heading) from parent (no 2nd prompt)
   window.addEventListener('message',function(e){ var d=e.data; if(!d)return; if(d.type==='gps'){ onGeo(d.lat,d.lon,d.speed,d.heading,d.acc); } else if(d.type==='mode'&&d.mode&&MODESTYLE[d.mode]){ hudMode=d.mode; document.body.setAttribute('data-hudmode',d.mode); } else if(d.type==='route'){ hubRoute=(d.coords&&d.coords.length>1)?d.coords.map(function(c){ return Array.isArray(c)?{lat:c[1],lon:c[0]}:{lat:c.lat,lon:c.lon}; }):null; } });
@@ -759,6 +795,7 @@
   initMap();
   var EMBED=/[?&]embed=1/.test(location.search);
   if(!EMBED){ auto=false; $('bAuto').classList.remove('on'); $('bAuto').textContent='○ Réel'; setTimeout(startGPS,700); }
+  setInterval(updateHealth,1000); updateHealth();
   window.addEventListener('resize',function(){ if(map)setTimeout(function(){map.invalidateSize();},150); });
 })();
 </script>
