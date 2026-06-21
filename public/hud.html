@@ -389,6 +389,27 @@
   var P1=0.45,P0=0.8, tStart=null;
   var riskHist=[], lastV=14, voiceCool={}, egoAccel=0;
 
+  /* ===== DÉMO : réalisateur de scénario crédible (joué uniquement hors LIVE) ===== */
+  var demo={ i:-1, t:0, name:'' };
+  var DEMO_SCENES=[
+    {name:'Centre-ville',     dur:10, speed:14, lanes:2, weather:'clear', night:false, traffic:5, enter:function(){ spawnCar(); spawnCar(); }},
+    {name:'Déboîtement',      dur:7,  speed:14,           weather:'clear',             traffic:5, enter:function(){ setTimeout(function(){ if(!isLive())cutIn(); },1400); }},
+    {name:'Piéton qui traverse', dur:7, speed:12,                                      traffic:4, enter:function(){ spawnPed(); }},
+    {name:'Voie rapide',      dur:13, speed:33, lanes:3, weather:'clear', night:false, traffic:8, enter:function(){ for(var i=0;i<4;i++)spawnCar(); }},
+    {name:'Radar',            dur:8,  speed:25,                                        traffic:5, enter:function(){} },
+    {name:'Pluie · crépuscule', dur:11, speed:20,         weather:'rain',  night:true, traffic:6, enter:function(){} }
+  ];
+  function demoEnter(i){ demo.i=i; demo.t=0; var s=DEMO_SCENES[i]; demo.name=s.name;
+    world.demoSpeed=s.speed; world.demoTraffic=s.traffic||5;
+    if(s.lanes)world.lanes=s.lanes;
+    if(s.weather!=null&&!wxManual)world.weather=s.weather;
+    if(s.night!=null&&!nightManual)world.night=s.night;
+    var lb=$('liveBadge'); if(lb&&!isLive()){ lb.textContent='DÉMO · '+s.name; lb.className='demo'; }
+    if(s.enter)try{s.enter();}catch(e){}
+  }
+  function demoTick(dt){ if(isLive())return; if(demo.i<0){ demoEnter(0); return; }
+    demo.t+=dt; if(demo.t>=DEMO_SCENES[demo.i].dur){ demoEnter((demo.i+1)%DEMO_SCENES.length); } }
+
   function step(dt,now){
     if(tStart==null)tStart=now;
     var grip=world.weather==='rain'?0.72:world.weather==='snow'?0.5:0.95;
@@ -400,6 +421,7 @@
     /* LIVE: aucun trafic simulé (pas de capteurs autour) — on n'affiche que le réel. DÉMO: simulation. */
     if(lv){ if(world.cars.length)world.cars.length=0; if(world.peds.length)world.peds.length=0; }
     else {
+      demoTick(dt);   /* fait avancer le scénario démo */
       /* move world by ego speed; update entities (closing) */
       world.cars.forEach(function(c){ c.dist-=(world.egoV-c.v)*dt; });
       /* comportement: certaines voitures déboîtent (à détecter) */
@@ -408,7 +430,7 @@
       world.cars=world.cars.filter(function(c){return c.dist>-6 && c.dist<VIEW_M*1.1;});
       world.peds.forEach(function(p){ p.dist-=world.egoV*dt; if(p.intent)p.prog+=dt*0.35; });
       world.peds=world.peds.filter(function(p){return p.dist>-4 && p.prog<1.2;});
-      world.spawnAt-=dt; if(world.spawnAt<=0 && world.cars.length<5){spawnCar();world.spawnAt=1.4+Math.random()*1.8;}
+      world.spawnAt-=dt; if(world.spawnAt<=0 && world.cars.length<(world.demoTraffic||5)){spawnCar();world.spawnAt=(world.demoSpeed>26?0.7:1.3)+Math.random()*1.4;}
       world.pedAt-=dt; if(world.pedAt<=0){ if(Math.random()<0.5)spawnPed(); world.pedAt=4+Math.random()*5; }
     }
 
@@ -437,7 +459,7 @@
     /* SPEED SOURCE: real (OBD/GPS) > manual > auto sim. Real speed = advisory mode (no override of the car) */
     if(real.speed!=null && real.src==='GPS' && Date.now()-real.at>4000) real.speed=null;
     if(real.speed!=null){ egoAccel=clamp((real.speed-lastV)/Math.max(dt,0.001),-9,5); world.egoV=clamp(real.speed,0,90); }
-    else if(auto){ var target=override?0:risk>P1?world.egoV*(1-risk*0.6):Math.min(world.egoV+2*dt*8,38);
+    else if(auto){ var dcap=(typeof world.demoSpeed==='number')?world.demoSpeed:38; var target=override?0:risk>P1?world.egoV*(1-risk*0.6):(world.egoV<dcap?Math.min(world.egoV+2.4*dt*8,dcap):Math.max(world.egoV-2.4*dt*8,dcap));
       var dv=target-world.egoV; egoAccel=clamp(dv/Math.max(dt,0.001),-9,4); world.egoV=clamp(world.egoV+egoAccel*dt,0,60); }
     else egoAccel=(world.egoV-lastV)/Math.max(dt,0.001);
     lastV=world.egoV;
@@ -794,7 +816,7 @@
   /* ---- REAL MODE by default: live map + auto GPS ---- */
   initMap();
   var EMBED=/[?&]embed=1/.test(location.search);
-  if(!EMBED){ auto=false; $('bAuto').classList.remove('on'); $('bAuto').textContent='○ Réel'; setTimeout(startGPS,700); }
+  if(!EMBED){ setTimeout(startGPS,700); }  /* auto-drive reste actif: la démo se joue seule; le vrai GPS reprend la main dès qu'il arrive */
   setInterval(updateHealth,1000); updateHealth();
   window.addEventListener('resize',function(){ if(map)setTimeout(function(){map.invalidateSize();},150); });
 })();
