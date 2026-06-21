@@ -82,7 +82,9 @@
   #voice .ic{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc);flex-shrink:0;}
 
   /* controls bottom-center */
-  #ctl{bottom:calc(16px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:7px;align-items:center;padding:9px 11px;flex-wrap:wrap;justify-content:center;max-width:94vw;}
+  #ctl{bottom:calc(14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:7;display:flex;gap:7px;align-items:center;padding:8px 11px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start;max-width:min(600px,calc(100vw - 460px));scrollbar-width:none;}
+  #ctl::-webkit-scrollbar{display:none;}
+  #ctl>*{flex:0 0 auto;}
   #ctl button{background:rgba(255,255,255,.06);border:.5px solid rgba(255,255,255,.14);color:#F2F3F5;border-radius:11px;padding:9px 13px;font-size:12px;cursor:pointer;font-family:'Inter';transition:.15s;white-space:nowrap;}
   #ctl button:hover{border-color:var(--acc);}
   #ctl button.on{background:var(--acc);color:#000;border-color:var(--acc);font-weight:600;}
@@ -94,7 +96,7 @@
 
   .brand{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:5;font-family:var(--mono);font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:#565b61;}
   .brand b{color:#F2F3F5;letter-spacing:.4em;}
-  .note{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);z-index:5;font-family:var(--mono);font-size:8px;letter-spacing:.05em;color:#3a3d42;text-align:center;}
+  .note{display:none;}
   /* ---- tablet ---- */
   @media(max-width:1024px){
     #tele,#twin,#risk,#mapPanel{width:185px;}
@@ -105,19 +107,19 @@
   @media(max-width:760px){
     .panel{padding:10px 11px;border-radius:14px;}
     .brand{display:none;}
-    #tele{top:calc(10px + env(safe-area-inset-top));left:8px;width:42vw;max-width:185px;}
-    #mapPanel{top:calc(10px + env(safe-area-inset-top));right:8px;bottom:auto;width:42vw;max-width:185px;}
+    #tele{top:calc(42px + env(safe-area-inset-top));left:8px;width:40vw;max-width:175px;}
+    #mapPanel{top:calc(42px + env(safe-area-inset-top));right:8px;bottom:auto;width:40vw;max-width:175px;}
     #miniMap{height:88px;margin-top:7px;}
     #twin{display:none;}                         /* keep the road readable on small screens */
-    #risk{bottom:104px;left:8px;width:42vw;max-width:185px;}
+    #risk{bottom:190px;left:8px;width:42vw;max-width:185px;}
     .big{font-size:28px;}
-    #voice{bottom:104px;max-width:90vw;font-size:13px;padding:9px 14px;}
+    #voice{bottom:196px;max-width:90vw;font-size:13px;padding:9px 14px;}
     #ctl{left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom));transform:none;max-width:none;border-radius:0;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;border-left:0;border-right:0;}
     #ctl button,#hz{flex-shrink:0;}
     .note{display:none;}
   }
   @media(max-width:430px){
-    #tele,#risk,#mapPanel{width:44vw;}
+    #tele,#risk,#mapPanel{width:42vw;}
     #miniMap{height:74px;}
     .big{font-size:24px;}
     .trow{font-size:11px;}
@@ -129,7 +131,7 @@
     #risk{bottom:60px;}
   }
   /* TacticAI — assistant tactique (inspiré de TacticAI, DeepMind) */
-  #tactic{top:calc(268px + env(safe-area-inset-top));left:calc(16px + env(safe-area-inset-left));width:215px;}
+  #tactic{top:calc(238px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));width:210px;}
   #tactic .tac-action{font-weight:700;font-size:15px;margin:2px 0 1px;color:#39d98a;}
   #tactic .tac-why{font-size:10px;color:#565b61;margin-bottom:9px;}
   .tac-row{display:flex;align-items:center;gap:7px;margin:5px 0;font-size:11px;}
@@ -164,14 +166,15 @@
   #raceHud .rh-bar{ width:9px; height:42px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden; display:flex; flex-direction:column-reverse; }
   #raceHud .rh-bar i{ display:block; width:100%; height:0%; background:#39d98a; transition:height .1s linear; }
   #raceHud .rh-bar.brake i{ background:#ff3b46; }
-  @media(max-width:760px){ #raceHud{ gap:9px; padding:8px 10px; bottom:calc(58px + env(safe-area-inset-bottom)); } #raceHud .rh-gear b{ font-size:26px; } #raceHud .rh-rpm{ min-width:104px; } #raceHud .rh-seg{ width:6px; } }
+  @media(max-width:760px){ #raceHud{ gap:9px; padding:8px 10px; bottom:calc(70px + env(safe-area-inset-bottom)); } #raceHud .rh-gear b{ font-size:26px; } #raceHud .rh-rpm{ min-width:104px; } #raceHud .rh-seg{ width:6px; } }
   @media(prefers-reduced-motion:reduce){ #raceHud .rh-seg.bl{ animation:none; } }
   /* ---- Hub LIVE / DÉMO ---- */
-  #liveBadge{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:42;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.2em;padding:5px 13px;border-radius:20px;border:.5px solid rgba(255,255,255,.16);background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);pointer-events:none;transition:color .3s,border-color .3s,box-shadow .3s;}
+  #liveBadge{position:fixed;top:calc(34px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:42;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.2em;padding:5px 13px;border-radius:20px;border:.5px solid rgba(255,255,255,.16);background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);pointer-events:none;transition:color .3s,border-color .3s,box-shadow .3s;}
   #liveBadge.live{color:#39d98a;border-color:rgba(57,217,138,.55);box-shadow:0 0 16px -4px rgba(57,217,138,.6);}
   #liveBadge.demo{color:#f5a623;border-color:rgba(245,166,35,.5);}
   /* contrôles de simulation masqués en LIVE (ils n'ont plus de sens) */
   body[data-live] #bAuto,body[data-live] #bFaster,body[data-live] #bSlower,body[data-live] #bCut,body[data-live] #bPed{display:none;}
+  @media(max-width:760px){ #liveBadge{ top:calc(12px + env(safe-area-inset-top)); font-size:9px; letter-spacing:.1em; padding:4px 9px; max-width:80vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } }
 </style>
 </head>
 <body data-lvl="SAFE">
