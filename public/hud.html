@@ -143,6 +143,29 @@
   @media(max-width:760px){ #tactic{display:none;} }
 </style>
 <style>
+  /* ---- cluster RACING (SimHub-like) ---- */
+  #raceHud{ position:fixed; left:50%; bottom:calc(72px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:6; display:flex; align-items:center; gap:14px; padding:10px 14px; border-radius:16px; background:rgba(8,10,14,.62); border:.5px solid rgba(255,255,255,.1); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); font-family:'JetBrains Mono',monospace; box-shadow:0 14px 44px -18px rgba(0,0,0,.75); pointer-events:none; }
+  #raceHud .rh-lab{ display:block; font-size:7px; letter-spacing:.16em; color:#7a808c; text-transform:uppercase; margin-bottom:3px; text-align:center; }
+  #raceHud .rh-gforce canvas{ width:54px; height:54px; display:block; }
+  #raceHud .rh-gear b{ font-size:34px; font-weight:700; color:#fff; line-height:1; display:block; text-align:center; }
+  #raceHud .rh-rpm{ display:flex; flex-direction:column; align-items:center; gap:5px; min-width:140px; }
+  #raceHud .rh-shift{ display:flex; gap:3px; }
+  #raceHud .rh-seg{ width:8px; height:14px; border-radius:2px; background:rgba(255,255,255,.09); }
+  #raceHud .rh-seg.on.g{ background:#39d98a; box-shadow:0 0 6px #39d98a; }
+  #raceHud .rh-seg.on.y{ background:#f5d020; box-shadow:0 0 6px #f5d020; }
+  #raceHud .rh-seg.on.r{ background:#ff3b46; box-shadow:0 0 7px #ff3b46; }
+  #raceHud .rh-seg.bl{ animation:rhBlink .12s steps(1) infinite; }
+  @keyframes rhBlink{ 0%{opacity:1} 50%{opacity:.2} }
+  #raceHud .rh-rpmrow{ display:flex; align-items:baseline; gap:4px; }
+  #raceHud .rh-rpmv{ font-size:17px; color:#fff; font-weight:600; }
+  #raceHud .rh-unit{ font-size:8px; color:#7a808c; }
+  #raceHud .rh-pedals{ display:flex; gap:8px; }
+  #raceHud .rh-ped{ display:flex; flex-direction:column; align-items:center; }
+  #raceHud .rh-bar{ width:9px; height:42px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden; display:flex; flex-direction:column-reverse; }
+  #raceHud .rh-bar i{ display:block; width:100%; height:0%; background:#39d98a; transition:height .1s linear; }
+  #raceHud .rh-bar.brake i{ background:#ff3b46; }
+  @media(max-width:760px){ #raceHud{ gap:9px; padding:8px 10px; bottom:calc(58px + env(safe-area-inset-bottom)); } #raceHud .rh-gear b{ font-size:26px; } #raceHud .rh-rpm{ min-width:104px; } #raceHud .rh-seg{ width:6px; } }
+  @media(prefers-reduced-motion:reduce){ #raceHud .rh-seg.bl{ animation:none; } }
   /* ---- Hub LIVE / DÉMO ---- */
   #liveBadge{position:fixed;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:42;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.2em;padding:5px 13px;border-radius:20px;border:.5px solid rgba(255,255,255,.16);background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);pointer-events:none;transition:color .3s,border-color .3s,box-shadow .3s;}
   #liveBadge.live{color:#39d98a;border-color:rgba(57,217,138,.55);box-shadow:0 0 16px -4px rgba(57,217,138,.6);}
@@ -206,6 +229,16 @@
   <div id="liveBadge" class="demo">DÉMO</div>
 
   <div class="panel" id="voice"><span class="ic"></span><span id="voiceTxt"></span></div>
+
+  <div id="raceHud" aria-hidden="true">
+    <div class="rh-gforce"><span class="rh-lab">G-FORCE</span><canvas id="rhG" width="120" height="120"></canvas></div>
+    <div class="rh-gear"><span class="rh-lab">RAPPORT</span><b id="rhGear">N</b></div>
+    <div class="rh-rpm"><div class="rh-shift" id="rhShift"></div><div class="rh-rpmrow"><span class="rh-rpmv" id="rhRpm">0</span><span class="rh-unit">tr/min</span></div></div>
+    <div class="rh-pedals">
+      <div class="rh-ped"><span class="rh-lab">GAZ</span><div class="rh-bar"><i id="rhThr"></i></div></div>
+      <div class="rh-ped"><span class="rh-lab">FREIN</span><div class="rh-bar brake"><i id="rhBrk"></i></div></div>
+    </div>
+  </div>
 
   <div class="panel" id="ctl">
     <button id="bAuto" class="on">⦿ Auto-drive</button>
@@ -676,8 +709,36 @@
 
   /* ---------- loop ---------- */
   var last=0;
+  /* ===== cluster RACING (inspiré SimHub) : shift-lights + rapport + régime + g-force + gaz/frein ===== */
+  var raceLastHdg=null, raceLat=0, rhBuilt=false;
+  function gearOf(k){ return k<6?0:k<26?1:k<48?2:k<74?3:k<104?4:k<142?5:6; }
+  function rpmModel(k,gear){ if(gear<=0)return 850; var B=[[6,26],[26,48],[48,74],[74,104],[104,142],[142,200]], b=B[gear-1]||B[5]; var f=Math.max(0,Math.min(1,(k-b[0])/(b[1]-b[0]))); return 1200+f*5300; }
+  function drawGmeter(gl,lat){ var c=document.getElementById('rhG'); if(!c)return; var x=c.getContext('2d'); if(!x)return; var w=c.width,h=c.height,cx=w/2,cy=h/2,R=w*0.40;
+    x.clearRect(0,0,w,h); x.strokeStyle='rgba(255,255,255,.15)'; x.lineWidth=1;
+    [0.5,1].forEach(function(r){ x.beginPath(); x.arc(cx,cy,R*r,0,7); x.stroke(); });
+    x.beginPath(); x.moveTo(cx-R,cy); x.lineTo(cx+R,cy); x.moveTo(cx,cy-R); x.lineTo(cx,cy+R); x.stroke();
+    var L=Math.max(-1,Math.min(1,lat)), G=Math.max(-1,Math.min(1,gl)), px=cx+L*R, py=cy+G*R;
+    var mag=Math.min(1,Math.sqrt(L*L+G*G)), col=mag>0.8?'#ff3b46':mag>0.5?'#f5a623':'#2f7bff';
+    x.fillStyle=col; x.shadowColor=col; x.shadowBlur=10; x.beginPath(); x.arc(px,py,7,0,7); x.fill(); x.shadowBlur=0; }
+  function updateRace(){
+    if(!rhBuilt){ var s=document.getElementById('rhShift'); if(s&&!s.children.length){ for(var i=0;i<14;i++){ var d=document.createElement('span'); d.className='rh-seg'; s.appendChild(d);} rhBuilt=true; } }
+    var spd=(real.speed!=null&&(Date.now()-real.at)<5000)?real.speed:world.egoV;
+    var k=spd*3.6, gear=gearOf(k);
+    var rpm=(real.rpm!=null&&(Date.now()-real.at)<5000)?real.rpm:rpmModel(k,gear);
+    var N=14, redline=6800, lit=Math.round(Math.min(1,rpm/redline)*N), blink=rpm>6300;
+    var s2=document.getElementById('rhShift'); if(s2){ var sg=s2.children; for(var j=0;j<sg.length;j++){ var on=j<lit, col=j<N*0.6?'g':j<N*0.86?'y':'r'; sg[j].className='rh-seg'+(on?(' on '+col):'')+(blink&&on?' bl':''); } }
+    var ge=document.getElementById('rhGear'); if(ge)ge.textContent=gear===0?'N':gear;
+    var rv=document.getElementById('rhRpm'); if(rv)rv.textContent=Math.round(rpm);
+    var gl=Math.max(-1.3,Math.min(1.3,egoAccel/9.81));
+    if(raceLastHdg!=null){ var dh=((egoHdg-raceLastHdg+540)%360)-180; var yaw=dh*Math.PI/180/0.12; raceLat=raceLat*0.7+Math.max(-1.3,Math.min(1.3,yaw*world.egoV/9.81))*0.3; }
+    raceLastHdg=egoHdg;
+    drawGmeter(gl/1.3, raceLat/1.3);
+    var thr=Math.max(0,Math.min(1,egoAccel/3)), brk=Math.max(0,Math.min(1,-egoAccel/4));
+    var t=document.getElementById('rhThr'), b=document.getElementById('rhBrk'); if(t)t.style.height=Math.round(thr*100)+'%'; if(b)b.style.height=Math.round(brk*100)+'%';
+  }
+
   function frame(ts){ if(!last)last=ts; var dt=Math.min(0.05,(ts-last)/1000); last=ts;
-    var S=step(dt,ts); draw(S); paint(S); requestAnimationFrame(frame); }
+    var S=step(dt,ts); draw(S); paint(S); updateRace(); requestAnimationFrame(frame); }
   requestAnimationFrame(frame);
 
   /* ---------- controls ---------- */
@@ -839,6 +900,7 @@
   var EMBED=/[?&]embed=1/.test(location.search);
   if(!EMBED){ setTimeout(startGPS,700); }  /* auto-drive reste actif: la démo se joue seule; le vrai GPS reprend la main dès qu'il arrive */
   setInterval(updateHealth,1000); updateHealth();
+  setInterval(updateRace,120); updateRace();   /* cluster racing : fluide via rAF, + filet de sécurité */
   window.addEventListener('resize',function(){ if(map)setTimeout(function(){map.invalidateSize();},150); });
 })();
 </script>
