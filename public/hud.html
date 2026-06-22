@@ -286,6 +286,10 @@
            car:'rgba(150,156,172,.5)', glass:'rgba(255,255,255,.08)',
            carTop:'#b3b9c6', carBot:'#6b717d', carWin:'#363b45', tail:'#ff2e3a',
            ego:'#161922', egoBlue:'#2f7bff' };
+  /* palette panoptique nuScenes (classes officielles) — teintes ajustées pour la lisibilité sur fond sombre */
+  var NUSC={ car:{c:'#ff9e00',l:'Voiture'}, truck:{c:'#ff6347',l:'Camion'}, bus:{c:'#ff8c4a',l:'Bus'},
+             motorcycle:{c:'#ff3d63',l:'Moto'}, bicycle:{c:'#ff5fa2',l:'Vélo'}, pedestrian:{c:'#3a78ff',l:'Piéton'},
+             trafficcone:{c:'#36c5c0',l:'Cône'}, barrier:{c:'#9aa7b8',l:'Barrière'} };
   var auto=true, voiceOn=true, horizon=3;
   /* racing-line chevrons adapt to the AI mode's identity */
   var hudMode='copilot';
@@ -506,7 +510,8 @@
   function mToY(dist){ var g=roadGeom(); return g.egoY-(dist/VIEW_M)*(g.egoY-g.topY); }
 
   function spawnCar(){ var lane=(Math.random()*world.lanes)|0; var v=Math.max(3,world.egoV+(Math.random()*10-6));
-    world.cars.push({lane:lane,dist:VIEW_M*0.92+Math.random()*14,v:v}); }
+    var r=Math.random(), cls=r<0.66?'car':r<0.80?'truck':r<0.89?'bus':r<0.96?'motorcycle':'bicycle';
+    world.cars.push({lane:lane,dist:VIEW_M*0.92+Math.random()*14,v:v,cls:cls}); }
   function spawnPed(){ var side=Math.random()<0.5?-1:1; world.peds.push({dist:30+Math.random()*30,off:side,prog:0,intent:Math.random()<0.5}); }
   function cutIn(){ world.cars.push({lane:world.egoLane,dist:11,v:Math.max(2,world.egoV-9),cut:true}); flashVoiceForce=true; }
   var flashVoiceForce=false;
@@ -683,17 +688,26 @@
     // trafic simulé — dessiné UNIQUEMENT en démo (aucun capteur ne détecte les véhicules/piétons autour)
     if(!isLive()){
     // ghosted surrounding cars (Tesla autopilot style)
-    world.cars.forEach(function(c){ var cx=laneX(c.lane), cy=mToY(c.dist); var w=Math.max(16,30-(c.dist/VIEW_M)*11), h=w*1.7;
+    world.cars.forEach(function(c){ var cx=laneX(c.lane), cy=mToY(c.dist);
+      var cls=c.cls||'car', meta=NUSC[cls]||NUSC.car, t=c.dist/VIEW_M, near=t<0.66;
+      var base=Math.max(16,30-t*11);
+      var w=base*(cls==='truck'?1.16:cls==='bus'?1.24:cls==='motorcycle'?0.5:cls==='bicycle'?0.42:1);
+      var h=w*(cls==='truck'?2.0:cls==='bus'?2.5:cls==='motorcycle'?2.05:cls==='bicycle'?2.1:1.7);
       var closing=world.egoV-c.v, pr=c._r||0, threat=pr>0.32;
       if(closing>1.2){ var fd=c.dist-closing*1.3; if(fd>1){ var gy=mToY(fd); ctx.globalAlpha=0.12; drawVehicle(cx,gy,w,h,{glow:0}); ctx.globalAlpha=1; } } // ghost de mouvement
-      drawVehicle(cx,cy,w,h, threat?{top:'#c89aa0',bot:'#7c585d',tail:'#ff3b46',glow:13}:{glow:7});
-      if(threat){ ctx.strokeStyle='rgba(255,59,70,'+(0.5+pr*0.4)+')'; ctx.lineWidth=2.2; rr(cx-w/2-2,cy-h/2-2,w+4,h+4,w*0.26); ctx.stroke(); } // menace réelle
-      var bh=carBehavior(c); if(bh && c.dist<VIEW_M){ ctx.save(); ctx.globalAlpha=Math.min(1,1.3-c.dist/VIEW_M); ctx.fillStyle=bh.col; ctx.font='600 9px JetBrains Mono, monospace'; ctx.textAlign='center'; ctx.fillText(bh.label,cx,cy-h/2-7); ctx.restore(); }
+      drawVehicle(cx,cy,w,h, threat?{top:'#c89aa0',bot:'#7c585d',tail:'#ff3b46',glow:13}:{glow:6});
+      // boîte de détection (couleur de classe nuScenes ; rouge si menace) + étiquette
+      var boxc=threat?'#ff3b46':meta.c;
+      ctx.save(); ctx.strokeStyle=boxc; ctx.lineWidth=1.5; if(near){ctx.shadowColor=boxc;ctx.shadowBlur=6;} rr(cx-w/2-3,cy-h/2-3,w+6,h+6,6); ctx.stroke(); ctx.restore();
+      if(near){ var bh=carBehavior(c); drawTag(cx,cy-h/2-4, bh?bh.label:meta.l, bh?bh.col:boxc); }
     });
 
     // pedestrians + intent arrows
     world.peds.forEach(function(p){ var px=W/2+p.off*(g.roadW/2+18)*(1-p.prog)+p.off*-p.prog*g.roadW*0.5, py=mToY(p.dist);
-      ctx.fillStyle=p.intent?'#f5a623':'#8b9298'; ctx.beginPath(); ctx.arc(px,py,5,0,7); ctx.fill();
+      var pc=p.intent?'#f5a623':NUSC.pedestrian.c, t=p.dist/VIEW_M, ps=Math.max(4,7*(1-t*0.7));
+      ctx.fillStyle=pc; ctx.beginPath(); ctx.arc(px,py-ps*1.5,ps*0.6,0,7); ctx.fill(); rr(px-ps*0.5,py-ps*0.9,ps,ps*1.7,ps*0.4); ctx.fill(); /* silhouette */
+      ctx.save(); ctx.strokeStyle=pc; ctx.lineWidth=1.4; if(t<0.7){ctx.shadowColor=pc;ctx.shadowBlur=6;} rr(px-ps*0.95,py-ps*2.5,ps*1.9,ps*3.1,3); ctx.stroke(); ctx.restore(); /* boîte */
+      if(t<0.7)drawTag(px,py-ps*2.6,p.intent?'PIÉTON !':'Piéton',pc);
       if(p.intent){ ctx.strokeStyle='#f5a623'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px-p.off*26,py); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(px-p.off*26,py); ctx.lineTo(px-p.off*20,py-5); ctx.lineTo(px-p.off*20,py+5); ctx.closePath(); ctx.fill(); } });
     } /* fin trafic simulé (démo) */
@@ -730,6 +744,11 @@
     world.t+=0.016;
   }
   function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+  /* étiquette de classe (perception) : petit chip coloré + texte sombre */
+  function drawTag(cx,topY,text,color){ ctx.save(); ctx.font='700 8px "JetBrains Mono",monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    var tw=Math.ceil(ctx.measureText(text).width)+8, th=11;
+    ctx.fillStyle=color; rr(cx-tw/2,topY-th,tw,th,3); ctx.fill();
+    ctx.fillStyle='#0a0c10'; ctx.fillText(text,cx,topY-th/2+0.5); ctx.restore(); }
   /* voiture vue de l'arrière, style Tesla self-driving viz : carrosserie grise dégradée + lunette sombre + 2 feux rouges */
   function drawVehicle(cx,cy,w,h,opt){ opt=opt||{}; var rd=Math.max(3,w*0.28);
     ctx.save();
