@@ -621,32 +621,48 @@
     ctx.clearRect(0,0,W,H);
     // palette Tesla (SC défini au niveau module pour être accessible à drawVehicle/drawScenery)
     var night=world.night;
-    var bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,SC.bgTop); bg.addColorStop(1,SC.bgBot);
+    // ---- ambiance "vision système" : fond sombre premium + lueur d'horizon ----
+    var bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#070a10'); bg.addColorStop(0.52,'#0b0f17'); bg.addColorStop(1,'#11161f');
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    var hg=ctx.createRadialGradient(W/2,g.topY,8,W/2,g.topY,W*0.62);
+    hg.addColorStop(0, night?'rgba(64,108,170,.20)':'rgba(120,150,205,.15)'); hg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=hg; ctx.fillRect(0,0,W,g.egoY+20);
+    // sol "scanné" : lignes de profondeur très discrètes
+    ctx.save(); ctx.strokeStyle='rgba(96,134,196,.055)'; ctx.lineWidth=1;
+    for(var gi=1;gi<=7;gi++){ var gy=g.egoY-(gi/8)*(g.egoY-g.topY); ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
+    ctx.restore();
 
     // real surroundings if we have GPS, else decorative roadside scenery (buildings / parking) for the demo
     if(egoLL) drawSurroundings(); else drawScenery(SC);
 
-    // road (perspective trapezoid)
+    // ---- route premium (trapèze perspective + dégradé de profondeur + reflet) ----
     var topW=g.roadW*0.42;
     ctx.beginPath(); ctx.moveTo(g.x0,g.egoY+40); ctx.lineTo(g.x0+g.roadW,g.egoY+40);
     ctx.lineTo(W/2+topW/2,g.topY); ctx.lineTo(W/2-topW/2,g.topY); ctx.closePath();
-    ctx.fillStyle=SC.road; ctx.fill();
-    // bords de voie : JAUNE à gauche, BLANC à droite (style Tesla)
-    ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.strokeStyle=SC.yellow; ctx.lineWidth=2.6; ctx.beginPath(); ctx.moveTo(g.x0,g.egoY+40); ctx.lineTo(W/2-topW/2,g.topY); ctx.stroke();
-    ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=2.6; ctx.beginPath(); ctx.moveTo(g.x0+g.roadW,g.egoY+40); ctx.lineTo(W/2+topW/2,g.topY); ctx.stroke();
-
-    // LAYER1: lane markings (scrolling) + lane force field
-    for(var l=1;l<world.lanes;l++){ ctx.strokeStyle=SC.lane; ctx.setLineDash([14,16]); ctx.lineDashOffset=-(world.t*world.egoV*6)%30; ctx.lineWidth=1.4;
-      ctx.beginPath(); var bx=g.x0+g.lw*l, tx=W/2-topW/2+(topW/world.lanes)*l; ctx.moveTo(bx,g.egoY+40); ctx.lineTo(tx,g.topY); ctx.stroke(); }
-    ctx.setLineDash([]);
+    var roadGrad=ctx.createLinearGradient(0,g.egoY+40,0,g.topY); roadGrad.addColorStop(0,'#272c37'); roadGrad.addColorStop(1,'#12161e');
+    ctx.save(); ctx.fillStyle=roadGrad; ctx.fill(); ctx.clip();
+    var sheen=ctx.createLinearGradient(W/2-46,0,W/2+46,0); sheen.addColorStop(0,'rgba(255,255,255,0)'); sheen.addColorStop(.5,'rgba(255,255,255,.03)'); sheen.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=sheen; ctx.fillRect(0,g.topY,W,g.egoY+40-g.topY); ctx.restore();
+    // bords lumineux : JAUNE à gauche, BLANC à droite (glow + cap rond)
+    ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round'; ctx.shadowBlur=8;
+    ctx.strokeStyle=SC.yellow; ctx.shadowColor=SC.yellow; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(g.x0,g.egoY+40); ctx.lineTo(W/2-topW/2,g.topY); ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.62)'; ctx.shadowColor='rgba(255,255,255,.5)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(g.x0+g.roadW,g.egoY+40); ctx.lineTo(W/2+topW/2,g.topY); ctx.stroke();
+    ctx.restore();
+    // marquages de voie (pointillés défilants) qui s'estompent vers l'horizon
+    for(var l=1;l<world.lanes;l++){ ctx.save(); ctx.setLineDash([14,16]); ctx.lineDashOffset=-(world.t*world.egoV*6)%30; ctx.lineWidth=2.2; ctx.lineCap='round';
+      var bx=g.x0+g.lw*l, tx=W/2-topW/2+(topW/world.lanes)*l;
+      var lg=ctx.createLinearGradient(0,g.egoY,0,g.topY); lg.addColorStop(0,'rgba(255,255,255,.6)'); lg.addColorStop(1,'rgba(255,255,255,0)'); ctx.strokeStyle=lg;
+      ctx.beginPath(); ctx.moveTo(bx,g.egoY+40); ctx.lineTo(tx,g.topY); ctx.stroke(); ctx.restore(); }
     // lane-centering force field (subtle glow in ego lane)
     var elx=laneX(world.egoLane);
-    /* tapis de trajectoire BLEU (style Tesla self-driving) — voie suivie par la voiture */
-    var topY2=g.topY+20, cw0=g.lw*0.46, cw1=g.lw*0.14;
-    var fg=ctx.createLinearGradient(0,g.egoY,0,topY2); fg.addColorStop(0,'rgba(47,123,255,.34)'); fg.addColorStop(1,'rgba(47,123,255,0)');
-    ctx.fillStyle=fg; ctx.beginPath(); ctx.moveTo(elx-cw0,g.egoY+18); ctx.lineTo(elx+cw0,g.egoY+18); ctx.lineTo(elx+cw1,topY2); ctx.lineTo(elx-cw1,topY2); ctx.closePath(); ctx.fill();
+    /* ---- trajectoire FSD : tapis bleu lumineux dans la voie suivie ---- */
+    var topY2=g.topY+18, cw0=g.lw*0.5, cw1=g.lw*0.13;
+    ctx.save();
+    var fg=ctx.createLinearGradient(0,g.egoY,0,topY2); fg.addColorStop(0,'rgba(47,123,255,.42)'); fg.addColorStop(.55,'rgba(47,123,255,.16)'); fg.addColorStop(1,'rgba(47,123,255,0)');
+    ctx.fillStyle=fg; ctx.beginPath(); ctx.moveTo(elx-cw0,g.egoY+22); ctx.lineTo(elx+cw0,g.egoY+22); ctx.lineTo(elx+cw1,topY2); ctx.lineTo(elx-cw1,topY2); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='rgba(96,166,255,.5)'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.shadowColor='rgba(47,123,255,.6)'; ctx.shadowBlur=9;
+    ctx.beginPath(); ctx.moveTo(elx-cw0,g.egoY+22); ctx.lineTo(elx-cw1,topY2); ctx.moveTo(elx+cw0,g.egoY+22); ctx.lineTo(elx+cw1,topY2); ctx.stroke();
+    ctx.restore();
     if(typeof drawTacticLane==='function')drawTacticLane(g);
 
     // RACING LINE: chevrons whose colour & behaviour follow the AI mode's identity
@@ -692,26 +708,38 @@
     if(!hasRR){ ctx.strokeStyle=rlc; ctx.globalAlpha=.55; ctx.lineWidth=3.5; ctx.setLineDash([4,10]); ctx.lineCap='round';
       ctx.beginPath(); ctx.moveTo(ex,ey-12); ctx.lineTo(ex,g.topY+18); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1; }
 
-    // ego — mis en avant BLEU (style Tesla self-driving)
-    ctx.save(); ctx.shadowColor='rgba(47,123,255,.6)'; ctx.shadowBlur=20;
-    ctx.fillStyle=SC.ego; rr(ex-17,ey-30,34,60,11); ctx.fill(); ctx.restore();
-    var eg=ctx.createLinearGradient(0,ey-26,0,ey+8); eg.addColorStop(0,'rgba(64,140,255,.9)'); eg.addColorStop(1,'rgba(47,123,255,.28)');
-    ctx.fillStyle=eg; rr(ex-12,ey-23,24,30,7); ctx.fill();                 /* toit bleu */
-    ctx.fillStyle='rgba(180,210,255,.5)'; rr(ex-12,ey-23,24,7,4); ctx.fill(); /* reflet haut */
-    ctx.strokeStyle='rgba(120,180,255,.75)'; ctx.lineWidth=1.4; rr(ex-17,ey-30,34,60,11); ctx.stroke();
+    // ---- ego : véhicule piloté mis en avant (halo de sélection + carrosserie premium) ----
+    ctx.save();
+    var ring=ctx.createRadialGradient(ex,ey+8,6,ex,ey+8,42); ring.addColorStop(0,'rgba(47,123,255,.34)'); ring.addColorStop(1,'rgba(47,123,255,0)');
+    ctx.fillStyle=ring; ctx.beginPath(); ctx.ellipse(ex,ey+8,42,18,0,0,7); ctx.fill();                         /* halo sol */
+    ctx.fillStyle='rgba(0,0,0,.45)'; ctx.beginPath(); ctx.ellipse(ex,ey+25,20,7,0,0,7); ctx.fill();             /* ombre */
+    var body=ctx.createLinearGradient(0,ey-30,0,ey+30); body.addColorStop(0,'#2c3543'); body.addColorStop(.5,'#1b212c'); body.addColorStop(1,'#11151d');
+    ctx.fillStyle=body; rr(ex-17,ey-30,34,60,12); ctx.fill();                                                   /* carrosserie */
+    var glass=ctx.createLinearGradient(0,ey-24,0,ey+4); glass.addColorStop(0,'rgba(96,156,240,.42)'); glass.addColorStop(1,'rgba(30,60,110,.22)');
+    ctx.fillStyle=glass; rr(ex-12,ey-22,24,26,7); ctx.fill();                                                   /* lunette teintée */
+    ctx.fillStyle='rgba(160,196,255,.2)'; rr(ex-12,ey-22,24,6,4); ctx.fill();                                   /* reflet capot */
+    ctx.fillStyle='rgba(255,72,84,.7)'; rr(ex-14,ey+22,7,3,1.5); ctx.fill(); rr(ex+7,ey+22,7,3,1.5); ctx.fill(); /* feux arrière */
+    ctx.strokeStyle='rgba(96,166,255,.85)'; ctx.lineWidth=1.6; ctx.shadowColor='rgba(47,123,255,.7)'; ctx.shadowBlur=14; rr(ex-17,ey-30,34,60,12); ctx.stroke(); /* liseré lumineux */
+    ctx.restore();
+
+    // vignette — assombrit les bords pour un focus central "dark premium"
+    var vg=ctx.createRadialGradient(W/2,g.egoY*0.6,Math.min(W,H)*0.3,W/2,g.egoY*0.6,Math.max(W,H)*0.78);
+    vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.5)');
+    ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
 
     world.t+=0.016;
   }
   function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
   /* voiture vue de l'arrière, style Tesla self-driving viz : carrosserie grise dégradée + lunette sombre + 2 feux rouges */
-  function drawVehicle(cx,cy,w,h,opt){ opt=opt||{}; var rd=Math.max(3,w*0.26);
+  function drawVehicle(cx,cy,w,h,opt){ opt=opt||{}; var rd=Math.max(3,w*0.28);
     ctx.save();
-    ctx.fillStyle='rgba(0,0,0,.38)'; ctx.beginPath(); ctx.ellipse(cx,cy+h*0.46,w*0.56,h*0.15,0,0,7); ctx.fill(); /* ombre sol */
-    var grd=ctx.createLinearGradient(0,cy-h/2,0,cy+h/2); grd.addColorStop(0,opt.top||SC.carTop); grd.addColorStop(1,opt.bot||SC.carBot);
-    ctx.fillStyle=grd; rr(cx-w/2,cy-h/2,w,h,rd); ctx.fill();                                  /* carrosserie */
-    ctx.fillStyle=SC.carWin; rr(cx-w*0.34,cy-h*0.36,w*0.68,h*0.32,rd*0.6); ctx.fill();         /* lunette/toit */
-    ctx.strokeStyle='rgba(255,255,255,.16)'; ctx.lineWidth=1; rr(cx-w/2+0.5,cy-h/2+0.5,w-1,h-1,rd); ctx.stroke(); /* liseré */
-    var tw=w*0.24, th=Math.max(2,h*0.10), ty=cy+h*0.28;
+    ctx.fillStyle='rgba(0,0,0,.42)'; ctx.beginPath(); ctx.ellipse(cx,cy+h*0.44,w*0.58,h*0.14,0,0,7); ctx.fill(); /* ombre sol */
+    var grd=ctx.createLinearGradient(0,cy-h/2,0,cy+h/2); grd.addColorStop(0,opt.top||SC.carTop); grd.addColorStop(.55,opt.bot||SC.carBot); grd.addColorStop(1,'#565c68');
+    ctx.fillStyle=grd; rr(cx-w/2,cy-h/2,w,h,rd); ctx.fill();                                  /* carrosserie métallique */
+    ctx.fillStyle=SC.carWin; rr(cx-w*0.36,cy-h*0.38,w*0.72,h*0.30,rd*0.55); ctx.fill();        /* lunette/toit */
+    ctx.fillStyle='rgba(255,255,255,.10)'; rr(cx-w*0.36,cy-h*0.38,w*0.72,h*0.08,3); ctx.fill();/* reflet toit */
+    ctx.strokeStyle='rgba(255,255,255,.14)'; ctx.lineWidth=1; rr(cx-w/2+0.5,cy-h/2+0.5,w-1,h-1,rd); ctx.stroke(); /* liseré */
+    var tw=w*0.22, th=Math.max(2,h*0.09), ty=cy+h*0.30;
     ctx.fillStyle=opt.tail||SC.tail; ctx.shadowColor=opt.tail||SC.tail; ctx.shadowBlur=(opt.glow!=null?opt.glow:7);
     rr(cx-w*0.42,ty,tw,th,th*0.5); ctx.fill(); rr(cx+w*0.42-tw,ty,tw,th,th*0.5); ctx.fill();    /* feux arrière */
     ctx.restore();
