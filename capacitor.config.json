@@ -1,0 +1,12 @@
+{
+  "appId": "com.betterstate.practice",
+  "appName": "Practice",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0a0c10"
+  },
+  "server": {
+    "iosScheme": "practice"
+  }
+}
