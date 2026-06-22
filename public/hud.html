@@ -402,13 +402,17 @@
   function newScene(side,dist,row){
     var r=rnd(); var id=(rnd()*1e6)|0;
     if(row===1){ /* 2e rangee : batiments plus petits, off plus grand, jamais d'arbre/lampadaire */
-      return {side:side,dist:dist,row:1,type:'b',id:id,w:13+rnd()*16,h:38+rnd()*70,off:96+rnd()*64,
+      return {side:side,dist:dist,row:1,type:'b',id:id,w:13+rnd()*16,h:38+rnd()*70,off:100+rnd()*64,
         cls:(rnd()*BCLS.length)|0,rc:(rnd()*9)|0};
     }
-    if(r<0.16) return {side:side,dist:dist,row:0,type:'tree',id:id,off:34+rnd()*16,sz:9+rnd()*6};
-    if(r<0.26) return {side:side,dist:dist,row:0,type:'lamp',id:id,off:24+rnd()*8};
-    if(r<0.36) return {side:side,dist:dist,row:0,type:'car',id:id,off:26+rnd()*10};
-    return {side:side,dist:dist,row:0,type:'b',id:id,w:11+rnd()*20,h:26+rnd()*64,off:40+rnd()*38,
+    /* taxonomie UrbanVerse mappee au decor canvas : tree / shrub / lamp / object(mobilier) / car / building.
+       offsets caleS sur les bandes au sol : mobilier sur trottoir (off<22), vegetation sur terrain (28-48), batiments derriere (46+). */
+    if(r<0.14) return {side:side,dist:dist,row:0,type:'tree', id:id,off:34+rnd()*14,sz:9+rnd()*6};
+    if(r<0.24) return {side:side,dist:dist,row:0,type:'shrub',id:id,off:28+rnd()*8, sz:6+rnd()*4};
+    if(r<0.32) return {side:side,dist:dist,row:0,type:'lamp', id:id,off:23+rnd()*6};
+    if(r<0.40) return {side:side,dist:dist,row:0,type:'obj',  id:id,off:9+rnd()*8, sz:5+rnd()*3, kind:(rnd()*4)|0};
+    if(r<0.48) return {side:side,dist:dist,row:0,type:'car',  id:id,off:7+rnd()*7};
+    return {side:side,dist:dist,row:0,type:'b',id:id,w:11+rnd()*20,h:26+rnd()*64,off:46+rnd()*36,
       cls:(rnd()*BCLS.length)|0,rc:(rnd()*9)|0};
   }
   function seedScenery(){ scenery=[];
@@ -452,7 +456,61 @@
       ctx.fillStyle='#cfd6e0'; ctx.beginPath(); ctx.arc(hx,hy,Math.max(1.2,h*0.09),0,7); ctx.fill();
     }
   }
+  /* arbuste / haie (UrbanVerse: vegetation 'shrub') : masse basse, plusieurs lobes */
+  function drawShrub(x,y,sz,n){
+    var col=n?['#274a31','#1d3a26']:['#5fa45c','#4a8a49'];
+    ctx.fillStyle=col[1];
+    ctx.beginPath(); ctx.arc(x-sz*0.5,y-sz*0.4,sz*0.5,0,7); ctx.arc(x+sz*0.5,y-sz*0.4,sz*0.5,0,7); ctx.fill();
+    ctx.fillStyle=col[0];
+    ctx.beginPath(); ctx.arc(x,y-sz*0.72,sz*0.62,0,7); ctx.fill();
+  }
+  /* mobilier urbain (UrbanVerse: 'object') : 0 borne incendie · 1 panneau · 2 poubelle · 3 banc. Petit & sobre. */
+  function drawObj(x,y,sz,side,n,kind){
+    if(kind===0){
+      ctx.fillStyle=n?'#7a3030':'#c2483f'; ctx.fillRect(x-sz*0.22,y-sz*1.1,sz*0.44,sz*1.1);
+      ctx.fillRect(x-sz*0.34,y-sz*1.12,sz*0.68,sz*0.2);
+    } else if(kind===1){
+      ctx.strokeStyle=n?'#555c6c':'#9aa3b2'; ctx.lineWidth=Math.max(1,sz*0.14); ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y-sz*1.8); ctx.stroke();
+      ctx.fillStyle=n?'#3a6a9a':'#4f8fd0'; ctx.fillRect(x-sz*0.5,y-sz*2.1,sz*1.0,sz*0.62);
+    } else if(kind===2){
+      ctx.fillStyle=n?'#2c3140':'#566072'; ctx.fillRect(x-sz*0.3,y-sz*0.85,sz*0.6,sz*0.85);
+      ctx.fillStyle=n?'#3a4150':'#6b7689'; ctx.fillRect(x-sz*0.36,y-sz*0.95,sz*0.72,sz*0.16);
+    } else {
+      ctx.fillStyle=n?'#4a3f33':'#8a6f4f';
+      ctx.fillRect(x-sz*0.7,y-sz*0.5,sz*1.4,sz*0.18);
+      ctx.fillRect(x-sz*0.6,y-sz*0.32,sz*0.12,sz*0.32);
+      ctx.fillRect(x+sz*0.48,y-sz*0.32,sz*0.12,sz*0.32);
+    }
+  }
+  /* bandes au sol en perspective : trottoir + bordure + terrain (UrbanVerse: road/sidewalk/terrain).
+     Dessinees AVANT les elements ET avant la route (peinte par-dessus -> aucune couture / aucun trou). */
+  function drawGroundBands(g,n){
+    var tFar=0.9, yN=g.egoY+40, yF=g.egoY-tFar*(g.egoY-g.topY);
+    var scN=1, scF=(1-tFar*0.8), SWW=22, TERW=30;
+    for(var s=-1;s<=1;s+=2){
+      var pxIn0=W/2+s*(g.roadW/2)*scN,           pxIn1=W/2+s*(g.roadW/2)*scF;
+      var pxSw0=W/2+s*((g.roadW/2)+SWW)*scN,      pxSw1=W/2+s*((g.roadW/2)+SWW)*scF;
+      var pxTe0=W/2+s*((g.roadW/2)+SWW+TERW)*scN, pxTe1=W/2+s*((g.roadW/2)+SWW+TERW)*scF;
+      /* terrain (herbe) */
+      var tg=ctx.createLinearGradient(0,yN,0,yF);
+      if(n){ tg.addColorStop(0,'#161c17'); tg.addColorStop(1,'#0d110e'); } else { tg.addColorStop(0,'#34402d'); tg.addColorStop(1,'#1b2317'); }
+      ctx.fillStyle=tg; ctx.beginPath(); ctx.moveTo(pxSw0,yN); ctx.lineTo(pxTe0,yN); ctx.lineTo(pxTe1,yF); ctx.lineTo(pxSw1,yF); ctx.closePath(); ctx.fill();
+      /* trottoir */
+      var sg=ctx.createLinearGradient(0,yN,0,yF);
+      if(n){ sg.addColorStop(0,'#272c35'); sg.addColorStop(1,'#161a21'); } else { sg.addColorStop(0,'#c3c8d0'); sg.addColorStop(1,'#888e99'); }
+      ctx.fillStyle=sg; ctx.beginPath(); ctx.moveTo(pxIn0,yN); ctx.lineTo(pxSw0,yN); ctx.lineTo(pxSw1,yF); ctx.lineTo(pxIn1,yF); ctx.closePath(); ctx.fill();
+      /* dalles : traits transversaux discrets sur le trottoir */
+      ctx.strokeStyle=n?'rgba(120,130,150,.13)':'rgba(90,96,108,.20)'; ctx.lineWidth=1;
+      for(var ti=1;ti<9;ti++){ var tt=ti/9, yy=g.egoY-tt*(g.egoY-g.topY), ssc=(1-tt*0.8);
+        ctx.beginPath(); ctx.moveTo(W/2+s*(g.roadW/2)*ssc,yy); ctx.lineTo(W/2+s*((g.roadW/2)+SWW)*ssc,yy); ctx.stroke(); }
+      /* bordure (curb) au bord de la route */
+      ctx.strokeStyle=n?'rgba(150,162,185,.4)':'rgba(255,255,255,.55)'; ctx.lineWidth=1.6;
+      ctx.beginPath(); ctx.moveTo(pxIn0,yN); ctx.lineTo(pxIn1,yF); ctx.stroke();
+    }
+  }
   function drawScenery(SC){ if(!scenery.length)return; var g=roadGeom(), n=world.night;
+    drawGroundBands(g,n);
     var list=scenery.slice().sort(function(a,b){return b.dist-a.dist;});
     for(var k=0;k<list.length;k++){ var o=list[k];
       var t=o.dist/VIEW_M; if(t<0||t>=1)continue;
@@ -488,6 +546,12 @@
 
       } else if(o.type==='tree'){
         drawTree(x,y,Math.max(4,o.sz*sc),n);
+
+      } else if(o.type==='shrub'){
+        drawShrub(x,y,Math.max(3,(o.sz||7)*sc),n);
+
+      } else if(o.type==='obj'){
+        drawObj(x,y,Math.max(3,(o.sz||6)*sc),o.side,n,o.kind||0);
 
       } else if(o.type==='lamp'){
         drawLamp(x,y,Math.max(14,46*sc),o.side,n);
