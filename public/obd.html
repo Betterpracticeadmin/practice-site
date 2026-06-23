@@ -108,12 +108,12 @@
   var userDisconnect=false, reconnectTries=0, pollTok=0;
 
   // feature detection — Web Bluetooth is Android Chrome / desktop Chrome / Bluefy(iOS). Not Safari.
-  var isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isApple=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   if(!navigator.bluetooth){
     var u=$('unsupp'); u.style.display='block';
-    u.innerHTML= isiOS
-      ? '<b>iPhone :</b> Safari ne supporte pas le Bluetooth web. Ouvre cette page dans le navigateur <b>Bluefy</b> (gratuit, App Store) pour connecter ton lecteur OBD. Tout le reste (RPM, températures, codes) fonctionnera.'
-      : '<b>Navigateur non compatible Web Bluetooth.</b> Utilise <b>Chrome sur Android</b> (ou Chrome/Edge desktop) pour connecter le lecteur OBD.';
+    u.innerHTML= isApple
+      ? '<b>iPad / iPhone :</b> Safari ne gère pas le Bluetooth web (Chrome iOS non plus — il tourne sur Safari en dessous). Pour l’OBD réel, c’est l’<b>app native Practice</b> qui s’en charge nativement (100 % autonome, sans autre navigateur). Le reste (carte, copilote, vision caméra) marche déjà ici.'
+      : '<b>Bluetooth web non disponible ici.</b> Sur PC/Android : <b>Chrome ou Edge</b>. Sur iPad/iPhone : l’<b>app native Practice</b> (le Bluetooth web n’existe pas dans Safari).';
     $('connectBtn').disabled=true;
   }
   $('hint').innerHTML='Compatible avec les adaptateurs <b>ELM327 Bluetooth LE</b> (Vgate iCar Pro BLE, Veepeak BLE+, OBDLink CX/MX+, V‑Link…). Branche le lecteur sur la prise OBD, contact mis, puis « Connecter ». <b>Reconnexion automatique</b> si la liaison se coupe. L\'adaptateur Carly d\'origine est chiffré et ne répondra pas — un ELM327 BLE générique est recommandé.';
