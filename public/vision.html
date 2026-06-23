@@ -66,7 +66,7 @@
       <div class="warn-box"><b>⚠ Sécurité</b> — Ce n'est pas un système de sécurité homologué (caméra unique, latence, précision limitée). C'est une aide pédagogique : <b>garde toujours les yeux sur la route</b> et reste maître du véhicule.</div>
       <button class="btn" id="startBtn">Activer la caméra</button>
       <a class="btn ghost" href="/os.html">Retour au cockpit</a>
-      <p style="font-size:11px;color:#6b7280">Astuce : monte le téléphone face à la route (pare‑brise). Nécessite Chrome/Android ou Safari iOS, en HTTPS.</p>
+      <p style="font-size:11px;color:#6b7280">Astuce : monte l’appareil face à la route (pare‑brise). Marche dans Safari (iPad/iPhone) ou Chrome, en https.</p>
     </div>
   </div>
 
@@ -98,7 +98,12 @@
   (function(){ var h=''; ['car','truck','bus','motorcycle','bicycle','person','traffic light','stop sign'].forEach(function(k){ var m=MAP[k]; h+='<span><i style="background:'+m.c+'"></i>'+m.l+'</span>'; }); $('legend').innerHTML=h; })();
 
   function support(){
-    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ fail('Caméra web indisponible. Sur iPhone : Safari (pas une app in‑app). HTTPS requis.'); return false; }
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+      var standalone=(navigator.standalone===true)||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
+      if(!window.isSecureContext){ fail('Caméra bloquée : ouvre la page en https:// (le lien Vercel), pas en http.'); return false; }
+      if(standalone){ fail('Pour la caméra sur iPad/iPhone, ouvre Practice dans Safari (onglet) plutôt que depuis l’icône installée — iOS la bloque dans les web-apps. (Sinon : app native.)'); return false; }
+      fail('Caméra non disponible sur ce navigateur. Sur iPad : utilise Safari à jour, en https.'); return false;
+    }
     if(typeof cocoSsd==='undefined'||typeof tf==='undefined'){ fail('Modèle de détection non chargé (réseau ?). Recharge la page.'); return false; }
     return true;
   }
@@ -184,7 +189,7 @@
 
   $('startBtn').addEventListener('click',begin);
   // si pas de support détecté tôt, prévenir (sans bloquer le bouton)
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ fail('Ce navigateur ne supporte pas la caméra web (utilise Chrome Android ou Safari iOS, en HTTPS).'); }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ fail('Caméra non détectée. Sur iPad/iPhone : ouvre la page dans Safari (onglet, https). Au pire, l’app native gère la caméra nativement.'); }
 })();
 </script>
 </body>
