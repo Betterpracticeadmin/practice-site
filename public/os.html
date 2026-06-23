@@ -376,10 +376,15 @@
   body[data-navfocus] .os{grid-template-columns:1fr;}
   body[data-navfocus] .col-l,body[data-navfocus] .col-r{display:none;}
   body[data-navfocus] .center{grid-column:1;}
+  /* portrait (iPad inclus) : carte plein ecran en navigation, pas seulement en paysage */
+  @media (orientation:portrait){
+    body[data-navfocus] .os{height:100dvh;width:100vw;padding:0;overflow:hidden;}
+    body[data-navfocus] .center{position:fixed;inset:0;border:0;border-radius:0;min-height:0;}
+  }
   .nav-exit{position:absolute;top:12px;left:12px;z-index:30;display:none;align-items:center;gap:7px;background:var(--card);backdrop-filter:blur(14px);border:.5px solid var(--border);color:var(--txt);border-radius:30px;padding:9px 15px;font-size:12px;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.3);}
   body[data-navfocus] .nav-exit{display:flex;}
   body[data-navfocus] .nav-exit svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;}
-  .nav-hud{position:absolute;top:12px;right:12px;z-index:30;display:none;align-items:center;gap:7px;background:var(--acc);color:#000;border:none;border-radius:30px;padding:10px 17px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.35);}
+  .nav-hud{position:absolute;top:12px;right:12px;z-index:8;display:none;align-items:center;gap:7px;background:var(--acc);color:#000;border:none;border-radius:30px;padding:10px 17px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.35);}
   body[data-navfocus] .nav-hud{display:flex;}
 
   /* integrated cognitive HUD (embedded fullscreen) */
@@ -536,7 +541,7 @@
   body[data-mode="night"] .orb{box-shadow:inset 0 0 0 .5px rgba(255,255,255,.4),0 0 26px rgba(255,255,255,.18);}
   body[data-mode="copilot"] .orb{box-shadow:inset 0 0 0 .5px rgba(106,161,255,.5),0 0 24px rgba(106,161,255,.28);}
   /* density: ULTRA RACE strips the superfluous — only the essentials remain */
-  body[data-mode="ultra"] .col-l .card:first-child,body[data-mode="ultra"] #mediaCard,body[data-mode="ultra"] #wxCard{opacity:.18;filter:grayscale(.7);pointer-events:none;}
+  body[data-mode="ultra"] #mediaCard,body[data-mode="ultra"] #wxCard{opacity:.18;filter:grayscale(.7);pointer-events:none;}
   body[data-mode="ultra"] .speed-ov .v{font-size:92px;}
   /* l'image de la voiture reste pleinement visible dans tous les modes (correctif) */
   body[data-mode="performance"] #dmCard .glitch-car,body[data-mode="ultra"] #dmCard .glitch-car{opacity:1;}
@@ -1335,7 +1340,7 @@
       <div class="nav-sub" id="navSub">Entre une destination</div>
     </div>
     <div class="card dco-card" id="daCostCard" data-state="empty">
-      <div class="w-head"><span class="w-title">Coût du trajet</span><button class="trip-recap-btn" id="tripRecapBtn" type="button">Récap</button><span class="lbl dco-dist">—</span></div>
+      <div class="w-head"><span class="w-title">Coût du trajet</span><button class="trip-recap-btn" id="tripRecapBtn" type="button">Récap</button><span class="lbl dco-header-info"><span class="dco-dist">—</span><span class="dco-cost" data-dco="cost-display"></span></span></div>
       <div class="dco-empty">
         <div class="dco-eico">&#129534;</div>
         <div class="dco-etxt">Lance un itinéraire pour estimer le coût (essence + péages).</div>
@@ -4196,7 +4201,7 @@
     syncPanel();
   })();
   if(/[?&]demo/.test(location.search)) setTimeout(function(){$('gateDemo').click();},700);
-  else setTimeout(beginLocate, 600); // auto-activate position — iOS shows the permission prompt by itself
+  else { hideGate(); beginLocate(); } // cockpit direct : on cache l'intro et on lance la geoloc en arriere-plan
 })();
 </script>
 <!-- DA-MODULE-START (auto) -->
@@ -6873,37 +6878,19 @@ html[data-da-off] .dvf-fx .dvf-rev{ color:inherit; text-shadow:none; }
       ctx.clearRect(0,0,W,H);
       ctx.save();
       ctx.globalCompositeOperation="lighter";
-      var cx=W/2, cy=H/2, i, p;
-
-      var halo=ctx.createRadialGradient(cx,cy,2,cx,cy,30);
-      halo.addColorStop(0,"rgba(255,160,40,.30)");
-      halo.addColorStop(1,"rgba(255,45,45,0)");
-      ctx.fillStyle=halo; ctx.fillRect(0,0,W,H);
-
-      for(i=0;i<cells.length;i++){
-        var c=cells[i];
-        var breathe = 1 + 0.28*Math.sin(t*c.sp*60 + c.ph);
-        var s = c.base*breathe;
-        var g=ctx.createLinearGradient(c.x-s/2,c.y-s/2,c.x+s/2,c.y+s/2);
-        var heat=(i===cells.length-1)?1:0.55+0.45*Math.sin(t*c.sp*40+c.ph);
-        if(heat>0.66){ g.addColorStop(0,"rgba(255,230,128,.95)"); g.addColorStop(.5,"rgba(255,138,0,.9)"); g.addColorStop(1,"rgba(255,45,45,.55)"); }
-        else if(heat>0.33){ g.addColorStop(0,"rgba(255,138,0,.9)"); g.addColorStop(.6,"rgba(255,45,45,.8)"); g.addColorStop(1,"rgba(120,18,10,.4)"); }
-        else { g.addColorStop(0,"rgba(255,45,45,.8)"); g.addColorStop(1,"rgba(60,10,8,.35)"); }
-        ctx.fillStyle=g;
-        ctx.save();
-        ctx.translate(c.x,c.y); ctx.rotate(c.rot + t*0.15); ctx.translate(-c.x,-c.y);
-        rsq(c.x,c.y,s,Math.min(s*0.34,4)); ctx.fill();
-        ctx.restore();
-      }
-
-      ctx.fillStyle="rgba(255,210,120,.85)";
-      for(p=0;p<parts.length;p++){
-        var pt=parts[p]; pt.a+=pt.sp;
-        var pd=pt.dist + 3*Math.sin(t*0.9+pt.ph);
-        var px=cx+Math.cos(pt.a)*pd, py=cy+Math.sin(pt.a)*pd*0.8;
-        var pa=0.4+0.5*Math.abs(Math.sin(t+pt.ph));
-        ctx.globalAlpha=pa;
-        rsq(px,py,pt.sz,pt.sz*0.3); ctx.fill();
+      /* logo Practice en dot-matrix : un "P" en points qui respirent (au lieu de l'orbe) */
+      var P=[[1,1,1,1,0],[1,0,0,1,0],[1,0,0,1,0],[1,1,1,1,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]];
+      var cols=5, rows=7, sp=Math.min(W,H)/9, r=sp*0.30;
+      var ox=(W-(cols-1)*sp)/2, oy=(H-(rows-1)*sp)/2;
+      for(var ri=0;ri<rows;ri++)for(var ci=0;ci<cols;ci++){
+        if(!P[ri][ci]) continue;
+        var x=ox+ci*sp, y=oy+ri*sp;
+        var ph=0.5+0.5*Math.sin(t*2 - (ri+ci)*0.45);
+        var rad=r*(0.72+0.5*ph);
+        var g=ctx.createRadialGradient(x,y,0,x,y,rad*2.1);
+        g.addColorStop(0,"rgba(255,150,60,.95)"); g.addColorStop(.5,"rgba(255,80,0,.6)"); g.addColorStop(1,"rgba(255,45,45,0)");
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,rad*2.1,0,7); ctx.fill();
+        ctx.fillStyle="rgba(255,170,90,.95)"; ctx.beginPath(); ctx.arc(x,y,rad*0.6,0,7); ctx.fill();
       }
       ctx.globalAlpha=1;
       ctx.restore();
@@ -8472,7 +8459,10 @@ html[data-da-off] .dco-total .dco-eco{transition:none;}
 .dco-row .dco-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--faint);margin-left:6px;}
 
 .dco-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.dco-header-info{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .dco-dist{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
+.dco-cost{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt);white-space:nowrap;}
+.dco-cost[data-dco]:not(:empty)::before{content:'· ';color:var(--faint);}
 .dco-note{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--faint);opacity:.85;}
 
 /* placeholder (no active route) */
@@ -8836,6 +8826,8 @@ html[data-da-off] .dco-total .dco-eco{transition:none;}
     if(tsub) tsub.textContent= c.tolls>0?('~'+Math.round(c.hwKm)+' km autoroute'):'pas d’autoroute';
     var dist=q('.dco-dist');
     if(dist) dist.textContent=(c.km>=10?Math.round(c.km):c.km.toFixed(1))+' km';
+    var costInline=q('[data-dco="cost-display"]');
+    if(costInline) costInline.textContent=eur(c.total);
 
     var bar=q('.dco-bar i'); if(bar) bar.style.width=clamp(c.aggr,0,100).toFixed(0)+'%';
 
