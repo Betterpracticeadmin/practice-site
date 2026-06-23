@@ -1,32 +1,30 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Practice -> app iOS testable sur iPad.
+#  Practice OS -> app iOS (le cockpit os.html UNIQUEMENT, pas le site).
 #  À LANCER SUR UN MAC qui a Xcode installé (gratuit, Mac App Store).
 #       bash deploy/ios-setup.sh
+#  (lignes une par une si besoin : npm install / npm run build / etc.)
 # ============================================================
-set -euo pipefail
+set -eu
 cd "$(dirname "$0")/.."
 
-echo "==> 1/4  Dépendances…"
+echo "==> 1/5  Dependances..."
 npm install
 
-echo "==> 2/4  Build du site (dist/)…"
+echo "==> 2/5  Build du site..."
 npm run build
 
-echo "==> 3/4  Plateforme iOS…"
+echo "==> 3/5  L'app ouvrira Practice OS (os.html) directement, pas la page d'accueil..."
+printf '%s' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=os.html"><title>Practice OS</title>' > dist/index.html
+
+echo "==> 4/5  Plateforme iOS + synchronisation..."
 [ -d ios ] || npx cap add ios
 npx cap sync ios
 
-echo "==> 4/4  Ouverture dans Xcode…"
+echo "==> 5/5  Ouverture dans Xcode..."
 npx cap open ios
 
-cat <<'EOT'
-
-✅ Xcode va s'ouvrir sur le projet "App".
-   1. Branche ton iPad au Mac (et "Faire confiance" sur l'iPad).
-   2. Dans Xcode : onglet "Signing & Capabilities" -> choisis ton compte
-      (un Apple ID gratuit suffit pour tester sur TON iPad pendant 7 jours ;
-       le compte Apple Developer 99 $/an sert pour TestFlight / App Store).
-   3. En haut, choisis ton iPad comme cible, puis clique Run (▶).
-   L'app Practice s'installe et se lance sur l'iPad.
-EOT
+echo ""
+echo "Dans Xcode : App -> Signing & Capabilities -> choisis ton equipe."
+echo "Branche l'iPad -> choisis-le en cible -> Run (triangle)."
+echo "Pour l'App Store : Product -> Archive -> Distribute App."
