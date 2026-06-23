@@ -1159,18 +1159,28 @@
 /* ===== THEME BITMAP N&B (superpose le vrai os.html, sans le modifier) ===== */
 :root,body[data-theme="dark"],body[data-theme="light"]{
  --acc:#ffffff!important;--amber:#ffffff!important;--red:#ffffff!important;
- --bg:#000!important;--bg2:#000!important;--card:#000!important;--mapbg:#000!important;
+ --bg:#000!important;--bg2:#000!important;--card:#000!important;
  --border:#ffffff!important;--txt:#ffffff!important;--dim:#ffffff!important;--faint:#cdd0d3!important;
  --dotc:rgba(255,255,255,.10)!important;--mono:'DotGothic16',monospace!important;--dot:'DotGothic16',monospace!important;
 }
 *{font-family:'DotGothic16',monospace!important;text-shadow:none!important;letter-spacing:.02em!important;}
 html,body{background:#000!important;color:#fff!important;}
-body{background-image:radial-gradient(rgba(255,255,255,.12) 1.3px,transparent 1.3px)!important;background-size:11px 11px!important;}
-.card,.theme-btn,.map-quick button,.quick-cats button,.map-layers,.explore-toggle,.map-layers button{
- background:#000!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:2px solid #fff!important;}
-canvas,img,video,iframe,.leaflet-container,.leaflet-tile,.leaflet-tile-pane,.leaflet-pane>*{
- filter:grayscale(1) contrast(1.35) brightness(1.05)!important;}
-.leaflet-container{background:#000!important;}
+
+/* (2) CONTOURS DES CASES ACCENTUES : bordures epaisses, coins nets (look bitmap) */
+.card,.theme-btn,.map-quick button,.quick-cats button,.map-layers,.map-layers button,.explore-toggle,.quick-cats,.topbar{
+ background:#000!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+ border:3px solid #fff!important;border-radius:4px!important;}
+.center{border:3px solid #fff!important;border-radius:4px!important;}
+
+/* (1) ICONOGRAPHIE EN BITMAP : pas d'anti-aliasing -> bords pixel ; photos pixelisees */
+svg,svg *{shape-rendering:crispEdges!important;}
+img:not(.leaflet-tile){filter:grayscale(1) contrast(1.4) brightness(1.05)!important;image-rendering:pixelated!important;}
+canvas,iframe,video{filter:grayscale(1) contrast(1.35) brightness(1.05)!important;}
+
+/* (3) LA CARTE GARDE SES COULEURS D'ORIGINE (aucun filtre sur la map) */
+.leaflet-container,.leaflet-pane,.leaflet-pane *,.leaflet-tile,.leaflet-tile-pane,.leaflet-tile-container,.leaflet-overlay-pane,.leaflet-marker-pane,.leaflet-layer{
+ filter:none!important;image-rendering:auto!important;}
+.leaflet-tile,.leaflet-tile *{shape-rendering:auto!important;}
 </style>
 </head>
 <body data-theme="dark" class="safe">
