@@ -176,6 +176,7 @@
   body[data-live] #bAuto,body[data-live] #bFaster,body[data-live] #bSlower,body[data-live] #bCut,body[data-live] #bPed{display:none;}
   @media(max-width:760px){ #liveBadge{ top:calc(12px + env(safe-area-inset-top)); font-size:9px; letter-spacing:.1em; padding:4px 9px; max-width:80vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } }
 </style>
+  <link rel="stylesheet" href="/bitmap.css">
 </head>
 <body data-lvl="SAFE">
 <div id="wrap">
@@ -230,6 +231,21 @@
   </div>
 
   <div id="liveBadge" class="demo">DÉMO</div>
+
+  <style>
+  #navAmp{position:absolute;top:62px;left:50%;transform:translateX(-50%);z-index:13;display:flex;align-items:center;gap:10px;pointer-events:none;font-family:var(--mono,monospace);}
+  #navAmp>div{background:rgba(12,14,18,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:.5px solid rgba(255,255,255,.12);border-radius:12px;padding:5px 10px;display:flex;align-items:center;gap:7px;box-shadow:0 6px 18px rgba(0,0,0,.3);}
+  .na-lim b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#fff;color:#c0202a;border:2.5px solid #d11a25;font-size:14px;font-weight:800;}
+  .na-feu .na-dot{width:11px;height:11px;border-radius:50%;background:#555;box-shadow:0 0 8px currentColor;}
+  .na-feu span#naFeuT{font-size:13px;color:#F2F3F5;font-weight:600;}
+  .na-eta b{font-size:14px;color:#F2F3F5;} .na-eta span{font-size:11px;color:#8b9298;margin-left:6px;}
+  @media(max-width:760px){ #navAmp{top:46px;gap:6px;transform:translateX(-50%) scale(.9);} }
+  </style>
+  <div id="navAmp" aria-hidden="true">
+    <div class="na-lim" title="Limite de vitesse"><b id="naLim">50</b></div>
+    <div class="na-feu"><span class="na-dot" id="naDot"></span><span id="naFeuT">—</span></div>
+    <div class="na-eta"><b id="naEta">—</b><span id="naRem"></span></div>
+  </div>
 
   <div class="panel" id="voice"><span class="ic"></span><span id="voiceTxt"></span></div>
 
@@ -608,6 +624,18 @@
   function demoTick(dt){ if(isLive())return; if(demo.i<0){ demoEnter(0); return; }
     demo.t+=dt; if(demo.t>=DEMO_SCENES[demo.i].dur){ demoEnter((demo.i+1)%DEMO_SCENES.length); } }
 
+  /* ===== Nav premium (features ORIGINALES inspirees des apps de nav) : compte a rebours des feux, ETA, limite ===== */
+  var nav={ light:{on:false,dist:0,state:'red',t:0}, destM:3600, limit:50 };
+  function tickNav(dt){
+    nav.limit = world.demoSpeed>=30?110:(world.demoSpeed>=22?70:50);
+    nav.destM -= world.egoV*dt; if(nav.destM<350) nav.destM=2600+Math.random()*3200;
+    var L=nav.light;
+    if(!L.on){ if((world.demoSpeed||14)<=22 && Math.random()<0.014){ L.on=true; L.dist=VIEW_M*0.92; L.state='red'; L.t=5+Math.round(Math.random()*15); } }
+    else { L.dist-=world.egoV*dt; L.t-=dt;
+      if(L.t<=0){ if(L.state==='red'){L.state='green';L.t=7+Math.round(Math.random()*9);} else if(L.state==='green'){L.state='amber';L.t=3;} else {L.state='red';L.t=8+Math.round(Math.random()*12);} }
+      if(L.dist<-4)L.on=false; }
+  }
+
   function step(dt,now){
     if(tStart==null)tStart=now;
     var grip=world.weather==='rain'?0.72:world.weather==='snow'?0.5:0.95;
@@ -625,6 +653,7 @@
       /* comportement: certaines voitures déboîtent (à détecter) */
       if(world.lanes>1 && world.cars.length && Math.random()<0.006){ var rc=world.cars[(Math.random()*world.cars.length)|0]; if(rc&&rc.dist>20&&rc.changedAt==null&&!rc.cut){ var nl=rc.lane+(Math.random()<0.5?-1:1); if(nl>=0&&nl<world.lanes){ rc.lane=nl; rc.changedAt=world.t; } } }
       scrollScenery(dt);
+      tickNav(dt);
       world.cars=world.cars.filter(function(c){return c.dist>-6 && c.dist<VIEW_M*1.1;});
       world.peds.forEach(function(p){ p.dist-=world.egoV*dt; if(p.intent)p.prog+=dt*0.35; });
       world.peds=world.peds.filter(function(p){return p.dist>-4 && p.prog<1.2;});
@@ -814,6 +843,7 @@
       if(t<0.7)drawTag(px,py-ps*2.6,p.intent?'PIÉTON !':'Piéton',pc);
       if(p.intent){ ctx.strokeStyle='#f5a623'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px-p.off*26,py); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(px-p.off*26,py); ctx.lineTo(px-p.off*20,py-5); ctx.lineTo(px-p.off*20,py+5); ctx.closePath(); ctx.fill(); } });
+    if(nav.light.on) drawTrafficLight(nav.light);
     } /* fin trafic simulé (démo) */
 
     var ex=elx, ey=g.egoY;
@@ -839,6 +869,27 @@
     var tw=Math.ceil(ctx.measureText(text).width)+8, th=11;
     ctx.fillStyle=color; rr(cx-tw/2,topY-th,tw,th,3); ctx.fill();
     ctx.fillStyle='#0a0c10'; ctx.fillText(text,cx,topY-th/2+0.5); ctx.restore(); }
+  /* feu tricolore + compte a rebours (estimation, pas de donnees temps reel) */
+  function drawTrafficLight(L){
+    var t=L.dist/VIEW_M; if(t<0||t>1)return;
+    var g=roadGeom(), sc=(1-t*0.8), y=g.egoY-t*(g.egoY-g.topY);
+    var x=W/2 + ((g.roadW/2)+24)*sc;
+    var hw=Math.max(4,9*sc), hh=Math.max(11,26*sc), poleH=Math.max(14,42*sc);
+    ctx.save();
+    ctx.strokeStyle='rgba(150,160,180,.55)'; ctx.lineWidth=Math.max(1,2.2*sc);
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y-poleH); ctx.stroke();
+    var hx=x-hw/2, hy=y-poleH-hh;
+    ctx.fillStyle='#0b0d11'; ctx.fillRect(hx,hy,hw,hh);
+    var cols={red:'#ff3b46',amber:'#ffb020',green:'#33e08a'}, r=hw*0.30;
+    ['red','amber','green'].forEach(function(s,i){ var cyl=hy+hh*(0.22+i*0.29), on=(L.state===s);
+      ctx.beginPath(); ctx.arc(x,cyl,r,0,7);
+      if(on){ ctx.fillStyle=cols[s]; ctx.shadowColor=cols[s]; ctx.shadowBlur=Math.min(14,12*sc); } else { ctx.fillStyle='rgba(255,255,255,.10)'; ctx.shadowBlur=0; }
+      ctx.fill(); ctx.shadowBlur=0; });
+    if(t<0.72){ var n=Math.max(0,Math.ceil(L.t)); ctx.fillStyle=cols[L.state]; ctx.shadowColor=cols[L.state]; ctx.shadowBlur=6;
+      ctx.font='700 '+Math.max(10,Math.round(14*sc))+'px "JetBrains Mono",monospace'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+      ctx.fillText(n+'s', x, hy-4); ctx.shadowBlur=0; }
+    ctx.restore();
+  }
   /* voiture vue de l'arrière, style Tesla self-driving viz : carrosserie grise dégradée + lunette sombre + 2 feux rouges */
   /* voiture/camion/bus/2-roues vus de l'arriere — style "Tesla vision". Classe = opt.cls (passe par l'appelant), fallback ratio. 1 seul gradient/vehicule. */
   function drawVehicle(cx,cy,w,h,opt){ opt=opt||{};
@@ -1076,8 +1127,20 @@
     setB('bFocus','vFocus',twin.focus); setB('bFat','vFat',twin.fatigue); setB('bAgg','vAgg',twin.aggr);
     $('rt').textContent=twin.rt.toFixed(2)+' s';
     paintTactic();
+    updateNavPanel();
   }
   function setB(b,v,x){ $(b).style.width=clamp(x,2,100).toFixed(0)+'%'; $(v).textContent=Math.round(x); }
+  /* panneau nav premium : limite + feu (compte a rebours) + ETA. Demo uniquement. */
+  function updateNavPanel(){
+    var amp=$('navAmp'); if(!amp)return; if(isLive()){ amp.style.display='none'; return; } amp.style.display='flex';
+    var lim=$('naLim'); if(lim)lim.textContent=nav.limit;
+    var dot=$('naDot'), ft=$('naFeuT'), cols={red:'#ff3b46',amber:'#ffb020',green:'#33e08a'}, labs={red:'Feu rouge',amber:'Orange',green:'Feu vert'};
+    if(nav.light.on){ if(dot){dot.style.background=cols[nav.light.state];dot.style.color=cols[nav.light.state];} if(ft)ft.textContent=labs[nav.light.state]+' · '+Math.max(0,Math.ceil(nav.light.t))+'s'; }
+    else { if(dot){dot.style.background='#555';dot.style.color='#555';} if(ft)ft.textContent='aucun feu'; }
+    var v=Math.max(world.egoV,1), secs=nav.destM/v, arr=new Date(Date.now()+secs*1000);
+    var eta=$('naEta'); if(eta)eta.textContent=('0'+arr.getHours()).slice(-2)+':'+('0'+arr.getMinutes()).slice(-2);
+    var rem=$('naRem'); if(rem)rem.textContent=(nav.destM>=1000?(nav.destM/1000).toFixed(1)+' km':Math.round(nav.destM)+' m')+' · '+Math.max(1,Math.round(secs/60))+' min';
+  }
 
   /* ---------- loop ---------- */
   var last=0;
