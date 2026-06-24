@@ -247,6 +247,22 @@
     <div class="na-eta"><b id="naEta">—</b><span id="naRem"></span></div>
   </div>
 
+  <style>
+  #navMan{position:absolute;top:100px;left:50%;transform:translateX(-50%);z-index:13;display:none;align-items:center;gap:12px;background:rgba(12,14,18,.66);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:.5px solid rgba(255,255,255,.14);border-radius:16px;padding:9px 16px;box-shadow:0 8px 24px rgba(0,0,0,.34);pointer-events:none;font-family:var(--mono,monospace);}
+  #navMan .nm-txt{display:flex;flex-direction:column;line-height:1.12;}
+  #navMan .nm-txt b{font-size:22px;color:#fff;}
+  #navMan .nm-txt span{font-size:12px;color:#9aa3b2;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #navLanes{position:absolute;top:154px;left:50%;transform:translateX(-50%);z-index:13;display:none;gap:4px;pointer-events:none;}
+  #navLanes .nl{width:30px;height:30px;border-radius:8px;background:rgba(12,14,18,.6);border:.5px solid rgba(255,255,255,.12);display:grid;place-items:center;}
+  #navLanes .nl svg{opacity:.32;} #navLanes .nl.rec{background:rgba(47,123,255,.28);border-color:rgba(96,166,255,.6);} #navLanes .nl.rec svg{opacity:1;}
+  @media(max-width:760px){ #navMan{top:80px;padding:7px 12px;gap:8px;} #navMan .nm-txt b{font-size:18px;} #navLanes{top:130px;} }
+  </style>
+  <div id="navMan" aria-hidden="true">
+    <div class="nm-arrow" id="nmArrow"></div>
+    <div class="nm-txt"><b id="nmDist">—</b><span id="nmRoad"></span></div>
+  </div>
+  <div id="navLanes" aria-hidden="true"></div>
+
   <div class="panel" id="voice"><span class="ic"></span><span id="voiceTxt"></span></div>
 
   <div id="raceHud" aria-hidden="true">
@@ -624,17 +640,40 @@
   function demoTick(dt){ if(isLive())return; if(demo.i<0){ demoEnter(0); return; }
     demo.t+=dt; if(demo.t>=DEMO_SCENES[demo.i].dur){ demoEnter((demo.i+1)%DEMO_SCENES.length); } }
 
-  /* ===== Nav premium (features ORIGINALES inspirees des apps de nav) : compte a rebours des feux, ETA, limite ===== */
-  var nav={ light:{on:false,dist:0,state:'red',t:0}, destM:3600, limit:50 };
+  /* ===== Nav premium (features ORIGINALES inspirees des apps de nav) : manoeuvre, voies, feux, ETA, limite ===== */
+  var nav={ light:{on:false,dist:0,state:'red',t:0}, destM:3600, limit:50, man:{i:0,dist:650} };
+  var MANS=[
+    {dir:'straight',    road:'Bd Voltaire',        d:650, lanes:[1,1,1], rec:1},
+    {dir:'right',       road:'Rue de la Roquette',  d:320, lanes:[0,0,1], rec:2},
+    {dir:'slight-left', road:'Av. Ledru-Rollin',   d:480, lanes:[1,1,0], rec:0},
+    {dir:'roundabout',  road:'Pl. de la Bastille',  d:260, lanes:[0,1,0], rec:1},
+    {dir:'left',        road:'Rue Saint-Antoine',   d:400, lanes:[1,0,0], rec:0},
+    {dir:'exit',        road:'Sortie 3 · A4',       d:820, lanes:[0,0,1], rec:2}
+  ];
   function tickNav(dt){
     nav.limit = world.demoSpeed>=30?110:(world.demoSpeed>=22?70:50);
     nav.destM -= world.egoV*dt; if(nav.destM<350) nav.destM=2600+Math.random()*3200;
+    var M=nav.man; M.dist -= world.egoV*dt; if(M.dist<=25){ M.i=(M.i+1)%MANS.length; M.dist=MANS[M.i].d; }
     var L=nav.light;
     if(!L.on){ if((world.demoSpeed||14)<=22 && Math.random()<0.014){ L.on=true; L.dist=VIEW_M*0.92; L.state='red'; L.t=5+Math.round(Math.random()*15); } }
     else { L.dist-=world.egoV*dt; L.t-=dt;
       if(L.t<=0){ if(L.state==='red'){L.state='green';L.t=7+Math.round(Math.random()*9);} else if(L.state==='green'){L.state='amber';L.t=3;} else {L.state='red';L.t=8+Math.round(Math.random()*12);} }
       if(L.dist<-4)L.on=false; }
   }
+  /* fleche de manoeuvre — dessin ORIGINAL (formes simples, DA Practice) */
+  function manSVG(dir,size){ size=size||36;
+    var P={
+      straight:'<path d="M16 29 V6"/><path d="M9 14 L16 5 L23 14"/>',
+      right:'<path d="M9 29 V17 q0 -7 7 -7 h6"/><path d="M17 4 L25 10 L17 16"/>',
+      left:'<path d="M23 29 V17 q0 -7 -7 -7 h-6"/><path d="M15 4 L7 10 L15 16"/>',
+      'slight-right':'<path d="M12 29 V18 L22 8"/><path d="M16 6 L23 7 L22 14"/>',
+      'slight-left':'<path d="M20 29 V18 L10 8"/><path d="M16 6 L9 7 L10 14"/>',
+      roundabout:'<circle cx="14" cy="15" r="6"/><path d="M16 29 V21"/><path d="M19 10 L24 6 L25 11"/>',
+      exit:'<path d="M11 29 V15 q0 -6 6 -8 l5 -2"/><path d="M20 2 L26 4 L22 9"/>'
+    };
+    return '<svg viewBox="0 0 32 32" width="'+size+'" height="'+size+'" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">'+(P[dir]||P.straight)+'</svg>';
+  }
+  var MANLBL={straight:'Continuer',right:'Tourner à droite',left:'Tourner à gauche','slight-right':'Légèrement à droite','slight-left':'Légèrement à gauche',roundabout:'Au rond-point',exit:'Prendre la sortie'};
 
   function step(dt,now){
     if(tStart==null)tStart=now;
@@ -1130,16 +1169,31 @@
     updateNavPanel();
   }
   function setB(b,v,x){ $(b).style.width=clamp(x,2,100).toFixed(0)+'%'; $(v).textContent=Math.round(x); }
-  /* panneau nav premium : limite + feu (compte a rebours) + ETA. Demo uniquement. */
+  /* panneau nav premium : manoeuvre + voies + limite + feu (compte a rebours) + ETA. Demo uniquement. */
+  var _lastManI=-1;
   function updateNavPanel(){
-    var amp=$('navAmp'); if(!amp)return; if(isLive()){ amp.style.display='none'; return; } amp.style.display='flex';
-    var lim=$('naLim'); if(lim)lim.textContent=nav.limit;
-    var dot=$('naDot'), ft=$('naFeuT'), cols={red:'#ff3b46',amber:'#ffb020',green:'#33e08a'}, labs={red:'Feu rouge',amber:'Orange',green:'Feu vert'};
-    if(nav.light.on){ if(dot){dot.style.background=cols[nav.light.state];dot.style.color=cols[nav.light.state];} if(ft)ft.textContent=labs[nav.light.state]+' · '+Math.max(0,Math.ceil(nav.light.t))+'s'; }
-    else { if(dot){dot.style.background='#555';dot.style.color='#555';} if(ft)ft.textContent='aucun feu'; }
-    var v=Math.max(world.egoV,1), secs=nav.destM/v, arr=new Date(Date.now()+secs*1000);
-    var eta=$('naEta'); if(eta)eta.textContent=('0'+arr.getHours()).slice(-2)+':'+('0'+arr.getMinutes()).slice(-2);
-    var rem=$('naRem'); if(rem)rem.textContent=(nav.destM>=1000?(nav.destM/1000).toFixed(1)+' km':Math.round(nav.destM)+' m')+' · '+Math.max(1,Math.round(secs/60))+' min';
+    var amp=$('navAmp'), nm=$('navMan'), nl=$('navLanes');
+    if(isLive()){ if(amp)amp.style.display='none'; if(nm)nm.style.display='none'; if(nl)nl.style.display='none'; return; }
+    if(amp){ amp.style.display='flex';
+      var lim=$('naLim'); if(lim)lim.textContent=nav.limit;
+      var dot=$('naDot'), ft=$('naFeuT'), cols={red:'#ff3b46',amber:'#ffb020',green:'#33e08a'}, labs={red:'Feu rouge',amber:'Orange',green:'Feu vert'};
+      if(nav.light.on){ if(dot){dot.style.background=cols[nav.light.state];dot.style.color=cols[nav.light.state];} if(ft)ft.textContent=labs[nav.light.state]+' · '+Math.max(0,Math.ceil(nav.light.t))+'s'; }
+      else { if(dot){dot.style.background='#555';dot.style.color='#555';} if(ft)ft.textContent='aucun feu'; }
+      var v=Math.max(world.egoV,1), secs=nav.destM/v, arr=new Date(Date.now()+secs*1000);
+      var eta=$('naEta'); if(eta)eta.textContent=('0'+arr.getHours()).slice(-2)+':'+('0'+arr.getMinutes()).slice(-2);
+      var rem=$('naRem'); if(rem)rem.textContent=(nav.destM>=1000?(nav.destM/1000).toFixed(1)+' km':Math.round(nav.destM)+' m')+' · '+Math.max(1,Math.round(secs/60))+' min';
+    }
+    var M=MANS[nav.man.i];
+    if(nm){ nm.style.display='flex';
+      if(nav.man.i!==_lastManI){ _lastManI=nav.man.i;
+        var ar=$('nmArrow'); if(ar)ar.innerHTML=manSVG(M.dir,38);
+        var rd=$('nmRoad'); if(rd)rd.textContent=(MANLBL[M.dir]||'Continuer')+' · '+M.road;
+        if(nl){ var html=''; for(var i=0;i<M.lanes.length;i++){ var rec=(i===M.rec); html+='<div class="nl'+(rec?' rec':'')+'">'+manSVG(rec?M.dir:'straight',18)+'</div>'; } nl.innerHTML=html; }
+      }
+      var md=Math.max(0,Math.round(nav.man.dist/10)*10);
+      var dd=$('nmDist'); if(dd)dd.textContent= md>=1000?(md/1000).toFixed(1)+' km':md+' m';
+    }
+    if(nl) nl.style.display = (nav.man.dist<260)?'flex':'none';
   }
 
   /* ---------- loop ---------- */
