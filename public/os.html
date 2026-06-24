@@ -320,11 +320,10 @@
   .boot{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:var(--bg);transition:opacity .5s ease;}
   .boot.hide{opacity:0;pointer-events:none;}
   .boot-blob{width:116px;height:116px;background:radial-gradient(circle at 38% 32%,rgba(255,255,255,.92),var(--acc) 60%,transparent 84%);filter:blur(1px);box-shadow:0 0 60px -10px var(--acc);}
-  /* logo Practice en points (dot-matrix "P") a la place de l'orbe au boot */
-  .boot-logo{position:relative;z-index:1;}
-  .boot-logo svg{display:block;fill:var(--acc);filter:drop-shadow(0 0 14px var(--acc));}
-  .boot-logo circle{animation:bootDot 1.5s ease-in-out infinite;}
-  @keyframes bootDot{0%,100%{opacity:.4;}50%{opacity:1;}}
+  /* logo Practice = grille de points qui ondulent (meme effet que la transition Reglages, anim lqRipple) */
+  .boot-dots{position:relative;z-index:1;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);width:132px;height:132px;filter:url(#bootGooey);}
+  .boot-dots span{display:block;width:60%;height:60%;margin:auto;background:var(--acc);border-radius:42%;scale:0;animation:lqRipple 2.6s cubic-bezier(.45,0,.2,1) infinite;animation-delay:var(--bd,0ms);will-change:transform;}
+  html[data-da-off] .boot-dots span{animation:none;scale:.82;}
   .boot-title{font-family:var(--mono);font-size:10px;letter-spacing:.42em;text-transform:uppercase;color:var(--dim);}
   .boot-lines{font-family:var(--mono);font-size:10px;color:var(--faint);line-height:1.95;min-height:150px;text-align:left;width:248px;}
   .boot-lines .ok{color:#39d98a;}
@@ -1825,17 +1824,9 @@
 
 <!-- organic system boot -->
 <div class="boot" id="boot">
-  <div class="boot-logo" aria-hidden="true">
-    <svg viewBox="0 0 50 70" width="84" height="118">
-      <circle cx="5" cy="5" r="3.6"/><circle cx="15" cy="5" r="3.6"/><circle cx="25" cy="5" r="3.6"/><circle cx="35" cy="5" r="3.6"/>
-      <circle cx="5" cy="15" r="3.6"/><circle cx="35" cy="15" r="3.6"/>
-      <circle cx="5" cy="25" r="3.6"/><circle cx="35" cy="25" r="3.6"/>
-      <circle cx="5" cy="35" r="3.6"/><circle cx="15" cy="35" r="3.6"/><circle cx="25" cy="35" r="3.6"/><circle cx="35" cy="35" r="3.6"/>
-      <circle cx="5" cy="45" r="3.6"/>
-      <circle cx="5" cy="55" r="3.6"/>
-      <circle cx="5" cy="65" r="3.6"/>
-    </svg>
-  </div>
+  <div class="boot-dots" id="bootDots" aria-hidden="true"></div>
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs><filter id="bootGooey" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="2.2" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"/></filter></defs></svg>
+  <script>(function(){var g=document.getElementById('bootDots');if(!g)return;var N=9,C=(N-1)/2,f=document.createDocumentFragment();for(var i=0;i<N*N;i++){var r=Math.floor(i/N),c=i%N,d=Math.sqrt((r-C)*(r-C)+(c-C)*(c-C));var s=document.createElement('span');s.style.setProperty('--bd','-'+Math.round(d*150+Math.random()*400)+'ms');f.appendChild(s);}g.appendChild(f);})();</script>
   <div class="boot-title">Practice OS</div>
   <div class="boot-lines" id="bootLines"></div>
 </div>
