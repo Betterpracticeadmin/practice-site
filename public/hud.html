@@ -886,18 +886,19 @@
       if(closing>1.2){ var fd=c.dist-closing*1.3; if(fd>1){ var gy=mToY(fd); ctx.globalAlpha=0.12; drawVehicle(cx,gy,w,h,{cls:cls,glow:0}); ctx.globalAlpha=1; } } // ghost de mouvement
       drawVehicle(cx,cy,w,h, threat?{cls:cls,top:'#c89aa0',bot:'#7c585d',tail:'#ff3b46',glow:13}:{cls:cls,glow:6});
       tailReflection(cx,cy,w, threat?'rgba(255,59,70,1)':'rgba(255,46,58,1)');
-      // boîte de détection (couleur de classe nuScenes ; rouge si menace) + étiquette
-      var boxc=threat?'#ff3b46':meta.c;
-      ctx.save(); ctx.strokeStyle=boxc; ctx.lineWidth=1.5; if(near){ctx.shadowColor=boxc;ctx.shadowBlur=6;} rr(cx-w/2-3,cy-h/2-3,w+6,h+6,6); ctx.stroke(); ctx.restore();
-      if(near){ var bh=carBehavior(c); drawTag(cx,cy-h/2-4, bh?bh.label:meta.l, bh?bh.col:boxc); }
+      // rendu "AMap" propre : pas de cadre de detection. Menace = halo rouge doux au sol.
+      if(threat){ ctx.save(); var thg=ctx.createRadialGradient(cx,cy+h*0.40,2,cx,cy+h*0.40,w*0.95);
+        thg.addColorStop(0,'rgba(255,59,70,.42)'); thg.addColorStop(1,'rgba(255,59,70,0)');
+        ctx.fillStyle=thg; ctx.beginPath(); ctx.ellipse(cx,cy+h*0.40,w*0.95,h*0.22,0,0,7); ctx.fill(); ctx.restore(); }
+      if(near){ var bh=carBehavior(c); if(bh) drawTag(cx,cy-h/2-4, bh.label, bh.col); else if(threat) drawTag(cx,cy-h/2-4, meta.l, '#ff3b46'); }
     });
 
     // pedestrians + intent arrows
     world.peds.forEach(function(p){ var px=W/2+p.off*(g.roadW/2+18)*(1-p.prog)+p.off*-p.prog*g.roadW*0.5, py=mToY(p.dist);
       var pc=p.intent?'#f5a623':NUSC.pedestrian.c, t=p.dist/VIEW_M, ps=Math.max(4,7*(1-t*0.7));
       ctx.fillStyle=pc; ctx.beginPath(); ctx.arc(px,py-ps*1.5,ps*0.6,0,7); ctx.fill(); rr(px-ps*0.5,py-ps*0.9,ps,ps*1.7,ps*0.4); ctx.fill(); /* silhouette */
-      ctx.save(); ctx.strokeStyle=pc; ctx.lineWidth=1.4; if(t<0.7){ctx.shadowColor=pc;ctx.shadowBlur=6;} rr(px-ps*0.95,py-ps*2.5,ps*1.9,ps*3.1,3); ctx.stroke(); ctx.restore(); /* boîte */
-      if(t<0.7)drawTag(px,py-ps*2.6,p.intent?'PIÉTON !':'Piéton',pc);
+      if(p.intent){ ctx.save(); var pgl=ctx.createRadialGradient(px,py,2,px,py,ps*2.4); pgl.addColorStop(0,'rgba(245,166,35,.5)'); pgl.addColorStop(1,'rgba(245,166,35,0)'); ctx.fillStyle=pgl; ctx.beginPath(); ctx.ellipse(px,py,ps*2.4,ps*0.7,0,0,7); ctx.fill(); ctx.restore(); /* halo intention */ }
+      if(t<0.7 && p.intent)drawTag(px,py-ps*2.6,'PIÉTON !',pc);
       if(p.intent){ ctx.strokeStyle='#f5a623'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px-p.off*26,py); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(px-p.off*26,py); ctx.lineTo(px-p.off*20,py-5); ctx.lineTo(px-p.off*20,py+5); ctx.closePath(); ctx.fill(); } });
     if(nav.light.on) drawTrafficLight(nav.light);
