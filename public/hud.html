@@ -132,6 +132,8 @@
   }
   /* TacticAI — assistant tactique (inspiré de TacticAI, DeepMind) */
   #tactic{top:calc(238px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));width:210px;}
+  /* VUE EPUREE : masque les panneaux data pour degager la voiture/route. Garde commandes (#ctl) + nav (navAmp/navMan/navLanes) + voix. */
+  body[data-clean] #tele,body[data-clean] #mapPanel,body[data-clean] #twin,body[data-clean] #risk,body[data-clean] #tactic,body[data-clean] #raceHud{display:none!important;}
   #tactic .tac-action{font-weight:700;font-size:15px;margin:2px 0 1px;color:#39d98a;}
   #tactic .tac-why{font-size:10px;color:#565b61;margin-bottom:9px;}
   .tac-row{display:flex;align-items:center;gap:7px;margin:5px 0;font-size:11px;}
@@ -276,6 +278,7 @@
   </div>
 
   <div class="panel" id="ctl">
+    <button id="bClean" class="on">🧹 Vue épurée</button>
     <button id="bAuto" class="on">⦿ Auto-drive</button>
     <button id="bFaster">▲ +vite</button>
     <button id="bSlower">▼ -vite</button>
@@ -1239,6 +1242,8 @@
   requestAnimationFrame(frame);
 
   /* ---------- controls ---------- */
+  document.body.setAttribute('data-clean','');  /* demarre en VUE EPUREE : voiture/route degagees */
+  $('bClean').addEventListener('click',function(){ if(document.body.hasAttribute('data-clean')){document.body.removeAttribute('data-clean');this.classList.remove('on');this.textContent='🧹 Vue complète';} else {document.body.setAttribute('data-clean','');this.classList.add('on');this.textContent='🧹 Vue épurée';} });
   $('bAuto').addEventListener('click',function(){auto=!auto;this.classList.toggle('on',auto);this.textContent=(auto?'⦿ Auto-drive':'○ Manuel');});
   $('bFaster').addEventListener('click',function(){auto=false;$('bAuto').classList.remove('on');$('bAuto').textContent='○ Manuel';world.egoV=clamp(world.egoV+3,0,60);});
   $('bSlower').addEventListener('click',function(){auto=false;$('bAuto').classList.remove('on');$('bAuto').textContent='○ Manuel';world.egoV=clamp(world.egoV-4,0,60);});
