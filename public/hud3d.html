@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>HUD 3D — Lane-level Navigation</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#aeb9c4;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  canvas{display:block;}
+  #hud{position:fixed;inset:0;pointer-events:none;}
+  /* Panneau de vitesse (cercle rouge réglementaire stylisé) */
+  #speedSign{
+    position:fixed;left:18px;bottom:18px;width:84px;height:84px;border-radius:50%;
+    background:#fff;border:7px solid #d61f26;box-shadow:0 6px 18px rgba(0,0,0,.25);
+    display:flex;align-items:center;justify-content:center;
+  }
+  #speedSign span{font-weight:800;font-size:34px;color:#16181d;line-height:1;}
+  /* Bandeau manœuvre en haut à gauche */
+  #maneuver{
+    position:fixed;left:16px;top:16px;display:flex;align-items:center;gap:14px;
+    background:rgba(18,24,33,.78);backdrop-filter:blur(8px);
+    padding:14px 20px 14px 14px;border-radius:18px;color:#eaf1fb;
+    box-shadow:0 8px 26px rgba(0,0,0,.30);
+  }
+  #maneuver .arrow{
+    width:46px;height:46px;border-radius:12px;background:#2e7dff;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+    box-shadow:0 0 16px rgba(46,125,255,.55);
+  }
+  #maneuver .arrow svg{width:30px;height:30px;}
+  #maneuver .dist{font-size:26px;font-weight:800;letter-spacing:.5px;}
+  #maneuver .road{font-size:13px;opacity:.78;margin-top:2px;}
+  /* Vitesse courante en bas à droite */
+  #curSpeed{
+    position:fixed;right:18px;bottom:18px;color:#0e141d;text-align:right;
+    text-shadow:0 1px 2px rgba(255,255,255,.4);
+  }
+  #curSpeed b{font-size:42px;font-weight:800;line-height:.9;}
+  #curSpeed small{display:block;font-size:13px;opacity:.7;letter-spacing:2px;font-weight:700;}
+  #hint{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);
+    color:rgba(20,26,34,.55);font-size:11px;letter-spacing:1px;}
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="hud">
+  <div id="maneuver">
+    <div class="arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 20 V11 a4 4 0 0 1 4 -4 h4"/>
+        <path d="M13 3 l5 4 l-5 4"/>
+      </svg>
+    </div>
+    <div>
+      <div class="dist">300 m</div>
+      <div class="road">Tournez à droite — Av. des Tilleuls</div>
+    </div>
+  </div>
+
+  <div id="speedSign"><span>50</span></div>
+
+  <div id="curSpeed"><b id="kmh">0</b><small>KM/H</small></div>
+  <div id="hint">Hub de conduite 3D — prototype original</div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+/* ============================================================
+   PALETTE — jour brumeux premium
+   ============================================================ */
+const FOG_COL   = 0xc3ccd6;   // brume claire = couleur de l'horizon
+const SKY_TOP   = 0x9fb3cb;   // ciel haut
+const SKY_BOT   = 0xd5dde6;   // ciel bas / horizon (proche du fog)
+const ACCENT    = 0x2e7dff;   // bleu guidage FSD-like
+const ROAD_W    = 11;         // largeur route (3 voies)
+const LANES     = [-3.4, 0, 3.4];
+
+/* ============================================================
+   RENDERER
+   ============================================================ */
+const renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));   // cappé UNE fois
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+/* ============================================================
+   SCENE / CAMERA / FOG
+   ============================================================ */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(FOG_COL);
+scene.fog = new THREE.Fog(FOG_COL, 38, 170);
+
+const camera = new THREE.PerspectiveCamera(58, innerWidth/innerHeight, 0.1, 1200);
+camera.position.set(0, 5, 11);
+
+/* ============================================================
+   CIEL DÉGRADÉ (sphère inversée, shader vertical)
+   ============================================================ */
+{
+  const skyMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite:false,
+    uniforms:{
+      top:{value:new THREE.Color(SKY_TOP)},
+      bottom:{value:new THREE.Color(SKY_BOT)},
+      offset:{value:60}, exponent:{value:0.9}
+    },
+    vertexShader:`varying vec3 v;void main(){vec4 w=modelMatrix*vec4(position,1.);v=w.xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform vec3 top;uniform vec3 bottom;uniform float offset;uniform float exponent;varying vec3 v;
+      void main(){float h=normalize(v+vec3(0.,offset,0.)).y;float t=pow(max(h,0.),exponent);gl_FragColor=vec4(mix(bottom,top,t),1.);}`
+  });
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(600,32,16), skyMat));
+}
+
+/* ============================================================
+   LUMIÈRES — jour doux + directionnelle (ombres)
+   ============================================================ */
+scene.add(new THREE.HemisphereLight(0xeef3fb, 0x9aa3ad, 0.95));
+scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+const sun = new THREE.DirectionalLight(0xfff3e0, 1.25);
+sun.position.set(-14, 26, 10);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.near = 1;  sun.shadow.camera.far = 80;
+sun.shadow.camera.left = -28; sun.shadow.camera.right = 28;
+sun.shadow.camera.top = 28;   sun.shadow.camera.bottom = -28;
+sun.shadow.bias = -0.0004;
+scene.add(sun);
+
+/* ============================================================
+   ROUTE — plan + texture scrollée (asphalte + marquages de voie)
+   3 voies clairement séparées, voie centrale (ego) surlignée
+   ============================================================ */
+function makeRoadTexture(){
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 1024;
+  const x = c.getContext('2d');
+
+  // asphalte (léger grain)
+  x.fillStyle = '#3b4048';
+  x.fillRect(0,0,c.width,c.height);
+  for(let i=0;i<2600;i++){
+    const g = 40 + (Math.random()*30|0);
+    x.fillStyle = `rgba(${g},${g+4},${g+8},0.22)`;
+    x.fillRect(Math.random()*c.width, Math.random()*c.height, 2, 2);
+  }
+
+  // voie active (centrale) légèrement plus claire
+  const laneW = c.width/3;
+  x.fillStyle = 'rgba(120,150,200,0.10)';
+  x.fillRect(laneW, 0, laneW, c.height);
+
+  // bords continus blancs
+  x.fillStyle = '#e9edf2';
+  x.fillRect(6,0,7,c.height);
+  x.fillRect(c.width-13,0,7,c.height);
+
+  // séparateurs de voie : pointillés blancs nets
+  x.fillStyle = '#f2f5f8';
+  const dash = 110, gap = 90;
+  for(const sx of [laneW, laneW*2]){
+    for(let y=0;y<c.height;y+=dash+gap){
+      x.fillRect(sx-4, y, 8, dash);
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(1, 26);
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const roadTex = makeRoadTexture();
+const road = new THREE.Mesh(
+  new THREE.PlaneGeometry(ROAD_W, 600),
+  new THREE.MeshStandardMaterial({ map:roadTex, roughness:0.55, metalness:0.15 })  // léger spéculaire = bitume brillant
+);
+road.rotation.x = -Math.PI/2;
+road.position.z = -270;
+road.receiveShadow = true;
+scene.add(road);
+
+// Trottoirs surélevés de part et d'autre
+function makeSidewalk(side){
+  const w = 2.2;
+  const sw = new THREE.Mesh(
+    new THREE.BoxGeometry(w, 0.28, 600),
+    new THREE.MeshStandardMaterial({ color:0xb9c0c8, roughness:0.95 })
+  );
+  sw.position.set(side*(ROAD_W/2 + w/2 - 0.1), 0.14, -270);
+  sw.receiveShadow = true; sw.castShadow = true;
+  scene.add(sw);
+}
+makeSidewalk(-1); makeSidewalk(1);
+
+// Sol urbain de chaque côté (évite le vide)
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(400, 600),
+  new THREE.MeshStandardMaterial({ color:0x8a929b, roughness:1 })
+);
+ground.rotation.x = -Math.PI/2;
+ground.position.set(0, -0.03, -270);
+ground.receiveShadow = true;
+scene.add(ground);
+
+/* ============================================================
+   RUBAN DE TRAJECTOIRE BLEU (style FSD) — voie de l'ego
+   Bande translucide animée par flux de texture
+   ============================================================ */
+function makeRibbonTexture(){
+  const c = document.createElement('canvas');
+  c.width = 32; c.height = 256;
+  const x = c.getContext('2d');
+  // dégradé latéral pour bords adoucis
+  for(let py=0; py<c.height; py++){
+    // chevrons de flux
+    const band = (py % 64) < 40 ? 1 : 0.35;
+    for(let px=0; px<c.width; px++){
+      const edge = 1 - Math.abs(px/(c.width-1)*2 - 1); // 0 bords ->1 centre
+      const a = Math.pow(edge, 0.7) * band;
+      x.fillStyle = `rgba(90,170,255,${a})`;
+      x.fillRect(px, py, 1, 1);
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(1, 18);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const ribbonTex = makeRibbonTexture();
+const ribbon = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.4, 220),
+  new THREE.MeshBasicMaterial({
+    map: ribbonTex, transparent:true, opacity:0.85,
+    blending: THREE.AdditiveBlending, depthWrite:false,
+    color: new THREE.Color(ACCENT)
+  })
+);
+ribbon.rotation.x = -Math.PI/2;
+ribbon.position.set(0, 0.04, -95);   // posé sur la voie centrale
+scene.add(ribbon);
+
+/* ============================================================
+   GRANDE FLÈCHE DE MANŒUVRE 3D FLOTTANTE (extrudée)
+   ============================================================ */
+function makeManeuverArrow(){
+  const s = new THREE.Shape();
+  // forme de flèche "tout droit puis tourner à droite" simplifiée -> grosse flèche directionnelle
+  s.moveTo(-0.5,-1.4);
+  s.lineTo(0.5,-1.4);
+  s.lineTo(0.5,0.5);
+  s.lineTo(1.3,0.5);
+  s.lineTo(0,1.9);
+  s.lineTo(-1.3,0.5);
+  s.lineTo(-0.5,0.5);
+  s.closePath();
+  const geo = new THREE.ExtrudeGeometry(s, { depth:0.35, bevelEnabled:true, bevelSize:0.06, bevelThickness:0.06, bevelSegments:2 });
+  geo.center();
+  const mat = new THREE.MeshStandardMaterial({
+    color: ACCENT, emissive: new THREE.Color(ACCENT), emissiveIntensity:0.55,
+    roughness:0.3, metalness:0.2
+  });
+  const m = new THREE.Mesh(geo, mat);
+  m.scale.set(1.5,1.5,1.5);
+  m.rotation.x = -Math.PI/2 + 0.5;   // légèrement basculée pour être lisible depuis la chase cam
+  m.position.set(0, 4.2, -42);       // flotte au-dessus de la route, devant
+  m.castShadow = true;
+  return m;
+}
+const maneuverArrow = makeManeuverArrow();
+scene.add(maneuverArrow);
+
+/* ============================================================
+   BÂTIMENTS LOW-POLY de chaque côté
+   ============================================================ */
+const buildingColors = [0x6f7884, 0x7d8794, 0x868f9b, 0x939ba6, 0x5f6873];
+const winMatDay = new THREE.MeshStandardMaterial({ color:0xb7c6d6, roughness:0.25, metalness:0.5 });
+function makeBuilding(x, z){
+  const grp = new THREE.Group();
+  const w = 5 + Math.random()*5;
+  const d = 5 + Math.random()*5;
+  const h = 8 + Math.random()*34;
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshStandardMaterial({ color: buildingColors[(Math.random()*buildingColors.length)|0], roughness:0.85 })
+  );
+  body.position.y = h/2;
+  body.castShadow = true; body.receiveShadow = true;
+  grp.add(body);
+  // bandeau de fenêtres (un plan émissif/brillant face à la route)
+  const facing = x < 0 ? 1 : -1;
+  const win = new THREE.Mesh(new THREE.PlaneGeometry(w*0.8, h*0.85), winMatDay);
+  win.position.set(facing*(w/2+0.02), h/2, 0);
+  win.rotation.y = facing*Math.PI/2;
+  grp.add(win);
+  grp.position.set(x, 0, z);
+  return grp;
+}
+const buildings = [];
+for(let z=-15; z>-540; z -= (10 + Math.random()*8)){
+  const offX = ROAD_W/2 + 5 + Math.random()*6;
+  buildings.push(makeBuilding(-offX, z));
+  buildings.push(makeBuilding( offX + Math.random()*4, z - 4));
+}
+buildings.forEach(b=>scene.add(b));
+
+// Lampadaires simples le long de la route
+const poleMat = new THREE.MeshStandardMaterial({ color:0x3a3f46, roughness:0.7, metalness:0.4 });
+function makeLamp(x,z){
+  const g = new THREE.Group();
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.1,6,8), poleMat);
+  pole.position.y = 3; g.add(pole);
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(1.6,0.12,0.12), poleMat);
+  arm.position.set((x<0?0.7:-0.7),5.9,0); g.add(arm);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.18,8,8),
+    new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xfff0c0,emissiveIntensity:0.3}));
+  head.position.set((x<0?1.4:-1.4),5.85,0); g.add(head);
+  g.position.set(x,0,z);
+  return g;
+}
+for(let z=-20; z>-520; z-=46){
+  scene.add(makeLamp(-(ROAD_W/2+1.4), z));
+  scene.add(makeLamp( (ROAD_W/2+1.4), z));
+}
+
+/* ============================================================
+   VOITURE EGO 3D (low-poly détaillée) + halo de contour
+   ============================================================ */
+function makeCar({ color=0x2e7dff, headlights=true } = {}){
+  const car = new THREE.Group();
+  const body = new THREE.Mesh(new RoundedBoxGeometry(1.9,0.6,4.2,4,0.26),
+    new THREE.MeshStandardMaterial({ color, roughness:0.32, metalness:0.55 }));
+  body.position.y = 0.58; body.castShadow = true; car.add(body);
+  const cabin = new THREE.Mesh(new RoundedBoxGeometry(1.55,0.55,2.0,4,0.22),
+    new THREE.MeshStandardMaterial({ color:0x10141b, roughness:0.12, metalness:0.2 }));
+  cabin.position.set(0,1.05,-0.15); cabin.castShadow = true; car.add(cabin);
+  const wg = new THREE.CylinderGeometry(0.37,0.37,0.32,18);
+  const wm = new THREE.MeshStandardMaterial({ color:0x0c0c0e, roughness:0.85 });
+  for(const [px,pz] of [[-0.92,1.35],[0.92,1.35],[-0.92,-1.35],[0.92,-1.35]]){
+    const w = new THREE.Mesh(wg,wm); w.rotation.z = Math.PI/2; w.position.set(px,0.37,pz);
+    w.castShadow = true; car.add(w);
+  }
+  const lg = new THREE.PlaneGeometry(0.34,0.2);
+  if(headlights){
+    for(const px of [-0.58,0.58]){
+      const h = new THREE.Mesh(lg, new THREE.MeshBasicMaterial({color:0xfff6d8}));
+      h.position.set(px,0.6,2.11); car.add(h);
+    }
+  }
+  for(const px of [-0.58,0.58]){
+    const t = new THREE.Mesh(lg, new THREE.MeshBasicMaterial({color:0xff2a2a}));
+    t.position.set(px,0.6,-2.11); t.rotation.y = Math.PI; car.add(t);
+  }
+  return car;
+}
+const ego = makeCar({ color:0x183a6b });
+scene.add(ego);
+// léger halo / contour sous l'ego
+const halo = new THREE.Mesh(
+  new THREE.RingGeometry(1.6, 2.4, 32),
+  new THREE.MeshBasicMaterial({ color:ACCENT, transparent:true, opacity:0.35, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending })
+);
+halo.rotation.x = -Math.PI/2; halo.position.y = 0.05;
+ego.add(halo);
+
+/* ============================================================
+   TRAFIC — ~6 véhicules 3D low-poly (Groups, vitesses variées)
+   ============================================================ */
+const trafficColors = [0xd84141, 0xe8c33a, 0xdfe6ee, 0x39b56a, 0x9b6cff, 0xff8a3d];
+const traffic = [];
+const NB_TRAFFIC = 6;
+for(let i=0;i<NB_TRAFFIC;i++){
+  const v = makeCar({ color: trafficColors[i % trafficColors.length] });
+  const st = {
+    mesh: v,
+    lane: LANES[(i+1) % LANES.length] === 0 ? LANES[(i%2)*2] : LANES[(i+1)%LANES.length],
+    z: -25 - Math.random()*220,
+    speed: 9 + Math.random()*16
+  };
+  // ne pas mettre de trafic pile devant l'ego au départ sur la voie centrale
+  st.lane = LANES[(i % LANES.length)];
+  v.position.set(st.lane, 0, st.z);
+  scene.add(v);
+  traffic.push(st);
+}
+
+/* ============================================================
+   CAMÉRA CHASE amortie (derrière + au-dessus, plongeante)
+   ============================================================ */
+const camOffset = new THREE.Vector3(0, 4.3, 10.5);
+const camTarget = new THREE.Vector3();
+const lookTarget = new THREE.Vector3();
+const smoothLook = new THREE.Vector3();
+const _v = new THREE.Vector3();
+smoothLook.set(0,1,-10);
+function updateChaseCamera(dt){
+  camTarget.copy(camOffset).applyQuaternion(ego.quaternion).add(ego.position);
+  const a = 1 - Math.exp(-5 * dt);   // amortissement indépendant du framerate
+  camera.position.lerp(camTarget, a);
+  _v.set(0, 0.8, -14).applyQuaternion(ego.quaternion).add(ego.position);
+  lookTarget.copy(_v);
+  smoothLook.lerp(lookTarget, a);
+  camera.lookAt(smoothLook);
+}
+
+/* ============================================================
+   UPDATES
+   ============================================================ */
+let egoSpeed = 0;            // unités/s logiques
+const targetSpeed = 30;
+let displayKmh = 0;
+const kmhEl = document.getElementById('kmh');
+
+function updateRoad(dt){
+  roadTex.offset.y -= egoSpeed * dt * 0.018;
+  roadTex.offset.y %= 1;
+  ribbonTex.offset.y -= egoSpeed * dt * 0.05;  // flux du ruban plus rapide
+  ribbonTex.offset.y %= 1;
+}
+
+function updateTraffic(dt){
+  for(const c of traffic){
+    c.z += (egoSpeed - c.speed) * dt;     // mouvement relatif à l'ego
+    if(c.z > 24){ c.z = -260 - Math.random()*60; c.speed = 9 + Math.random()*16; c.lane = LANES[(Math.random()*3)|0]; }
+    if(c.z < -340){ c.z = 24; }
+    // glissement doux vers la voie cible
+    c.mesh.position.x += (c.lane - c.mesh.position.x) * Math.min(1, dt*2);
+    c.mesh.position.z = c.z;
+  }
+}
+
+function updateEgo(dt, t){
+  // accélération progressive jusqu'à targetSpeed
+  egoSpeed += (targetSpeed - egoSpeed) * Math.min(1, dt*0.6);
+  // léger zig-zag de démonstration sur la voie centrale
+  const lateral = Math.sin(t*0.45) * 1.1;
+  ego.position.x += (lateral - ego.position.x) * Math.min(1, dt*1.8);
+  ego.rotation.y = -Math.cos(t*0.45)*0.05;
+  // ruban suit légèrement la trajectoire de l'ego
+  ribbon.position.x = ego.position.x * 0.6;
+  ribbon.rotation.z = ego.rotation.y * 0.5;
+  // affichage vitesse
+  displayKmh += ((egoSpeed*3.6*1.4) - displayKmh) * Math.min(1, dt*2);
+  kmhEl.textContent = Math.round(displayKmh);
+}
+
+function updateArrow(t){
+  // pulsation + léger flottement
+  const p = 0.55 + Math.sin(t*3)*0.25;
+  maneuverArrow.material.emissiveIntensity = p;
+  maneuverArrow.position.y = 4.2 + Math.sin(t*2)*0.25;
+}
+
+/* ============================================================
+   RESIZE
+   ============================================================ */
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  // PAS de setPixelRatio ici (bug viewport iOS)
+});
+
+/* ============================================================
+   BOUCLE rAF (delta clampé)
+   ============================================================ */
+const clock = new THREE.Clock();
+(function tick(){
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+  updateEgo(dt, t);
+  updateRoad(dt);
+  updateTraffic(dt);
+  updateArrow(t);
+  updateChaseCamera(dt);
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
