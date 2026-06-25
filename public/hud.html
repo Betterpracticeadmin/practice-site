@@ -777,7 +777,7 @@
     // palette Tesla (SC défini au niveau module pour être accessible à drawVehicle/drawScenery)
     var night=world.night;
     // ---- ambiance "vision système" : fond sombre premium + lueur d'horizon ----
-    var bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#070a10'); bg.addColorStop(0.52,'#0b0f17'); bg.addColorStop(1,'#11161f');
+    var bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#171e2a'); bg.addColorStop(0.30,'#10151f'); bg.addColorStop(0.62,'#0c111a'); bg.addColorStop(1,'#0c1119');
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
     var hg=ctx.createRadialGradient(W/2,g.topY,8,W/2,g.topY,W*0.62);
     hg.addColorStop(0, night?'rgba(64,108,170,.20)':'rgba(120,150,205,.15)'); hg.addColorStop(1,'rgba(0,0,0,0)');
@@ -1050,13 +1050,14 @@
   /* 1) brume d'horizon — APRES le decor, AVANT la route */
   function drawHorizonHaze(g){
     var night=world.night, fog=atmFogK(), wet=atmWet();
-    var band=(g.egoY-g.topY)*(0.34+fog*0.30+wet*0.10), y0=g.topY-18, y1=g.topY+band;
+    var band=(g.egoY-g.topY)*(0.34+fog*0.30+wet*0.10), y0=0, y1=g.topY+band, hpk=Math.max(0.05,Math.min(0.5,g.topY/(y1-y0)));
     var c=night?[60,86,134]:[150,172,206];
     if(fog>0){ c=night?[70,84,104]:[182,190,200]; } else if(wet>0){ c=night?[52,74,118]:[140,158,188]; }
     var aTop=(0.04+fog*0.30+wet*0.10)*(night?0.9:1), aMid=(0.16+fog*0.42+wet*0.16)*(night?0.95:1);
     var hz=ctx.createLinearGradient(0,y0,0,y1);
-    hz.addColorStop(0,'rgba('+c[0]+','+c[1]+','+c[2]+','+aMid.toFixed(3)+')');
-    hz.addColorStop(0.5,'rgba('+c[0]+','+c[1]+','+c[2]+','+(aMid*0.6).toFixed(3)+')');
+    hz.addColorStop(0,'rgba('+c[0]+','+c[1]+','+c[2]+','+(aMid*0.5).toFixed(3)+')');
+    hz.addColorStop(hpk,'rgba('+c[0]+','+c[1]+','+c[2]+','+aMid.toFixed(3)+')');
+    hz.addColorStop(Math.min(0.98,hpk+0.4),'rgba('+c[0]+','+c[1]+','+c[2]+','+(aMid*0.55).toFixed(3)+')');
     hz.addColorStop(1,'rgba('+c[0]+','+c[1]+','+c[2]+',0)');
     ctx.save(); ctx.fillStyle=hz; ctx.fillRect(0,y0,W,y1-y0);
     var core=ctx.createRadialGradient(W/2,g.topY+6,4,W/2,g.topY+6,W*0.30);
