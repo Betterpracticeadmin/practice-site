@@ -194,7 +194,7 @@
   <div id="warm"></div>
   <div id="vig"></div>
 
-  <div class="brand"><b>PRACTICE VISION</b></div>
+  <!-- bandeau "PRACTICE VISION" retire (vue 3D plein cadre) -->
 
   <div class="panel" id="tele">
     <div class="ttl"><span><b>01</b> Véhicule · <i id="srcBadge" style="font-style:normal;color:var(--faint)">SIM</i></span><span class="state-chip" id="stateChip"><span class="dot" id="stateDot"></span><span id="stateTxt">SAFE</span></span></div>
@@ -351,7 +351,7 @@
   var wxLabel='—', wxAt=0, wxLL=null, wxRealAt=0, wxManual=false, nightManual=false, gpsErr=false, gpsStarted=false, lastAcc=null;
   var VIEW_M=95;            // metres of road shown ahead
   function laneX(lane){ var roadW=Math.min(W*0.52,360), x0=W/2-roadW/2, lw=roadW/world.lanes; return x0+lw*(lane+0.5); }
-  function roadGeom(){ var roadW=Math.min(W*0.52,360); return {roadW:roadW, x0:W/2-roadW/2, lw:roadW/world.lanes, egoY:H-130, topY:60}; }
+  function roadGeom(){ var roadW=Math.min(W*0.52,360); return {roadW:roadW, x0:W/2-roadW/2, lw:roadW/world.lanes, egoY:H-44, topY:60}; }
 
   /* ---- real surroundings (buildings / parks / rivers) projected into the HUD ---- */
   var egoLL=null, egoHdg=0, surrLL=null, surrAt=0, surr={b:[],g:[],w:[],wl:[]}, hubRoute=null;
