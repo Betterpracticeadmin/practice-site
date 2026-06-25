@@ -82,7 +82,14 @@
   #voice .ic{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc);flex-shrink:0;}
 
   /* controls bottom-center */
-  #ctl{bottom:calc(14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:7;display:flex;gap:7px;align-items:center;padding:8px 11px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start;max-width:min(600px,calc(100vw - 460px));scrollbar-width:none;}
+  /* bouton burger PARAMETRES (haut-droite) + tiroir vertical des commandes (masque par defaut) */
+  #burgerBtn{position:fixed;top:calc(16px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));z-index:33;background:rgba(8,10,14,.72);border:.5px solid rgba(255,255,255,.18);color:#F2F3F5;border-radius:12px;padding:9px 14px;font-size:12.5px;cursor:pointer;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;gap:9px;}
+  #burgerBtn:hover{border-color:var(--acc);}
+  #burgerBtn .bi{display:inline-flex;flex-direction:column;gap:2.5px;}
+  #burgerBtn .bi i{width:15px;height:1.6px;background:currentColor;border-radius:2px;}
+  #ctl{top:calc(58px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));z-index:32;display:none;flex-direction:column;gap:7px;align-items:stretch;padding:12px;width:218px;max-height:calc(100vh - 96px);overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}
+  #ctl.open{display:flex;}
+  #ctl .sep{width:auto!important;height:1px!important;margin:4px 2px!important;}
   #ctl::-webkit-scrollbar{display:none;}
   #ctl>*{flex:0 0 auto;}
   #ctl button{background:rgba(255,255,255,.06);border:.5px solid rgba(255,255,255,.14);color:#F2F3F5;border-radius:11px;padding:9px 13px;font-size:12px;cursor:pointer;font-family:'Inter';transition:.15s;white-space:nowrap;}
@@ -114,7 +121,7 @@
     #risk{bottom:190px;left:8px;width:42vw;max-width:185px;}
     .big{font-size:28px;}
     #voice{bottom:196px;max-width:90vw;font-size:13px;padding:9px 14px;}
-    #ctl{left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom));transform:none;max-width:none;border-radius:0;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;border-left:0;border-right:0;}
+    #ctl{top:calc(56px + env(safe-area-inset-top));bottom:auto;left:auto;right:8px;transform:none;width:min(82vw,232px);max-height:calc(100vh - 88px);border-radius:18px;}
     #ctl button,#hz{flex-shrink:0;}
     .note{display:none;}
   }
@@ -132,8 +139,8 @@
   }
   /* TacticAI — assistant tactique (inspiré de TacticAI, DeepMind) */
   #tactic{top:calc(238px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));width:210px;}
-  /* VUE EPUREE : masque les panneaux data pour degager la voiture/route. Garde commandes (#ctl) + nav (navAmp/navMan/navLanes) + voix. */
-  body[data-clean] #tele,body[data-clean] #mapPanel,body[data-clean] #twin,body[data-clean] #risk,body[data-clean] #tactic,body[data-clean] #raceHud{display:none!important;}
+  /* analytics hors dispo cible (driver-twin / risque / tactic) : masques pour degager le cockpit */
+  #twin,#risk,#tactic{display:none!important;}
   #tactic .tac-action{font-weight:700;font-size:15px;margin:2px 0 1px;color:#39d98a;}
   #tactic .tac-why{font-size:10px;color:#565b61;margin-bottom:9px;}
   .tac-row{display:flex;align-items:center;gap:7px;margin:5px 0;font-size:11px;}
@@ -148,7 +155,7 @@
 </style>
 <style>
   /* ---- cluster RACING (SimHub-like) ---- */
-  #raceHud{ position:fixed; left:50%; bottom:calc(72px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:6; display:flex; align-items:center; gap:14px; padding:10px 14px; border-radius:16px; background:rgba(8,10,14,.62); border:.5px solid rgba(255,255,255,.1); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); font-family:'JetBrains Mono',monospace; box-shadow:0 14px 44px -18px rgba(0,0,0,.75); pointer-events:none; }
+  #raceHud{ position:absolute; left:calc(16px + env(safe-area-inset-left)); bottom:calc(16px + env(safe-area-inset-bottom)); z-index:6; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px 12px; width:215px; padding:11px 12px; border-radius:16px; background:rgba(8,10,14,.62); border:.5px solid rgba(255,255,255,.1); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); font-family:'JetBrains Mono',monospace; box-shadow:0 14px 44px -18px rgba(0,0,0,.75); pointer-events:none; }
   #raceHud .rh-lab{ display:block; font-size:7px; letter-spacing:.16em; color:#7a808c; text-transform:uppercase; margin-bottom:3px; text-align:center; }
   #raceHud .rh-gforce canvas{ width:54px; height:54px; display:block; }
   #raceHud .rh-gear b{ font-size:34px; font-weight:700; color:#fff; line-height:1; display:block; text-align:center; }
@@ -168,7 +175,7 @@
   #raceHud .rh-bar{ width:9px; height:42px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden; display:flex; flex-direction:column-reverse; }
   #raceHud .rh-bar i{ display:block; width:100%; height:0%; background:#39d98a; transition:height .1s linear; }
   #raceHud .rh-bar.brake i{ background:#ff3b46; }
-  @media(max-width:760px){ #raceHud{ gap:9px; padding:8px 10px; bottom:calc(70px + env(safe-area-inset-bottom)); } #raceHud .rh-gear b{ font-size:26px; } #raceHud .rh-rpm{ min-width:104px; } #raceHud .rh-seg{ width:6px; } }
+  @media(max-width:760px){ #raceHud{ gap:8px 9px; padding:8px 9px; bottom:calc(14px + env(safe-area-inset-bottom)); width:168px; } #raceHud .rh-gear b{ font-size:26px; } #raceHud .rh-rpm{ min-width:90px; } #raceHud .rh-seg{ width:6px; } }
   @media(prefers-reduced-motion:reduce){ #raceHud .rh-seg.bl{ animation:none; } }
   /* ---- Hub LIVE / DÉMO ---- */
   #liveBadge{position:fixed;top:calc(34px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:42;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.2em;padding:5px 13px;border-radius:20px;border:.5px solid rgba(255,255,255,.16);background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);pointer-events:none;transition:color .3s,border-color .3s,box-shadow .3s;}
@@ -233,6 +240,7 @@
   </div>
 
   <div id="liveBadge" class="demo">DÉMO</div>
+  <button id="burgerBtn" aria-label="Paramètres"><span class="bi"><i></i><i></i><i></i></span>Paramètres</button>
 
   <style>
   #navAmp{position:absolute;top:62px;left:50%;transform:translateX(-50%);z-index:13;display:flex;align-items:center;gap:10px;pointer-events:none;font-family:var(--mono,monospace);}
@@ -278,7 +286,6 @@
   </div>
 
   <div class="panel" id="ctl">
-    <button id="bClean" class="on">🧹 Vue épurée</button>
     <button id="bAuto" class="on">⦿ Auto-drive</button>
     <button id="bFaster">▲ +vite</button>
     <button id="bSlower">▼ -vite</button>
@@ -1242,8 +1249,9 @@
   requestAnimationFrame(frame);
 
   /* ---------- controls ---------- */
-  document.body.setAttribute('data-clean','');  /* demarre en VUE EPUREE : voiture/route degagees */
-  $('bClean').addEventListener('click',function(){ if(document.body.hasAttribute('data-clean')){document.body.removeAttribute('data-clean');this.classList.remove('on');this.textContent='🧹 Vue complète';} else {document.body.setAttribute('data-clean','');this.classList.add('on');this.textContent='🧹 Vue épurée';} });
+  /* menu PARAMETRES (burger) : ouvre/ferme le tiroir des commandes ; ferme au clic exterieur */
+  $('burgerBtn').addEventListener('click',function(e){ e.stopPropagation(); var c=$('ctl'); c.classList.toggle('open'); this.classList.toggle('on',c.classList.contains('open')); });
+  document.addEventListener('click',function(e){ var c=$('ctl'),b=$('burgerBtn'); if(c.classList.contains('open') && !c.contains(e.target) && e.target!==b && !b.contains(e.target)){ c.classList.remove('open'); b.classList.remove('on'); } });
   $('bAuto').addEventListener('click',function(){auto=!auto;this.classList.toggle('on',auto);this.textContent=(auto?'⦿ Auto-drive':'○ Manuel');});
   $('bFaster').addEventListener('click',function(){auto=false;$('bAuto').classList.remove('on');$('bAuto').textContent='○ Manuel';world.egoV=clamp(world.egoV+3,0,60);});
   $('bSlower').addEventListener('click',function(){auto=false;$('bAuto').classList.remove('on');$('bAuto').textContent='○ Manuel';world.egoV=clamp(world.egoV-4,0,60);});
