@@ -2749,8 +2749,17 @@
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
   /* ---- three navigation views: Normal (map) · HUD (Practice Vision) · Pulse ---- */
   var currentView='normal';
-  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud3d.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(function(){postHudMode();postHudRoute();},700); }
+  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud3d.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(function(){postHudMode();postHudRoute();postHudData();},700); }
   function postHudMode(){ var f=$('hudFrame'); if(f&&f.contentWindow&&$('hudOv')&&$('hudOv').classList.contains('show')){ try{f.contentWindow.postMessage({type:'mode',mode:mode},'*');}catch(e){} } }
+  /* envoi recurrent de la manoeuvre courante au Hub 3D (pour sortir du mode demo) */
+  function postHudData(){ var f=$('hudFrame'); if(!f||!f.contentWindow||!$('hudOv')||!$('hudOv').classList.contains('show'))return;
+    var dist=($('mvDist')?$('mvDist').textContent:'')||'', m=dist.trim().match(/([0-9.]+)\s*(m|km)?/);
+    try{ f.contentWindow.postMessage({type:'nav',
+      nav:!!(typeof navActive!=='undefined'&&navActive),
+      dist:(m?m[1]:''), distUnit:(m&&m[2]?m[2]:'m'),
+      instr:($('mvStreet')?($('mvStreet').textContent||'—'):'—'),
+      arrow:($('mvArrow')?($('mvArrow').textContent||'↑'):'↑'),
+      eta:($('navEta')?(($('navEta').textContent||'').replace(/\s*[0-9]+%\s*$/,'').trim()):'') },'*'); }catch(e){} }
   function closeHud(){ $('hudOv').classList.remove('show'); var f=$('hudFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
   function openPulse(){ var f=$('pulseFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/pulse.html'); $('pulseOv').classList.add('show'); setTimeout(postPulseData,600); }
   function closePulse(){ $('pulseOv').classList.remove('show'); var f=$('pulseFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
@@ -2768,7 +2777,7 @@
   if($('navHud'))$('navHud').addEventListener('click',function(){ setView('hud'); });
   if($('hudClose'))$('hudClose').addEventListener('click',function(){ setView('normal'); });
   if($('pulseClose'))$('pulseClose').addEventListener('click',function(){ setView('normal'); });
-  setInterval(function(){ if($('pulseOv').classList.contains('show'))postPulseData(); },1000);
+  setInterval(function(){ if($('pulseOv').classList.contains('show'))postPulseData(); if($('hudOv')&&$('hudOv').classList.contains('show'))postHudData(); },1000);
   if($('sheetHandle'))$('sheetHandle').addEventListener('click',function(){ document.body.toggleAttribute('data-sheet'); });
   if($('obdHomeBtn'))$('obdHomeBtn').addEventListener('click',function(){ window.location.href='/obd.html'; });
   if($('carModeBtn'))$('carModeBtn').addEventListener('click',function(){ $('carOv').classList.add('show'); });

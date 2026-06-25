@@ -296,12 +296,121 @@ const HUB3D = window.HUB3D = {
   navText: 'Continuez tout droit',
   limit: 90,     // limite de vitesse courante (km/h)
   heading: 0,    // cap 0..360 (deg)
-  live: false    // DEMO par defaut
+  live: false,   // DEMO par defaut
+  eta: null,     // texte ETA fourni par la nav (LIVE)
+  remaining: null// texte distance restante (LIVE)
 };
 
-/* ============ Palette sobre / nuit ============ */
-const SKY_HORIZON = new THREE.Color(0x141d2e); // bleu-nuit horizon (== fog)
-const SKY_TOP     = new THREE.Color(0x05070f); // zenith profond
+/* ============================================================
+   BRANCHEMENT GPS REEL — sortie du mode demo.
+   os.html charge ce hub dans une IFRAME et lui envoie via
+   window.postMessage des messages typés (gps / nav / route / mode).
+   Logique : des qu'un 'gps' arrive -> mode LIVE (timestamp). Si plus
+   aucun 'gps' depuis LIVE_TIMEOUT ms -> retour DEMO (sim actuelle).
+   Robustesse : jamais d'erreur si un champ manque (valeurs par defaut).
+   ============================================================ */
+const LIVE_TIMEOUT = 5000;          // ms sans 'gps' -> retour DEMO
+const LIVE = {
+  active: false,
+  lastGps: -1e9,                    // performance.now() du dernier 'gps'
+  speedKmh: 0,                      // vitesse reelle (km/h)
+  heading: 0,                       // cap reel (deg)
+  lat: null, lon: null, acc: null,
+  navOn: false,                     // manoeuvre courante active ?
+  navDist: 0,                       // distance avant manoeuvre (m)
+  navText: '',                      // instruction / rue
+  navArrow: '',                     // glyphe fleche (info)
+  navTurn: 0,                       // -1 gauche / +1 droite / 0 tout droit
+  eta: null,
+  limit: null,                      // limite si fournie
+  routeCoords: null                 // [[lon,lat],...] (info)
+};
+
+// parse robuste d'une distance "<nombre>" + unite "m"|"km" -> metres
+function parseDistMeters(distStr, unit){
+  var n = parseFloat(distStr);
+  if(!isFinite(n)) return 0;
+  return (unit === 'km') ? n * 1000 : n;
+}
+
+// detecte le sens de manoeuvre depuis l'instruction / la fleche
+function detectTurn(instr, arrow){
+  var s = ((instr||'') + ' ' + (arrow||'')).toLowerCase();
+  // fleches usuelles
+  if(/[↰←⬅️◀]/.test(s) || /droite/.test(s)===false && /gauche|left/.test(s)) {
+    if(/gauche|left|↰|←|⬅|◀/.test(s)) return -1;
+  }
+  if(/droite|right|↱|→|➡|▶/.test(s)) return 1;
+  if(/gauche|left|↰|←|⬅|◀/.test(s)) return -1;
+  return 0;
+}
+
+window.addEventListener('message', function(e){
+  var d = e && e.data;
+  if(!d || typeof d !== 'object' || !d.type) return;
+  try {
+    switch(d.type){
+      case 'gps': {
+        // vitesse REELLE en m/s -> km/h
+        var ms = (typeof d.speed === 'number' && isFinite(d.speed)) ? d.speed : 0;
+        LIVE.speedKmh = Math.max(0, ms * 3.6);
+        if(typeof d.heading === 'number' && isFinite(d.heading)){
+          LIVE.heading = ((d.heading % 360) + 360) % 360;
+        }
+        if(typeof d.lat === 'number') LIVE.lat = d.lat;
+        if(typeof d.lon === 'number') LIVE.lon = d.lon;
+        if(typeof d.acc === 'number') LIVE.acc = d.acc;
+        // limite de vitesse facultative (champ 'limit' ou 'maxspeed'), sinon inchangee
+        var lim = (typeof d.limit === 'number') ? d.limit
+                : (typeof d.maxspeed === 'number') ? d.maxspeed : null;
+        if(lim != null && isFinite(lim) && lim > 0) LIVE.limit = lim;
+        LIVE.lastGps = performance.now();
+        LIVE.active = true;
+        // recentre la mini-carte sur la vraie position si dispo
+        if(LIVE.lat != null && LIVE.lon != null && window.cockpitSetMapPos){
+          window.cockpitSetMapPos(LIVE.lat, LIVE.lon);
+        }
+        break;
+      }
+      case 'nav': {
+        LIVE.navOn = !!d.nav;
+        if(LIVE.navOn){
+          LIVE.navDist = parseDistMeters(d.dist, d.distUnit);
+          LIVE.navText = (typeof d.instr === 'string' && d.instr) ? d.instr : '';
+          LIVE.navArrow = (typeof d.arrow === 'string') ? d.arrow : '';
+          LIVE.eta = (typeof d.eta === 'string' && d.eta) ? d.eta : null;
+          if(typeof d.limit === 'number' && isFinite(d.limit) && d.limit > 0) LIVE.limit = d.limit;
+          LIVE.navTurn = detectTurn(LIVE.navText, LIVE.navArrow);
+        } else {
+          LIVE.navDist = 0; LIVE.navText = ''; LIVE.navArrow='';
+          LIVE.eta = null; LIVE.navTurn = 0;
+        }
+        break;
+      }
+      case 'route': {
+        LIVE.routeCoords = Array.isArray(d.coords) ? d.coords : null;
+        break;
+      }
+      case 'mode': {
+        if(typeof d.mode === 'string') HUB3D.mode = d.mode;
+        break;
+      }
+      case 'northlock':
+      default:
+        // 'northlock' a ignorer ; types inconnus ignores sans erreur
+        break;
+    }
+  } catch(err){ /* jamais lever d'erreur cote hub */ }
+}, false);
+
+// vrai si on a recu un 'gps' recemment
+function liveFresh(){
+  return LIVE.active && (performance.now() - LIVE.lastGps) < LIVE_TIMEOUT;
+}
+
+/* ============ Palette JOUR (ville bien visible) ============ */
+const SKY_HORIZON = new THREE.Color(0xeaf2fb); // blanc bleute a l'horizon (== fog)
+const SKY_TOP     = new THREE.Color(0x6fa8e8); // bleu clair au zenith
 const FOG_COLOR   = SKY_HORIZON.clone();
 const ACCENT      = 0x2f7bff;                   // bleu guidage FSD
 
@@ -313,7 +422,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.08;
+renderer.toneMappingExposure = 1.12;
 // le canvas reste sous le cockpit (overlay z-index:10) : on le force en fond.
 renderer.domElement.style.position = 'absolute';
 renderer.domElement.style.inset = '0';
@@ -323,8 +432,9 @@ document.body.appendChild(renderer.domElement);
 /* ============ Scene & Camera ============ */
 const scene = new THREE.Scene();
 scene.background = FOG_COLOR.clone();
-// fog dont la couleur == horizon : les lointains se fondent dans le ciel
-scene.fog = new THREE.Fog(FOG_COLOR, 34, 260);
+// fog JOUR : couleur claire (== horizon) et eloigne -> les BATIMENTS restent
+// bien visibles et lisibles, pas noyes dans le noir.
+scene.fog = new THREE.Fog(FOG_COLOR, 90, 520);
 const camera = new THREE.PerspectiveCamera(56, window.innerWidth/window.innerHeight, 0.1, 1200);
 camera.position.set(0, 4.4, 10);
 
@@ -334,11 +444,14 @@ camera.position.set(0, 4.4, 10);
     side: THREE.BackSide, depthWrite:false, fog:false,
     uniforms:{
       top:{value:SKY_TOP}, bottom:{value:SKY_HORIZON},
-      offset:{value:18}, exponent:{value:0.62}
+      offset:{value:8}, exponent:{value:0.78}
     },
     vertexShader:`varying vec3 v;void main(){vec4 w=modelMatrix*vec4(position,1.);v=w.xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    // JOUR : degrade bleu clair (zenith) -> blanc bleute a l'horizon.
+    // On utilise abs(h) pour que la moitie sous l'horizon reste claire
+    // (pas de bande sombre) et on mixe doucement vers le ciel haut.
     fragmentShader:`uniform vec3 top;uniform vec3 bottom;uniform float offset;uniform float exponent;varying vec3 v;
-      void main(){float h=normalize(v+vec3(0.,offset,0.)).y;float t=pow(max(h,0.),exponent);gl_FragColor=vec4(mix(bottom,top,t),1.);}`
+      void main(){float h=normalize(v+vec3(0.,offset,0.)).y;float t=pow(clamp(abs(h),0.,1.),exponent);gl_FragColor=vec4(mix(bottom,top,t),1.);}`
   });
   const sky = new THREE.Mesh(new THREE.SphereGeometry(600,32,16), skyMat);
   sky.renderOrder = -1;
@@ -350,14 +463,17 @@ camera.position.set(0, 4.4, 10);
   window.__sky = sky;
 }
 
-/* ============ Lumieres ============ */
-scene.add(new THREE.HemisphereLight(0x6b7fa8, 0x14161d, 0.6));
-scene.add(new THREE.AmbientLight(0x2a3145, 0.5));
-const moon = new THREE.DirectionalLight(0xaec6ff, 1.05);
-moon.position.set(-10, 22, 8);
+/* ============ Lumieres JOUR ============ */
+// hemisphere clair (ciel bleu clair -> sol clair) + ambiante claire
+scene.add(new THREE.HemisphereLight(0xcfe2ff, 0xb9b3a6, 1.05));
+scene.add(new THREE.AmbientLight(0xdfe7f2, 0.55));
+// "moon" conserve comme variable mais c'est desormais le SOLEIL du jour :
+// directionnel clair, intensite forte, teinte legerement chaude.
+const moon = new THREE.DirectionalLight(0xfff4e0, 2.4);
+moon.position.set(-10, 26, 10);
 moon.castShadow = true;
 moon.shadow.mapSize.set(1024,1024);
-moon.shadow.camera.near=1; moon.shadow.camera.far=80;
+moon.shadow.camera.near=1; moon.shadow.camera.far=90;
 moon.shadow.camera.left=-26; moon.shadow.camera.right=26;
 moon.shadow.camera.top=26;  moon.shadow.camera.bottom=-26;
 moon.shadow.bias = -0.0004;
@@ -402,16 +518,18 @@ const ROAD_LEN      = ROAD_SEGMENTS * ROAD_SPAN;
 function makeRoadTexture(){
   const c=document.createElement('canvas'); c.width=256; c.height=1024;
   const x=c.getContext('2d');
-  x.fillStyle='#16181d'; x.fillRect(0,0,256,1024);
+  // asphalte gris MOYEN (jour)
+  x.fillStyle='#6f7378'; x.fillRect(0,0,256,1024);
   for(let i=0;i<2600;i++){
-    const g=18+Math.random()*22;
-    x.fillStyle='rgba('+g+','+(g+2)+','+(g+6)+',0.5)';
+    const g=96+Math.random()*36;
+    x.fillStyle='rgba('+g+','+(g+2)+','+(g+6)+',0.45)';
     x.fillRect(Math.random()*256, Math.random()*1024, 1.4, 1.4);
   }
-  x.fillStyle='#cdd2d8';
+  // marquages blancs bien lumineux
+  x.fillStyle='#ffffff';
   x.fillRect(6,0,5,1024); x.fillRect(245,0,5,1024);
   const sepX=[256*0.25, 256*0.5, 256*0.75];
-  x.fillStyle='#e6e8ec';
+  x.fillStyle='#ffffff';
   const dash=90, gap=110;
   for(const sx of sepX){
     for(let y=0;y<1024;y+=dash+gap){ x.fillRect(sx-2.5, y, 5, dash); }
@@ -446,7 +564,7 @@ function buildStripGeometry(segs){
 const roadGeo = buildStripGeometry(ROAD_SEGMENTS);
 const road = new THREE.Mesh(
   roadGeo,
-  new THREE.MeshStandardMaterial({ map:roadTex, roughness:0.5, metalness:0.18 })
+  new THREE.MeshStandardMaterial({ map:roadTex, roughness:0.78, metalness:0.04 })
 );
 road.receiveShadow = true;
 road.frustumCulled = false;
@@ -455,7 +573,7 @@ scene.add(road);
 const groundGeo = buildStripGeometry(ROAD_SEGMENTS);
 const ground = new THREE.Mesh(
   groundGeo,
-  new THREE.MeshStandardMaterial({ color:0x0c0e12, roughness:0.92, metalness:0.06 })
+  new THREE.MeshStandardMaterial({ color:0x8d9486, roughness:0.96, metalness:0.0 })
 );
 ground.receiveShadow = true;
 ground.frustumCulled = false;
@@ -640,9 +758,12 @@ const BLD_SPAN = 14;
 const BLD_SETBACK = ROAD_W/2 + 7;
 const bldGeo = new THREE.BoxGeometry(1,1,1);
 bldGeo.translate(0,0.5,0);
+// NB: surtout PAS de vertexColors:true ici. La couleur par batiment passe par
+// instanceColor (mecanisme dedie d'InstancedMesh). Avec vertexColors:true, le
+// shader cherche un attribut 'color' par sommet, absent de la BoxGeometry, et
+// retombe sur (0,0,0) -> tous les batiments deviennent NOIRS (incoherent de jour).
 const bldMat = new THREE.MeshStandardMaterial({
-  color:0x1a1f2b, roughness:0.85, metalness:0.1,
-  emissive:0x0a0d14, emissiveIntensity:1.0
+  color:0xffffff, roughness:0.82, metalness:0.05
 });
 const buildings = new THREE.InstancedMesh(bldGeo, bldMat, BLD_COUNT);
 buildings.castShadow = true;
@@ -666,8 +787,19 @@ for(let i=0;i<BLD_COUNT;i++){
     hue: 0.58 + Math.random()*0.05,
     lit: Math.random()
   });
-  const litWarm = bldData[i].lit > 0.7;
-  _c.setHSL(litWarm?0.10:bldData[i].hue, litWarm?0.35:0.25, litWarm?0.16:0.10);
+  // JOUR : facades variees facon vraie ville en plein jour
+  // (gris froids, beiges chauds, blancs casses) bien lisibles.
+  const tone = Math.random();
+  if(tone < 0.45){
+    // beige / pierre chaud
+    _c.setHSL(0.09 + Math.random()*0.04, 0.18 + Math.random()*0.12, 0.62 + Math.random()*0.16);
+  } else if(tone < 0.8){
+    // gris froid / beton
+    _c.setHSL(0.58 + Math.random()*0.06, 0.04 + Math.random()*0.06, 0.58 + Math.random()*0.18);
+  } else {
+    // blanc casse / verre clair
+    _c.setHSL(0.55 + Math.random()*0.08, 0.05 + Math.random()*0.05, 0.78 + Math.random()*0.12);
+  }
   bldColors[i*3]=_c.r; bldColors[i*3+1]=_c.g; bldColors[i*3+2]=_c.b;
 }
 buildings.instanceColor = new THREE.InstancedBufferAttribute(bldColors,3);
@@ -742,9 +874,11 @@ function updateLamps(){
   poles.computeBoundingSphere();
   bulbs.computeBoundingSphere();
 }
+// JOUR : les lampadaires sont eteints -> point lights tres faibles
+// (on garde les meshes comme mobilier urbain).
 const movingLights = [];
 for(let i=0;i<4;i++){
-  const pl = new THREE.PointLight(0xffd9a0, 5, 18, 2);
+  const pl = new THREE.PointLight(0xffd9a0, 0.4, 18, 2);
   scene.add(pl); movingLights.push(pl);
 }
 
@@ -806,12 +940,34 @@ let t = 0;
 const hudSpd = document.querySelector('#hud .spd');
 
 function updateEgo(dt){
-  targetSpeed = 24 + Math.sin(t*0.13)*8 + Math.sin(t*0.41+1.0)*3;
-  egoSpeed += (targetSpeed - egoSpeed) * (1 - Math.exp(-1.5*dt));
+  const live = liveFresh();
+
+  if(live){
+    // === MODE LIVE : vitesse pilotee par le GPS reel (km/h -> m/s) ===
+    targetSpeed = LIVE.speedKmh / 3.6;
+    egoSpeed += (targetSpeed - egoSpeed) * (1 - Math.exp(-3.0*dt));
+  } else {
+    // === MODE DEMO : comportement simule inchange ===
+    targetSpeed = 24 + Math.sin(t*0.13)*8 + Math.sin(t*0.41+1.0)*3;
+    egoSpeed += (targetSpeed - egoSpeed) * (1 - Math.exp(-1.5*dt));
+  }
 
   sBase += egoSpeed * dt;
 
-  const laneTarget = LANES[1] + Math.sin(t*0.32) * (LANE_W*1.25);
+  // voie cible : en DEMO, ondulation auto. En LIVE, on reste centre, mais on
+  // incurve doucement la trajectoire vers la manoeuvre proche (nice-to-have).
+  let laneTarget;
+  if(live){
+    laneTarget = LANES[1];
+    // alignement doux : si manoeuvre a gauche/droite et distance faible,
+    // on biaise legerement la voie ego dans le sens du virage.
+    if(LIVE.navOn && LIVE.navTurn !== 0 && LIVE.navDist > 0 && LIVE.navDist < 80){
+      const prox = 1 - (LIVE.navDist / 80);        // 0 loin -> 1 proche
+      laneTarget = LANES[1] + LIVE.navTurn * prox * (LANE_W*0.9);
+    }
+  } else {
+    laneTarget = LANES[1] + Math.sin(t*0.32) * (LANE_W*1.25);
+  }
   egoLane += (laneTarget - egoLane) * (1 - Math.exp(-2.2*dt));
 
   worldAt(sBase, egoLane, _egoPos);
@@ -831,7 +987,11 @@ function updateScroll(dt){
    ================================================== */
 const RPM_IDLE = 850, RPM_SPAN = 6100; // tr/min : ralenti + plage utile
 function updateState(){
-  const kmh = egoSpeed * 3.6;
+  const live = liveFresh();
+  HUB3D.live = live;
+
+  // vitesse : en LIVE = vraie valeur GPS ; en DEMO = vitesse simulee.
+  const kmh = live ? LIVE.speedKmh : (egoSpeed * 3.6);
   HUB3D.speedKmh = Math.round(kmh);
 
   // rapport derive de la vitesse (nombre pour le cockpit + libelle conserve)
@@ -848,19 +1008,43 @@ function updateState(){
   HUB3D.rpmNorm = norm;
   HUB3D.rpm = Math.round(RPM_IDLE + norm * RPM_SPAN);
 
-  HUB3D.limit = 90;
-  HUB3D.heading = (THREE.MathUtils.radToDeg(pathHeading(sBase)) % 360 + 360) % 360;
+  if(live){
+    // === LIVE : cap reel + limite si fournie + manoeuvre reelle ===
+    HUB3D.heading = LIVE.heading;
+    HUB3D.limit = (LIVE.limit != null) ? LIVE.limit : null;
+    HUB3D.eta = LIVE.eta;
 
-  // prochaine manoeuvre : ou la spline tourne le plus fort devant
-  let bestS = sBase+40, bestK = 0;
-  for(let s=sBase+20; s<sBase+160; s+=20){
-    const k = Math.abs(pathHeading(s+10) - pathHeading(s-10));
-    if(k > bestK){ bestK = k; bestS = s; }
+    if(LIVE.navOn){
+      HUB3D.navDist = Math.max(0, LIVE.navDist);
+      HUB3D.navText = LIVE.navText || 'Continuez tout droit';
+      // distance restante lisible dans le panneau telemetrie
+      HUB3D.remaining = HUB3D.navDist >= 1000
+        ? (HUB3D.navDist/1000).toFixed(1)+' km'
+        : Math.round(HUB3D.navDist)+' m';
+    } else {
+      // pas de manoeuvre active : on masque le bandeau (navDist negatif)
+      HUB3D.navDist = -1;
+      HUB3D.navText = '';
+      HUB3D.remaining = null;
+    }
+  } else {
+    // === DEMO : valeurs simulees (comportement d'origine inchange) ===
+    HUB3D.limit = 90;
+    HUB3D.heading = (THREE.MathUtils.radToDeg(pathHeading(sBase)) % 360 + 360) % 360;
+    HUB3D.eta = null;
+    HUB3D.remaining = null;
+
+    // prochaine manoeuvre : ou la spline tourne le plus fort devant
+    let bestS = sBase+40, bestK = 0;
+    for(let s=sBase+20; s<sBase+160; s+=20){
+      const k = Math.abs(pathHeading(s+10) - pathHeading(s-10));
+      if(k > bestK){ bestK = k; bestS = s; }
+    }
+    HUB3D.navDist = Math.max(0, Math.round((bestS - sBase)/5)*5);
+    const dir = (pathOffsetX(bestS+10) - pathOffsetX(bestS-10));
+    HUB3D.navText = bestK < 0.02 ? 'Continuez tout droit'
+                  : (dir > 0 ? 'Courbe a droite' : 'Courbe a gauche');
   }
-  HUB3D.navDist = Math.max(0, Math.round((bestS - sBase)/5)*5);
-  const dir = (pathOffsetX(bestS+10) - pathOffsetX(bestS-10));
-  HUB3D.navText = bestK < 0.02 ? 'Continuez tout droit'
-                : (dir > 0 ? 'Courbe a droite' : 'Courbe a gauche');
 }
 
 /* ============ Resize responsive ============ */
