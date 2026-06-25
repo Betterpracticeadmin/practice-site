@@ -2749,7 +2749,7 @@
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
   /* ---- three navigation views: Normal (map) · HUD (Practice Vision) · Pulse ---- */
   var currentView='normal';
-  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(function(){postHudMode();postHudRoute();},700); }
+  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud3d.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(function(){postHudMode();postHudRoute();},700); }
   function postHudMode(){ var f=$('hudFrame'); if(f&&f.contentWindow&&$('hudOv')&&$('hudOv').classList.contains('show')){ try{f.contentWindow.postMessage({type:'mode',mode:mode},'*');}catch(e){} } }
   function closeHud(){ $('hudOv').classList.remove('show'); var f=$('hudFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
   function openPulse(){ var f=$('pulseFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/pulse.html'); $('pulseOv').classList.add('show'); setTimeout(postPulseData,600); }
