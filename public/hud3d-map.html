@@ -361,6 +361,25 @@ window.addEventListener('message', function(e){
 }, false);
 
 /* ============================================================
+   GEOLOCALISATION REELLE de l'appareil (mode autonome).
+   En iframe (os.html) le GPS arrive aussi par postMessage ; les deux
+   alimentent LIVE. Demande l'autorisation de localisation au navigateur.
+   ============================================================ */
+if(navigator.geolocation && navigator.geolocation.watchPosition){
+  try{
+    navigator.geolocation.watchPosition(function(pos){
+      var c=pos && pos.coords; if(!c) return;
+      if(typeof c.latitude==='number'){ LIVE.lat=c.latitude; LIVE.lon=c.longitude; }
+      if(typeof c.heading==='number' && !isNaN(c.heading)) LIVE.heading=((c.heading%360)+360)%360;
+      if(typeof c.speed==='number' && !isNaN(c.speed)) LIVE.speedKmh=Math.max(0,c.speed*3.6);
+      LIVE.lastGps=performance.now(); LIVE.active=true;
+      if(window.cockpitSetMapPos) window.cockpitSetMapPos(LIVE.lat, LIVE.lon);
+    }, function(){ /* refus/erreur loc -> on reste en demo, sans alarme */ },
+    { enableHighAccuracy:true, maximumAge:2000, timeout:20000 });
+  }catch(e){}
+}
+
+/* ============================================================
    CARTE MapLibre
    ============================================================ */
 var map=null, mapReady=false;
@@ -510,21 +529,76 @@ function addSky(){
   }catch(_){}
 }
 
-/* ---------- Marqueur position (puck) ---------- */
+/* ---------- Theme JOUR / NUIT ---------- */
+var PB_DAY=['interpolate',['linear'],['get','render_height'],0,'#d8dde6',30,'#c8d0db',80,'#b9c3d1',180,'#a8b4c6'];
+function lightenBasemap(){
+  if(!map) return; var layers=map.getStyle().layers||[];
+  for(var i=0;i<layers.length;i++){ var L=layers[i],id=L.id,type=L.type; try{
+    if(type==='background') map.setPaintProperty(id,'background-color','#e8edf3');
+    else if(type==='fill'){
+      if(/water|ocean|sea|river/i.test(id)) map.setPaintProperty(id,'fill-color','#a9cdee');
+      else if(/(park|wood|forest|grass|green|landuse|landcover)/i.test(id)) map.setPaintProperty(id,'fill-color','#cfe6c6');
+      else map.setPaintProperty(id,'fill-color','#dfe5ec');
+    } else if(type==='line'){
+      if(/motorway|trunk|primary/i.test(id)) map.setPaintProperty(id,'line-color','#ffffff');
+      else if(/secondary|tertiary/i.test(id)) map.setPaintProperty(id,'line-color','#eef1f5');
+      else map.setPaintProperty(id,'line-color','#e4e8ee');
+    } else if(type==='symbol'){
+      if(map.getLayoutProperty(id,'text-field')!==undefined){
+        try{ map.setPaintProperty(id,'text-color','#39414f'); }catch(_){}
+        try{ map.setPaintProperty(id,'text-halo-color','#ffffff'); }catch(_){}
+      }
+    }
+  }catch(_){} }
+}
+function themeBuildings(night){
+  if(!map) return; var layers=map.getStyle().layers||[];
+  for(var i=0;i<layers.length;i++){ if(layers[i].type==='fill-extrusion'){ try{
+    map.setPaintProperty(layers[i].id,'fill-extrusion-color', night?PB_COLOR:PB_DAY);
+    map.setPaintProperty(layers[i].id,'fill-extrusion-opacity',0.92);
+  }catch(_){} } }
+}
+function themeSky(night){
+  try{ if(typeof map.setSky==='function'){
+    if(night) map.setSky({'sky-color':'#0a1424','horizon-color':'#16202f','fog-color':'#0a0d14','sky-horizon-blend':0.6,'horizon-fog-blend':0.6,'fog-ground-blend':0.55});
+    else map.setSky({'sky-color':'#9fc6f2','horizon-color':'#dde8f6','fog-color':'#eef3f9','sky-horizon-blend':0.5,'horizon-fog-blend':0.5,'fog-ground-blend':0.5});
+  } }catch(_){}
+}
+function applyTheme(night){
+  if(!map||!mapReady) return;
+  if(night) darkenBasemap(); else lightenBasemap();
+  themeBuildings(night); themeSky(night);
+  document.documentElement.classList.toggle('hub-day', !night);
+}
+window.addEventListener('cockpit:night', function(e){ applyTheme(!!e.detail); });
+var camPadTop=260;
+function updatePad(){ try{ var el=map&&map.getContainer(); if(el) camPadTop=Math.round(el.clientHeight*0.42); }catch(_){} }
+window.addEventListener('resize', updatePad);
+
+/* ---------- Marqueur position : VOITURE (style hub Tesla) ---------- */
 var puckEl=null, puck=null;
-function addPuck(lon,lat){
+var CAR_SVG = "<svg width='34' height='46' viewBox='0 0 34 46' xmlns='http://www.w3.org/2000/svg'>"
+  + "<ellipse cx='17' cy='41' rx='12' ry='4.5' fill='rgba(0,0,0,.35)'/>"
+  + "<rect x='5' y='6' width='24' height='34' rx='9' fill='#11151c' stroke='#2f7bff' stroke-width='1.6'/>"
+  + "<rect x='8.5' y='10' width='17' height='9' rx='4.5' fill='#3a6ad0'/>"
+  + "<rect x='8.5' y='23' width='17' height='9' rx='4' fill='#1b2230'/>"
+  + "<rect x='9' y='4.2' width='6' height='3' rx='1.5' fill='#eaf2ff'/>"
+  + "<rect x='19' y='4.2' width='6' height='3' rx='1.5' fill='#eaf2ff'/>"
+  + "<rect x='9' y='38.5' width='6' height='2.6' rx='1' fill='#ff3b46'/>"
+  + "<rect x='19' y='38.5' width='6' height='2.6' rx='1' fill='#ff3b46'/>"
+  + "</svg>";
+function addPuck(lon,lat,bearing){
   if(!map) return;
   if(!puckEl){
     puckEl = document.createElement('div');
-    puckEl.style.cssText='width:22px;height:22px;border-radius:50%;'
-      +'background:radial-gradient(circle at 50% 40%,#9fc2ff,#2f7bff 70%);'
-      +'box-shadow:0 0 0 6px rgba(47,123,255,.25),0 0 16px rgba(47,123,255,.9);'
-      +'border:2px solid #eaf2ff;';
-    puck = new maplibregl.Marker({element:puckEl, pitchAlignment:'map'})
+    puckEl.style.cssText = 'width:34px;height:46px;will-change:transform;';
+    puckEl.innerHTML = CAR_SVG;
+    puck = new maplibregl.Marker({element:puckEl, pitchAlignment:'map', rotationAlignment:'map'})
       .setLngLat([lon,lat]).addTo(map);
   } else {
     puck.setLngLat([lon,lat]);
   }
+  if(typeof bearing==='number' && !isNaN(bearing)) puck.setRotation(bearing);
 }
 
 /* ---------- Itineraire (LineString bleue style FSD) ---------- */
@@ -606,9 +680,10 @@ function frame(ts){
       center:[cam.lon, cam.lat],
       bearing:cam.bearing,
       pitch: opt.view ? DRIVE_PITCH : 0,
-      zoom: DRIVE_ZOOM
+      zoom: DRIVE_ZOOM,
+      padding:{ top:camPadTop, bottom:0, left:0, right:0 }   // voiture en bas, route devant (angle type hub precedent)
     });
-    addPuck(cam.lon, cam.lat);
+    addPuck(cam.lon, cam.lat, HUB3D.heading);
   }
 
   updateState(dt);
@@ -669,10 +744,10 @@ window.__hubOpt = opt;
 if(map){
   map.on('load', function(){
     mapReady = true;
-    try{ darkenBasemap(); }catch(_){}
+    updatePad();
     try{ addBuildings3D(); }catch(_){}
-    try{ addSky(); }catch(_){}
-    addPuck(DEMO_POS.lon, DEMO_POS.lat);
+    try{ applyTheme(opt.night); }catch(_){}   // applique jour ou nuit selon le reglage
+    addPuck(DEMO_POS.lon, DEMO_POS.lat, 0);
     if(LIVE.routeCoords) applyRoute(LIVE.routeCoords);
     startFrame();
   });
