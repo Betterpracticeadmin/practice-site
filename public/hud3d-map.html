@@ -314,25 +314,48 @@ function detectTurn(instr, arrow){
    { type:'route', coords:[[lon,lat],...]|null }
    { type:'mode' } ; { type:'northlock' } -> ignore
    ============================================================ */
+/* ---- helpers position / cap ---- */
+function bearingBetween(la1,lo1,la2,lo2){
+  var R=Math.PI/180, p1=la1*R, p2=la2*R, dl=(lo2-lo1)*R;
+  var y=Math.sin(dl)*Math.cos(p2);
+  var x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+function distMeters(la1,lo1,la2,lo2){
+  var R=6371000, p=Math.PI/180;
+  var dphi=(la2-la1)*p, dl=(lo2-lo1)*p;
+  var a=Math.sin(dphi/2)*Math.sin(dphi/2)+Math.cos(la1*p)*Math.cos(la2*p)*Math.sin(dl/2)*Math.sin(dl/2);
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(a)));
+}
+/* alimente LIVE depuis une source de position (postMessage GPS ou geoloc navigateur).
+   Si le cap n'est PAS fourni (boussole absente), on le DEDUIT du deplacement ->
+   la carte s'oriente toujours dans la direction de marche (route devant = haut). */
+function feedPosition(lat,lon,heading,spd){
+  if(typeof lat==='number' && typeof lon==='number' && isFinite(lat) && isFinite(lon)){
+    if(typeof heading==='number' && !isNaN(heading) && heading>=0){
+      LIVE.heading=((heading%360)+360)%360;
+    } else if(LIVE.prevLat!=null && distMeters(LIVE.prevLat,LIVE.prevLon,lat,lon)>=3){
+      LIVE.heading=bearingBetween(LIVE.prevLat,LIVE.prevLon,lat,lon);
+    }
+    LIVE.prevLat=lat; LIVE.prevLon=lon;
+    LIVE.lat=lat; LIVE.lon=lon;
+  }
+  if(typeof spd==='number' && !isNaN(spd)) LIVE.speedKmh=Math.max(0,spd*3.6);
+  LIVE.lastGps=performance.now(); LIVE.active=true;
+  if(LIVE.lat!=null && LIVE.lon!=null && window.cockpitSetMapPos) window.cockpitSetMapPos(LIVE.lat,LIVE.lon);
+}
+
 window.addEventListener('message', function(e){
   var d = e && e.data;
   if(!d || typeof d!=='object' || !d.type) return;
   try{
     switch(d.type){
       case 'gps': {
-        var ms = (typeof d.speed==='number' && isFinite(d.speed)) ? d.speed : 0;
-        LIVE.speedKmh = Math.max(0, ms*3.6);
-        if(typeof d.heading==='number' && isFinite(d.heading)) LIVE.heading = ((d.heading%360)+360)%360;
-        if(typeof d.lat==='number') LIVE.lat = d.lat;
-        if(typeof d.lon==='number') LIVE.lon = d.lon;
-        if(typeof d.acc==='number') LIVE.acc = d.acc;
         var lim = (typeof d.limit==='number') ? d.limit
                 : (typeof d.maxspeed==='number') ? d.maxspeed : null;
         if(lim!=null && isFinite(lim) && lim>0) LIVE.limit = lim;
-        LIVE.lastGps = performance.now();
-        LIVE.active = true;
-        if(LIVE.lat!=null && LIVE.lon!=null && window.cockpitSetMapPos)
-          window.cockpitSetMapPos(LIVE.lat, LIVE.lon);
+        if(typeof d.acc==='number') LIVE.acc = d.acc;
+        feedPosition(d.lat, d.lon, d.heading, d.speed);   // cap deduit du mouvement si absent
         break;
       }
       case 'nav': {
@@ -370,11 +393,8 @@ if(navigator.geolocation && navigator.geolocation.watchPosition){
   try{
     navigator.geolocation.watchPosition(function(pos){
       var c=pos && pos.coords; if(!c) return;
-      if(typeof c.latitude==='number'){ LIVE.lat=c.latitude; LIVE.lon=c.longitude; }
-      if(typeof c.heading==='number' && !isNaN(c.heading)) LIVE.heading=((c.heading%360)+360)%360;
-      if(typeof c.speed==='number' && !isNaN(c.speed)) LIVE.speedKmh=Math.max(0,c.speed*3.6);
-      LIVE.lastGps=performance.now(); LIVE.active=true;
-      if(window.cockpitSetMapPos) window.cockpitSetMapPos(LIVE.lat, LIVE.lon);
+      if(typeof c.accuracy==='number') LIVE.acc=c.accuracy;
+      feedPosition(c.latitude, c.longitude, c.heading, c.speed);   // cap reel ou deduit du mouvement
     }, function(){ /* refus/erreur loc -> on reste en demo, sans alarme */ },
     { enableHighAccuracy:true, maximumAge:2000, timeout:20000 });
   }catch(e){}
@@ -573,7 +593,7 @@ function applyTheme(night){
 }
 window.addEventListener('cockpit:night', function(e){ applyTheme(!!e.detail); });
 var camPadTop=260;
-function updatePad(){ try{ var el=map&&map.getContainer(); if(el) camPadTop=Math.round(el.clientHeight*0.42); }catch(_){} }
+function updatePad(){ try{ var el=map&&map.getContainer(); if(el) camPadTop=Math.round(el.clientHeight*0.25); }catch(_){} }
 window.addEventListener('resize', updatePad);
 
 /* ---------- Marqueur position : VOITURE (style hub Tesla) ---------- */
@@ -646,16 +666,10 @@ function driveTarget(dt){
   if(liveFresh() && LIVE.lat!=null && LIVE.lon!=null){
     return { lon:LIVE.lon, lat:LIVE.lat, bearing:LIVE.heading };
   }
-  // DEMO : petite boucle douce autour de Vitry, cap qui tourne -> beau a l'arret.
-  demoT += dt;
-  var R = 0.0016;                      // ~ rayon en degres
-  var ang = demoT*0.10;                // vitesse de parcours
-  var lon = DEMO_POS.lon + Math.cos(ang)*R*1.4;
-  var lat = DEMO_POS.lat + Math.sin(ang)*R;
-  // cap = tangente au cercle (deg, 0=N, sens horaire)
-  var dx = -Math.sin(ang)*1.4, dy = Math.cos(ang);
-  var bearing = (Math.atan2(dx, dy)*180/Math.PI + 360)%360;
-  return { lon:lon, lat:lat, bearing:bearing };
+  // DEMO (pas encore de GPS) : position fixe + cap constant -> AUCUNE rotation aleatoire.
+  // Des qu'une vraie position GPS arrive, on suit la position et le cap reels.
+  demoT += dt;                         // (sert juste a la legere oscillation de vitesse demo)
+  return { lon:DEMO_POS.lon, lat:DEMO_POS.lat, bearing:0 };
 }
 
 var lastTs = performance.now();
