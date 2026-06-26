@@ -12,6 +12,7 @@
 <!-- MapLibre GL JS (CDN, pas de cle API) -->
 <link href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" rel="stylesheet"/>
 <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }</script>
 
 <style>
   html,body{margin:0;height:100%;overflow:hidden;background:#05070f;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
@@ -589,6 +590,7 @@ var CAR_SVG = "<svg width='34' height='46' viewBox='0 0 34 46' xmlns='http://www
   + "</svg>";
 function addPuck(lon,lat,bearing){
   if(!map) return;
+  if(window.__car3d){ if(puckEl) puckEl.style.display='none'; return; }   // voiture 3D active -> on masque le marqueur 2D
   if(!puckEl){
     puckEl = document.createElement('div');
     puckEl.style.cssText = 'width:34px;height:46px;will-change:transform;';
@@ -680,9 +682,10 @@ function frame(ts){
       center:[cam.lon, cam.lat],
       bearing:cam.bearing,
       pitch: opt.view ? DRIVE_PITCH : 0,
-      zoom: DRIVE_ZOOM,
+      // zoom LIBRE : on ne force plus DRIVE_ZOOM chaque frame -> l'utilisateur peut zoomer / dezoomer
       padding:{ top:camPadTop, bottom:0, left:0, right:0 }   // voiture en bas, route devant (angle type hub precedent)
     });
+    window.__carPos = { lon:cam.lon, lat:cam.lat, bearing:(HUB3D.heading||0) };  // pour la voiture 3D (couche Three.js)
     addPuck(cam.lon, cam.lat, HUB3D.heading);
   }
 
@@ -948,5 +951,74 @@ window.__hubMap = map;
 /* =================== /PRACTICE COCKPIT OVERLAY — LOGIC ==================== */
 </script>
 
+<script type="module">
+/* ============================================================
+   VOITURE 3D : couche custom MapLibre rendue avec Three.js.
+   Vrai modele 3D -> scale avec le zoom, s'incline avec le pitch.
+   Position/orientation lues dans window.__carPos (alimente par la boucle).
+   Constantes de calage faciles a ajuster sur appareil : CARSCALE / CAR_YAW_OFFSET.
+   ============================================================ */
+import * as THREE from 'three';
+(function(){
+  var CARSCALE = 1.0;        // taille de la voiture (≈ metres) — ajuster si trop grosse/petite
+  var CAR_YAW_OFFSET = 0;    // decalage d'orientation (radians) — mettre Math.PI si la voiture roule en marche arriere
+  function start(){
+    var map = window.__hubMap, ml = window.maplibregl;
+    if(!map || !ml){ return setTimeout(start, 250); }
+    function buildCar(){
+      var g = new THREE.Group();
+      var paint=new THREE.MeshStandardMaterial({color:0x1b2230,metalness:0.6,roughness:0.45});
+      var roof =new THREE.MeshStandardMaterial({color:0x222b3c,metalness:0.5,roughness:0.5});
+      var glass=new THREE.MeshStandardMaterial({color:0x3a6ad0,metalness:0.3,roughness:0.2});
+      var tire =new THREE.MeshStandardMaterial({color:0x07090d,metalness:0.1,roughness:0.95});
+      var head =new THREE.MeshStandardMaterial({color:0xeaf2ff,emissive:0xbcd2ff,emissiveIntensity:0.7});
+      var tail =new THREE.MeshStandardMaterial({color:0xff3b46,emissive:0xff2030,emissiveIntensity:0.8});
+      var body=new THREE.Mesh(new THREE.BoxGeometry(2.0,4.4,0.9),paint); body.position.z=0.65; g.add(body);
+      var cab =new THREE.Mesh(new THREE.BoxGeometry(1.7,2.5,0.7),roof); cab.position.set(0,-0.1,1.25); g.add(cab);
+      var win =new THREE.Mesh(new THREE.BoxGeometry(1.55,1.0,0.62),glass); win.position.set(0,0.95,1.22); g.add(win);
+      var wp=[[-0.95,1.4],[0.95,1.4],[-0.95,-1.4],[0.95,-1.4]];
+      for(var i=0;i<4;i++){ var w=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,0.35,16),tire); w.rotation.z=Math.PI/2; w.position.set(wp[i][0],wp[i][1],0.45); g.add(w); }
+      var h1=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.18,0.3),head); h1.position.set(-0.6,2.2,0.6); g.add(h1);
+      var h2=h1.clone(); h2.position.x=0.6; g.add(h2);
+      var t1=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.18,0.32),tail); t1.position.set(-0.6,-2.2,0.7); g.add(t1);
+      var t2=t1.clone(); t2.position.x=0.6; g.add(t2);
+      return g;
+    }
+    var layer = {
+      id:'ego-car-3d', type:'custom', renderingMode:'3d',
+      onAdd:function(m, gl){
+        this.scene=new THREE.Scene();
+        this.scene.add(new THREE.AmbientLight(0xffffff,1.15));
+        var d=new THREE.DirectionalLight(0xffffff,1.5); d.position.set(40,-60,120); this.scene.add(d);
+        this.car=buildCar(); this.scene.add(this.car);
+        this.camera=new THREE.Camera();
+        // pattern canonique MapLibre + Three : partage canvas + contexte WebGL de la carte.
+        // (En WebGL software headless, Chromium peut logguer "different context type" -> sans
+        //  effet sur appareil reel WebGL2. Sur device le rendu fonctionne.)
+        this.renderer=new THREE.WebGLRenderer({canvas:m.getCanvas(),context:gl,antialias:true});
+        this.renderer.autoClear=false;
+        window.__car3d=true;
+      },
+      render:function(gl, matrix){
+        var pos=window.__carPos; if(!pos){ var c=map.getCenter(); pos={lon:c.lng,lat:c.lat,bearing:0}; }
+        var merc=ml.MercatorCoordinate.fromLngLat([pos.lon,pos.lat],0);
+        var s=merc.meterInMercatorCoordinateUnits();
+        var l=new THREE.Matrix4().makeTranslation(merc.x,merc.y,merc.z)
+          .multiply(new THREE.Matrix4().makeScale(s,-s,s))
+          .multiply(new THREE.Matrix4().makeRotationZ(-(pos.bearing||0)*Math.PI/180 + CAR_YAW_OFFSET))
+          .multiply(new THREE.Matrix4().makeScale(CARSCALE,CARSCALE,CARSCALE));
+        this.camera.projectionMatrix=new THREE.Matrix4().fromArray(matrix).multiply(l);
+        this.renderer.resetState();
+        this.renderer.render(this.scene,this.camera);
+        map.triggerRepaint();
+      }
+    };
+    function add(){ try{ if(map.getLayer && !map.getLayer('ego-car-3d')) map.addLayer(layer); }catch(e){ /* fallback : le marqueur 2D voiture reste */ } }
+    if(map.isStyleLoaded && map.isStyleLoaded()) add();
+    map.on('load', add); map.on('style.load', add);
+  }
+  start();
+})();
+</script>
 </body>
 </html>
