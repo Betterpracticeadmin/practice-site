@@ -273,9 +273,14 @@ html.embedded #ck-navMan{top:146px;}
 /* ---------- Constantes ---------- */
 var STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 var DEMO_POS  = { lon:2.392, lat:48.787 };   // Vitry-sur-Seine
-var MAX_PITCH = 60;                            // limite sure iPad (>60 = experimental, rendu KO possible)
-var DRIVE_ZOOM = 17;
-var DRIVE_PITCH = 60;
+/* ---- CAMERA CHASE (vue 3e personne proche, facon hud3d.html) ----
+   Valeurs FACILEMENT ajustables. Recommandations Context7 MapLibre :
+   pitch 60-70 (vue derriere la voiture), zoom 17.5-18.5 (collee),
+   padding.top eleve -> voiture dans le tiers bas, route devant. */
+var DRIVE_PITCH    = 68;     // inclinaison chase (60-70). >75 = horizon plein ecran.
+var DRIVE_ZOOM     = 18.2;   // zoom rapproche (17.5-18.5). 16-17 = vue large GPS.
+var CAM_PAD_FACTOR = 0.34;   // padding.top = facteur * hauteur canvas -> voiture en bas
+var MAX_PITCH      = 74;     // maxPitch a l'init (marge au-dessus de DRIVE_PITCH)
 var LIVE_TIMEOUT = 5000;                       // ms sans 'gps' -> retour DEMO
 
 /* ---------- Etat global expose (lu par le cockpit) ---------- */
@@ -593,7 +598,7 @@ function applyTheme(night){
 }
 window.addEventListener('cockpit:night', function(e){ applyTheme(!!e.detail); });
 var camPadTop=260;
-function updatePad(){ try{ var el=map&&map.getContainer(); if(el) camPadTop=Math.round(el.clientHeight*0.25); }catch(_){} }
+function updatePad(){ try{ var el=map&&map.getContainer(); if(el) camPadTop=Math.round(el.clientHeight*CAM_PAD_FACTOR); }catch(_){} }
 window.addEventListener('resize', updatePad);
 
 /* ---------- Marqueur position : VOITURE (style hub Tesla) ---------- */
@@ -973,30 +978,77 @@ window.__hubMap = map;
    Constantes de calage faciles a ajuster sur appareil : CARSCALE / CAR_YAW_OFFSET.
    ============================================================ */
 import * as THREE from 'three';
+/* RoundedBoxGeometry : arêtes arrondies facon Cybertruck (port hud3d.html).
+   Si l'addon ne charge pas (CDN/bundle), repli automatique sur BoxGeometry. */
+let RoundedBoxGeometry = null;
+try{
+  ({ RoundedBoxGeometry } = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/geometries/RoundedBoxGeometry.js'));
+}catch(_){ RoundedBoxGeometry = null; }
+function rbox(w,h,d,seg,rad){
+  return RoundedBoxGeometry ? new RoundedBoxGeometry(w,h,d,seg,rad) : new THREE.BoxGeometry(w,h,d);
+}
+
+/* OPTION GLTF (point d'entree commente) : pour charger un .glb si une URL fiable
+   est fournie plus tard. Laisser null -> le vehicule procedural reste par defaut.
+   Exemple :
+     import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+     new GLTFLoader().load(CAR_GLB_URL, function(gltf){ ... remplacer this.car ... });
+*/
+var CAR_GLB_URL = null;
+
 (function(){
   var CARSCALE = 1.0;        // taille de la voiture (≈ metres) — ajuster si trop grosse/petite
   var CAR_YAW_OFFSET = 0;    // decalage d'orientation (radians) — mettre Math.PI si la voiture roule en marche arriere
+  var ACCENT = 0x2f7bff;     // accent anneau FSD (DA hub)
   function start(){
     var map = window.__hubMap, ml = window.maplibregl;
     if(!map || !ml){ return setTimeout(start, 250); }
+    /* ----------------------------------------------------------------
+       Modele EGO porte depuis hud3d.html (makeCar, look Cybertruck).
+       Convention MODELE Three Y-up : avant vers +Z, roues au sol (y~0).
+       L'adaptation a l'espace MapLibre (Z-up) se fait dans render() via
+       un rotateX(+PI/2) ; ici on reste dans le repere natif du modele.
+       ---------------------------------------------------------------- */
     function buildCar(){
-      var g = new THREE.Group();
-      var paint=new THREE.MeshStandardMaterial({color:0x1b2230,metalness:0.6,roughness:0.45});
-      var roof =new THREE.MeshStandardMaterial({color:0x222b3c,metalness:0.5,roughness:0.5});
-      var glass=new THREE.MeshStandardMaterial({color:0x3a6ad0,metalness:0.3,roughness:0.2});
-      var tire =new THREE.MeshStandardMaterial({color:0x07090d,metalness:0.1,roughness:0.95});
-      var head =new THREE.MeshStandardMaterial({color:0xeaf2ff,emissive:0xbcd2ff,emissiveIntensity:0.7});
-      var tail =new THREE.MeshStandardMaterial({color:0xff3b46,emissive:0xff2030,emissiveIntensity:0.8});
-      var body=new THREE.Mesh(new THREE.BoxGeometry(2.0,4.4,0.9),paint); body.position.z=0.65; g.add(body);
-      var cab =new THREE.Mesh(new THREE.BoxGeometry(1.7,2.5,0.7),roof); cab.position.set(0,-0.1,1.25); g.add(cab);
-      var win =new THREE.Mesh(new THREE.BoxGeometry(1.55,1.0,0.62),glass); win.position.set(0,0.95,1.22); g.add(win);
-      var wp=[[-0.95,1.4],[0.95,1.4],[-0.95,-1.4],[0.95,-1.4]];
-      for(var i=0;i<4;i++){ var w=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,0.35,16),tire); w.rotation.z=Math.PI/2; w.position.set(wp[i][0],wp[i][1],0.45); g.add(w); }
-      var h1=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.18,0.3),head); h1.position.set(-0.6,2.2,0.6); g.add(h1);
-      var h2=h1.clone(); h2.position.x=0.6; g.add(h2);
-      var t1=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.18,0.32),tail); t1.position.set(-0.6,-2.2,0.7); g.add(t1);
-      var t2=t1.clone(); t2.position.x=0.6; g.add(t2);
-      return g;
+      var car = new THREE.Group();
+      var color = 0x9aa0a8;  // caisse EGO metallique claire
+
+      // Caisse metallique anguleuse
+      var body = new THREE.Mesh(rbox(1.9,0.6,4.1,4,0.26),
+        new THREE.MeshStandardMaterial({color:color,roughness:0.45,metalness:0.55}));
+      body.position.y = 0.55; car.add(body);
+
+      // Cabine vitree sombre, legerement reculee
+      var cabin = new THREE.Mesh(rbox(1.6,0.52,2.0,4,0.2),
+        new THREE.MeshStandardMaterial({color:0x0c0f14,roughness:0.12,metalness:0.2}));
+      cabin.position.set(0,1.02,-0.15); car.add(cabin);
+
+      // 4 roues (cylindres couches sur l'axe X)
+      var wheelGeo=new THREE.CylinderGeometry(0.37,0.37,0.3,16);
+      var wheelMat=new THREE.MeshStandardMaterial({color:0x090909,roughness:0.85});
+      var wp=[[-0.9,1.35],[0.9,1.35],[-0.9,-1.35],[0.9,-1.35]];
+      for(var i=0;i<4;i++){
+        var w=new THREE.Mesh(wheelGeo,wheelMat);
+        w.rotation.z=Math.PI/2; w.position.set(wp[i][0],0.37,wp[i][1]); car.add(w);
+      }
+
+      // Feux : plans. Arriere rouges (z=-2.06) / phares EGO froids (z=+2.06 = AVANT)
+      var lightGeo=new THREE.PlaneGeometry(0.34,0.16);
+      var tailMat=new THREE.MeshBasicMaterial({color:0xff2a22});
+      var headMat=new THREE.MeshBasicMaterial({color:0xeaf2ff});
+      [-0.6,0.6].forEach(function(px){
+        var t=new THREE.Mesh(lightGeo,tailMat); t.position.set(px,0.55,-2.06); t.rotation.y=Math.PI; car.add(t);
+        var h=new THREE.Mesh(lightGeo,headMat); h.position.set(px,0.55,2.06); car.add(h);
+      });
+
+      // Anneau de guidage FSD au sol (EGO)
+      var ring=new THREE.Mesh(new THREE.TorusGeometry(2.0,0.04,8,40),
+        new THREE.MeshBasicMaterial({color:ACCENT,transparent:true,opacity:0.5,
+          blending:THREE.AdditiveBlending,depthWrite:false}));
+      ring.rotation.x=-Math.PI/2; ring.position.y=0.06; ring.scale.set(1.0,1.5,1.0);
+      car.add(ring);
+
+      return car;
     }
     var layer = {
       id:'ego-car-3d', type:'custom', renderingMode:'3d',
@@ -1011,6 +1063,10 @@ import * as THREE from 'three';
         //  effet sur appareil reel WebGL2. Sur device le rendu fonctionne.)
         this.renderer=new THREE.WebGLRenderer({canvas:m.getCanvas(),context:gl,antialias:true});
         this.renderer.autoClear=false;
+        // matrices reutilisees chaque frame (pas de re-allocation -> evite la fuite/GC churn)
+        this._mProj=new THREE.Matrix4();
+        this._mModel=new THREE.Matrix4();
+        this._mTmp=new THREE.Matrix4();
         window.__car3d=true;
       },
       render:function(gl, args){
@@ -1018,13 +1074,20 @@ import * as THREE from 'three';
         // MapLibre 5.x : la matrice de projection est dans args.defaultProjectionData.mainMatrix
         // (fallback : argument direct = ancienne API). Source : doc Context7.
         var mat=(args && args.defaultProjectionData && args.defaultProjectionData.mainMatrix) ? args.defaultProjectionData.mainMatrix : args;
+        if(!mat){ map.triggerRepaint(); return; }   // pas de matrice fournie -> on saute la frame proprement
         var merc=ml.MercatorCoordinate.fromLngLat([pos.lon,pos.lat],0);
         var s=merc.meterInMercatorCoordinateUnits();
-        var l=new THREE.Matrix4().makeTranslation(merc.x,merc.y,merc.z)
-          .multiply(new THREE.Matrix4().makeScale(s,-s,s))
-          .multiply(new THREE.Matrix4().makeRotationZ(-(pos.bearing||0)*Math.PI/180 + CAR_YAW_OFFSET))
-          .multiply(new THREE.Matrix4().makeScale(CARSCALE,CARSCALE,CARSCALE));
-        this.camera.projectionMatrix=new THREE.Matrix4().fromArray(mat).multiply(l);
+        // MapLibre = Z-up ; le modele EGO est Y-up (avant +Z, haut +Y).
+        // 1) place+echelle Mercator (Y inverse), 2) cap autour de l'axe vertical
+        //    MapLibre (Z), 3) bascule le modele Y-up -> Z-up via rotateX(+PI/2),
+        // 4) echelle d'ajustement CARSCALE.
+        // Matrices PRE-ALLOUEES (this._m*) reutilisees : aucun new THREE.Matrix4() par frame.
+        var l=this._mModel.makeTranslation(merc.x,merc.y,merc.z)
+          .multiply(this._mTmp.makeScale(s,-s,s))
+          .multiply(this._mTmp.makeRotationZ(-(pos.bearing||0)*Math.PI/180 + CAR_YAW_OFFSET))
+          .multiply(this._mTmp.makeRotationX(Math.PI/2))
+          .multiply(this._mTmp.makeScale(CARSCALE,CARSCALE,CARSCALE));
+        this.camera.projectionMatrix=this._mProj.fromArray(mat).multiply(l);
         this.renderer.resetState();
         this.renderer.render(this.scene,this.camera);
         map.triggerRepaint();
