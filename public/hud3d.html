@@ -79,6 +79,8 @@
 #ck-tele{top:calc(16px + env(safe-area-inset-top));left:calc(16px + env(safe-area-inset-left));width:215px;}
 .ck-big{font-size:46px;font-weight:200;letter-spacing:-2px;line-height:1;font-family:var(--mono);}
 .ck-big small{font-size:13px;color:#8b9298;letter-spacing:0;margin-left:6px;}
+/* en mode embarque (iframe os.html), on decale le panneau vitesse pour ne pas passer sous le bouton "Cockpit" de l'hote */
+html.embedded #ck-tele{top:calc(60px + env(safe-area-inset-top));}
 
 /* ---- bottom-right mini-map ---- */
 #ck-mapPanel{bottom:calc(16px + env(safe-area-inset-bottom));right:calc(16px + env(safe-area-inset-right));width:230px;padding:12px 13px;}
@@ -200,6 +202,7 @@
 </head>
 <body>
 
+<script>if(window.self!==window.top){document.documentElement.classList.add('embedded');}</script>
 <!-- HUD minimal de debug (conserve) ; le canvas Three.js est insere par JS juste apres -->
 <div id="hud"><span class="spd">0</span><span class="unit">km/h</span><div class="sub">Trajectoire active</div></div>
 <div id="vig"></div>
