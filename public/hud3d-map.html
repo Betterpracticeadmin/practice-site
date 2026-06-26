@@ -1013,15 +1013,18 @@ import * as THREE from 'three';
         this.renderer.autoClear=false;
         window.__car3d=true;
       },
-      render:function(gl, matrix){
+      render:function(gl, args){
         var pos=window.__carPos; if(!pos){ var c=map.getCenter(); pos={lon:c.lng,lat:c.lat,bearing:0}; }
+        // MapLibre 5.x : la matrice de projection est dans args.defaultProjectionData.mainMatrix
+        // (fallback : argument direct = ancienne API). Source : doc Context7.
+        var mat=(args && args.defaultProjectionData && args.defaultProjectionData.mainMatrix) ? args.defaultProjectionData.mainMatrix : args;
         var merc=ml.MercatorCoordinate.fromLngLat([pos.lon,pos.lat],0);
         var s=merc.meterInMercatorCoordinateUnits();
         var l=new THREE.Matrix4().makeTranslation(merc.x,merc.y,merc.z)
           .multiply(new THREE.Matrix4().makeScale(s,-s,s))
           .multiply(new THREE.Matrix4().makeRotationZ(-(pos.bearing||0)*Math.PI/180 + CAR_YAW_OFFSET))
           .multiply(new THREE.Matrix4().makeScale(CARSCALE,CARSCALE,CARSCALE));
-        this.camera.projectionMatrix=new THREE.Matrix4().fromArray(matrix).multiply(l);
+        this.camera.projectionMatrix=new THREE.Matrix4().fromArray(mat).multiply(l);
         this.renderer.resetState();
         this.renderer.render(this.scene,this.camera);
         map.triggerRepaint();
