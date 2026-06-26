@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Drive MAP — Hub carte reelle (MapLibre)</title>
+
+<!-- Practice fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+
+<!-- MapLibre GL JS (CDN, pas de cle API) -->
+<link href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" rel="stylesheet"/>
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#05070f;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  #map{position:absolute;inset:0;z-index:0;background:#0a0d14;}
+  /* MapLibre attribution discrete et coin bas-droit decale au-dessus du cockpit */
+  .maplibregl-ctrl-attrib{font-size:9px!important;background:rgba(6,8,14,.45)!important;color:#7a808c!important;}
+  .maplibregl-ctrl-attrib a{color:#9aa3b2!important;}
+  .maplibregl-ctrl-bottom-right{z-index:9!important;}
+  .maplibregl-ctrl-bottom-left{display:none!important;} /* logo non requis */
+
+  /* message d'erreur discret (echec tuiles) */
+  #map-err{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:8;
+    display:none;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
+    color:#f5a623;background:rgba(8,10,14,.78);border:.5px solid rgba(245,166,35,.4);
+    border-radius:10px;padding:6px 12px;pointer-events:none;text-transform:uppercase;}
+  #vig{position:fixed;inset:0;pointer-events:none;z-index:3;
+       box-shadow:inset 0 0 200px 40px rgba(0,0,0,.40);}
+</style>
+
+<style>
+/* ===================== PRACTICE COCKPIT OVERLAY — STYLE ===================== */
+#cockpit{
+  --acc:#FF5000; --mono:'JetBrains Mono',monospace;
+  --safe:#39d98a; --alert:#f5a623; --crit:#ff3b46;
+  --txt:#F2F3F5; --faint:#6c727a;
+  position:absolute; inset:0; z-index:10;
+  font-family:'Inter',sans-serif; color:var(--txt);
+  pointer-events:none;
+  -webkit-user-select:none; user-select:none;
+}
+#cockpit .ck-panel,
+#cockpit #ck-burger,
+#cockpit #ck-ctl,
+#cockpit #ck-miniMap{ pointer-events:auto; }
+
+#cockpit, #cockpit *{ box-sizing:border-box; margin:0; padding:0; }
+
+#ck-warm{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.35;background:
+  radial-gradient(130% 90% at 50% 22%, rgba(255,80,0,.16), transparent 58%),
+  radial-gradient(90% 70% at 10% 96%, rgba(150,28,72,.14), transparent 55%),
+  radial-gradient(90% 70% at 92% 92%, rgba(120,30,90,.12), transparent 55%);}
+#ck-vig{position:absolute;inset:0;pointer-events:none;z-index:2;
+  box-shadow:inset 0 0 220px -40px var(--lvl,transparent);transition:box-shadow .5s;}
+#cockpit[data-lvl="ALERT"] #ck-vig{--lvl:rgba(245,166,35,.45);}
+#cockpit[data-lvl="CRITICAL"] #ck-vig{animation:ck-pulse 1s ease-in-out infinite;}
+@keyframes ck-pulse{0%,100%{box-shadow:inset 0 0 200px -50px rgba(255,59,70,.5)}
+  50%{box-shadow:inset 0 0 260px -20px rgba(255,59,70,.85)}}
+
+.ck-panel{position:absolute;z-index:5;
+  background:
+    linear-gradient(135deg, rgba(255,80,0,.14), rgba(120,28,62,.06) 55%, rgba(30,12,22,.12)),
+    rgba(16,11,14,.42);
+  backdrop-filter:blur(28px) saturate(1.3);-webkit-backdrop-filter:blur(28px) saturate(1.3);
+  border:.5px solid rgba(255,255,255,.14);border-radius:20px;padding:14px 16px;
+  box-shadow:0 18px 55px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.07);}
+.ck-lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);}
+.ck-ttl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+  color:#565b61;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.ck-ttl b{color:var(--acc);}
+.ck-v{font-family:var(--mono);font-size:12px;}
+.ck-trow{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:12px;}
+.ck-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.1em;padding:4px 9px;border-radius:20px;border:.5px solid rgba(255,255,255,.14);}
+.ck-dot{width:7px;height:7px;border-radius:50%;background:var(--safe);box-shadow:0 0 8px currentColor;color:var(--safe);}
+
+#ck-tele{top:calc(16px + env(safe-area-inset-top));left:calc(16px + env(safe-area-inset-left));width:215px;}
+.ck-big{font-size:46px;font-weight:200;letter-spacing:-2px;line-height:1;font-family:var(--mono);}
+.ck-big small{font-size:13px;color:#8b9298;letter-spacing:0;margin-left:6px;}
+/* en mode embarque (iframe os.html), on decale les overlays du haut pour ne pas
+   passer sous le bouton "Cockpit"/fermeture de l'hote (haut-droit + haut-centre) */
+html.embedded #ck-tele{top:calc(60px + env(safe-area-inset-top));}
+html.embedded #ck-burger{top:calc(58px + env(safe-area-inset-top));}
+html.embedded #ck-ctl{top:calc(100px + env(safe-area-inset-top));}
+html.embedded #ck-live{top:calc(64px + env(safe-area-inset-top));}
+html.embedded #ck-navAmp{top:104px;}
+html.embedded #ck-navMan{top:146px;}
+
+#ck-mapPanel{bottom:calc(16px + env(safe-area-inset-bottom));right:calc(16px + env(safe-area-inset-right));width:230px;padding:12px 13px;}
+#ck-miniMap{width:100%;height:150px;border-radius:12px;margin-top:9px;background:#0a0c10;overflow:hidden;position:relative;}
+#ck-mapFallback{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--mono);
+  font-size:9px;letter-spacing:.16em;color:#565b61;text-align:center;
+  background:repeating-linear-gradient(45deg,#0a0c10 0 12px,#0d1015 12px 24px);}
+.ck-me-dot{width:14px;height:14px;border-radius:50%;background:var(--acc);
+  box-shadow:0 0 0 4px rgba(255,80,0,.25),0 0 12px var(--acc);}
+#cockpit[data-map="off"] #ck-mapPanel{display:none;}
+
+#ck-burger{position:absolute;top:calc(16px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));
+  z-index:33;pointer-events:auto;background:rgba(8,10,14,.72);border:.5px solid rgba(255,255,255,.18);
+  color:var(--txt);border-radius:12px;padding:9px 14px;font-size:12.5px;cursor:pointer;
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;gap:9px;}
+#ck-burger:hover{border-color:var(--acc);}
+#ck-burger.on{border-color:var(--acc);color:var(--acc);}
+#ck-burger .bi{display:inline-flex;flex-direction:column;gap:2.5px;}
+#ck-burger .bi i{width:15px;height:1.6px;background:currentColor;border-radius:2px;}
+#ck-ctl{top:calc(58px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));
+  z-index:32;display:none;flex-direction:column;gap:7px;align-items:stretch;padding:12px;width:218px;
+  max-height:calc(100vh - 96px);overflow-y:auto;scrollbar-width:none;}
+#ck-ctl.open{display:flex;}
+#ck-ctl::-webkit-scrollbar{display:none;}
+#ck-ctl button{background:rgba(255,255,255,.06);border:.5px solid rgba(255,255,255,.14);color:var(--txt);
+  border-radius:11px;padding:9px 13px;font-size:12px;cursor:pointer;font-family:'Inter';
+  transition:.15s;white-space:nowrap;text-align:left;}
+#ck-ctl button:hover{border-color:var(--acc);}
+#ck-ctl button.on{background:var(--acc);color:#000;border-color:var(--acc);font-weight:600;}
+#ck-ctl .ck-sep{height:1px;background:rgba(255,255,255,.12);margin:4px 2px;}
+
+#ck-live{position:absolute;top:calc(34px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+  z-index:42;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;
+  padding:5px 13px;border-radius:20px;border:.5px solid rgba(255,255,255,.16);background:rgba(0,0,0,.5);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);pointer-events:none;
+  transition:color .3s,border-color .3s,box-shadow .3s;}
+#ck-live.live{color:var(--safe);border-color:rgba(57,217,138,.55);box-shadow:0 0 16px -4px rgba(57,217,138,.6);}
+#ck-live.demo{color:var(--alert);border-color:rgba(245,166,35,.5);}
+
+#ck-navAmp{position:absolute;top:62px;left:50%;transform:translateX(-50%);z-index:13;
+  display:flex;align-items:center;gap:10px;pointer-events:none;font-family:var(--mono);}
+#ck-navAmp>div{background:rgba(12,14,18,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:.5px solid rgba(255,255,255,.12);border-radius:12px;padding:5px 10px;
+  display:flex;align-items:center;gap:7px;box-shadow:0 6px 18px rgba(0,0,0,.3);}
+.na-lim b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;
+  background:#fff;color:#c0202a;border:2.5px solid #d11a25;font-size:14px;font-weight:800;}
+.na-eta b{font-size:14px;color:var(--txt);} .na-eta span{font-size:11px;color:#8b9298;margin-left:6px;}
+
+#ck-navMan{position:absolute;top:104px;left:50%;transform:translateX(-50%);z-index:13;
+  display:none;align-items:center;gap:12px;background:rgba(12,14,18,.66);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:.5px solid rgba(255,255,255,.14);
+  border-radius:16px;padding:9px 16px;box-shadow:0 8px 24px rgba(0,0,0,.34);
+  pointer-events:none;font-family:var(--mono);}
+#ck-navMan.show{display:flex;}
+#ck-navMan .nm-arrow{color:var(--acc);display:flex;align-items:center;}
+#ck-navMan .nm-txt{display:flex;flex-direction:column;line-height:1.12;}
+#ck-navMan .nm-txt b{font-size:22px;color:#fff;}
+#ck-navMan .nm-txt span{font-size:12px;color:#9aa3b2;max-width:200px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;}
+
+#ck-raceHud{position:absolute;left:calc(16px + env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom));
+  z-index:6;display:flex;align-items:center;gap:14px;width:215px;padding:11px 12px;border-radius:16px;
+  background:rgba(8,10,14,.62);border:.5px solid rgba(255,255,255,.1);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);font-family:var(--mono);
+  box-shadow:0 14px 44px -18px rgba(0,0,0,.75);pointer-events:none;}
+#ck-raceHud .rh-lab{display:block;font-size:7px;letter-spacing:.16em;color:#7a808c;
+  text-transform:uppercase;margin-bottom:3px;text-align:center;}
+#ck-raceHud .rh-gear b{font-size:34px;font-weight:700;color:#fff;line-height:1;display:block;text-align:center;}
+#ck-raceHud .rh-rpm{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;}
+#ck-raceHud .rh-shift{display:flex;gap:3px;}
+#ck-raceHud .rh-seg{width:8px;height:14px;border-radius:2px;background:rgba(255,255,255,.09);}
+#ck-raceHud .rh-seg.on.g{background:var(--safe);box-shadow:0 0 6px var(--safe);}
+#ck-raceHud .rh-seg.on.y{background:#f5d020;box-shadow:0 0 6px #f5d020;}
+#ck-raceHud .rh-seg.on.r{background:var(--crit);box-shadow:0 0 7px var(--crit);}
+#ck-raceHud .rh-seg.bl{animation:ck-blink .12s steps(1) infinite;}
+@keyframes ck-blink{0%{opacity:1}50%{opacity:.2}}
+#ck-raceHud .rh-rpmrow{display:flex;align-items:baseline;gap:4px;}
+#ck-raceHud .rh-rpmv{font-size:17px;color:#fff;font-weight:600;}
+#ck-raceHud .rh-unit{font-size:8px;color:#7a808c;}
+
+@media(max-width:1024px){
+  #ck-tele,#ck-mapPanel{width:185px;} #ck-miniMap{height:118px;} .ck-big{font-size:40px;}
+}
+@media(max-width:760px){
+  .ck-panel{padding:10px 11px;border-radius:14px;}
+  #ck-tele{top:calc(42px + env(safe-area-inset-top));left:8px;width:40vw;max-width:175px;}
+  #ck-mapPanel{top:calc(42px + env(safe-area-inset-top));right:8px;bottom:auto;width:40vw;max-width:175px;}
+  #ck-miniMap{height:88px;margin-top:7px;}
+  .ck-big{font-size:28px;}
+  #ck-navAmp{top:46px;gap:6px;transform:translateX(-50%) scale(.9);}
+  #ck-navMan{top:82px;padding:7px 12px;gap:8px;} #ck-navMan .nm-txt b{font-size:18px;}
+  #ck-ctl{top:calc(56px + env(safe-area-inset-top));right:8px;width:min(82vw,232px);border-radius:18px;}
+  #ck-raceHud{width:168px;bottom:calc(14px + env(safe-area-inset-bottom));}
+  #ck-raceHud .rh-gear b{font-size:26px;}
+  #ck-live{top:calc(12px + env(safe-area-inset-top));font-size:9px;letter-spacing:.1em;padding:4px 9px;}
+}
+@media(prefers-reduced-motion:reduce){
+  #ck-raceHud .rh-seg.bl{animation:none;} #cockpit[data-lvl="CRITICAL"] #ck-vig{animation:none;}
+}
+/* =================== /PRACTICE COCKPIT OVERLAY — STYLE ==================== */
+</style>
+</head>
+<body>
+
+<script>if(window.self!==window.top){document.documentElement.classList.add('embedded');}</script>
+
+<!-- VRAIE carte 3D MapLibre -->
+<div id="map"></div>
+<div id="vig"></div>
+<div id="map-err">CARTE PARTIELLEMENT INDISPONIBLE</div>
+
+<!-- ===================== PRACTICE COCKPIT OVERLAY ===================== -->
+<div id="cockpit" aria-hidden="false">
+
+  <div id="ck-warm"></div>
+  <div id="ck-vig"></div>
+
+  <div id="ck-live" class="demo">DÉMO</div>
+
+  <div id="ck-navAmp">
+    <div class="na-lim" title="Limite de vitesse"><b id="ck-lim">50</b></div>
+    <div class="na-eta"><b id="ck-eta">—</b><span id="ck-rem">restant</span></div>
+  </div>
+  <div id="ck-navMan">
+    <div class="nm-arrow" id="ck-nmArrow">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor"
+           stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 19V6M6 12l6-6 6 6"/>
+      </svg>
+    </div>
+    <div class="nm-txt"><b id="ck-nmDist">—</b><span id="ck-nmRoad">—</span></div>
+  </div>
+
+  <div class="ck-panel" id="ck-tele">
+    <div class="ck-ttl">
+      <span><b>01</b> Véhicule</span>
+      <span class="ck-chip"><span class="ck-dot" id="ck-stateDot"></span><span id="ck-stateTxt">SAFE</span></span>
+    </div>
+    <div class="ck-big"><span id="ck-spd">0</span><small>km/h</small></div>
+    <div class="ck-trow"><span class="ck-lbl">Cap</span><span class="ck-v" id="ck-hdg">N</span></div>
+    <div class="ck-trow"><span class="ck-lbl">Itinéraire</span><span class="ck-v" id="ck-route">—</span></div>
+  </div>
+
+  <button id="ck-burger" aria-label="Paramètres">
+    <span class="bi"><i></i><i></i><i></i></span>Paramètres
+  </button>
+  <div class="ck-panel" id="ck-ctl">
+    <button id="ck-bView" class="on">🛰 Vue 3D</button>
+    <button id="ck-bNorth">🧭 Nord libre</button>
+    <div class="ck-sep"></div>
+    <button id="ck-bMap" class="on">🗺 Mini-carte</button>
+    <button id="ck-bNight" class="on">🌙 Nuit</button>
+    <button id="ck-bSound" class="on">🔊 Son</button>
+    <div class="ck-sep"></div>
+    <button id="ck-bFull">⛶ Plein écran</button>
+  </div>
+
+  <div id="ck-raceHud" aria-hidden="true">
+    <div class="rh-gear"><span class="rh-lab">RAPPORT</span><b id="ck-gear">N</b></div>
+    <div class="rh-rpm">
+      <div class="rh-shift" id="ck-shift"></div>
+      <div class="rh-rpmrow"><span class="rh-rpmv" id="ck-rpm">0</span><span class="rh-unit">tr/min</span></div>
+    </div>
+  </div>
+
+  <div class="ck-panel" id="ck-mapPanel">
+    <div class="ck-ttl"><span><b>05</b> GPS live</span><span class="ck-lbl" id="ck-gpsAcc">DEMO</span></div>
+    <div id="ck-miniMap"><div id="ck-mapFallback">CARTE INDISPONIBLE</div></div>
+  </div>
+
+</div>
+<!-- =================== /PRACTICE COCKPIT OVERLAY ===================== -->
+
+<!-- ============================================================
+     MOTEUR CARTE REELLE — MapLibre GL JS + OpenFreeMap (liberty).
+     Vraies rues + vrais batiments OSM, camera de conduite.
+     ============================================================ -->
+<script>
+"use strict";
+(function(){
+
+/* ---------- Constantes ---------- */
+var STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+var DEMO_POS  = { lon:2.392, lat:48.787 };   // Vitry-sur-Seine
+var MAX_PITCH = 60;                            // limite sure iPad (>60 = experimental, rendu KO possible)
+var DRIVE_ZOOM = 17;
+var DRIVE_PITCH = 60;
+var LIVE_TIMEOUT = 5000;                       // ms sans 'gps' -> retour DEMO
+
+/* ---------- Etat global expose (lu par le cockpit) ---------- */
+var HUB3D = window.HUB3D = {
+  speedKmh:0, gear:0, gearLabel:'D', rpm:0, rpmNorm:0,
+  navDist:-1, navText:'', limit:50, heading:0, live:false,
+  eta:null, remaining:null
+};
+
+/* ---------- Etat LIVE (messages GPS de os.html) ---------- */
+var LIVE = {
+  active:false, lastGps:-1e9,
+  speedKmh:0, heading:0, lat:null, lon:null, acc:null,
+  navOn:false, navDist:0, navText:'', navArrow:'', navTurn:0,
+  eta:null, limit:null, routeCoords:null
+};
+
+function liveFresh(){ return LIVE.active && (performance.now()-LIVE.lastGps) < LIVE_TIMEOUT; }
+
+function parseDistMeters(distStr, unit){
+  var n = parseFloat(distStr);
+  if(!isFinite(n)) return 0;
+  return (unit === 'km') ? n*1000 : n;
+}
+function detectTurn(instr, arrow){
+  var s = ((instr||'')+' '+(arrow||'')).toLowerCase();
+  if(/droite|right|↱|→|➡|▶/.test(s)) return 1;
+  if(/gauche|left|↰|←|⬅|◀/.test(s)) return -1;
+  return 0;
+}
+
+/* ============================================================
+   PROTOCOLE GPS — identique a hud3d.html.
+   { type:'gps', speed:<m/s>, heading, lat, lon, acc }
+   { type:'nav', nav, dist, distUnit, instr, arrow, eta }
+   { type:'route', coords:[[lon,lat],...]|null }
+   { type:'mode' } ; { type:'northlock' } -> ignore
+   ============================================================ */
+window.addEventListener('message', function(e){
+  var d = e && e.data;
+  if(!d || typeof d!=='object' || !d.type) return;
+  try{
+    switch(d.type){
+      case 'gps': {
+        var ms = (typeof d.speed==='number' && isFinite(d.speed)) ? d.speed : 0;
+        LIVE.speedKmh = Math.max(0, ms*3.6);
+        if(typeof d.heading==='number' && isFinite(d.heading)) LIVE.heading = ((d.heading%360)+360)%360;
+        if(typeof d.lat==='number') LIVE.lat = d.lat;
+        if(typeof d.lon==='number') LIVE.lon = d.lon;
+        if(typeof d.acc==='number') LIVE.acc = d.acc;
+        var lim = (typeof d.limit==='number') ? d.limit
+                : (typeof d.maxspeed==='number') ? d.maxspeed : null;
+        if(lim!=null && isFinite(lim) && lim>0) LIVE.limit = lim;
+        LIVE.lastGps = performance.now();
+        LIVE.active = true;
+        if(LIVE.lat!=null && LIVE.lon!=null && window.cockpitSetMapPos)
+          window.cockpitSetMapPos(LIVE.lat, LIVE.lon);
+        break;
+      }
+      case 'nav': {
+        LIVE.navOn = !!d.nav;
+        if(LIVE.navOn){
+          LIVE.navDist = parseDistMeters(d.dist, d.distUnit);
+          LIVE.navText = (typeof d.instr==='string' && d.instr) ? d.instr : '';
+          LIVE.navArrow= (typeof d.arrow==='string') ? d.arrow : '';
+          LIVE.eta     = (typeof d.eta==='string' && d.eta) ? d.eta : null;
+          if(typeof d.limit==='number' && isFinite(d.limit) && d.limit>0) LIVE.limit = d.limit;
+          LIVE.navTurn = detectTurn(LIVE.navText, LIVE.navArrow);
+        } else {
+          LIVE.navDist=0; LIVE.navText=''; LIVE.navArrow=''; LIVE.eta=null; LIVE.navTurn=0;
+        }
+        break;
+      }
+      case 'route': {
+        LIVE.routeCoords = Array.isArray(d.coords) ? d.coords : null;
+        applyRoute(LIVE.routeCoords);
+        break;
+      }
+      case 'mode':      { if(typeof d.mode==='string') HUB3D.mode = d.mode; break; }
+      case 'northlock':
+      default: break;
+    }
+  }catch(err){ /* jamais lever d'erreur cote hub */ }
+}, false);
+
+/* ============================================================
+   CARTE MapLibre
+   ============================================================ */
+var map=null, mapReady=false;
+try{
+  map = new maplibregl.Map({
+    container:'map',
+    style:STYLE_URL,
+    center:[DEMO_POS.lon, DEMO_POS.lat],
+    zoom:DRIVE_ZOOM,
+    pitch:DRIVE_PITCH,
+    bearing:0,
+    maxPitch:MAX_PITCH,
+    attributionControl:{ compact:true },
+    antialias:true,
+    fadeDuration:120,
+    refreshExpiredTiles:false,
+    dragRotate:false, pitchWithRotate:false   // controle camera = nous, pas le doigt
+  });
+}catch(e){
+  showMapErr('CARTE INDISPONIBLE');
+}
+
+/* tuiles qui echouent -> message discret, pas d'erreur console bloquante */
+var errShown=false;
+function showMapErr(msg){
+  var el=document.getElementById('map-err');
+  if(el){ if(msg) el.textContent=msg; el.style.display='block'; }
+  errShown=true;
+}
+if(map){
+  map.on('error', function(ev){
+    // ne pas spammer la console ; signaler une seule fois
+    if(!errShown) showMapErr('CARTE PARTIELLEMENT INDISPONIBLE');
+  });
+}
+
+/* ---------- Theme sombre premium applique au chargement ---------- */
+function darkenBasemap(){
+  if(!map) return;
+  var layers = map.getStyle().layers || [];
+  for(var i=0;i<layers.length;i++){
+    var L = layers[i], id=L.id, type=L.type;
+    try{
+      if(type==='background'){
+        map.setPaintProperty(id,'background-color','#0a0d14');
+      } else if(type==='fill'){
+        // eau / parcs / terrains : teintes sombres
+        if(/water|ocean|sea|river/i.test(id)) map.setPaintProperty(id,'fill-color','#0c1828');
+        else if(/(park|wood|forest|grass|green|landuse|landcover)/i.test(id)) map.setPaintProperty(id,'fill-color','#10160f');
+        else map.setPaintProperty(id,'fill-color','#11151c');
+      } else if(type==='line'){
+        // routes : gris sombres, hierarchie conservee via largeur d'origine
+        if(/motorway|trunk|primary/i.test(id)) map.setPaintProperty(id,'line-color','#3a4150');
+        else if(/secondary|tertiary/i.test(id)) map.setPaintProperty(id,'line-color','#2c323d');
+        else if(/(rail|transit)/i.test(id)) map.setPaintProperty(id,'line-color','#23272f');
+        else map.setPaintProperty(id,'line-color','#222731');
+      } else if(type==='symbol'){
+        // libelles : clairs et discrets, halo sombre
+        if(map.getLayoutProperty(id,'text-field')!==undefined){
+          try{ map.setPaintProperty(id,'text-color','#aab2c0'); }catch(_){}
+          try{ map.setPaintProperty(id,'text-halo-color','#05070f'); }catch(_){}
+          try{ map.setPaintProperty(id,'text-halo-width',1.2); }catch(_){}
+        }
+      }
+    }catch(_){}
+  }
+}
+
+/* ---------- Batiments 3D (source-layer OpenMapTiles "building") ----------
+   Le style OpenFreeMap "liberty" embarque DEJA une couche fill-extrusion
+   ("building" / "building-3d"). En ajouter une seconde provoque du z-fighting
+   et laisse les batiments d'origine en couleurs "jour". On RESTYLE donc la
+   couche existante ; on n'en cree une que si aucune n'est presente. */
+var PB_COLOR = [
+  'interpolate',['linear'],['get','render_height'],
+  0,'#1b2230', 30,'#222b3c', 80,'#2b3850', 180,'#36486a'
+];
+function styleExtrusion(id){
+  try{
+    map.setPaintProperty(id,'fill-extrusion-color',PB_COLOR);
+    map.setPaintProperty(id,'fill-extrusion-opacity',0.9);
+    map.setPaintProperty(id,'fill-extrusion-vertical-gradient',true);
+  }catch(_){}
+}
+function addBuildings3D(){
+  if(!map) return;
+  var style = map.getStyle();
+  var layers = style.layers||[];
+
+  // 1) restyler toute couche fill-extrusion deja fournie par le style
+  var found=false;
+  for(var i=0;i<layers.length;i++){
+    if(layers[i].type==='fill-extrusion'){ styleExtrusion(layers[i].id); found=true; }
+  }
+  if(found) return;                      // batiments 3D natifs : on s'arrete la
+
+  // 2) aucune couche 3D fournie -> on tente d'en creer une nous-memes
+  if(map.getLayer('practice-buildings-3d')) return;
+  var srcId = null, sources = style.sources || {};
+  for(var s in sources){ if(sources[s] && sources[s].type==='vector'){ srcId = srcId || s; } }
+  if(!srcId) return;
+  // poser la couche juste avant le premier symbol (sous les libelles)
+  var beforeId;
+  for(var j=0;j<layers.length;j++){ if(layers[j].type==='symbol'){ beforeId=layers[j].id; break; } }
+  try{
+    map.addLayer({
+      id:'practice-buildings-3d',
+      type:'fill-extrusion',
+      source:srcId,
+      'source-layer':'building',
+      minzoom:14,
+      filter:['!=',['get','hide_3d'], true],
+      paint:{
+        'fill-extrusion-color':PB_COLOR,
+        'fill-extrusion-height':[
+          'interpolate',['linear'],['zoom'],
+          14,0, 15.5,['get','render_height']
+        ],
+        'fill-extrusion-base':['get','render_min_height'],
+        'fill-extrusion-opacity':0.9,
+        'fill-extrusion-vertical-gradient':true
+      }
+    }, beforeId);
+  }catch(e){ /* schema different : on ignore proprement, la carte 2D reste */ }
+}
+
+/* ---------- Ciel / atmosphere discrets (si dispo) ---------- */
+function addSky(){
+  if(!map) return;
+  try{
+    if(typeof map.setSky==='function'){
+      map.setSky({
+        'sky-color':'#0a1424',
+        'sky-horizon-blend':0.6,
+        'horizon-color':'#16202f',
+        'horizon-fog-blend':0.6,
+        'fog-color':'#0a0d14',
+        'fog-ground-blend':0.55,
+        'atmosphere-blend':['interpolate',['linear'],['zoom'],0,0.8,12,0.2,17,0.05]
+      });
+    }
+  }catch(_){}
+  try{
+    if(typeof map.setFog==='function' && !map.getFog()){
+      map.setFog({ color:'#0a0d14', 'high-color':'#16202f', 'horizon-blend':0.2 });
+    }
+  }catch(_){}
+}
+
+/* ---------- Marqueur position (puck) ---------- */
+var puckEl=null, puck=null;
+function addPuck(lon,lat){
+  if(!map) return;
+  if(!puckEl){
+    puckEl = document.createElement('div');
+    puckEl.style.cssText='width:22px;height:22px;border-radius:50%;'
+      +'background:radial-gradient(circle at 50% 40%,#9fc2ff,#2f7bff 70%);'
+      +'box-shadow:0 0 0 6px rgba(47,123,255,.25),0 0 16px rgba(47,123,255,.9);'
+      +'border:2px solid #eaf2ff;';
+    puck = new maplibregl.Marker({element:puckEl, pitchAlignment:'map'})
+      .setLngLat([lon,lat]).addTo(map);
+  } else {
+    puck.setLngLat([lon,lat]);
+  }
+}
+
+/* ---------- Itineraire (LineString bleue style FSD) ---------- */
+function applyRoute(coords){
+  if(!map || !mapReady) return;
+  var data = (coords && coords.length>1)
+    ? { type:'Feature', geometry:{ type:'LineString', coordinates:coords } }
+    : { type:'FeatureCollection', features:[] };
+  var src = map.getSource('practice-route');
+  if(src){ src.setData(data); return; }
+  try{
+    map.addSource('practice-route', { type:'geojson', data:data });
+    // halo
+    map.addLayer({ id:'practice-route-glow', type:'line', source:'practice-route',
+      layout:{ 'line-cap':'round','line-join':'round' },
+      paint:{ 'line-color':'#2f7bff','line-width':16,'line-opacity':0.28,'line-blur':6 } });
+    // coeur
+    map.addLayer({ id:'practice-route-core', type:'line', source:'practice-route',
+      layout:{ 'line-cap':'round','line-join':'round' },
+      paint:{ 'line-color':'#5aa0ff','line-width':7,'line-opacity':0.95 } });
+  }catch(_){}
+}
+
+/* ============================================================
+   CAMERA DE CONDUITE — suivi lisse.
+   IMPORTANT : on NE re-arme PAS un easeTo de 900ms a chaque frame
+   (bug connu). On interpole nous-memes l'etat camera (lon/lat/
+   bearing) chaque frame et on applique via map.jumpTo (instantane,
+   donc pas de file d'animations qui se chevauchent).
+   ============================================================ */
+var cam = { lon:DEMO_POS.lon, lat:DEMO_POS.lat, bearing:0 };
+var camInit=false, wasLive=false;
+
+function lerp(a,b,t){ return a + (b-a)*t; }
+function lerpAngle(a,b,t){
+  var diff = ((b-a+540)%360)-180;   // plus court chemin
+  return (a + diff*t + 360)%360;
+}
+
+// position cible de conduite : LIVE -> GPS reel ; DEMO -> deplacement anime.
+var demoT=0;
+function driveTarget(dt){
+  if(liveFresh() && LIVE.lat!=null && LIVE.lon!=null){
+    return { lon:LIVE.lon, lat:LIVE.lat, bearing:LIVE.heading };
+  }
+  // DEMO : petite boucle douce autour de Vitry, cap qui tourne -> beau a l'arret.
+  demoT += dt;
+  var R = 0.0016;                      // ~ rayon en degres
+  var ang = demoT*0.10;                // vitesse de parcours
+  var lon = DEMO_POS.lon + Math.cos(ang)*R*1.4;
+  var lat = DEMO_POS.lat + Math.sin(ang)*R;
+  // cap = tangente au cercle (deg, 0=N, sens horaire)
+  var dx = -Math.sin(ang)*1.4, dy = Math.cos(ang);
+  var bearing = (Math.atan2(dx, dy)*180/Math.PI + 360)%360;
+  return { lon:lon, lat:lat, bearing:bearing };
+}
+
+var lastTs = performance.now();
+var frameStarted=false;
+function startFrame(){ if(frameStarted) return; frameStarted=true; lastTs=performance.now(); requestAnimationFrame(frame); }
+function frame(ts){
+  var dt = Math.min(0.05, (ts-lastTs)/1000); lastTs = ts;
+
+  if(map && mapReady){
+    var tgt = driveTarget(dt);
+    if(!camInit){ cam.lon=tgt.lon; cam.lat=tgt.lat; cam.bearing=tgt.bearing; camInit=true; }
+    var nowLive = liveFresh() && LIVE.lat!=null && LIVE.lon!=null;
+    if(nowLive && !wasLive){ cam.lon=tgt.lon; cam.lat=tgt.lat; cam.bearing=tgt.bearing; } // snap a l'arrivee du GPS (evite un long panoramique multi-km)
+    wasLive = nowLive;
+    // lissage exponentiel (independant du framerate)
+    var kPos = 1 - Math.exp(-6.0*dt);
+    var kRot = 1 - Math.exp(-4.5*dt);
+    cam.lon     = lerp(cam.lon, tgt.lon, kPos);
+    cam.lat     = lerp(cam.lat, tgt.lat, kPos);
+    cam.bearing = opt.north ? lerpAngle(cam.bearing, 0, kRot)
+                            : lerpAngle(cam.bearing, tgt.bearing, kRot);
+
+    map.jumpTo({
+      center:[cam.lon, cam.lat],
+      bearing:cam.bearing,
+      pitch: opt.view ? DRIVE_PITCH : 0,
+      zoom: DRIVE_ZOOM
+    });
+    addPuck(cam.lon, cam.lat);
+  }
+
+  updateState(dt);
+  if(window.updateCockpit) window.updateCockpit();
+  requestAnimationFrame(frame);
+}
+
+/* ============================================================
+   ETAT VEHICULE pour le cockpit (vitesse / rapport / rpm / nav).
+   ============================================================ */
+var egoKmh = 0;
+var RPM_IDLE=850, RPM_SPAN=6100;
+function updateState(dt){
+  var live = liveFresh();
+  HUB3D.live = live;
+
+  var targetKmh = live ? LIVE.speedKmh : (26 + Math.sin(demoT*0.5)*8);
+  egoKmh += (targetKmh - egoKmh) * (1 - Math.exp(-(live?3.0:1.5)*dt));
+  HUB3D.speedKmh = Math.round(egoKmh);
+
+  var kmh = egoKmh, g, label;
+  if(kmh<30){ g=2; label='2'; }
+  else if(kmh<60){ g=3; label='3'; }
+  else if(kmh<90){ g=4; label='4'; }
+  else { g=5; label='D'; }
+  HUB3D.gear=g; HUB3D.gearLabel=label;
+
+  var norm = Math.min(1, kmh/120)*0.65 + 0.15;
+  HUB3D.rpmNorm = norm;
+  HUB3D.rpm = Math.round(RPM_IDLE + norm*RPM_SPAN);
+
+  HUB3D.heading = live ? LIVE.heading : cam.bearing;
+
+  if(live){
+    HUB3D.limit = (LIVE.limit!=null) ? LIVE.limit : null;
+    HUB3D.eta = LIVE.eta;
+    if(LIVE.navOn){
+      HUB3D.navDist = Math.max(0, LIVE.navDist);
+      HUB3D.navText = LIVE.navText || 'Continuez tout droit';
+      HUB3D.remaining = HUB3D.navDist>=1000
+        ? (HUB3D.navDist/1000).toFixed(1)+' km'
+        : Math.round(HUB3D.navDist)+' m';
+    } else {
+      HUB3D.navDist=-1; HUB3D.navText=''; HUB3D.remaining=null;
+    }
+  } else {
+    HUB3D.limit = 50;
+    HUB3D.eta = null; HUB3D.remaining = null;
+    HUB3D.navDist = -1; HUB3D.navText = '';
+  }
+}
+
+/* ---------- options pilotees par le burger Parametres ---------- */
+var opt = { map:true, night:true, sound:true, north:false, view:true };
+window.__hubOpt = opt;
+
+/* ---------- demarrage carte ---------- */
+if(map){
+  map.on('load', function(){
+    mapReady = true;
+    try{ darkenBasemap(); }catch(_){}
+    try{ addBuildings3D(); }catch(_){}
+    try{ addSky(); }catch(_){}
+    addPuck(DEMO_POS.lon, DEMO_POS.lat);
+    if(LIVE.routeCoords) applyRoute(LIVE.routeCoords);
+    startFrame();
+  });
+  // si 'load' tarde (premier chargement de tuiles vectorielles lent, ou saut GPS lointain),
+  // on lance la boucle SANS alarmer ; les vraies erreurs de tuiles sont signalees par map.on('error').
+  // On NE force PAS mapReady : quand 'load' finit par arriver, il applique le theme + active le suivi camera.
+  setTimeout(function(){ if(!mapReady) startFrame(); }, 14000);
+} else {
+  // pas de carte du tout : la boucle alimente quand meme le cockpit
+  startFrame();
+}
+
+/* exposer pour le toggle vue/nord du cockpit */
+window.__hubMap = map;
+})();
+</script>
+
+<script>
+"use strict";
+/* ===================== PRACTICE COCKPIT OVERLAY — LOGIC ===================== */
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  window.HUB3D = window.HUB3D || {};
+  var d = { speedKmh:0, gear:0, rpm:0, navDist:-1, navText:'',
+    limit:50, heading:null, eta:null, remaining:null, live:false };
+  for(var k in d){ if(!(k in window.HUB3D)) window.HUB3D[k] = d[k]; }
+
+  var DEMO_POS = [48.787, 2.392];   // Vitry-sur-Seine [lat,lon]
+  var RPM_MAX  = 8000, RPM_REDLINE = 6800, SHIFT_SEGS = 10;
+  var COMPASS  = ['N','NE','E','SE','S','SO','O','NO'];
+
+  var opt = window.__hubOpt || { map:true, night:true, sound:true, north:false, view:true };
+
+  /* ============ MINI-MAP (MapLibre statique, raster sombre) ============ */
+  var mini=null, miniMarker=null;
+  function initMap(){
+    if(mini || !$('ck-miniMap')) return;
+    if(typeof maplibregl === 'undefined'){ showMapFallback(); return; }
+    try{
+      mini = new maplibregl.Map({
+        container:'ck-miniMap',
+        style:{
+          version:8,
+          sources:{ 'carto-dark':{
+            type:'raster',
+            tiles:['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                   'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
+            tileSize:256,
+            attribution:'© OpenStreetMap, © CARTO'
+          }},
+          layers:[{ id:'carto-dark', type:'raster', source:'carto-dark' }]
+        },
+        center:[DEMO_POS[1], DEMO_POS[0]],
+        zoom:14, attributionControl:false, interactive:false
+      });
+      var el=document.createElement('div'); el.className='ck-me-dot';
+      miniMarker = new maplibregl.Marker({element:el}).setLngLat([DEMO_POS[1],DEMO_POS[0]]).addTo(mini);
+      var fb=$('ck-mapFallback'); if(fb) fb.style.display='none';
+      mini.on('error', function(){ showMapFallback(); });
+    }catch(e){ showMapFallback(); }
+  }
+  function showMapFallback(){ var fb=$('ck-mapFallback'); if(fb) fb.style.display='grid'; }
+  window.cockpitSetMapPos = function(lat,lon){
+    if(!mini||!miniMarker) return;
+    miniMarker.setLngLat([lon,lat]); mini.setCenter([lon,lat]);
+  };
+
+  /* ============ SHIFT-LIGHT SEGMENTS ============ */
+  (function buildShift(){
+    var c=$('ck-shift'); if(!c) return;
+    for(var i=0;i<SHIFT_SEGS;i++){ var s=document.createElement('span'); s.className='rh-seg'; c.appendChild(s); }
+  })();
+  function paintShift(rpm){
+    var c=$('ck-shift'); if(!c) return;
+    var frac=Math.max(0,Math.min(1,rpm/RPM_MAX)), lit=Math.round(frac*SHIFT_SEGS);
+    var redline = rpm>=RPM_REDLINE, segs=c.children;
+    for(var i=0;i<segs.length;i++){
+      var on=i<lit, cls='rh-seg';
+      if(on){ var col=i<5?'g':i<8?'y':'r'; cls+=' on '+col; if(redline) cls+=' bl'; }
+      if(segs[i].className!==cls) segs[i].className=cls;
+    }
+  }
+
+  /* ============ updateCockpit() — every frame ============ */
+  var _last={};
+  function setTxt(id,val){ if(_last[id]===val) return; var el=$(id); if(el){ el.textContent=val; _last[id]=val; } }
+
+  function updateCockpit(){
+    var s = window.HUB3D || {};
+    setTxt('ck-spd', Math.round(s.speedKmh||0));
+
+    var g = s.gear|0;
+    setTxt('ck-gear', g===0 ? 'N' : String(g));
+    var rpm = Math.max(0, s.rpm||0);
+    setTxt('ck-rpm', String(Math.round(rpm)));
+    paintShift(rpm);
+
+    if(typeof s.heading==='number'){
+      var idx=Math.round(((s.heading%360)+360)%360 / 45) % 8;
+      setTxt('ck-hdg', COMPASS[idx]);
+    }
+    if(s.remaining!=null || s.eta!=null){
+      setTxt('ck-route', [s.remaining, s.eta].filter(Boolean).join(' · ') || '—');
+    } else setTxt('ck-route','—');
+
+    if(s.limit!=null) setTxt('ck-lim', String(s.limit));
+    setTxt('ck-eta', s.eta!=null ? s.eta : '—');
+    setTxt('ck-rem', s.remaining!=null ? s.remaining : 'restant');
+
+    var nm=$('ck-navMan');
+    if(typeof s.navDist==='number' && s.navDist>=0){
+      var dd = s.navDist>=1000 ? (s.navDist/1000).toFixed(1)+' km' : Math.round(s.navDist)+' m';
+      setTxt('ck-nmDist', dd); setTxt('ck-nmRoad', s.navText || '—');
+      if(nm) nm.classList.add('show');
+    } else if(nm){ nm.classList.remove('show'); }
+
+    var lvl='SAFE';
+    if(s.limit && s.speedKmh){
+      if(s.speedKmh > s.limit*1.20) lvl='CRITICAL';
+      else if(s.speedKmh > s.limit)  lvl='ALERT';
+    }
+    var ck=$('cockpit');
+    if(ck && ck.getAttribute('data-lvl')!==lvl) ck.setAttribute('data-lvl',lvl);
+    setTxt('ck-stateTxt', lvl);
+    var dot=$('ck-stateDot');
+    if(dot){ var cc = lvl==='CRITICAL'?'var(--crit)':lvl==='ALERT'?'var(--alert)':'var(--safe)';
+      if(dot.style.color!==cc){ dot.style.color=cc; dot.style.background=cc; } }
+
+    setTxt('ck-gpsAcc', s.live ? 'LIVE' : 'DEMO');
+
+    var lb=$('ck-live');
+    if(lb){ var want=s.live?'live':'demo';
+      if(!lb.classList.contains(want)){ lb.className=want; lb.textContent=s.live?'LIVE':'DÉMO'; } }
+  }
+  window.updateCockpit = updateCockpit;
+
+  /* ============ BURGER "Paramètres" drawer ============ */
+  $('ck-burger').addEventListener('click', function(e){
+    e.stopPropagation();
+    var c=$('ck-ctl'); c.classList.toggle('open');
+    this.classList.toggle('on', c.classList.contains('open'));
+  });
+  document.addEventListener('click', function(e){
+    var c=$('ck-ctl'), b=$('ck-burger');
+    if(c.classList.contains('open') && !c.contains(e.target) && e.target!==b && !b.contains(e.target)){
+      c.classList.remove('open'); b.classList.remove('on');
+    }
+  });
+
+  function toggleBtn(btn, key, onLabel, offLabel){
+    opt[key]=!opt[key];
+    btn.classList.toggle('on', opt[key]);
+    if(onLabel) btn.textContent = opt[key]?onLabel:offLabel;
+  }
+  $('ck-bMap').addEventListener('click', function(){
+    toggleBtn(this,'map');
+    $('cockpit').setAttribute('data-map', opt.map?'on':'off');
+    if(opt.map){ initMap(); setTimeout(function(){ try{mini&&mini.resize();}catch(e){} },120); }
+  });
+  $('ck-bNight').addEventListener('click', function(){
+    toggleBtn(this,'night'); window.dispatchEvent(new CustomEvent('cockpit:night',{detail:opt.night}));
+  });
+  $('ck-bSound').addEventListener('click', function(){
+    toggleBtn(this,'sound','🔊 Son','🔇 Muet');
+    window.dispatchEvent(new CustomEvent('cockpit:sound',{detail:opt.sound}));
+  });
+  $('ck-bNorth').addEventListener('click', function(){
+    toggleBtn(this,'north','🧭 Nord verrouillé','🧭 Nord libre');
+    window.dispatchEvent(new CustomEvent('cockpit:north',{detail:opt.north}));
+  });
+  $('ck-bView').addEventListener('click', function(){
+    opt.view=!opt.view; this.classList.toggle('on', opt.view);
+    window.dispatchEvent(new CustomEvent('cockpit:view',{detail:opt.view}));
+  });
+  $('ck-bFull').addEventListener('click', function(){
+    var el=document.documentElement, btn=this;
+    try{
+      var req = el.requestFullscreen || el.webkitRequestFullscreen;
+      var exit = document.exitFullscreen || document.webkitExitFullscreen;
+      var isFull = document.fullscreenElement || document.webkitFullscreenElement;
+      if(!isFull){ if(req){ req.call(el); btn.classList.add('on'); } }
+      else { if(exit){ exit.call(document); } btn.classList.remove('on'); }
+    }catch(e){}
+  });
+
+  /* ============ INIT ============ */
+  function boot(){
+    $('cockpit').setAttribute('data-lvl','SAFE');
+    $('cockpit').setAttribute('data-map','on');
+    initMap();
+    updateCockpit();
+    setInterval(updateCockpit, 200);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+/* =================== /PRACTICE COCKPIT OVERLAY — LOGIC ==================== */
+</script>
+
+</body>
+</html>
