@@ -339,8 +339,8 @@ var DEMO_POS  = { lon:2.392, lat:48.787 };   // Vitry-sur-Seine
    car MapLibre ne place pas la camera librement (cf. LIMITE API ci-dessus). */
 var BEHIND_M       = 10;     // camera ~10 m DERRIERE le vehicule (le long de -cap)
 var UP_M           = 6;      // camera ~6 m AU-DESSUS du sol
-var AHEAD_SLOW     = 12;     // a l'arret/lent : vise ~12 m -> voiture au 1er plan, proche
-var AHEAD_FAST     = 24;     // a vitesse : vise ~24 m devant (route = sujet principal)
+var AHEAD_SLOW     = 6;      // a l'arret/lent : vise pres -> voiture VISIBLE au 1er plan (pas hors-champ)
+var AHEAD_FAST     = 16;     // a vitesse : vise plus loin (route devant)
 
 /* --- PITCH / FOV cibles (inclinaison ~60, jamais vertical ni horizontal) --- */
 var PITCH          = 60;     // inclinaison camera cible (~atan(AHEAD/UP) ramene en 55-65)
@@ -362,7 +362,7 @@ var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
 /* --- CADRAGE : vehicule bas (~18% depuis le bas) ---
    Le decalage AHEAD_M du center fait deja descendre la voiture ; ce padding.top
    complementaire remonte le pivot pour caler la voiture vers ~18% du bas. */
-var CAM_PAD_FACTOR = 0.26;   // padding.top : voiture dans le quart inferieur (~15% du bas), grande et presente
+var CAM_PAD_FACTOR = 0.12;   // padding.top : remonte la voiture pour qu'elle reste DANS l'ecran (quart inferieur)
 
 /* --- AMORTI (frame-rate-independant : k = 1 - exp(-RATE*dt)) ---
    Plus le RATE est BAS, plus il y a de lag/inertie (ressenti premium).
