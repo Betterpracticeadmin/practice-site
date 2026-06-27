@@ -48,7 +48,10 @@
 #cockpit #ck-ctl,
 #cockpit #ck-miniMap{ pointer-events:auto; }
 
-#cockpit, #cockpit *{ box-sizing:border-box; margin:0; padding:0; }
+#cockpit, #cockpit *{ box-sizing:border-box; margin:0; }
+/* NOTE : on ne remet PAS 'padding:0' ici -> sinon ca ecrase (specificite #cockpit *)
+   le padding de .ck-panel et le texte colle aux bords (infos qui "depassent" du cadre).
+   Les boutons gardent leur propre padding (regles #id dediees). */
 
 #ck-warm{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.35;background:
   radial-gradient(130% 90% at 50% 22%, rgba(255,80,0,.16), transparent 58%),
@@ -328,8 +331,8 @@ var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
 /* --- PITCH DYNAMIQUE selon la vitesse ---
    Lent -> moins incline (~45, vue plongeante douce).
    Rapide -> plus incline (~60, on rase la route, sensation de vitesse). */
-var PITCH_SLOW     = 52;     // inclinaison a faible vitesse (plus rasante = plus immersif)
-var PITCH_FAST     = 66;     // inclinaison a vitesse elevee
+var PITCH_SLOW     = 58;     // inclinaison a faible vitesse (proche de la ref hud3d.html ~68)
+var PITCH_FAST     = 68;     // inclinaison a vitesse elevee (= angle camera hud3d.html)
 var MAX_PITCH      = 74;     // maxPitch a l'init (marge au-dessus de PITCH_FAST)
 
 /* --- CADRAGE : vehicule dans le tiers inferieur --- */
