@@ -264,7 +264,7 @@ html.embedded #ck-navMan{top:146px;}
     <!-- "Nord en haut" supprime : la camera suit TOUJOURS le cap (vue FSD immersive). -->
     <div class="ck-sep"></div>
     <button id="ck-bMap" class="on">🗺 Mini-carte</button>
-    <button id="ck-bNight">🌙 Nuit</button>
+    <button id="ck-bNight" class="on">🌙 Nuit</button>
     <button id="ck-bSound" class="on">🔊 Son</button>
     <div class="ck-sep"></div>
     <button id="ck-bFull">⛶ Plein écran</button>
@@ -1031,7 +1031,7 @@ function updateState(dt){
 }
 
 /* ---------- options pilotees par le burger Parametres ---------- */
-var opt = { map:true, night:false, sound:true, north:false, view:true };
+var opt = { map:true, night:true, sound:true, north:false, view:true };
 window.__hubOpt = opt;
 
 /* ---------- demarrage carte ---------- */
@@ -1077,7 +1077,7 @@ window.__hubMap = map;
   var RPM_MAX  = 8000, RPM_REDLINE = 6800, SHIFT_SEGS = 10;
   var COMPASS  = ['N','NE','E','SE','S','SO','O','NO'];
 
-  var opt = window.__hubOpt || { map:true, night:false, sound:true, north:false, view:true };
+  var opt = window.__hubOpt || { map:true, night:true, sound:true, north:false, view:true };
 
   /* ============ MINI-MAP (MapLibre statique, raster sombre) ============ */
   var mini=null, miniMarker=null;
