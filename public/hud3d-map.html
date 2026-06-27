@@ -339,7 +339,8 @@ var DEMO_POS  = { lon:2.392, lat:48.787 };   // Vitry-sur-Seine
    car MapLibre ne place pas la camera librement (cf. LIMITE API ci-dessus). */
 var BEHIND_M       = 10;     // camera ~10 m DERRIERE le vehicule (le long de -cap)
 var UP_M           = 6;      // camera ~6 m AU-DESSUS du sol
-var AHEAD_M        = 28;     // point vise ~28 m DEVANT la voiture (center projete en avant)
+var AHEAD_SLOW     = 10;     // a l'arret/lent : on vise PRES -> camera PROCHE par defaut, voiture bien presente
+var AHEAD_FAST     = 30;     // a vitesse elevee : on vise loin devant -> on voit la route qui arrive
 
 /* --- PITCH / FOV cibles (inclinaison ~60, jamais vertical ni horizontal) --- */
 var PITCH          = 60;     // inclinaison camera cible (~atan(AHEAD/UP) ramene en 55-65)
@@ -351,7 +352,7 @@ var FOV            = 60;     // FOV vertical cible (reglable en MapLibre 5.x via
 /* --- ZOOM DYNAMIQUE selon la vitesse ---
    Recule par rapport a l'ancien reglage : la voiture doit etre PETITE (~6-8% de
    l'ecran). Lent -> un peu plus proche, Rapide -> plus recule (voit + de route). */
-var ZOOM_SLOW      = 18.6;   // vitesse faible  : voiture petite, route devant bien visible
+var ZOOM_SLOW      = 19.8;   // vitesse faible  : CAMERA PROCHE (defaut), voiture bien presente
 var ZOOM_MID       = 18.2;   // vitesse moyenne : intermediaire (autour de SPD_MID)
 var ZOOM_FAST      = 17.6;   // vitesse elevee  : recule, voit la route loin
 var SPD_SLOW       = 15;     // km/h : en dessous = ZOOM_SLOW / PITCH_SLOW
@@ -852,6 +853,11 @@ function zoomForSpeed(kmh){
   if(kmh<=SPD_FAST) return lerp(ZOOM_MID,  ZOOM_FAST, (kmh-SPD_MID)/(SPD_FAST-SPD_MID));
   return ZOOM_FAST;
 }
+function aheadForSpeed(kmh){   // distance du point vise devant : proche a l'arret, loin a vitesse
+  if(kmh<=SPD_SLOW) return AHEAD_SLOW;
+  if(kmh>=SPD_FAST) return AHEAD_FAST;
+  return lerp(AHEAD_SLOW, AHEAD_FAST, (kmh-SPD_SLOW)/(SPD_FAST-SPD_SLOW));
+}
 function pitchForSpeed(kmh){
   if(kmh<=SPD_SLOW) return PITCH_SLOW;
   if(kmh>=SPD_FAST) return PITCH_FAST;
@@ -896,7 +902,7 @@ function recenter(){
       // On le ramene sur le vehicule (recul de AHEAD_M) pour que cam.* reste
       // l'etat "vehicule" et eviter une derive vers l'avant a chaque recentrage.
       var c = map.getCenter();
-      var back = offsetForward(c.lat, c.lng, cam.bearing, -AHEAD_M);
+      var back = offsetForward(c.lat, c.lng, cam.bearing, -aheadForSpeed(HUB3D.speedKmh||0));
       cam.lon=back.lon; cam.lat=back.lat;
     }catch(_){}
   }
@@ -964,7 +970,7 @@ function frame(ts){
       // le vehicule (le long du cap lisse). C'est ce qui fait descendre la voiture
       // dans l'ecran (~18% du bas) et donne la sensation "camera derriere/au-dessus
       // regardant l'horizon routier". La voiture 3D, elle, reste sur cam.lon/cam.lat.
-      offsetForwardInto(cam.lat, cam.lon, cam.bearing, AHEAD_M, _ahead);
+      offsetForwardInto(cam.lat, cam.lon, cam.bearing, aheadForSpeed(spd), _ahead);
       _jumpOpts.center[0]=_ahead.lon; _jumpOpts.center[1]=_ahead.lat;
       _jumpOpts.bearing=cam.bearing; _jumpOpts.zoom=cam.zoom; _jumpOpts.pitch=cam.pitch;
       _jumpOpts.padding.top=camPadTop;   // remonte le pivot -> voiture encore plus basse
