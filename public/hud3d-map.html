@@ -411,7 +411,17 @@ function distMeters(la1,lo1,la2,lo2){
    Si le cap n'est PAS fourni (boussole absente), on le DEDUIT du deplacement ->
    la carte s'oriente toujours dans la direction de marche (route devant = haut). */
 function feedPosition(lat,lon,heading,spd){
+  var now=performance.now();
   if(typeof lat==='number' && typeof lon==='number' && isFinite(lat) && isFinite(lon)){
+    // GARDE ANTI-TELEPORTATION : rejette une position trop eloignee arrivee trop vite
+    // (point GPS errone, ou source qui renvoie une vieille position = "position d'hier").
+    // Acceptee seulement si confirmee 2x de suite (vrai grand deplacement / reouverture loin).
+    if(LIVE.lat!=null){
+      var jump=distMeters(LIVE.lat,LIVE.lon,lat,lon), dtSec=Math.max(0.001,(now-LIVE.lastGps)/1000);
+      var implKmh=(jump/1000)/(dtSec/3600);   // vitesse impliquee par le saut
+      if(jump>300 && implKmh>400 && (LIVE._far||0)<2){ LIVE._far=(LIVE._far||0)+1; LIVE.lastGps=now; LIVE.active=true; return; }  // saut impossible -> rejete (sauf confirme 2x)
+      LIVE._far=0;
+    }
     if(typeof heading==='number' && !isNaN(heading) && heading>=0){
       LIVE.heading=((heading%360)+360)%360;
     } else if(LIVE.prevLat!=null && distMeters(LIVE.prevLat,LIVE.prevLon,lat,lon)>=3){
@@ -421,7 +431,7 @@ function feedPosition(lat,lon,heading,spd){
     LIVE.lat=lat; LIVE.lon=lon;
   }
   if(typeof spd==='number' && !isNaN(spd)) LIVE.speedKmh=Math.max(0,spd*3.6);
-  LIVE.lastGps=performance.now(); LIVE.active=true;
+  LIVE.lastGps=now; LIVE.active=true;
   if(LIVE.lat!=null && LIVE.lon!=null && window.cockpitSetMapPos) window.cockpitSetMapPos(LIVE.lat,LIVE.lon);
 }
 
@@ -820,11 +830,13 @@ window.__hubRecenter = recenter;
 // position cible de conduite : LIVE -> GPS reel ; DEMO -> deplacement anime.
 var demoT=0;
 function driveTarget(dt){
-  if(liveFresh() && LIVE.lat!=null && LIVE.lon!=null){
+  // FIX teleportation : une fois qu'on a recu une VRAIE position GPS, on la GARDE
+  // (meme si le GPS a un trou > LIVE_TIMEOUT). On NE revient JAMAIS a la position demo
+  // Vitry -> sinon la camera teleporte entre ta position reelle et Vitry a chaque coupure.
+  if(LIVE.lat!=null && LIVE.lon!=null){
     return { lon:LIVE.lon, lat:LIVE.lat, bearing:LIVE.heading };
   }
-  // DEMO (pas encore de GPS) : position fixe + cap constant -> AUCUNE rotation aleatoire.
-  // Des qu'une vraie position GPS arrive, on suit la position et le cap reels.
+  // DEMO : uniquement TANT QU'ON N'A JAMAIS recu de position GPS.
   demoT += dt;                         // (sert juste a la legere oscillation de vitesse demo)
   return { lon:DEMO_POS.lon, lat:DEMO_POS.lat, bearing:0 };
 }
@@ -841,9 +853,10 @@ function frame(ts){
       cam.lon=tgt.lon; cam.lat=tgt.lat; cam.bearing=tgt.bearing;
       cam.zoom=ZOOM_SLOW; cam.pitch=PITCH_SLOW; camInit=true;
     }
-    var nowLive = liveFresh() && LIVE.lat!=null && LIVE.lon!=null;
-    if(nowLive && !wasLive){ cam.lon=tgt.lon; cam.lat=tgt.lat; cam.bearing=tgt.bearing; } // snap a l'arrivee du GPS (evite un long panoramique multi-km)
-    wasLive = nowLive;
+    // snap UNE SEULE FOIS, a la toute premiere vraie position GPS (evite un long
+    // panoramique depuis Vitry). Ensuite suivi lisse uniquement -> jamais de re-snap
+    // sur un trou GPS, donc plus de teleportation.
+    if(!wasLive && LIVE.lat!=null && LIVE.lon!=null){ cam.lon=tgt.lon; cam.lat=tgt.lat; cam.bearing=tgt.bearing; wasLive=true; }
 
     // --- cap cible : cap de marche + biais d'anticipation de virage ---
     var bearingTgt = (tgt.bearing||0) + turnBias();
