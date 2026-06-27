@@ -339,22 +339,22 @@ var DEMO_POS  = { lon:2.392, lat:48.787 };   // Vitry-sur-Seine
    car MapLibre ne place pas la camera librement (cf. LIMITE API ci-dessus). */
 var BEHIND_M       = 10;     // camera ~10 m DERRIERE le vehicule (le long de -cap)
 var UP_M           = 6;      // camera ~6 m AU-DESSUS du sol
-var AHEAD_SLOW     = 10;     // a l'arret/lent : on vise PRES -> camera PROCHE par defaut, voiture bien presente
-var AHEAD_FAST     = 30;     // a vitesse elevee : on vise loin devant -> on voit la route qui arrive
+var AHEAD_SLOW     = 12;     // a l'arret/lent : vise ~12 m -> voiture au 1er plan, proche
+var AHEAD_FAST     = 24;     // a vitesse : vise ~24 m devant (route = sujet principal)
 
 /* --- PITCH / FOV cibles (inclinaison ~60, jamais vertical ni horizontal) --- */
 var PITCH          = 60;     // inclinaison camera cible (~atan(AHEAD/UP) ramene en 55-65)
-var PITCH_SLOW     = 58;     // a faible vitesse : un poil moins rasante (voit plus de route proche)
-var PITCH_FAST     = 63;     // a vitesse elevee : un peu plus rasante (sensation de vitesse)
+var PITCH_SLOW     = 52;     // basse vitesse : camera basse derriere la voiture (cinematique)
+var PITCH_FAST     = 58;     // vitesse elevee : un peu plus rasante (profondeur/vitesse)
 var MAX_PITCH      = 70;     // maxPitch a l'init (marge au-dessus de PITCH_FAST, < 85)
-var FOV            = 60;     // FOV vertical cible (reglable en MapLibre 5.x via setVerticalFieldOfView)
+var FOV            = 75;     // FOV grand-angle (immersion/vitesse/profondeur max) - setVerticalFieldOfView
 
 /* --- ZOOM DYNAMIQUE selon la vitesse ---
    Recule par rapport a l'ancien reglage : la voiture doit etre PETITE (~6-8% de
    l'ecran). Lent -> un peu plus proche, Rapide -> plus recule (voit + de route). */
-var ZOOM_SLOW      = 19.8;   // vitesse faible  : CAMERA PROCHE (defaut), voiture bien presente
-var ZOOM_MID       = 18.2;   // vitesse moyenne : intermediaire (autour de SPD_MID)
-var ZOOM_FAST      = 17.6;   // vitesse elevee  : recule, voit la route loin
+var ZOOM_SLOW      = 20.6;   // vitesse faible  : camera QUASI-COLLEE (immersion max), voiture grande
+var ZOOM_MID       = 19.6;   // vitesse moyenne : reste tres proche
+var ZOOM_FAST      = 18.8;   // vitesse elevee  : recule un peu mais garde l'immersion
 var SPD_SLOW       = 15;     // km/h : en dessous = ZOOM_SLOW / PITCH_SLOW
 var SPD_MID        = 50;     // km/h : palier intermediaire
 var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
@@ -362,7 +362,7 @@ var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
 /* --- CADRAGE : vehicule bas (~18% depuis le bas) ---
    Le decalage AHEAD_M du center fait deja descendre la voiture ; ce padding.top
    complementaire remonte le pivot pour caler la voiture vers ~18% du bas. */
-var CAM_PAD_FACTOR = 0.30;   // padding.top = facteur * hauteur canvas (avec AHEAD_M -> voiture basse)
+var CAM_PAD_FACTOR = 0.26;   // padding.top : voiture dans le quart inferieur (~15% du bas), grande et presente
 
 /* --- AMORTI (frame-rate-independant : k = 1 - exp(-RATE*dt)) ---
    Plus le RATE est BAS, plus il y a de lag/inertie (ressenti premium).
