@@ -169,6 +169,27 @@ html.embedded #ck-navMan{top:146px;}
 #ck-raceHud .rh-rpmv{font-size:17px;color:#fff;font-weight:600;}
 #ck-raceHud .rh-unit{font-size:8px;color:#7a808c;}
 
+/* ---- BOUTON RECENTRER (mode libre) ---- */
+#ck-recenter{
+  position:absolute; z-index:30; pointer-events:auto;
+  left:50%; bottom:calc(20px + env(safe-area-inset-bottom));
+  transform:translate(-50%, 14px) scale(.94);
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--txt); cursor:pointer;
+  padding:9px 16px; border-radius:24px;
+  border:.5px solid rgba(255,255,255,.16);
+  background:linear-gradient(135deg, rgba(255,80,0,.14), rgba(120,28,62,.06) 55%, rgba(30,12,22,.12)), rgba(12,10,14,.55);
+  -webkit-backdrop-filter:blur(22px) saturate(1.3); backdrop-filter:blur(22px) saturate(1.3);
+  box-shadow:0 14px 40px -16px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.07);
+  opacity:0; visibility:hidden;
+  transition:opacity .35s ease, transform .35s ease, border-color .2s, color .2s;
+}
+#ck-recenter.show{ opacity:1; visibility:visible; transform:translate(-50%,0) scale(1); }
+#ck-recenter:hover{ border-color:var(--acc); color:var(--acc); }
+#ck-recenter svg{ color:var(--acc); }
+@media(prefers-reduced-motion:reduce){ #ck-recenter{ transition:opacity .2s; } }
+
 @media(max-width:1024px){
   #ck-tele,#ck-mapPanel{width:185px;} #ck-miniMap{height:118px;} .ck-big{font-size:40px;}
 }
@@ -237,7 +258,7 @@ html.embedded #ck-navMan{top:146px;}
   </button>
   <div class="ck-panel" id="ck-ctl">
     <button id="ck-bView" class="on">🛰 Vue 3D</button>
-    <button id="ck-bNorth">🧭 Nord libre</button>
+    <!-- "Nord en haut" supprime : la camera suit TOUJOURS le cap (vue FSD immersive). -->
     <div class="ck-sep"></div>
     <button id="ck-bMap" class="on">🗺 Mini-carte</button>
     <button id="ck-bNight" class="on">🌙 Nuit</button>
@@ -253,6 +274,19 @@ html.embedded #ck-navMan{top:146px;}
       <div class="rh-rpmrow"><span class="rh-rpmv" id="ck-rpm">0</span><span class="rh-unit">tr/min</span></div>
     </div>
   </div>
+
+  <!-- BOUTON RECENTRER : visible seulement en MODE LIBRE (user a deplace la carte).
+       Clic -> retour au suivi + snap doux sur la position courante. -->
+  <button id="ck-recenter" aria-label="Recentrer sur ma position">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="7"/>
+      <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/>
+      <line x1="12" y1="1.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22.5"/>
+      <line x1="1.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22.5" y2="12"/>
+    </svg>
+    <span>Recentrer</span>
+  </button>
 
   <div class="ck-panel" id="ck-mapPanel">
     <div class="ck-ttl"><span><b>05</b> GPS live</span><span class="ck-lbl" id="ck-gpsAcc">DEMO</span></div>
@@ -273,14 +307,55 @@ html.embedded #ck-navMan{top:146px;}
 /* ---------- Constantes ---------- */
 var STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 var DEMO_POS  = { lon:2.392, lat:48.787 };   // Vitry-sur-Seine
-/* ---- CAMERA CHASE (vue 3e personne proche, facon hud3d.html) ----
-   Valeurs FACILEMENT ajustables. Recommandations Context7 MapLibre :
-   pitch 60-70 (vue derriere la voiture), zoom 17.5-18.5 (collee),
-   padding.top eleve -> voiture dans le tiers bas, route devant. */
-var DRIVE_PITCH    = 68;     // inclinaison chase (60-70). >75 = horizon plein ecran.
-var DRIVE_ZOOM     = 18.2;   // zoom rapproche (17.5-18.5). 16-17 = vue large GPS.
-var CAM_PAD_FACTOR = 0.34;   // padding.top = facteur * hauteur canvas -> voiture en bas
-var MAX_PITCH      = 74;     // maxPitch a l'init (marge au-dessus de DRIVE_PITCH)
+/* ============================================================
+   CAMERA IMMERSIVE "Tesla FSD" — vue 3e personne, JAMAIS plan du dessus.
+   Camera DERRIERE le vehicule, au-dessus, inclinee, basse -> profondeur.
+   Le vehicule reste dans le TIERS INFERIEUR, centre, route devant (haut).
+   La camera suit TOUJOURS le cap (pas de "Nord en haut").
+   Tout est interpole frame par frame (amorti spring/damping), aucune
+   transition instantanee. Constantes ci-dessous = ressenti, ajustables.
+   ============================================================ */
+
+/* --- ZOOM DYNAMIQUE selon la vitesse ---
+   Lent -> camera proche (voit le detail). Rapide -> recule (voit + de route). */
+var ZOOM_SLOW      = 18.5;   // vitesse faible  : tres rapproche
+var ZOOM_MID       = 17.8;   // vitesse moyenne : intermediaire (autour de SPD_MID)
+var ZOOM_FAST      = 17.0;   // vitesse elevee  : recule, voit la route loin
+var SPD_SLOW       = 15;     // km/h : en dessous = ZOOM_SLOW / PITCH_SLOW
+var SPD_MID        = 50;     // km/h : palier intermediaire
+var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
+
+/* --- PITCH DYNAMIQUE selon la vitesse ---
+   Lent -> moins incline (~45, vue plongeante douce).
+   Rapide -> plus incline (~60, on rase la route, sensation de vitesse). */
+var PITCH_SLOW     = 45;     // inclinaison a faible vitesse
+var PITCH_FAST     = 60;     // inclinaison a vitesse elevee
+var MAX_PITCH      = 70;     // maxPitch a l'init (marge au-dessus de PITCH_FAST)
+
+/* --- CADRAGE : vehicule dans le tiers inferieur --- */
+var CAM_PAD_FACTOR = 0.36;   // padding.top = facteur * hauteur canvas (0.33-0.38)
+
+/* --- AMORTI (frame-rate-independant : k = 1 - exp(-RATE*dt)) ---
+   Plus le RATE est BAS, plus il y a de lag/inertie (ressenti premium).
+   On vise un peu plus de lag qu'avant (position 6.0 -> 4.5, rot 4.5 -> 3.2). */
+var DAMP_POS       = 4.5;    // suivi position (lon/lat)
+var DAMP_ROT       = 3.2;    // suivi cap (bearing) — plus mou = virages absorbes
+var DAMP_ZOOM      = 3.0;    // transition zoom (~equiv. 300-500ms)
+var DAMP_PITCH     = 2.6;    // transition pitch (douce)
+
+/* --- ANTICIPATION VIRAGES ---
+   Quand une manoeuvre approche (LIVE.navTurn != 0 et LIVE.navDist faible),
+   on biaise legerement le cap cible vers le virage pour montrer la route
+   qui arrive. Doux, borne, proportionnel a la proximite. */
+var TURN_LOOKAHEAD = 120;    // m : distance sous laquelle on commence a anticiper
+var TURN_BIAS_MAX  = 12;     // deg : biais maximal de cap (a 0 m de la manoeuvre)
+
+/* --- MODE LIBRE / SUIVI ---
+   Quand l'utilisateur manipule la carte (geste -> e.originalEvent), on passe
+   en LIBRE : la boucle cesse de piloter la camera. Le bouton RECENTRER
+   rebascule en SUIVI. Reprise auto possible apres inactivite (0 = jamais). */
+var FREE_AUTO_RESUME = 0;    // ms d'inactivite avant retour auto au suivi (0 = manuel via bouton)
+
 var LIVE_TIMEOUT = 5000;                       // ms sans 'gps' -> retour DEMO
 
 /* ---------- Etat global expose (lu par le cockpit) ---------- */
@@ -414,8 +489,8 @@ try{
     container:'map',
     style:STYLE_URL,
     center:[DEMO_POS.lon, DEMO_POS.lat],
-    zoom:DRIVE_ZOOM,
-    pitch:DRIVE_PITCH,
+    zoom:ZOOM_SLOW,
+    pitch:PITCH_SLOW,
     bearing:0,
     maxPitch:MAX_PITCH,
     attributionControl:{ compact:true },
@@ -440,6 +515,21 @@ if(map){
     // ne pas spammer la console ; signaler une seule fois
     if(!errShown) showMapErr('CARTE PARTIELLEMENT INDISPONIBLE');
   });
+
+  /* ---- detection manipulation utilisateur -> MODE LIBRE ----
+     movestart couvre pan / zoom / rotate / pitch. e.originalEvent present
+     => geste utilisateur (notre jumpTo n'a PAS d'originalEvent). */
+  map.on('movestart', function(e){
+    if(e && e.originalEvent) enterFreeMode();
+  });
+  if(FREE_AUTO_RESUME>0){
+    map.on('moveend', function(e){
+      if(e && e.originalEvent){
+        if(freeResumeTimer) clearTimeout(freeResumeTimer);
+        freeResumeTimer = setTimeout(recenter, FREE_AUTO_RESUME);
+      }
+    });
+  }
 }
 
 /* ---------- Theme sombre premium applique au chargement ---------- */
@@ -656,14 +746,76 @@ function applyRoute(coords){
    bearing) chaque frame et on applique via map.jumpTo (instantane,
    donc pas de file d'animations qui se chevauchent).
    ============================================================ */
-var cam = { lon:DEMO_POS.lon, lat:DEMO_POS.lat, bearing:0 };
+var cam = { lon:DEMO_POS.lon, lat:DEMO_POS.lat, bearing:0, zoom:ZOOM_SLOW, pitch:PITCH_SLOW };
 var camInit=false, wasLive=false;
 
+/* objets reutilises chaque frame (pas de re-allocation -> evite le GC churn) */
+var _jumpOpts = { center:[0,0], bearing:0, zoom:0, pitch:0,
+                  padding:{ top:0, bottom:0, left:0, right:0 } };
+var _carPos   = window.__carPos = { lon:DEMO_POS.lon, lat:DEMO_POS.lat, bearing:0 };
+
 function lerp(a,b,t){ return a + (b-a)*t; }
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
 function lerpAngle(a,b,t){
   var diff = ((b-a+540)%360)-180;   // plus court chemin
   return (a + diff*t + 360)%360;
 }
+
+/* ---- ZOOM/PITCH cibles selon la vitesse (interpolation lineaire par paliers) ---- */
+function zoomForSpeed(kmh){
+  if(kmh<=SPD_SLOW) return ZOOM_SLOW;
+  if(kmh<=SPD_MID)  return lerp(ZOOM_SLOW, ZOOM_MID,  (kmh-SPD_SLOW)/(SPD_MID-SPD_SLOW));
+  if(kmh<=SPD_FAST) return lerp(ZOOM_MID,  ZOOM_FAST, (kmh-SPD_MID)/(SPD_FAST-SPD_MID));
+  return ZOOM_FAST;
+}
+function pitchForSpeed(kmh){
+  if(kmh<=SPD_SLOW) return PITCH_SLOW;
+  if(kmh>=SPD_FAST) return PITCH_FAST;
+  return lerp(PITCH_SLOW, PITCH_FAST, (kmh-SPD_SLOW)/(SPD_FAST-SPD_SLOW));
+}
+/* ---- biais d'anticipation de virage (deg, signe = sens) ---- */
+function turnBias(){
+  if(!liveFresh() || !LIVE.navOn || !LIVE.navTurn) return 0;
+  var d = LIVE.navDist;
+  if(!(d>=0) || d>TURN_LOOKAHEAD) return 0;
+  var prox = 1 - (d/TURN_LOOKAHEAD);          // 0 (loin) -> 1 (a la manoeuvre)
+  return LIVE.navTurn * TURN_BIAS_MAX * prox; // +droite / -gauche
+}
+
+/* ============================================================
+   MODE SUIVI (defaut) vs LIBRE.
+   En LIBRE, la boucle ne pilote plus la camera (jumpTo coupe) pour ne pas
+   se battre avec le geste utilisateur. Le bouton RECENTRER repasse en SUIVI.
+   Discriminant fiable user vs programme : presence de e.originalEvent.
+   ============================================================ */
+var followMode = true;          // true = suivi auto camera, false = libre (user)
+var freeResumeTimer = null;
+function setFollow(on){
+  if(followMode===on) return;
+  followMode = on;
+  var btn = document.getElementById('ck-recenter');
+  if(btn) btn.classList.toggle('show', !on);
+}
+function enterFreeMode(){
+  setFollow(false);
+  if(freeResumeTimer){ clearTimeout(freeResumeTimer); freeResumeTimer=null; }
+}
+function recenter(){
+  // snap doux : on resynchronise l'etat camera sur la cible courante puis on
+  // laisse la boucle reprendre (l'amorti lisse le retour, pas de saut brutal).
+  if(map){
+    try{
+      var c = map.getCenter();
+      cam.lon=c.lng; cam.lat=c.lat;
+      cam.bearing = map.getBearing();
+      cam.zoom = map.getZoom();
+      cam.pitch = map.getPitch();
+    }catch(_){}
+  }
+  if(freeResumeTimer){ clearTimeout(freeResumeTimer); freeResumeTimer=null; }
+  setFollow(true);
+}
+window.__hubRecenter = recenter;
 
 // position cible de conduite : LIVE -> GPS reel ; DEMO -> deplacement anime.
 var demoT=0;
@@ -685,26 +837,44 @@ function frame(ts){
 
   if(map && mapReady){
     var tgt = driveTarget(dt);
-    if(!camInit){ cam.lon=tgt.lon; cam.lat=tgt.lat; cam.bearing=tgt.bearing; camInit=true; }
+    if(!camInit){
+      cam.lon=tgt.lon; cam.lat=tgt.lat; cam.bearing=tgt.bearing;
+      cam.zoom=ZOOM_SLOW; cam.pitch=PITCH_SLOW; camInit=true;
+    }
     var nowLive = liveFresh() && LIVE.lat!=null && LIVE.lon!=null;
     if(nowLive && !wasLive){ cam.lon=tgt.lon; cam.lat=tgt.lat; cam.bearing=tgt.bearing; } // snap a l'arrivee du GPS (evite un long panoramique multi-km)
     wasLive = nowLive;
-    // lissage exponentiel (independant du framerate)
-    var kPos = 1 - Math.exp(-6.0*dt);
-    var kRot = 1 - Math.exp(-4.5*dt);
+
+    // --- cap cible : cap de marche + biais d'anticipation de virage ---
+    var bearingTgt = (tgt.bearing||0) + turnBias();
+
+    // --- cibles zoom/pitch fonction de la vitesse affichee ---
+    var spd = HUB3D.speedKmh || 0;
+    var zoomTgt  = zoomForSpeed(spd);
+    var pitchTgt = opt.view ? pitchForSpeed(spd) : 0;   // vue 2D forcee -> pitch 0
+
+    // --- lissage exponentiel (independant du framerate) : amorti premium ---
+    var kPos   = 1 - Math.exp(-DAMP_POS*dt);
+    var kRot   = 1 - Math.exp(-DAMP_ROT*dt);
+    var kZoom  = 1 - Math.exp(-DAMP_ZOOM*dt);
+    var kPitch = 1 - Math.exp(-DAMP_PITCH*dt);
     cam.lon     = lerp(cam.lon, tgt.lon, kPos);
     cam.lat     = lerp(cam.lat, tgt.lat, kPos);
-    cam.bearing = opt.north ? lerpAngle(cam.bearing, 0, kRot)
-                            : lerpAngle(cam.bearing, tgt.bearing, kRot);
+    cam.bearing = lerpAngle(cam.bearing, bearingTgt, kRot);   // suit TOUJOURS le cap (pas de Nord en haut)
+    cam.zoom    = lerp(cam.zoom, zoomTgt, kZoom);
+    cam.pitch   = clamp(lerp(cam.pitch, pitchTgt, kPitch), 0, MAX_PITCH);
 
-    map.jumpTo({
-      center:[cam.lon, cam.lat],
-      bearing:cam.bearing,
-      pitch: opt.view ? DRIVE_PITCH : 0,
-      // zoom LIBRE : on ne force plus DRIVE_ZOOM chaque frame -> l'utilisateur peut zoomer / dezoomer
-      padding:{ top:camPadTop, bottom:0, left:0, right:0 }   // voiture en bas, route devant (angle type hub precedent)
-    });
-    window.__carPos = { lon:cam.lon, lat:cam.lat, bearing:(HUB3D.heading||0) };  // pour la voiture 3D (couche Three.js)
+    // En mode SUIVI, on pilote la camera (jumpTo, options reutilisees -> 0 alloc).
+    // En mode LIBRE, l'utilisateur a la main : on NE touche PAS la camera.
+    // Dans les deux cas on alimente la voiture 3D + le puck sur la position
+    // interpolee, et l'etat camera reste synchro pour un recentrage doux.
+    if(followMode){
+      _jumpOpts.center[0]=cam.lon; _jumpOpts.center[1]=cam.lat;
+      _jumpOpts.bearing=cam.bearing; _jumpOpts.zoom=cam.zoom; _jumpOpts.pitch=cam.pitch;
+      _jumpOpts.padding.top=camPadTop;   // voiture en bas, route devant
+      map.jumpTo(_jumpOpts);
+    }
+    _carPos.lon=cam.lon; _carPos.lat=cam.lat; _carPos.bearing=(HUB3D.heading||0);
     addPuck(cam.lon, cam.lat, HUB3D.heading);
   }
 
@@ -937,14 +1107,22 @@ window.__hubMap = map;
     toggleBtn(this,'sound','🔊 Son','🔇 Muet');
     window.dispatchEvent(new CustomEvent('cockpit:sound',{detail:opt.sound}));
   });
-  $('ck-bNorth').addEventListener('click', function(){
-    toggleBtn(this,'north','🧭 Nord verrouillé','🧭 Nord libre');
-    window.dispatchEvent(new CustomEvent('cockpit:north',{detail:opt.north}));
-  });
+  /* "Nord en haut" retire : bouton absent, listener neutralise (la camera
+     suit toujours le cap). On garde un garde-fou si le bouton revenait. */
+  var _bNorth = $('ck-bNorth');
+  if(_bNorth){ _bNorth.style.display='none'; }
   $('ck-bView').addEventListener('click', function(){
     opt.view=!opt.view; this.classList.toggle('on', opt.view);
     window.dispatchEvent(new CustomEvent('cockpit:view',{detail:opt.view}));
   });
+  /* RECENTRER : repasse en mode suivi + snap doux (logique cote moteur carte). */
+  (function(){
+    var rc=$('ck-recenter');
+    if(rc) rc.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(typeof window.__hubRecenter==='function') window.__hubRecenter();
+    });
+  })();
   $('ck-bFull').addEventListener('click', function(){
     var el=document.documentElement, btn=this;
     try{
