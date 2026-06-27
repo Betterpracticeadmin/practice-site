@@ -321,9 +321,9 @@ var DEMO_POS  = { lon:2.392, lat:48.787 };   // Vitry-sur-Seine
 
 /* --- ZOOM DYNAMIQUE selon la vitesse ---
    Lent -> camera proche (voit le detail). Rapide -> recule (voit + de route). */
-var ZOOM_SLOW      = 19.2;   // vitesse faible  : tres rapproche (camera collee, immersif)
-var ZOOM_MID       = 18.4;   // vitesse moyenne : intermediaire (autour de SPD_MID)
-var ZOOM_FAST      = 17.6;   // vitesse elevee  : recule, voit la route loin
+var ZOOM_SLOW      = 19.8;   // vitesse faible  : camera tres collee (immersion Tesla/AMap)
+var ZOOM_MID       = 19.0;   // vitesse moyenne : intermediaire (autour de SPD_MID)
+var ZOOM_FAST      = 18.2;   // vitesse elevee  : un peu reculee, voit la route loin
 var SPD_SLOW       = 15;     // km/h : en dessous = ZOOM_SLOW / PITCH_SLOW
 var SPD_MID        = 50;     // km/h : palier intermediaire
 var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
@@ -331,12 +331,12 @@ var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
 /* --- PITCH DYNAMIQUE selon la vitesse ---
    Lent -> moins incline (~45, vue plongeante douce).
    Rapide -> plus incline (~60, on rase la route, sensation de vitesse). */
-var PITCH_SLOW     = 58;     // inclinaison a faible vitesse (proche de la ref hud3d.html ~68)
-var PITCH_FAST     = 68;     // inclinaison a vitesse elevee (= angle camera hud3d.html)
-var MAX_PITCH      = 74;     // maxPitch a l'init (marge au-dessus de PITCH_FAST)
+var PITCH_SLOW     = 62;     // inclinaison a faible vitesse (rasante = immersif Tesla/AMap)
+var PITCH_FAST     = 72;     // inclinaison a vitesse elevee (vue tres plongeante dans la route)
+var MAX_PITCH      = 78;     // maxPitch a l'init (marge au-dessus de PITCH_FAST)
 
 /* --- CADRAGE : vehicule dans le tiers inferieur --- */
-var CAM_PAD_FACTOR = 0.40;   // padding.top = facteur * hauteur canvas (voiture plus basse = plus de route)
+var CAM_PAD_FACTOR = 0.42;   // padding.top = facteur * hauteur canvas (voiture plus basse = plus de route)
 
 /* --- AMORTI (frame-rate-independant : k = 1 - exp(-RATE*dt)) ---
    Plus le RATE est BAS, plus il y a de lag/inertie (ressenti premium).
