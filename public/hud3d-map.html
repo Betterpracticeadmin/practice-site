@@ -311,32 +311,57 @@ html.embedded #ck-navMan{top:146px;}
 var STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 var DEMO_POS  = { lon:2.392, lat:48.787 };   // Vitry-sur-Seine
 /* ============================================================
-   CAMERA IMMERSIVE "Tesla FSD" — vue 3e personne, JAMAIS plan du dessus.
-   Camera DERRIERE le vehicule, au-dessus, inclinee, basse -> profondeur.
-   Le vehicule reste dans le TIERS INFERIEUR, centre, route devant (haut).
-   La camera suit TOUJOURS le cap (pas de "Nord en haut").
-   Tout est interpole frame par frame (amorti spring/damping), aucune
-   transition instantanee. Constantes ci-dessous = ressenti, ajustables.
+   CAMERA 3D LIBRE "Tesla / AMap" — vue 3e personne basse, JAMAIS plan du dessus.
+
+   GEOMETRIE VOULUE (camera independante, suit le vehicule avec du retard) :
+     - camera ~BEHIND_M derriere le vehicule (le long de -cap),
+     - ~UP_M au-dessus du sol,
+     - visant un point ~AHEAD_M DEVANT la voiture (regard vers l'horizon routier),
+     - inclinaison resultante ~PITCH (55-65), FOV ~FOV (55-65),
+     - vehicule PETIT (~6-8% de la hauteur ecran), a ~18% depuis le bas, centre,
+       ~80% d'ecran = la route devant. Toujours une ligne d'horizon visible.
+
+   LIMITE API (verifie sur maplibre-gl@5.24.0 — d.ts + camera.ts dans C:\tmp) :
+     MapLibre N'A PAS setFreeCameraOptions / getFreeCameraOptions / lookAtPoint
+     (API Mapbox uniquement). On ne peut donc PAS poser la camera librement.
+     => APPROXIMATION : on garde jumpTo(center/bearing/pitch/zoom) MAIS on place
+        le 'center' (= pivot d'inclinaison) ~AHEAD_M EN AVANT du vehicule le long
+        du cap. Resultat : la voiture descend dans l'ecran (sensation "camera
+        derriere le capot, regard vers l'horizon"). Le FOV, LUI, est reglable
+        (setVerticalFieldOfView) -> on le fixe a FOV.
+
+   Tout est interpole frame par frame (amorti exp/damping) -> camera independante
+   qui suit avec un leger retard, jamais collee, aucune transition instantanee.
    ============================================================ */
 
+/* --- GEOMETRIE CAMERA (metres) — esprit "derriere/au-dessus/regard devant" ---
+   Ces metres sont traduits en pitch + zoom + decalage du center (voir plus bas),
+   car MapLibre ne place pas la camera librement (cf. LIMITE API ci-dessus). */
+var BEHIND_M       = 10;     // camera ~10 m DERRIERE le vehicule (le long de -cap)
+var UP_M           = 6;      // camera ~6 m AU-DESSUS du sol
+var AHEAD_M        = 28;     // point vise ~28 m DEVANT la voiture (center projete en avant)
+
+/* --- PITCH / FOV cibles (inclinaison ~60, jamais vertical ni horizontal) --- */
+var PITCH          = 60;     // inclinaison camera cible (~atan(AHEAD/UP) ramene en 55-65)
+var PITCH_SLOW     = 58;     // a faible vitesse : un poil moins rasante (voit plus de route proche)
+var PITCH_FAST     = 63;     // a vitesse elevee : un peu plus rasante (sensation de vitesse)
+var MAX_PITCH      = 70;     // maxPitch a l'init (marge au-dessus de PITCH_FAST, < 85)
+var FOV            = 60;     // FOV vertical cible (reglable en MapLibre 5.x via setVerticalFieldOfView)
+
 /* --- ZOOM DYNAMIQUE selon la vitesse ---
-   Lent -> camera proche (voit le detail). Rapide -> recule (voit + de route). */
-var ZOOM_SLOW      = 19.8;   // vitesse faible  : camera tres collee (immersion Tesla/AMap)
-var ZOOM_MID       = 19.0;   // vitesse moyenne : intermediaire (autour de SPD_MID)
-var ZOOM_FAST      = 18.2;   // vitesse elevee  : un peu reculee, voit la route loin
+   Recule par rapport a l'ancien reglage : la voiture doit etre PETITE (~6-8% de
+   l'ecran). Lent -> un peu plus proche, Rapide -> plus recule (voit + de route). */
+var ZOOM_SLOW      = 18.6;   // vitesse faible  : voiture petite, route devant bien visible
+var ZOOM_MID       = 18.2;   // vitesse moyenne : intermediaire (autour de SPD_MID)
+var ZOOM_FAST      = 17.6;   // vitesse elevee  : recule, voit la route loin
 var SPD_SLOW       = 15;     // km/h : en dessous = ZOOM_SLOW / PITCH_SLOW
 var SPD_MID        = 50;     // km/h : palier intermediaire
 var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
 
-/* --- PITCH DYNAMIQUE selon la vitesse ---
-   Lent -> moins incline (~45, vue plongeante douce).
-   Rapide -> plus incline (~60, on rase la route, sensation de vitesse). */
-var PITCH_SLOW     = 62;     // inclinaison a faible vitesse (rasante = immersif Tesla/AMap)
-var PITCH_FAST     = 72;     // inclinaison a vitesse elevee (vue tres plongeante dans la route)
-var MAX_PITCH      = 78;     // maxPitch a l'init (marge au-dessus de PITCH_FAST)
-
-/* --- CADRAGE : vehicule dans le tiers inferieur --- */
-var CAM_PAD_FACTOR = 0.42;   // padding.top = facteur * hauteur canvas (voiture plus basse = plus de route)
+/* --- CADRAGE : vehicule bas (~18% depuis le bas) ---
+   Le decalage AHEAD_M du center fait deja descendre la voiture ; ce padding.top
+   complementaire remonte le pivot pour caler la voiture vers ~18% du bas. */
+var CAM_PAD_FACTOR = 0.30;   // padding.top = facteur * hauteur canvas (avec AHEAD_M -> voiture basse)
 
 /* --- AMORTI (frame-rate-independant : k = 1 - exp(-RATE*dt)) ---
    Plus le RATE est BAS, plus il y a de lag/inertie (ressenti premium).
@@ -409,6 +434,26 @@ function distMeters(la1,lo1,la2,lo2){
   var dphi=(la2-la1)*p, dl=(lo2-lo1)*p;
   var a=Math.sin(dphi/2)*Math.sin(dphi/2)+Math.cos(la1*p)*Math.cos(la2*p)*Math.sin(dl/2)*Math.sin(dl/2);
   return 2*R*Math.asin(Math.min(1,Math.sqrt(a)));
+}
+/* Avance [lat,lon] de distMeters le long de bearingDeg (0=N, 90=E) -> {lat,lon}.
+   Sert a placer le 'center' (pivot d'inclinaison) ~AHEAD_M DEVANT le vehicule :
+   c'est l'astuce qui simule la "camera derriere le capot regardant l'horizon",
+   faute de setFreeCameraOptions/lookAtPoint en MapLibre. */
+function offsetForward(lat, lon, bearingDeg, distM){
+  return offsetForwardInto(lat, lon, bearingDeg, distM, { lat:0, lon:0 });
+}
+/* Variante SANS allocation : ecrit dans 'out' (reutilise dans la boucle frame
+   -> 0 objet cree par frame, evite le GC churn). Conversion deg/rad explicite,
+   garde-fou cos(lat)~0 (poles) pour ne JAMAIS produire de NaN/Infinity. */
+function offsetForwardInto(lat, lon, bearingDeg, distM, out){
+  var R=6378137, rad=Math.PI/180, br=bearingDeg*rad;
+  var cosLat=Math.cos(lat*rad);
+  if(Math.abs(cosLat)<1e-9) cosLat = (cosLat<0?-1:1)*1e-9;   // anti-NaN proche des poles
+  var dLatRad=(distM*Math.cos(br))/R;                         // radians
+  var dLonRad=(distM*Math.sin(br))/(R*cosLat);               // radians
+  out.lat = lat + dLatRad/rad;                                // -> degres
+  out.lon = lon + dLonRad/rad;                                // -> degres
+  return out;
 }
 /* alimente LIVE depuis une source de position (postMessage GPS ou geoloc navigateur).
    Si le cap n'est PAS fourni (boussole absente), on le DEDUIT du deplacement ->
@@ -503,7 +548,7 @@ try{
     style:STYLE_URL,
     center:[DEMO_POS.lon, DEMO_POS.lat],
     zoom:ZOOM_SLOW,
-    pitch:PITCH_SLOW,
+    pitch:PITCH,            // pitch cible ~60 a l'init (range dynamique = PITCH_SLOW..PITCH_FAST)
     bearing:0,
     maxPitch:MAX_PITCH,
     attributionControl:{ compact:true },
@@ -741,14 +786,39 @@ function applyRoute(coords){
   if(src){ src.setData(data); return; }
   try{
     map.addSource('practice-route', { type:'geojson', data:data });
-    // halo
+    // ITINERAIRE TRES VISIBLE (style FSD) : empile sur 3 couches, en HAUT de la
+    // pile (apres les batiments 3D) -> jamais masque. line-width interpole avec
+    // le zoom pour rester epais en vue rapprochee comme eloignee.
+    //  - 'glow'    : large halo bleu flou (lueur autour du trace)
+    //  - 'casing'  : contour bleu fonce (detache la route du fond/batiments)
+    //  - 'core'    : coeur bleu vif lumineux
     map.addLayer({ id:'practice-route-glow', type:'line', source:'practice-route',
       layout:{ 'line-cap':'round','line-join':'round' },
-      paint:{ 'line-color':'#2f7bff','line-width':16,'line-opacity':0.28,'line-blur':6 } });
-    // coeur
+      paint:{ 'line-color':'#3da5ff',
+        'line-width':['interpolate',['linear'],['zoom'],10,14,16,30,20,52],
+        'line-opacity':0.40,'line-blur':10 } });
+    map.addLayer({ id:'practice-route-casing', type:'line', source:'practice-route',
+      layout:{ 'line-cap':'round','line-join':'round' },
+      paint:{ 'line-color':'#0a3a8c',
+        'line-width':['interpolate',['linear'],['zoom'],10,9,16,18,20,30],
+        'line-opacity':0.95 } });
     map.addLayer({ id:'practice-route-core', type:'line', source:'practice-route',
       layout:{ 'line-cap':'round','line-join':'round' },
-      paint:{ 'line-color':'#5aa0ff','line-width':7,'line-opacity':0.95 } });
+      paint:{ 'line-color':'#2f9bff',
+        'line-width':['interpolate',['linear'],['zoom'],10,5,16,11,20,20],
+        'line-opacity':1.0 } });
+    raiseRoute();
+  }catch(_){}
+}
+/* Remonte l'itineraire AU-DESSUS des batiments 3D (mais sous la voiture 3D si
+   presente) pour qu'il reste toujours bien visible, jamais masque par le bati. */
+function raiseRoute(){
+  if(!map) return;
+  try{
+    var before = map.getLayer('ego-car-3d') ? 'ego-car-3d' : undefined;
+    ['practice-route-glow','practice-route-casing','practice-route-core'].forEach(function(id){
+      if(map.getLayer(id)) map.moveLayer(id, before);
+    });
   }catch(_){}
 }
 
@@ -766,6 +836,7 @@ var camInit=false, wasLive=false;
 var _jumpOpts = { center:[0,0], bearing:0, zoom:0, pitch:0,
                   padding:{ top:0, bottom:0, left:0, right:0 } };
 var _carPos   = window.__carPos = { lon:DEMO_POS.lon, lat:DEMO_POS.lat, bearing:0 };
+var _ahead    = { lat:0, lon:0 };   // scratch reutilise par offsetForwardInto (0 alloc/frame)
 
 function lerp(a,b,t){ return a + (b-a)*t; }
 function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
@@ -818,11 +889,15 @@ function recenter(){
   // laisse la boucle reprendre (l'amorti lisse le retour, pas de saut brutal).
   if(map){
     try{
-      var c = map.getCenter();
-      cam.lon=c.lng; cam.lat=c.lat;
       cam.bearing = map.getBearing();
       cam.zoom = map.getZoom();
       cam.pitch = map.getPitch();
+      // map.getCenter() est le pivot PROJETE EN AVANT (AHEAD_M le long du cap).
+      // On le ramene sur le vehicule (recul de AHEAD_M) pour que cam.* reste
+      // l'etat "vehicule" et eviter une derive vers l'avant a chaque recentrage.
+      var c = map.getCenter();
+      var back = offsetForward(c.lat, c.lng, cam.bearing, -AHEAD_M);
+      cam.lon=back.lon; cam.lat=back.lat;
     }catch(_){}
   }
   if(freeResumeTimer){ clearTimeout(freeResumeTimer); freeResumeTimer=null; }
@@ -885,9 +960,14 @@ function frame(ts){
     // Dans les deux cas on alimente la voiture 3D + le puck sur la position
     // interpolee, et l'etat camera reste synchro pour un recentrage doux.
     if(followMode){
-      _jumpOpts.center[0]=cam.lon; _jumpOpts.center[1]=cam.lat;
+      // CENTER PROJETE EN AVANT : le pivot d'inclinaison est place ~AHEAD_M devant
+      // le vehicule (le long du cap lisse). C'est ce qui fait descendre la voiture
+      // dans l'ecran (~18% du bas) et donne la sensation "camera derriere/au-dessus
+      // regardant l'horizon routier". La voiture 3D, elle, reste sur cam.lon/cam.lat.
+      offsetForwardInto(cam.lat, cam.lon, cam.bearing, AHEAD_M, _ahead);
+      _jumpOpts.center[0]=_ahead.lon; _jumpOpts.center[1]=_ahead.lat;
       _jumpOpts.bearing=cam.bearing; _jumpOpts.zoom=cam.zoom; _jumpOpts.pitch=cam.pitch;
-      _jumpOpts.padding.top=camPadTop;   // voiture en bas, route devant
+      _jumpOpts.padding.top=camPadTop;   // remonte le pivot -> voiture encore plus basse
       map.jumpTo(_jumpOpts);
     }
     _carPos.lon=cam.lon; _carPos.lat=cam.lat; _carPos.bearing=(HUB3D.heading||0);
@@ -953,6 +1033,9 @@ if(map){
   map.on('load', function(){
     mapReady = true;
     updatePad();
+    // FOV ~60 (effet "objectif voiture", profondeur). MapLibre 5.x SAIT le regler
+    // (setVerticalFieldOfView) — contrairement a setFreeCameraOptions qui n'existe pas.
+    try{ if(typeof map.setVerticalFieldOfView==='function') map.setVerticalFieldOfView(FOV); }catch(_){}
     try{ addBuildings3D(); }catch(_){}
     try{ applyTheme(opt.night); }catch(_){}   // applique jour ou nuit selon le reglage
     addPuck(DEMO_POS.lon, DEMO_POS.lat, 0);
