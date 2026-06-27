@@ -261,7 +261,7 @@ html.embedded #ck-navMan{top:146px;}
     <!-- "Nord en haut" supprime : la camera suit TOUJOURS le cap (vue FSD immersive). -->
     <div class="ck-sep"></div>
     <button id="ck-bMap" class="on">🗺 Mini-carte</button>
-    <button id="ck-bNight" class="on">🌙 Nuit</button>
+    <button id="ck-bNight">🌙 Nuit</button>
     <button id="ck-bSound" class="on">🔊 Son</button>
     <div class="ck-sep"></div>
     <button id="ck-bFull">⛶ Plein écran</button>
@@ -318,9 +318,9 @@ var DEMO_POS  = { lon:2.392, lat:48.787 };   // Vitry-sur-Seine
 
 /* --- ZOOM DYNAMIQUE selon la vitesse ---
    Lent -> camera proche (voit le detail). Rapide -> recule (voit + de route). */
-var ZOOM_SLOW      = 18.5;   // vitesse faible  : tres rapproche
-var ZOOM_MID       = 17.8;   // vitesse moyenne : intermediaire (autour de SPD_MID)
-var ZOOM_FAST      = 17.0;   // vitesse elevee  : recule, voit la route loin
+var ZOOM_SLOW      = 19.2;   // vitesse faible  : tres rapproche (camera collee, immersif)
+var ZOOM_MID       = 18.4;   // vitesse moyenne : intermediaire (autour de SPD_MID)
+var ZOOM_FAST      = 17.6;   // vitesse elevee  : recule, voit la route loin
 var SPD_SLOW       = 15;     // km/h : en dessous = ZOOM_SLOW / PITCH_SLOW
 var SPD_MID        = 50;     // km/h : palier intermediaire
 var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
@@ -328,12 +328,12 @@ var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
 /* --- PITCH DYNAMIQUE selon la vitesse ---
    Lent -> moins incline (~45, vue plongeante douce).
    Rapide -> plus incline (~60, on rase la route, sensation de vitesse). */
-var PITCH_SLOW     = 45;     // inclinaison a faible vitesse
-var PITCH_FAST     = 60;     // inclinaison a vitesse elevee
-var MAX_PITCH      = 70;     // maxPitch a l'init (marge au-dessus de PITCH_FAST)
+var PITCH_SLOW     = 52;     // inclinaison a faible vitesse (plus rasante = plus immersif)
+var PITCH_FAST     = 66;     // inclinaison a vitesse elevee
+var MAX_PITCH      = 74;     // maxPitch a l'init (marge au-dessus de PITCH_FAST)
 
 /* --- CADRAGE : vehicule dans le tiers inferieur --- */
-var CAM_PAD_FACTOR = 0.36;   // padding.top = facteur * hauteur canvas (0.33-0.38)
+var CAM_PAD_FACTOR = 0.40;   // padding.top = facteur * hauteur canvas (voiture plus basse = plus de route)
 
 /* --- AMORTI (frame-rate-independant : k = 1 - exp(-RATE*dt)) ---
    Plus le RATE est BAS, plus il y a de lag/inertie (ressenti premium).
@@ -942,7 +942,7 @@ function updateState(dt){
 }
 
 /* ---------- options pilotees par le burger Parametres ---------- */
-var opt = { map:true, night:true, sound:true, north:false, view:true };
+var opt = { map:true, night:false, sound:true, north:false, view:true };
 window.__hubOpt = opt;
 
 /* ---------- demarrage carte ---------- */
@@ -985,7 +985,7 @@ window.__hubMap = map;
   var RPM_MAX  = 8000, RPM_REDLINE = 6800, SHIFT_SEGS = 10;
   var COMPASS  = ['N','NE','E','SE','S','SO','O','NO'];
 
-  var opt = window.__hubOpt || { map:true, night:true, sound:true, north:false, view:true };
+  var opt = window.__hubOpt || { map:true, night:false, sound:true, north:false, view:true };
 
   /* ============ MINI-MAP (MapLibre statique, raster sombre) ============ */
   var mini=null, miniMarker=null;
