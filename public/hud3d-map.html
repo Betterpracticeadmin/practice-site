@@ -1226,9 +1226,81 @@ function refreshUnesco(){
   for(var j=0;j<N;j++){ window.__geo3d.add(makeUnescoMarker(list[j].s.c), list[j].s.lon, list[j].s.lat, 'unesco'); }
   window.__unescoCount=N;
 }
+/* ---------- PONTS EN 3D : rubans de route sureleves (arc au-dessus du sol) ----------
+   On lit les segments brunnel=bridge des tuiles vectorielles et on construit un ruban 3D
+   (largeur reelle de la classe) qui MONTE en arc (rampes aux extremites, plat au milieu a H
+   metres) -> le pont passe physiquement au-dessus des routes qu'il croise. Pose via __geo3d
+   (ancre = 1er point ; sommets en metres relatifs). Les lignes 2D du pont sont masquees. */
+function roadMetersForClass(cls, ramp){
+  cls=cls||'';
+  if(cls==='motorway') return ramp?7:28;
+  if(cls==='trunk'||cls==='primary') return 19;
+  if(cls==='secondary'||cls==='tertiary') return 12;
+  if(cls==='minor'||cls==='street'||cls==='street_limited') return 8;
+  if(cls==='service'||cls==='track') return 4.5;
+  if(cls==='path'||cls==='pedestrian'||cls==='footway') return 2.5;
+  return 7;
+}
+function buildBridgeRibbon(coords, widthM, aLon, aLat){
+  var T=window.THREE; if(!T||!coords||coords.length<2) return null;
+  var mLat=111320, mLon=111320*Math.cos(aLat*Math.PI/180);
+  var pts=coords.map(function(c){ return { x:(c[0]-aLon)*mLon, z:-(c[1]-aLat)*mLat }; });
+  var cum=[0]; for(var i=1;i<pts.length;i++){ var dx=pts[i].x-pts[i-1].x, dz=pts[i].z-pts[i-1].z; cum[i]=cum[i-1]+Math.hypot(dx,dz); }
+  var Tlen=cum[cum.length-1]; if(Tlen<2) return null;
+  var H=6, Lr=Math.min(Tlen*0.3, 18), hw=widthM/2;
+  var pos=[], idx=[];
+  for(var i=0;i<pts.length;i++){
+    var a=pts[Math.max(0,i-1)], b=pts[Math.min(pts.length-1,i+1)];
+    var dirx=b.x-a.x, dirz=b.z-a.z, dl=Math.hypot(dirx,dirz)||1; dirx/=dl; dirz/=dl;
+    var px=-dirz, pz=dirx;                                   // perpendiculaire (largeur)
+    var ru=Math.min(1,cum[i]/Lr), rd=Math.min(1,(Tlen-cum[i])/Lr), t=Math.min(ru,rd); t=t*t*(3-2*t);  // arc smoothstep
+    var hy=H*t;
+    pos.push(pts[i].x+px*hw, hy, pts[i].z+pz*hw);
+    pos.push(pts[i].x-px*hw, hy, pts[i].z-pz*hw);
+  }
+  for(var i=0;i<pts.length-1;i++){ var k=i*2; idx.push(k,k+1,k+2, k+1,k+3,k+2); }
+  var geo=new T.BufferGeometry();
+  geo.setAttribute('position', new T.Float32BufferAttribute(pos,3));
+  geo.setIndex(idx); geo.computeVertexNormals();
+  return new T.Mesh(geo, new T.MeshStandardMaterial({color:0x4a5160, roughness:0.92, metalness:0.0, side:T.DoubleSide}));
+}
+var __bridgeAnchor=null;
+function hide2DBridges(){
+  if(window.__bridge2dHidden) return;
+  try{ var st=map.getStyle(); if(!st||!st.layers) return;
+    st.layers.forEach(function(L){ if(L.type==='line'&&L['source-layer']==='transportation'&&L.id.indexOf('bridge')===0&&!/rail|transit/.test(L.id)){ try{ map.setLayoutProperty(L.id,'visibility','none'); }catch(_){} } });
+    window.__bridge2dHidden=true; }catch(_){}
+}
+function refreshBridges3D(force){
+  if(!window.__geo3d || !window.THREE || !map.querySourceFeatures) return;
+  var c=map.getCenter();
+  if(!force && __bridgeAnchor){ var ddx=(c.lng-__bridgeAnchor.lng)*88000, ddy=(c.lat-__bridgeAnchor.lat)*111320; if(ddx*ddx+ddy*ddy < 250*250) return; }
+  var feats=[];
+  try{ feats=map.querySourceFeatures(vectorSourceId(),{sourceLayer:'transportation',filter:['==',['get','brunnel'],'bridge']}); }
+  catch(_){ try{ feats=map.querySourceFeatures(vectorSourceId(),{sourceLayer:'transportation'}); }catch(e){} }
+  if(!feats) return;
+  __bridgeAnchor={lng:c.lng,lat:c.lat};
+  var mLon=111320*Math.cos(c.lat*Math.PI/180), mLat=111320, R=3000, count=0, seen={};
+  window.__geo3d.clear('bridge');
+  for(var i=0;i<feats.length && count<80;i++){ var f=feats[i];
+    if(!f.properties || f.properties.brunnel!=='bridge') continue;
+    var g=f.geometry; if(!g) continue;
+    var parts = g.type==='LineString' ? [g.coordinates] : (g.type==='MultiLineString' ? g.coordinates : null);
+    if(!parts) continue;
+    var wm=roadMetersForClass(f.properties.class, f.properties.ramp); if(!wm) continue;
+    for(var pi=0; pi<parts.length; pi++){ var coords=parts[pi]; if(!coords||coords.length<2) continue;
+      var a=coords[0], ex=(a[0]-c.lng)*mLon, ey=(a[1]-c.lat)*mLat; if(ex*ex+ey*ey > R*R) continue;
+      var key=a[0].toFixed(5)+','+a[1].toFixed(5)+':'+coords.length; if(seen[key]) continue; seen[key]=1;
+      var mesh=buildBridgeRibbon(coords, wm, a[0], a[1]); if(mesh){ window.__geo3d.add(mesh, a[0], a[1], 'bridge', 0); count++; }
+    }
+  }
+  window.__bridge3dCount=count;
+  if(count>0) hide2DBridges();
+}
 function geo3dTick(){
   try{ refreshPOIs(); }catch(_){}
   try{ refreshUnesco(); }catch(_){}
+  try{ refreshBridges3D(); }catch(_){}
   try{ if(__lastRoute && window.__geo3d && window.__geo3d.count('dest')===0) setDestinationPin(); }catch(_){}
 }
 
@@ -1245,7 +1317,7 @@ if(map){
     try{ map.on('style.load', function(){ try{realRoadWidths(); fixBridgesTunnels();}catch(_){} }); }catch(_){}
     try{ applyTheme(opt.night); autoTheme(); }catch(_){}   // 1er rendu puis bascule AUTO jour/nuit (soleil)
     try{ setInterval(autoTheme, 60000); }catch(_){}        // re-verifie chaque minute (lever/coucher)
-    try{ loadUnesco(); refreshPOIs(); setInterval(geo3dTick, 4000); }catch(_){}   // POIs + monuments UNESCO 3D + destination
+    try{ loadUnesco(); refreshPOIs(); refreshBridges3D(true); setInterval(geo3dTick, 4000); }catch(_){}   // POIs + UNESCO + ponts 3D + destination
     addPuck(DEMO_POS.lon, DEMO_POS.lat, 0);
     if(LIVE.routeCoords) applyRoute(LIVE.routeCoords);
     startFrame();
