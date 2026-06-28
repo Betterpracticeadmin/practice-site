@@ -1242,27 +1242,60 @@ function roadMetersForClass(cls, ramp){
   return 7;
 }
 function buildBridgeRibbon(coords, widthM, aLon, aLat){
+  // VIADUC (inspire du modele "pour claude pont") : tablier epais + rambardes + piliers au sol
   var T=window.THREE; if(!T||!coords||coords.length<2) return null;
   var mLat=111320, mLon=111320*Math.cos(aLat*Math.PI/180);
   var pts=coords.map(function(c){ return { x:(c[0]-aLon)*mLon, z:-(c[1]-aLat)*mLat }; });
   var cum=[0]; for(var i=1;i<pts.length;i++){ var dx=pts[i].x-pts[i-1].x, dz=pts[i].z-pts[i-1].z; cum[i]=cum[i-1]+Math.hypot(dx,dz); }
-  var Tlen=cum[cum.length-1]; if(Tlen<2) return null;
-  var H=6, Lr=Math.min(Tlen*0.3, 18), hw=widthM/2;
-  var pos=[], idx=[];
+  var Tlen=cum[cum.length-1]; if(Tlen<3) return null;
+  var H=5.5, Lr=Math.min(Tlen*0.32,16), hw=Math.max(widthM/2,1.4), deck=0.7, rail=0.95;
+  function hAt(d){ var ru=Math.min(1,d/Lr), rd=Math.min(1,(Tlen-d)/Lr), t=Math.min(ru,rd); return H*(t*t*(3-2*t)); }
+  var F=[];
   for(var i=0;i<pts.length;i++){
     var a=pts[Math.max(0,i-1)], b=pts[Math.min(pts.length-1,i+1)];
-    var dirx=b.x-a.x, dirz=b.z-a.z, dl=Math.hypot(dirx,dirz)||1; dirx/=dl; dirz/=dl;
-    var px=-dirz, pz=dirx;                                   // perpendiculaire (largeur)
-    var ru=Math.min(1,cum[i]/Lr), rd=Math.min(1,(Tlen-cum[i])/Lr), t=Math.min(ru,rd); t=t*t*(3-2*t);  // arc smoothstep
-    var hy=H*t;
-    pos.push(pts[i].x+px*hw, hy, pts[i].z+pz*hw);
-    pos.push(pts[i].x-px*hw, hy, pts[i].z-pz*hw);
+    var dx=b.x-a.x, dz=b.z-a.z, dl=Math.hypot(dx,dz)||1; dx/=dl; dz/=dl;
+    F.push({ x:pts[i].x, z:pts[i].z, px:-dz, pz:dx, hy:hAt(cum[i]) });
   }
-  for(var i=0;i<pts.length-1;i++){ var k=i*2; idx.push(k,k+1,k+2, k+1,k+3,k+2); }
-  var geo=new T.BufferGeometry();
-  geo.setAttribute('position', new T.Float32BufferAttribute(pos,3));
-  geo.setIndex(idx); geo.computeVertexNormals();
-  return new T.Mesh(geo, new T.MeshStandardMaterial({color:0x4a5160, roughness:0.92, metalness:0.0, side:T.DoubleSide}));
+  var grp=new T.Group();
+  // ---- TABLIER (boite : dessus / dessous / cotes) ----
+  var dp=[], di=[];
+  for(var i=0;i<F.length;i++){ var f=F[i];
+    dp.push(f.x+f.px*hw, f.hy,      f.z+f.pz*hw);     // 0 hautG
+    dp.push(f.x-f.px*hw, f.hy,      f.z-f.pz*hw);     // 1 hautD
+    dp.push(f.x+f.px*hw, f.hy-deck, f.z+f.pz*hw);     // 2 basG
+    dp.push(f.x-f.px*hw, f.hy-deck, f.z-f.pz*hw);     // 3 basD
+  }
+  for(var i=0;i<F.length-1;i++){ var k=i*4, n=(i+1)*4;
+    di.push(k,k+1,n, k+1,n+1,n);          // dessus
+    di.push(k+2,n+2,k+3, k+3,n+2,n+3);    // dessous
+    di.push(k,n,k+2, k+2,n,n+2);          // cote G
+    di.push(k+1,k+3,n+1, k+3,n+3,n+1);    // cote D
+  }
+  var dg=new T.BufferGeometry(); dg.setAttribute('position',new T.Float32BufferAttribute(dp,3)); dg.setIndex(di); dg.computeVertexNormals();
+  grp.add(new T.Mesh(dg,new T.MeshStandardMaterial({color:0x5a6170,roughness:0.9,metalness:0.05,side:T.DoubleSide})));
+  // ---- RAMBARDES (2 cotes) ----
+  var rp=[], ri=[], vc=0;
+  function railSide(sign){ var base=vc;
+    for(var i=0;i<F.length;i++){ var f=F[i], ox=f.px*hw*sign, oz=f.pz*hw*sign;
+      rp.push(f.x+ox, f.hy, f.z+oz); rp.push(f.x+ox, f.hy+rail, f.z+oz); vc+=2; }
+    for(var i=0;i<F.length-1;i++){ var a=base+i*2, b=base+(i+1)*2; ri.push(a,a+1,b, a+1,b+1,b); }
+  }
+  railSide(1); railSide(-1);
+  var rg=new T.BufferGeometry(); rg.setAttribute('position',new T.Float32BufferAttribute(rp,3)); rg.setIndex(ri); rg.computeVertexNormals();
+  grp.add(new T.Mesh(rg,new T.MeshStandardMaterial({color:0x8a93a3,roughness:0.55,metalness:0.35,side:T.DoubleSide})));
+  // ---- PILIERS (colonnes au sol) ----
+  var pr=Math.min(Math.max(hw*0.45,0.7),2.2);
+  var pierMat=new T.MeshStandardMaterial({color:0x4d535e,roughness:0.92,metalness:0.03});
+  function ptAt(d){ for(var i=1;i<cum.length;i++){ if(cum[i]>=d){ var t=(d-cum[i-1])/((cum[i]-cum[i-1])||1);
+    return { x:pts[i-1].x+(pts[i].x-pts[i-1].x)*t, z:pts[i-1].z+(pts[i].z-pts[i-1].z)*t, hy:hAt(d) }; } }
+    return { x:pts[pts.length-1].x, z:pts[pts.length-1].z, hy:hAt(d) }; }
+  var piers=0;
+  for(var d=Lr; d<Tlen-Lr+0.1; d+=28){ var q=ptAt(d); var colH=q.hy-deck; if(colH<1.2) continue;
+    var col=new T.Mesh(new T.CylinderGeometry(pr*0.8,pr,colH,10), pierMat); col.position.set(q.x,colH/2,q.z); grp.add(col);
+    var cap=new T.Mesh(new T.CylinderGeometry(pr*1.5,pr*0.9,0.8,10), pierMat); cap.position.set(q.x,colH+0.1,q.z); grp.add(cap); piers++; }
+  if(piers===0){ var q=ptAt(Tlen/2), colH=Math.max(q.hy-deck,1.2);
+    var col=new T.Mesh(new T.CylinderGeometry(pr*0.8,pr,colH,10), pierMat); col.position.set(q.x,colH/2,q.z); grp.add(col); }
+  return grp;
 }
 var __bridgeAnchor=null, __bridgeTick=0;
 function hide2DBridges(){
