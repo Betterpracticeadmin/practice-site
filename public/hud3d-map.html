@@ -1264,7 +1264,7 @@ function buildBridgeRibbon(coords, widthM, aLon, aLat){
   geo.setIndex(idx); geo.computeVertexNormals();
   return new T.Mesh(geo, new T.MeshStandardMaterial({color:0x4a5160, roughness:0.92, metalness:0.0, side:T.DoubleSide}));
 }
-var __bridgeAnchor=null;
+var __bridgeAnchor=null, __bridgeTick=0;
 function hide2DBridges(){
   if(window.__bridge2dHidden) return;
   try{ var st=map.getStyle(); if(!st||!st.layers) return;
@@ -1274,22 +1274,27 @@ function hide2DBridges(){
 function refreshBridges3D(force){
   if(!window.__geo3d || !window.THREE || !map.querySourceFeatures) return;
   var c=map.getCenter();
-  if(!force && __bridgeAnchor){ var ddx=(c.lng-__bridgeAnchor.lng)*88000, ddy=(c.lat-__bridgeAnchor.lat)*111320; if(ddx*ddx+ddy*ddy < 250*250) return; }
+  __bridgeTick++;
+  if(!force && __bridgeAnchor){
+    var ddx=(c.lng-__bridgeAnchor.lng)*88000, ddy=(c.lat-__bridgeAnchor.lat)*111320;
+    var moved = (ddx*ddx+ddy*ddy >= 200*200);
+    if(!moved && (__bridgeTick % 3 !== 0)) return;   // rebuild si on bouge >200 m, sinon periodique (tuiles tardives)
+  }
   var feats=[];
   try{ feats=map.querySourceFeatures(vectorSourceId(),{sourceLayer:'transportation',filter:['==',['get','brunnel'],'bridge']}); }
   catch(_){ try{ feats=map.querySourceFeatures(vectorSourceId(),{sourceLayer:'transportation'}); }catch(e){} }
   if(!feats) return;
   __bridgeAnchor={lng:c.lng,lat:c.lat};
-  var mLon=111320*Math.cos(c.lat*Math.PI/180), mLat=111320, R=3000, count=0, seen={};
+  var count=0, seen={};
   window.__geo3d.clear('bridge');
-  for(var i=0;i<feats.length && count<80;i++){ var f=feats[i];
+  for(var i=0;i<feats.length && count<400;i++){ var f=feats[i];   // TOUS les ponts des tuiles chargees (partout)
     if(!f.properties || f.properties.brunnel!=='bridge') continue;
     var g=f.geometry; if(!g) continue;
     var parts = g.type==='LineString' ? [g.coordinates] : (g.type==='MultiLineString' ? g.coordinates : null);
     if(!parts) continue;
     var wm=roadMetersForClass(f.properties.class, f.properties.ramp); if(!wm) continue;
     for(var pi=0; pi<parts.length; pi++){ var coords=parts[pi]; if(!coords||coords.length<2) continue;
-      var a=coords[0], ex=(a[0]-c.lng)*mLon, ey=(a[1]-c.lat)*mLat; if(ex*ex+ey*ey > R*R) continue;
+      var a=coords[0];
       var key=a[0].toFixed(5)+','+a[1].toFixed(5)+':'+coords.length; if(seen[key]) continue; seen[key]=1;
       var mesh=buildBridgeRibbon(coords, wm, a[0], a[1]); if(mesh){ window.__geo3d.add(mesh, a[0], a[1], 'bridge', 0); count++; }
     }
