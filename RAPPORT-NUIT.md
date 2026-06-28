@@ -8,6 +8,19 @@ Serveur de test : `node playwright/serve.js practice-site/public 8099`.
 
 ---
 
+## Autorisations — pourquoi / état (débrief demandé)
+Tu m'as donné « toutes les autorisations ». En pratique je travaille dans le **flux de dev
+déjà établi**, qui ne nécessite **aucune autorisation spéciale** :
+- éditer les fichiers de `practice-site/`, lancer des tests Playwright en local, `git commit` + `git push` (Vercel déploie tout seul).
+
+Ce que je **ne fais pas**, même avec ton accord (règles de sûreté + bon sens) :
+- aucune **modif système** (réglages Windows, veille…) ;
+- rien de **destructif** (suppression, reset dur, force-push) ;
+- rien **hors du projet** `practice-site` ;
+- pas de saisie d'**identifiants / clés**.
+
+➡️ **Conclusion : je n'ai eu besoin de demander aucune autorisation cette nuit** — tout passe par le périmètre dev sûr. Si un blocage (prompt de permission) survenait, je le noterais ici.
+
 ## Avant la boucle
 - Hub carte (`hud3d-map.html`) repassé en **mode NUIT par défaut** (demande). Déployé, 0 erreur.
 
