@@ -744,6 +744,7 @@ function applyTheme(night){
   if(night) darkenBasemap(); else lightenBasemap();
   themeBuildings(night); themeSky(night);
   document.documentElement.classList.toggle('hub-day', !night);
+  try{ fixBridgesTunnels(); }catch(_){}   // re-applique ponts/tunnels apres reset des couleurs du theme
 }
 /* ---- JOUR/NUIT AUTO selon le vrai lever/coucher du soleil (algorithme sunrise) ---- */
 function isDaytime(lat, lon, now){
@@ -812,6 +813,33 @@ function realRoadWidths(){
     try{ map.setPaintProperty(L.id,'line-width',expr); n++; }catch(_){}
   });
   window.__roadsReal=n;
+}
+/* ---------- PONTS / TUNNELS : superposition correcte ----------
+   2D MapLibre : les lignes sont posees au sol (pas d'elevation native). On utilise le tag
+   brunnel : PONTS dessines au-dessus avec un rebord d'ombre (effet tablier sureleve) ;
+   TUNNELS en pointilles attenues (souterrain -> ne chevauche plus les routes de surface). */
+function fixBridgesTunnels(){
+  if(!map||!map.getStyle) return;
+  var st; try{ st=map.getStyle(); }catch(_){ return; }
+  if(!st||!st.layers) return;
+  var night = !document.documentElement.classList.contains('hub-day');
+  var n=0;
+  st.layers.forEach(function(L){
+    if(L.type!=='line' || L['source-layer']!=='transportation') return;
+    var id=L.id, casing=/casing/.test(id);
+    if(id.indexOf('tunnel')===0){
+      try{ map.setPaintProperty(id,'line-opacity', casing?0.18:0.45); }catch(_){}      // souterrain attenue
+      if(!casing){ try{ map.setPaintProperty(id,'line-dasharray',[1.6,2.2]); }catch(_){} }   // pointilles
+      n++;
+    } else if(id.indexOf('bridge')===0 && casing){
+      try{ map.setPaintProperty(id,'line-color', night?'#05070c':'#27313f'); }catch(_){}  // ombre du tablier
+      try{ map.setPaintProperty(id,'line-opacity', 0.95); }catch(_){}
+      try{ map.setPaintProperty(id,'line-blur', 1.2); }catch(_){}
+      n++;
+    }
+  });
+  // la pile de couches du style place deja tunnel < route < pont : le pont passe au-dessus.
+  window.__bridgesFixed=n;
 }
 var camPadTop=260;
 function updatePad(){ try{ var el=map&&map.getContainer(); if(el) camPadTop=Math.round(el.clientHeight*CAM_PAD_FACTOR); }catch(_){} }
@@ -1213,8 +1241,8 @@ if(map){
     // (setVerticalFieldOfView) — contrairement a setFreeCameraOptions qui n'existe pas.
     try{ if(typeof map.setVerticalFieldOfView==='function') map.setVerticalFieldOfView(FOV); }catch(_){}
     try{ addBuildings3D(); }catch(_){}
-    try{ realRoadWidths(); }catch(_){}                     // routes a l'echelle reelle (metres)
-    try{ map.on('style.load', function(){ try{realRoadWidths();}catch(_){} }); }catch(_){}
+    try{ realRoadWidths(); fixBridgesTunnels(); }catch(_){}   // routes a l'echelle reelle + ponts/tunnels
+    try{ map.on('style.load', function(){ try{realRoadWidths(); fixBridgesTunnels();}catch(_){} }); }catch(_){}
     try{ applyTheme(opt.night); autoTheme(); }catch(_){}   // 1er rendu puis bascule AUTO jour/nuit (soleil)
     try{ setInterval(autoTheme, 60000); }catch(_){}        // re-verifie chaque minute (lever/coucher)
     try{ loadUnesco(); refreshPOIs(); setInterval(geo3dTick, 4000); }catch(_){}   // POIs + monuments UNESCO 3D + destination
