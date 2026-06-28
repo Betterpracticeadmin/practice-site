@@ -1,20 +1,33 @@
-# Compte rendu — nuit du 2026-06-26 08:10
+# Compte rendu de nuit — Practice OS (2026-06-28)
 
-Boucle autonome d'amelioration de Practice OS (priorite Hub 3D).
-Regles : chaque changement verifie Playwright (0 erreur) avant deploiement, 1 commit/changement, rien de casse deploye.
+Boucle autonome : tests de **tout Practice OS** (pas que le hub) + corrections de bugs.
+Règles : vérifier avant déploiement, 1 commit par correction, ne jamais déployer du cassé,
+rester dans `practice-site`, rien de destructif/système, ne corriger que des bugs vérifiables.
 
-## File de priorites
-1. Meteo : garder des emoticones coherentes dans la DA (capture Vitry-sur-Seine)
-2. Emojis boutons OBD2 / Mode Voiture au style icones maison  -> **FAIT**
-3. Hub 3D suit le vrai itineraire/GPS
-4. Ameliorer les visuels 3D des elements du Hub
-5. Corriger les bugs detectes
+Serveur de test : `node playwright/serve.js practice-site/public 8099`.
 
 ---
 
-## Iteration 1 — 2026-06-26 08:10  ✅ Emojis OBD2 / Mode Voiture
-**Probleme :** les boutons `.diag-open` (🔌 OBD2, 🚗 Mode Voiture) gardaient l'emoji natif colore, incoherent avec le reste de l'app (qui remplace les emojis par des icones SVG maison via le module daNothingIcons).
-**Cause :** (a) 🔌 et 🚗 absents de la map `ICONS` ; (b) le selecteur `.diag-open` absent de `LEAD` (donc scan() ne les traitait pas).
-**Fix :** ajout des 2 icones pixel-art maison + ajout de `.diag-open` au scan.
-**Verif Playwright :** boutons obdHomeBtn / carModeBtn / carObd -> `ni-svg` present, plus d'emoji natif, 0 erreur console.
-**Deploye :** oui (os.html).
+## Avant la boucle
+- Hub carte (`hud3d-map.html`) repassé en **mode NUIT par défaut** (demande). Déployé, 0 erreur.
+
+## Itération 1 — health check global (chargement + erreurs JS/console/4xx)
+Pages testées via Playwright (viewport iPad 1194×834, géoloc Paris accordée) :
+`os.html`, `hud.html`, `hud3d.html`, `hud3d-map.html`, `vision.html`, `obd.html`, `pulse.html`.
+
+**Résultat : TOUTES saines au chargement.**
+- 0 `pageerror` (aucune erreur JS fatale / de syntaxe)
+- 0 erreur console corrigeable
+- 0 ressource locale en 4xx
+
+Note `os.html` : seul 404 = `/api/tts` (API neurale ElevenLabs **absente du serveur statique
+local**, **présente sur Vercel** ; le code bascule proprement sur la voix navigateur en cas
+d'échec). → **Pas un bug.**
+
+**Aucun bug corrigeable trouvé à ce niveau.**
+
+### À faire (prochaines itérations)
+Vérifs plus profondes, page par page :
+- débordements de layout par panneau (comme le bug `#ck-tele` corrigé hier) ;
+- flux d'interaction clés (ouverture/fermeture vues, boutons, nav) ;
+- responsive (portrait/paysage iPad).
