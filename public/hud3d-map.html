@@ -1277,11 +1277,14 @@ function rbox(w,h,d,seg,rad){
      import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
      new GLTFLoader().load(CAR_GLB_URL, function(gltf){ ... remplacer this.car ... });
 */
-var CAR_GLB_URL = null;
+var CAR_GLB_URL = 'car-maybach.glb';   // Maybach (STL decime -> glb 0.68 Mo, 45k tris)
 
 (function(){
   var CARSCALE = 1.0;        // taille de la voiture (≈ metres) — ajuster si trop grosse/petite
   var CAR_YAW_OFFSET = 0;    // decalage d'orientation (radians) — mettre Math.PI si la voiture roule en marche arriere
+  var GLB_LIFT = 0.7;        // remonte le modele glb pour poser les roues au sol (tunable)
+  var GLB_YAW  = 0;          // oriente l'avant du modele glb (0 ; mettre Math.PI s'il est a l'envers)
+  var GLB_FLIP = false;      // mettre true si le modele glb apparait sur le toit/sous le sol
   var ACCENT = 0x2f7bff;     // accent anneau FSD (DA hub)
   function start(){
     var map = window.__hubMap, ml = window.maplibregl;
@@ -1339,7 +1342,25 @@ var CAR_GLB_URL = null;
         this.scene=new THREE.Scene();
         this.scene.add(new THREE.AmbientLight(0xffffff,1.15));
         var d=new THREE.DirectionalLight(0xffffff,1.5); d.position.set(40,-60,120); this.scene.add(d);
-        this.car=buildCar(); this.scene.add(this.car);
+        this.car=new THREE.Group(); this.scene.add(this.car);
+        var fallback=buildCar(); this.car.add(fallback);   // procedural en attendant / si echec du glb
+        if(CAR_GLB_URL){
+          var self=this;
+          import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js')
+            .then(function(mod){ new mod.GLTFLoader().load(CAR_GLB_URL, function(gltf){
+              try{
+                self.car.remove(fallback);                 // glb charge -> on retire le procedural
+                var holder=new THREE.Group();
+                var inner=gltf.scene;
+                inner.rotation.x = GLB_FLIP ? Math.PI/2 : -Math.PI/2;  // glb Z-up -> Y-up (convention hub)
+                inner.position.y = GLB_LIFT;               // pose les roues au sol
+                holder.add(inner);
+                holder.rotation.y = GLB_YAW;               // oriente l'avant
+                self.car.add(holder);
+              }catch(e){ self.car.add(fallback); }         // souci -> on remet le procedural
+            }, undefined, function(){ /* echec chargement -> on garde le procedural */ }); })
+            .catch(function(){});
+        }
         this.camera=new THREE.Camera();
         // pattern canonique MapLibre + Three : partage canvas + contexte WebGL de la carte.
         // (En WebGL software headless, Chromium peut logguer "different context type" -> sans
