@@ -1312,15 +1312,15 @@ function rbox(w,h,d,seg,rad){
      import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
      new GLTFLoader().load(CAR_GLB_URL, function(gltf){ ... remplacer this.car ... });
 */
-var CAR_GLB_URL = 'car-maybach.glb';   // Maybach (STL decime -> glb 0.68 Mo, 45k tris)
+var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/peinture/feux, Y-up)
 
 (function(){
-  var CARSCALE = 1.0;        // taille de la voiture (≈ metres) — ajuster si trop grosse/petite
-  var CAR_YAW_OFFSET = 0;    // decalage d'orientation (radians) — mettre Math.PI si la voiture roule en marche arriere
-  var GLB_LIFT = 0.7;        // remonte le modele glb pour poser les roues au sol (tunable)
-  var GLB_YAW  = 0;          // oriente l'avant du modele glb (0 ; mettre Math.PI s'il est a l'envers)
-  var GLB_FRONT = 1;         // quel bout (axe longueur) porte les PHARES blancs : 1 ou -1 (sinon feux inverses)
-  var GLB_FLIP = false;      // mettre true si le modele glb apparait sur le toit/sous le sol
+  var CARSCALE = 1.0;        // multiplicateur de taille global (1 = taille reelle TARGET_CAR_LEN)
+  var CAR_YAW_OFFSET = 0;    // decalage d'orientation (radians) cote rendu
+  var TARGET_CAR_LEN = 5.0;  // longueur reelle visee de la voiture (metres) — auto-mise a l'echelle
+  var GLB_LIFT = 0;          // ajuste la hauteur au sol (0 = roues au sol ; + pour remonter)
+  var GLB_YAW  = 0;          // oriente l'avant : 0 / Math.PI (marche arriere) / +-Math.PI/2 (de travers)
+  var GLB_FLIP = false;      // true si le modele apparait couche (glb exporte en Z-up)
   var ACCENT = 0x2f7bff;     // accent anneau FSD (DA hub)
   function start(){
     var map = window.__hubMap, ml = window.maplibregl;
@@ -1386,27 +1386,19 @@ var CAR_GLB_URL = 'car-maybach.glb';   // Maybach (STL decime -> glb 0.68 Mo, 45
             .then(function(mod){ new mod.GLTFLoader().load(CAR_GLB_URL, function(gltf){
               try{
                 self.car.remove(fallback);                 // glb charge -> on retire le procedural
+                var inner=gltf.scene;                       // glb Blender glTF : Y-up + VRAIS materiaux/feux
+                // auto-ajustement : echelle reelle (m) + centrage horizontal + roues au sol
+                var box=new THREE.Box3().setFromObject(inner);
+                var size=box.getSize(new THREE.Vector3()), ctr=box.getCenter(new THREE.Vector3());
+                var len=Math.max(size.x,size.z)||1, k=TARGET_CAR_LEN/len;
+                inner.scale.setScalar(k);
+                if(GLB_FLIP) inner.rotation.x=-Math.PI/2;   // secours si modele couche (Z-up)
+                inner.position.set(-ctr.x*k, -box.min.y*k + GLB_LIFT, -ctr.z*k);
                 var holder=new THREE.Group();
-                var inner=gltf.scene;
-                // --- feux : le STL n'a pas de couleurs, on ajoute des phares BLANCS (avant)
-                //     et des feux ROUGES (arriere) d'apres la bbox du modele (espace natif glb) ---
-                try{
-                  var bb=new THREE.Box3().setFromObject(inner);
-                  var frontY=GLB_FRONT>0?bb.max.y:bb.min.y, rearY=GLB_FRONT>0?bb.min.y:bb.max.y;
-                  var halfW=(bb.max.x-bb.min.x)*0.5, loZ=bb.min.z+(bb.max.z-bb.min.z)*0.32;
-                  var head=new THREE.MeshBasicMaterial({color:0xeaf2ff});   // phares froids
-                  var tail=new THREE.MeshBasicMaterial({color:0xff2a22});   // feux rouges
-                  var lg=new THREE.BoxGeometry(0.30,0.16,0.14);
-                  [-0.55,0.55].forEach(function(fx){
-                    var h=new THREE.Mesh(lg,head); h.position.set(fx*halfW, frontY, loZ); inner.add(h);
-                    var t=new THREE.Mesh(lg,tail); t.position.set(fx*halfW, rearY,  loZ); inner.add(t);
-                  });
-                }catch(_){}
-                inner.rotation.x = GLB_FLIP ? Math.PI/2 : -Math.PI/2;  // glb Z-up -> Y-up (convention hub)
-                inner.position.y = GLB_LIFT;               // pose les roues au sol
                 holder.add(inner);
-                holder.rotation.y = GLB_YAW;               // oriente l'avant
+                holder.rotation.y = (size.x>size.z?Math.PI/2:0) + GLB_YAW;  // longueur -> +Z, + ajust manuel
                 self.car.add(holder);
+                window.__carFit={len:+(len).toFixed(2),k:+k.toFixed(3),sx:+size.x.toFixed(2),sy:+size.y.toFixed(2),sz:+size.z.toFixed(2),mats:(gltf.parser&&gltf.parser.json&&gltf.parser.json.materials||[]).length};
               }catch(e){ self.car.add(fallback); }         // souci -> on remet le procedural
             }, undefined, function(){ /* echec chargement -> on garde le procedural */ }); })
             .catch(function(){});
