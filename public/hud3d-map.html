@@ -745,7 +745,41 @@ function applyTheme(night){
   themeBuildings(night); themeSky(night);
   document.documentElement.classList.toggle('hub-day', !night);
 }
-window.addEventListener('cockpit:night', function(e){ applyTheme(!!e.detail); });
+/* ---- JOUR/NUIT AUTO selon le vrai lever/coucher du soleil (algorithme sunrise) ---- */
+function isDaytime(lat, lon, now){
+  var rad=Math.PI/180, deg=180/Math.PI;
+  var start=Date.UTC(now.getUTCFullYear(),0,0);
+  var day=Math.floor((now-start)/86400000);
+  var lngHour=lon/15;
+  function ut(rising){
+    var t=day+((rising?6:18)-lngHour)/24;
+    var M=0.9856*t-3.289;
+    var L=M+1.916*Math.sin(M*rad)+0.020*Math.sin(2*M*rad)+282.634; L=((L%360)+360)%360;
+    var RA=Math.atan(0.91764*Math.tan(L*rad))*deg; RA=((RA%360)+360)%360;
+    RA+=(Math.floor(L/90)*90-Math.floor(RA/90)*90); RA/=15;
+    var sinDec=0.39782*Math.sin(L*rad), cosDec=Math.cos(Math.asin(sinDec));
+    var cosH=(Math.cos(90.833*rad)-sinDec*Math.sin(lat*rad))/(cosDec*Math.cos(lat*rad));
+    if(cosH>1||cosH<-1) return null;   // pas de lever/coucher (zone polaire)
+    var H=rising?360-Math.acos(cosH)*deg:Math.acos(cosH)*deg; H/=15;
+    var T=H+RA-0.06571*t-6.622;
+    var U=T-lngHour; return ((U%24)+24)%24;
+  }
+  var sr=ut(true), ss=ut(false);
+  var nowU=now.getUTCHours()+now.getUTCMinutes()/60+now.getUTCSeconds()/3600;
+  if(sr==null||ss==null) return null;
+  return (sr<ss) ? (nowU>=sr && nowU<ss) : (nowU>=sr || nowU<ss);
+}
+var __themeManual=false;   // true si l'utilisateur force le mode via le bouton (desactive l'auto)
+function autoTheme(){
+  if(__themeManual) return;
+  var la=(typeof LIVE!=='undefined'&&LIVE.lat!=null)?LIVE.lat:DEMO_POS.lat;
+  var lo=(typeof LIVE!=='undefined'&&LIVE.lon!=null)?LIVE.lon:DEMO_POS.lon;
+  var d=isDaytime(la,lo,new Date());
+  if(d===null) return;       // zone polaire -> on ne force pas
+  applyTheme(!d);            // jour (entre lever et coucher) -> theme jour ; sinon nuit
+}
+/* le bouton Jour/Nuit passe en MANUEL (desactive l'auto) */
+window.addEventListener('cockpit:night', function(e){ __themeManual=true; applyTheme(!!e.detail); });
 var camPadTop=260;
 function updatePad(){ try{ var el=map&&map.getContainer(); if(el) camPadTop=Math.round(el.clientHeight*CAM_PAD_FACTOR); }catch(_){} }
 window.addEventListener('resize', updatePad);
@@ -1043,7 +1077,8 @@ if(map){
     // (setVerticalFieldOfView) — contrairement a setFreeCameraOptions qui n'existe pas.
     try{ if(typeof map.setVerticalFieldOfView==='function') map.setVerticalFieldOfView(FOV); }catch(_){}
     try{ addBuildings3D(); }catch(_){}
-    try{ applyTheme(opt.night); }catch(_){}   // applique jour ou nuit selon le reglage
+    try{ applyTheme(opt.night); autoTheme(); }catch(_){}   // 1er rendu puis bascule AUTO jour/nuit (soleil)
+    try{ setInterval(autoTheme, 60000); }catch(_){}        // re-verifie chaque minute (lever/coucher)
     addPuck(DEMO_POS.lon, DEMO_POS.lat, 0);
     if(LIVE.routeCoords) applyRoute(LIVE.routeCoords);
     startFrame();
@@ -1284,6 +1319,7 @@ var CAR_GLB_URL = 'car-maybach.glb';   // Maybach (STL decime -> glb 0.68 Mo, 45
   var CAR_YAW_OFFSET = 0;    // decalage d'orientation (radians) — mettre Math.PI si la voiture roule en marche arriere
   var GLB_LIFT = 0.7;        // remonte le modele glb pour poser les roues au sol (tunable)
   var GLB_YAW  = 0;          // oriente l'avant du modele glb (0 ; mettre Math.PI s'il est a l'envers)
+  var GLB_FRONT = 1;         // quel bout (axe longueur) porte les PHARES blancs : 1 ou -1 (sinon feux inverses)
   var GLB_FLIP = false;      // mettre true si le modele glb apparait sur le toit/sous le sol
   var ACCENT = 0x2f7bff;     // accent anneau FSD (DA hub)
   function start(){
@@ -1352,6 +1388,20 @@ var CAR_GLB_URL = 'car-maybach.glb';   // Maybach (STL decime -> glb 0.68 Mo, 45
                 self.car.remove(fallback);                 // glb charge -> on retire le procedural
                 var holder=new THREE.Group();
                 var inner=gltf.scene;
+                // --- feux : le STL n'a pas de couleurs, on ajoute des phares BLANCS (avant)
+                //     et des feux ROUGES (arriere) d'apres la bbox du modele (espace natif glb) ---
+                try{
+                  var bb=new THREE.Box3().setFromObject(inner);
+                  var frontY=GLB_FRONT>0?bb.max.y:bb.min.y, rearY=GLB_FRONT>0?bb.min.y:bb.max.y;
+                  var halfW=(bb.max.x-bb.min.x)*0.5, loZ=bb.min.z+(bb.max.z-bb.min.z)*0.32;
+                  var head=new THREE.MeshBasicMaterial({color:0xeaf2ff});   // phares froids
+                  var tail=new THREE.MeshBasicMaterial({color:0xff2a22});   // feux rouges
+                  var lg=new THREE.BoxGeometry(0.30,0.16,0.14);
+                  [-0.55,0.55].forEach(function(fx){
+                    var h=new THREE.Mesh(lg,head); h.position.set(fx*halfW, frontY, loZ); inner.add(h);
+                    var t=new THREE.Mesh(lg,tail); t.position.set(fx*halfW, rearY,  loZ); inner.add(t);
+                  });
+                }catch(_){}
                 inner.rotation.x = GLB_FLIP ? Math.PI/2 : -Math.PI/2;  // glb Z-up -> Y-up (convention hub)
                 inner.position.y = GLB_LIFT;               // pose les roues au sol
                 holder.add(inner);
