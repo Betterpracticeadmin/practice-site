@@ -1375,6 +1375,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     var layer = {
       id:'ego-car-3d', type:'custom', renderingMode:'3d',
       onAdd:function(m, gl){
+        var self=this;
         this.scene=new THREE.Scene();
         this.scene.add(new THREE.AmbientLight(0xffffff,1.15));
         var d=new THREE.DirectionalLight(0xffffff,1.5); d.position.set(40,-60,120); this.scene.add(d);
@@ -1398,6 +1399,8 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
                 holder.add(inner);
                 holder.rotation.y = (size.x>size.z?Math.PI/2:0) + GLB_YAW;  // longueur -> +Z, + ajust manuel
                 self.car.add(holder);
+                // boost reflexions (metaux : roues/chrome/freins) sur tous les materiaux
+                inner.traverse(function(ob){ if(ob.isMesh&&ob.material){ (Array.isArray(ob.material)?ob.material:[ob.material]).forEach(function(mt){ if('envMapIntensity' in mt) mt.envMapIntensity=1.3; mt.needsUpdate=true; }); } });
                 window.__carFit={len:+(len).toFixed(2),k:+k.toFixed(3),sx:+size.x.toFixed(2),sy:+size.y.toFixed(2),sz:+size.z.toFixed(2),mats:(gltf.parser&&gltf.parser.json&&gltf.parser.json.materials||[]).length};
               }catch(e){ self.car.add(fallback); }         // souci -> on remet le procedural
             }, undefined, function(){ /* echec chargement -> on garde le procedural */ }); })
@@ -1409,6 +1412,14 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         //  effet sur appareil reel WebGL2. Sur device le rendu fonctionne.)
         this.renderer=new THREE.WebGLRenderer({canvas:m.getCanvas(),context:gl,antialias:true});
         this.renderer.autoClear=false;
+        // ENVIRONMENT MAP : sans reflexions, les materiaux METALLIQUES (roues, chrome, freins)
+        // s'affichent NOIRS/invisibles. RoomEnvironment (procedural) -> PMREM -> scene.environment.
+        try{
+          var pmrem=new THREE.PMREMGenerator(this.renderer);
+          import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/environments/RoomEnvironment.js')
+            .then(function(mod){ try{ self.scene.environment=pmrem.fromScene(new mod.RoomEnvironment(),0.04).texture; window.__env=true; }catch(_){}})
+            .catch(function(){});
+        }catch(_){}
         // matrices reutilisees chaque frame (pas de re-allocation -> evite la fuite/GC churn)
         this._mProj=new THREE.Matrix4();
         this._mModel=new THREE.Matrix4();
