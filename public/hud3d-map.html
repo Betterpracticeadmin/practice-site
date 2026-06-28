@@ -1272,7 +1272,7 @@ function buildBridgeRibbon(coords, widthM, aLon, aLat){
     di.push(k+1,k+3,n+1, k+3,n+3,n+1);    // cote D
   }
   var dg=new T.BufferGeometry(); dg.setAttribute('position',new T.Float32BufferAttribute(dp,3)); dg.setIndex(di); dg.computeVertexNormals();
-  grp.add(new T.Mesh(dg,new T.MeshStandardMaterial({color:0x5a6170,roughness:0.9,metalness:0.05,side:T.DoubleSide})));
+  grp.add(new T.Mesh(dg,new T.MeshStandardMaterial({color:0x8b95a4,emissive:0x2a3039,roughness:0.85,metalness:0.05,side:T.DoubleSide})));
   // ---- RAMBARDES (2 cotes) ----
   var rp=[], ri=[], vc=0;
   function railSide(sign){ var base=vc;
@@ -1282,10 +1282,10 @@ function buildBridgeRibbon(coords, widthM, aLon, aLat){
   }
   railSide(1); railSide(-1);
   var rg=new T.BufferGeometry(); rg.setAttribute('position',new T.Float32BufferAttribute(rp,3)); rg.setIndex(ri); rg.computeVertexNormals();
-  grp.add(new T.Mesh(rg,new T.MeshStandardMaterial({color:0x8a93a3,roughness:0.55,metalness:0.35,side:T.DoubleSide})));
+  grp.add(new T.Mesh(rg,new T.MeshStandardMaterial({color:0xb6bdc9,emissive:0x2c323b,roughness:0.5,metalness:0.4,side:T.DoubleSide})));
   // ---- PILIERS (colonnes au sol) ----
   var pr=Math.min(Math.max(hw*0.45,0.7),2.2);
-  var pierMat=new T.MeshStandardMaterial({color:0x4d535e,roughness:0.92,metalness:0.03});
+  var pierMat=new T.MeshStandardMaterial({color:0x767e8c,emissive:0x222730,roughness:0.9,metalness:0.04});
   function ptAt(d){ for(var i=1;i<cum.length;i++){ if(cum[i]>=d){ var t=(d-cum[i-1])/((cum[i]-cum[i-1])||1);
     return { x:pts[i-1].x+(pts[i].x-pts[i-1].x)*t, z:pts[i-1].z+(pts[i].z-pts[i-1].z)*t, hy:hAt(d) }; } }
     return { x:pts[pts.length-1].x, z:pts[pts.length-1].z, hy:hAt(d) }; }
@@ -1318,7 +1318,7 @@ function refreshBridges3D(force){
   catch(_){ try{ feats=map.querySourceFeatures(vectorSourceId(),{sourceLayer:'transportation'}); }catch(e){} }
   if(!feats) return;
   __bridgeAnchor={lng:c.lng,lat:c.lat};
-  var count=0, seen={};
+  var count=0, seen={}, anchors=[];
   window.__geo3d.clear('bridge');
   for(var i=0;i<feats.length && count<400;i++){ var f=feats[i];   // TOUS les ponts des tuiles chargees (partout)
     if(!f.properties || f.properties.brunnel!=='bridge') continue;
@@ -1329,10 +1329,10 @@ function refreshBridges3D(force){
     for(var pi=0; pi<parts.length; pi++){ var coords=parts[pi]; if(!coords||coords.length<2) continue;
       var a=coords[0];
       var key=a[0].toFixed(5)+','+a[1].toFixed(5)+':'+coords.length; if(seen[key]) continue; seen[key]=1;
-      var mesh=buildBridgeRibbon(coords, wm, a[0], a[1]); if(mesh){ window.__geo3d.add(mesh, a[0], a[1], 'bridge', 0); count++; }
+      var mesh=buildBridgeRibbon(coords, wm, a[0], a[1]); if(mesh){ window.__geo3d.add(mesh, a[0], a[1], 'bridge', 0); anchors.push([a[0],a[1]]); count++; }
     }
   }
-  window.__bridge3dCount=count;
+  window.__bridge3dCount=count; window.__bridgeAnchors=anchors;
   if(count>0) hide2DBridges();
 }
 function geo3dTick(){
