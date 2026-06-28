@@ -850,6 +850,7 @@ function applyRoute(coords){
   var data = (coords && coords.length>1)
     ? { type:'Feature', geometry:{ type:'LineString', coordinates:coords } }
     : { type:'FeatureCollection', features:[] };
+  try{ setDestinationPin(coords && coords.length>1 ? coords : null); }catch(_){}   // pin 3D a l'arrivee
   var src = map.getSource('practice-route');
   if(src){ src.setData(data); return; }
   try{
@@ -1101,6 +1102,75 @@ function updateState(dt){
 var opt = { map:true, night:true, sound:true, north:false, view:true };
 window.__hubOpt = opt;
 
+/* ---------- OBJETS GEO-3D : POIs + destination (fleches de manoeuvre = etape suivante) ---------- */
+var __lastRoute=null;
+function poiColor(cls){
+  cls=cls||'';
+  if(/fuel|charging/.test(cls)) return 0x39d0ff;
+  if(/restaurant|fast_food|cafe|food|bar|pub/.test(cls)) return 0xff8a3d;
+  if(/shop|mall|supermarket|store|commercial/.test(cls)) return 0xffd23d;
+  if(/bus|train|railway|subway|transit|airport/.test(cls)) return 0x4dff88;
+  if(/hospital|pharmacy|police|fire/.test(cls)) return 0xff4d5e;
+  if(/hotel|lodging/.test(cls)) return 0xb98cff;
+  if(/park|garden|pitch|sport/.test(cls)) return 0x6bd86b;
+  return 0x69e0ff;
+}
+function makePoiBeacon(color){
+  var T=window.THREE; if(!T) return null;
+  var g=new T.Group(); var mat=new T.MeshBasicMaterial({color:color});
+  var pole=new T.Mesh(new T.CylinderGeometry(0.18,0.18,5,8), mat); pole.position.y=2.5; g.add(pole);
+  var head=new T.Mesh(new T.SphereGeometry(1.0,16,12), mat); head.position.y=6; g.add(head);
+  var halo=new T.Mesh(new T.RingGeometry(1.5,2.1,28),
+    new T.MeshBasicMaterial({color:color,transparent:true,opacity:0.45,side:T.DoubleSide,depthWrite:false}));
+  halo.rotation.x=-Math.PI/2; halo.position.y=0.08; g.add(halo);
+  return g;
+}
+function makeDestPin(){
+  var T=window.THREE; if(!T) return null;
+  var g=new T.Group(); var col=0x2f7bff; var mat=new T.MeshBasicMaterial({color:col});
+  var pole=new T.Mesh(new T.CylinderGeometry(0.22,0.22,8,10), mat); pole.position.y=4; g.add(pole);
+  var ball=new T.Mesh(new T.SphereGeometry(1.6,18,14), mat); ball.position.y=9; g.add(ball);
+  var cone=new T.Mesh(new T.ConeGeometry(1.0,2.0,16), mat); cone.position.y=7.4; cone.rotation.x=Math.PI; g.add(cone);
+  for(var i=0;i<3;i++){ var ring=new T.Mesh(new T.RingGeometry(2.0+i*1.4,2.4+i*1.4,30),
+      new T.MeshBasicMaterial({color:col,transparent:true,opacity:0.40-i*0.10,side:T.DoubleSide,depthWrite:false}));
+    ring.rotation.x=-Math.PI/2; ring.position.y=0.06; g.add(ring); }
+  return g;
+}
+function vectorSourceId(){
+  try{ var s=map.getStyle().sources; for(var k in s){ if(s[k] && s[k].type==='vector') return k; } }catch(_){}
+  return 'openmaptiles';
+}
+function refreshPOIs(){
+  if(!window.__geo3d || !window.THREE || !map.querySourceFeatures) return;
+  var feats=[]; try{ feats=map.querySourceFeatures(vectorSourceId(),{sourceLayer:'poi'}); }catch(_){ }
+  if(!feats || !feats.length) return;
+  var c=map.getCenter(), mLon=111320*Math.cos(c.lat*Math.PI/180), mLat=111320, list=[], seen={};
+  for(var i=0;i<feats.length;i++){ var f=feats[i]; if(!f.geometry||f.geometry.type!=='Point')continue;
+    var lon=f.geometry.coordinates[0], lat=f.geometry.coordinates[1];
+    var key=lon.toFixed(5)+','+lat.toFixed(5); if(seen[key])continue; seen[key]=1;
+    var dx=(lon-c.lng)*mLon, dy=(lat-c.lat)*mLat;
+    list.push({lon:lon,lat:lat,cls:(f.properties&&f.properties.class)||'',d2:dx*dx+dy*dy});
+  }
+  list.sort(function(a,b){return a.d2-b.d2;});
+  window.__geo3d.clear('poi');
+  var N=Math.min(18,list.length);
+  for(var j=0;j<N;j++){ window.__geo3d.add(makePoiBeacon(poiColor(list[j].cls)), list[j].lon, list[j].lat, 'poi'); }
+  window.__poiCount=N;
+}
+function setDestinationPin(coords){
+  if(coords) __lastRoute=coords;
+  if(!window.__geo3d || !window.THREE) return;
+  window.__geo3d.clear('dest');
+  var rc=__lastRoute; if(!rc||rc.length<1) return;
+  var d=rc[rc.length-1];
+  window.__geo3d.add(makeDestPin(), d[0], d[1], 'dest');
+  window.__destSet=true;
+}
+function geo3dTick(){
+  try{ refreshPOIs(); }catch(_){}
+  try{ if(__lastRoute && window.__geo3d && window.__geo3d.count('dest')===0) setDestinationPin(); }catch(_){}
+}
+
 /* ---------- demarrage carte ---------- */
 if(map){
   map.on('load', function(){
@@ -1114,6 +1184,7 @@ if(map){
     try{ map.on('style.load', function(){ try{realRoadWidths();}catch(_){} }); }catch(_){}
     try{ applyTheme(opt.night); autoTheme(); }catch(_){}   // 1er rendu puis bascule AUTO jour/nuit (soleil)
     try{ setInterval(autoTheme, 60000); }catch(_){}        // re-verifie chaque minute (lever/coucher)
+    try{ refreshPOIs(); setInterval(geo3dTick, 4000); }catch(_){}   // POIs 3D + maj pin destination
     addPuck(DEMO_POS.lon, DEMO_POS.lat, 0);
     if(LIVE.routeCoords) applyRoute(LIVE.routeCoords);
     startFrame();
@@ -1331,6 +1402,7 @@ window.__hubMap = map;
    Constantes de calage faciles a ajuster sur appareil : CARSCALE / CAR_YAW_OFFSET.
    ============================================================ */
 import * as THREE from 'three';
+window.THREE = THREE;   // expose THREE au script classique (builders POIs/destination)
 /* RoundedBoxGeometry : arêtes arrondies facon Cybertruck (port hud3d.html).
    Si l'addon ne charge pas (CDN/bundle), repli automatique sur BoxGeometry. */
 let RoundedBoxGeometry = null;
@@ -1479,6 +1551,20 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         this._mModel=new THREE.Matrix4();
         this._mTmp=new THREE.Matrix4();
         window.__car3d=true;
+        // --- SYSTEME GEO-3D reutilisable : pose des objets 3D a une position GPS (POIs,
+        //     destination, fleches de manoeuvre). 2e scene rendue avec origine = centre carte ;
+        //     chaque objet positionne en METRES relatifs a l'origine (modeles Y-up). ---
+        this.geoScene=new THREE.Scene();
+        this.geoScene.add(new THREE.AmbientLight(0xffffff,1.25));
+        var gd=new THREE.DirectionalLight(0xffffff,1.1); gd.position.set(30,-50,80); this.geoScene.add(gd);
+        this.geoReg=[];
+        var gself=this;
+        window.__geo3d={
+          add:function(obj,lon,lat,kind,elev){ gself.geoScene.add(obj); gself.geoReg.push({obj:obj,lon:lon,lat:lat,kind:kind||'',elev:elev||0}); return obj; },
+          clear:function(kind){ gself.geoReg=gself.geoReg.filter(function(r){ if(kind&&r.kind!==kind)return true; gself.geoScene.remove(r.obj); return false; }); },
+          count:function(kind){ return gself.geoReg.filter(function(r){return !kind||r.kind===kind;}).length; }
+        };
+        window.__geo3dReady=true;
       },
       render:function(gl, args){
         var pos=window.__carPos; if(!pos){ var c=map.getCenter(); pos={lon:c.lng,lat:c.lat,bearing:0}; }
@@ -1501,6 +1587,21 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         this.camera.projectionMatrix=this._mProj.fromArray(mat).multiply(l);
         this.renderer.resetState();
         this.renderer.render(this.scene,this.camera);
+        // --- 2e passe : objets GEO-3D (POIs / destination / fleches), origine = centre carte ---
+        if(this.geoReg && this.geoReg.length){
+          var oc=map.getCenter();
+          var oM=ml.MercatorCoordinate.fromLngLat([oc.lng,oc.lat],0), gs=oM.meterInMercatorCoordinateUnits();
+          var mLat=111320, mLon=111320*Math.cos(oc.lat*Math.PI/180);
+          for(var gi=0;gi<this.geoReg.length;gi++){ var r=this.geoReg[gi];
+            r.obj.position.set((r.lon-oc.lng)*mLon, r.elev||0, -(r.lat-oc.lat)*mLat);
+          }
+          var gL=this._mModel.makeTranslation(oM.x,oM.y,oM.z)
+            .multiply(this._mTmp.makeScale(gs,-gs,gs))
+            .multiply(this._mTmp.makeRotationX(Math.PI/2));
+          this.camera.projectionMatrix=this._mProj.fromArray(mat).multiply(gL);
+          this.renderer.resetState();
+          this.renderer.render(this.geoScene,this.camera);
+        }
         map.triggerRepaint();
       }
     };
