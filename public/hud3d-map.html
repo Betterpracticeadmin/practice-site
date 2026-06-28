@@ -1488,12 +1488,20 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         this.scene.add(new THREE.AmbientLight(0xffffff,1.15));
         var d=new THREE.DirectionalLight(0xffffff,1.5); d.position.set(40,-60,120); this.scene.add(d);
         this.car=new THREE.Group(); this.scene.add(this.car);
-        var fallback=buildCar(); this.car.add(fallback);   // procedural en attendant / si echec du glb
+        var fallback=buildCar(); fallback.visible=false; this.car.add(fallback);  // cache : on ne montre PAS l'ancienne voiture
+        var fbTimer=null;
         if(CAR_GLB_URL){
+          fbTimer=setTimeout(function(){ try{ fallback.visible=true; }catch(_){} }, 9000);  // secours seulement si glb tres lent
           var self=this;
-          import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js')
-            .then(function(mod){ new mod.GLTFLoader().load(CAR_GLB_URL, function(gltf){
+          Promise.all([
+            import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js'),
+            import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/meshopt_decoder.module.js')
+          ]).then(function(mods){
+            var loader=new mods[0].GLTFLoader();
+            try{ loader.setMeshoptDecoder(mods[1].MeshoptDecoder); }catch(_){}   // glb compresse meshopt
+            loader.load(CAR_GLB_URL, function(gltf){
               try{
+                if(fbTimer) clearTimeout(fbTimer);          // glb arrive a temps -> pas de placeholder
                 self.car.remove(fallback);                 // glb charge -> on retire le procedural
                 var inner=gltf.scene;                       // glb Blender glTF : Y-up + VRAIS materiaux/feux
                 // auto-ajustement : echelle reelle (m) + centrage horizontal + roues au sol
@@ -1528,9 +1536,9 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
                 }catch(e){ window.__mirror='err:'+(e&&e.message); } }
                 try{ window.__carRoot=self.car; window.__scene=self.scene; window.THREE=THREE; }catch(_){}  // debug
                 window.__carFit={len:+(len).toFixed(2),k:+k.toFixed(3),sx:+size.x.toFixed(2),sy:+size.y.toFixed(2),sz:+size.z.toFixed(2),mats:(gltf.parser&&gltf.parser.json&&gltf.parser.json.materials||[]).length};
-              }catch(e){ self.car.add(fallback); }         // souci -> on remet le procedural
-            }, undefined, function(){ /* echec chargement -> on garde le procedural */ }); })
-            .catch(function(){});
+              }catch(e){ try{ fallback.visible=true; }catch(_){} }   // souci -> on montre le procedural
+            }, undefined, function(){ try{ if(fbTimer)clearTimeout(fbTimer); fallback.visible=true; }catch(_){} }); })   // echec -> placeholder
+            .catch(function(){ try{ fallback.visible=true; }catch(_){} });
         }
         this.camera=new THREE.Camera();
         // pattern canonique MapLibre + Three : partage canvas + contexte WebGL de la carte.
