@@ -2749,9 +2749,7 @@
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
   /* ---- three navigation views: Normal (map) · HUD (Practice Vision) · Pulse ---- */
   var currentView='normal';
-  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud3d-map.html?embed=1&mode='+mode); $('hudOv').classList.add('show');
-    try{ if(f&&f.contentWindow) f.contentWindow.postMessage({type:'resume'},'*'); }catch(e){}   // hub deja chaud -> reprend + recadre + relocalise
-    setTimeout(function(){postHudMode();postHudRoute();postHudData();},250); }
+  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud3d-map.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(function(){postHudMode();postHudRoute();postHudData();},700); }
   function postHudMode(){ var f=$('hudFrame'); if(f&&f.contentWindow&&$('hudOv')&&$('hudOv').classList.contains('show')){ try{f.contentWindow.postMessage({type:'mode',mode:mode},'*');}catch(e){} } }
   /* envoi recurrent de la manoeuvre courante au Hub 3D (pour sortir du mode demo) */
   function postHudData(){ var f=$('hudFrame'); if(!f||!f.contentWindow||!$('hudOv')||!$('hudOv').classList.contains('show'))return;
@@ -2762,13 +2760,7 @@
       instr:($('mvStreet')?($('mvStreet').textContent||'—'):'—'),
       arrow:($('mvArrow')?($('mvArrow').textContent||'↑'):'↑'),
       eta:($('navEta')?(($('navEta').textContent||'').replace(/\s*[0-9]+%\s*$/,'').trim()):'') },'*'); }catch(e){} }
-  function closeHud(){ $('hudOv').classList.remove('show'); var f=$('hudFrame');
-    try{ if(f&&f.contentWindow) f.contentWindow.postMessage({type:'pause'},'*'); }catch(e){} }   // garde le hub CHAUD (pas de rechargement) + le met au repos -> reouverture instantanee
-  // PRECHARGEMENT : charge le hub en tache de fond a l'inactivite puis le met en pause,
-  // pour que la 1re ouverture soit elle aussi quasi instantanee (assets deja telecharges).
-  function preloadHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')){ f.setAttribute('src','/hud3d-map.html?embed=1&mode='+mode);
-    f.addEventListener('load', function(){ try{ if(!$('hudOv').classList.contains('show') && f.contentWindow) f.contentWindow.postMessage({type:'pause'},'*'); }catch(e){} }, {once:true}); } }
-  try{ if('requestIdleCallback' in window) requestIdleCallback(function(){ preloadHud(); }, {timeout:5000}); else setTimeout(preloadHud, 3000); }catch(e){ setTimeout(preloadHud, 3000); }
+  function closeHud(){ $('hudOv').classList.remove('show'); var f=$('hudFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
   function openPulse(){ var f=$('pulseFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/pulse.html'); $('pulseOv').classList.add('show'); setTimeout(postPulseData,600); }
   function closePulse(){ $('pulseOv').classList.remove('show'); var f=$('pulseFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
   function postPulseData(){ var f=$('pulseFrame'); if(!f||!f.contentWindow||!$('pulseOv').classList.contains('show'))return;
