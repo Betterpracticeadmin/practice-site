@@ -379,6 +379,55 @@ var DAMP_PITCH     = 2.6;    // transition pitch (douce)
 var TURN_LOOKAHEAD = 120;    // m : distance sous laquelle on commence a anticiper
 var TURN_BIAS_MAX  = 12;     // deg : biais maximal de cap (a 0 m de la manoeuvre)
 
+/* ============================================================
+   MODES DE CONDUITE — chaque mode a sa PROPRE personnalite.
+   Le mode ne change pas que l'apparence : il pilote TOUTE la strategie
+   (vitesse cible, accel/freinage, maniere d'aborder les virages, intersections,
+   marges de securite, fluidite, distances de suivi, anticipation, trajectoire)
+   -> cote RESSENTI camera (immediat, en conduite reelle) ET conduite SIMULEE (demo).
+   Bloc 'sim' = conduite autonome : vmax(km/h), accel/brake(m/s2), latG(g lateral->vitesse
+   en virage), anticip(m), racing(0..1 trajectoire de corde), inter(0..1 prudence carrefour),
+   gap(distance de suivi), jerk(brusquerie). ============================================ */
+var DRIVE_MODES = {
+  copilot:{ label:'Copilot', ahead:[7,18], pitch:[50,56], maxPitch:68, zoom:[20.4,19.4,18.8], spd:[15,50,110],
+    damp:{pos:4.0,rot:2.8,zoom:2.8,pitch:2.4}, turn:{look:140,bias:11}, fov:72, pad:0.13,
+    sim:{ vmax:90, accel:1.6, brake:2.2, latG:2.6, anticip:95, racing:0.15, inter:0.7, gap:1.0, jerk:1.2 } },
+  learning:{ label:'Apprentissage', ahead:[6,13], pitch:[48,53], maxPitch:64, zoom:[20.6,19.9,19.3], spd:[12,40,90],
+    damp:{pos:3.1,rot:2.1,zoom:2.2,pitch:1.9}, turn:{look:175,bias:9}, fov:68, pad:0.14,
+    sim:{ vmax:55, accel:1.0, brake:1.6, latG:1.8, anticip:135, racing:0.0, inter:1.0, gap:1.5, jerk:0.7 } },
+  gt:{ label:'GT', ahead:[9,22], pitch:[52,59], maxPitch:72, zoom:[20.0,19.0,18.2], spd:[18,60,140],
+    damp:{pos:4.6,rot:3.2,zoom:3.2,pitch:2.8}, turn:{look:125,bias:12}, fov:76, pad:0.12,
+    sim:{ vmax:150, accel:2.4, brake:3.0, latG:3.2, anticip:105, racing:0.30, inter:0.6, gap:0.9, jerk:1.0 } },
+  performance:{ label:'Performance', ahead:[8,24], pitch:[54,61], maxPitch:74, zoom:[20.0,18.8,18.0], spd:[20,70,160],
+    damp:{pos:6.0,rot:4.6,zoom:4.0,pitch:3.6}, turn:{look:105,bias:14}, fov:80, pad:0.11,
+    sim:{ vmax:185, accel:3.3, brake:4.6, latG:4.3, anticip:78, racing:0.55, inter:0.45, gap:0.7, jerk:2.1 } },
+  ultra:{ label:'Ultra', ahead:[10,28], pitch:[56,64], maxPitch:78, zoom:[19.6,18.4,17.6], spd:[25,90,200],
+    damp:{pos:7.6,rot:6.2,zoom:5.0,pitch:4.4}, turn:{look:88,bias:16}, fov:84, pad:0.10,
+    sim:{ vmax:235, accel:4.6, brake:6.2, latG:5.6, anticip:60, racing:0.85, inter:0.30, gap:0.5, jerk:3.6 } },
+  night:{ label:'Nuit', ahead:[6,15], pitch:[49,54], maxPitch:66, zoom:[20.6,19.8,19.2], spd:[12,45,95],
+    damp:{pos:3.4,rot:2.4,zoom:2.4,pitch:2.1}, turn:{look:160,bias:10}, fov:70, pad:0.13,
+    sim:{ vmax:70, accel:1.2, brake:1.8, latG:2.0, anticip:120, racing:0.05, inter:0.9, gap:1.3, jerk:0.8 } }
+};
+var MODE_ALIAS = { magma:'performance', confort:'copilot', comfort:'copilot', eco:'learning', sport:'performance', track:'ultra' };
+var ACTIVE_MODE='copilot', SIM=DRIVE_MODES.copilot.sim;
+function applyDriveMode(mode){
+  var key = DRIVE_MODES[mode] ? mode : ((MODE_ALIAS[mode] && DRIVE_MODES[MODE_ALIAS[mode]]) ? MODE_ALIAS[mode] : 'copilot');
+  var m = DRIVE_MODES[key]; ACTIVE_MODE=key;
+  AHEAD_SLOW=m.ahead[0]; AHEAD_FAST=m.ahead[1];
+  PITCH_SLOW=m.pitch[0]; PITCH_FAST=m.pitch[1]; PITCH=(m.pitch[0]+m.pitch[1])/2; MAX_PITCH=m.maxPitch;
+  ZOOM_SLOW=m.zoom[0]; ZOOM_MID=m.zoom[1]; ZOOM_FAST=m.zoom[2];
+  SPD_SLOW=m.spd[0]; SPD_MID=m.spd[1]; SPD_FAST=m.spd[2];
+  DAMP_POS=m.damp.pos; DAMP_ROT=m.damp.rot; DAMP_ZOOM=m.damp.zoom; DAMP_PITCH=m.damp.pitch;
+  TURN_LOOKAHEAD=m.turn.look; TURN_BIAS_MAX=m.turn.bias;
+  FOV=m.fov; CAM_PAD_FACTOR=m.pad; SIM=m.sim;
+  try{ if(map){ if(map.setMaxPitch) map.setMaxPitch(MAX_PITCH); if(map.setVerticalFieldOfView) map.setVerticalFieldOfView(FOV); } }catch(_){}
+  try{ if(typeof updatePad==='function') updatePad(); }catch(_){}
+  window.__driveMode=ACTIVE_MODE; window.__driveSim=SIM;
+  window.__driveCam={ fov:FOV, dampPos:DAMP_POS, dampRot:DAMP_ROT, aheadFast:AHEAD_FAST, zoomSlow:ZOOM_SLOW, pitchFast:PITCH_FAST, look:TURN_LOOKAHEAD };
+}
+var INIT_MODE='copilot'; try{ var _mm=new URLSearchParams(location.search).get('mode'); if(_mm) INIT_MODE=_mm; }catch(_){}
+applyDriveMode(INIT_MODE);   // fixe les constantes selon le mode AVANT la creation de la carte
+
 /* --- MODE LIBRE / SUIVI ---
    Quand l'utilisateur manipule la carte (geste -> e.originalEvent), on passe
    en LIBRE : la boucle cesse de piloter la camera. Le bouton RECENTRER
@@ -401,6 +450,7 @@ var LIVE = {
   navOn:false, navDist:0, navText:'', navArrow:'', navTurn:0,
   eta:null, limit:null, routeCoords:null
 };
+var realGpsSeen=false;   // true des qu'une VRAIE position arrive -> la conduite simulee s'arrete
 
 function liveFresh(){ return LIVE.active && (performance.now()-LIVE.lastGps) < LIVE_TIMEOUT; }
 
@@ -461,6 +511,8 @@ function offsetForwardInto(lat, lon, bearingDeg, distM, out){
    la carte s'oriente toujours dans la direction de marche (route devant = haut). */
 function feedPosition(lat,lon,heading,spd){
   var now=performance.now();
+  // 1er vrai GPS apres la conduite simulee -> on efface l'etat simu pour re-caler net sur la position reelle
+  if(realGpsSeen && LIVE._sim){ LIVE._sim=false; LIVE.lat=null; LIVE.lon=null; LIVE.prevLat=null; LIVE._far=0; wasLive=false; }
   if(typeof lat==='number' && typeof lon==='number' && isFinite(lat) && isFinite(lon)){
     // GARDE ANTI-TELEPORTATION : rejette une position trop eloignee arrivee trop vite
     // (point GPS errone, ou source qui renvoie une vieille position = "position d'hier").
@@ -494,6 +546,7 @@ window.addEventListener('message', function(e){
                 : (typeof d.maxspeed==='number') ? d.maxspeed : null;
         if(lim!=null && isFinite(lim) && lim>0) LIVE.limit = lim;
         if(typeof d.acc==='number') LIVE.acc = d.acc;
+        realGpsSeen=true;                                 // vraie position de l'appareil -> stoppe la simu
         feedPosition(d.lat, d.lon, d.heading, d.speed);   // cap deduit du mouvement si absent
         break;
       }
@@ -516,7 +569,7 @@ window.addEventListener('message', function(e){
         applyRoute(LIVE.routeCoords);
         break;
       }
-      case 'mode':      { if(typeof d.mode==='string') HUB3D.mode = d.mode; break; }
+      case 'mode':      { if(typeof d.mode==='string'){ HUB3D.mode = d.mode; applyDriveMode(d.mode); } break; }
       case 'northlock':
       default: break;
     }
@@ -528,15 +581,16 @@ window.addEventListener('message', function(e){
    En iframe (os.html) le GPS arrive aussi par postMessage ; les deux
    alimentent LIVE. Demande l'autorisation de localisation au navigateur.
    ============================================================ */
-if(navigator.geolocation && navigator.geolocation.watchPosition){
-  try{
-    navigator.geolocation.watchPosition(function(pos){
-      var c=pos && pos.coords; if(!c) return;
-      if(typeof c.accuracy==='number') LIVE.acc=c.accuracy;
-      feedPosition(c.latitude, c.longitude, c.heading, c.speed);   // cap reel ou deduit du mouvement
-    }, function(){ /* refus/erreur loc -> on reste en demo, sans alarme */ },
-    { enableHighAccuracy:true, maximumAge:2000, timeout:20000 });
-  }catch(e){}
+if(navigator.geolocation){
+  // FIX IMMEDIAT : a CHAQUE ouverture/refresh on centre sur la position EXACTE de l'appareil
+  // le plus vite possible (getCurrentPosition force une mesure fraiche, maximumAge:0). Puis suivi continu.
+  var onGeo=function(pos){ var c=pos&&pos.coords; if(!c) return; if(typeof c.accuracy==='number') LIVE.acc=c.accuracy;
+    realGpsSeen=true; feedPosition(c.latitude, c.longitude, c.heading, c.speed); };
+  try{ navigator.geolocation.getCurrentPosition(onGeo, function(){}, { enableHighAccuracy:true, maximumAge:0, timeout:15000 }); }catch(e){}
+  if(navigator.geolocation.watchPosition){
+    try{ navigator.geolocation.watchPosition(onGeo, function(){ /* refus/erreur -> demo, sans alarme */ },
+      { enableHighAccuracy:true, maximumAge:1500, timeout:20000 }); }catch(e){}
+  }
 }
 
 /* ============================================================
@@ -1009,6 +1063,101 @@ window.__hubRecenter = recenter;
 
 // position cible de conduite : LIVE -> GPS reel ; DEMO -> deplacement anime.
 var demoT=0;
+/* ============================================================
+   CONDUITE AUTONOME (DEMO) — la voiture roule SEULE selon le MODE.
+   Active uniquement TANT QU'AUCUN vrai GPS n'est recu (realGpsSeen=false).
+   Suit l'itineraire si present, sinon un trajet genere sur le reseau routier.
+   Toute la strategie vient du profil SIM du mode : vitesse cible (vmax + reduction
+   en virage selon latG), accel/freinage, anticipation, prudence carrefour, trajectoire
+   de corde (racing line). La camera + le cockpit suivent via LIVE (comme un vrai GPS).
+   ============================================================ */
+var simPath=null, simLen=0, simS=0, simV=0, simTried=0, simReady=false;
+function pathFromCoords(coords){
+  if(!coords||coords.length<2) return null;
+  var pts=coords.map(function(c){ return {lon:c[0], lat:c[1]}; });
+  var cum=[0]; for(var i=1;i<pts.length;i++){ cum[i]=cum[i-1]+distMeters(pts[i-1].lat,pts[i-1].lon,pts[i].lat,pts[i].lon); }
+  return { pts:pts, cum:cum, len:cum[cum.length-1] };
+}
+function generateDemoPath(){
+  if(!map||!map.querySourceFeatures) return null;
+  var feats=[]; try{ feats=map.querySourceFeatures(vectorSourceId(),{sourceLayer:'transportation'}); }catch(_){}
+  if(!feats||!feats.length) return null;
+  var segs=[];
+  feats.forEach(function(f){ var cl=(f.properties&&f.properties.class)||''; if(!/^(motorway|trunk|primary|secondary|tertiary|minor|street)/.test(cl)) return;
+    var g=f.geometry; if(!g) return; var parts=g.type==='LineString'?[g.coordinates]:(g.type==='MultiLineString'?g.coordinates:null); if(!parts) return;
+    parts.forEach(function(c){ if(c&&c.length>=2) segs.push(c); }); });
+  if(!segs.length) return null;
+  function key(p){ return p[0].toFixed(5)+','+p[1].toFixed(5); }
+  var endIndex={};
+  segs.forEach(function(s,i){ [key(s[0]),key(s[s.length-1])].forEach(function(k){ (endIndex[k]=endIndex[k]||[]).push(i); }); });
+  var best=-1,bestD=1e18,bestRev=false;
+  segs.forEach(function(s,i){ var a=s[0],b=s[s.length-1];
+    var da=distMeters(DEMO_POS.lat,DEMO_POS.lon,a[1],a[0]); if(da<bestD){bestD=da;best=i;bestRev=false;}
+    var db=distMeters(DEMO_POS.lat,DEMO_POS.lon,b[1],b[0]); if(db<bestD){bestD=db;best=i;bestRev=true;} });
+  if(best<0) return null;
+  var used={}, path=(bestRev?segs[best].slice().reverse():segs[best].slice()); used[best]=1;
+  var total=0; for(var i=1;i<path.length;i++) total+=distMeters(path[i-1][1],path[i-1][0],path[i][1],path[i][0]);
+  var guard=0;
+  while(total<2500 && guard++<500){
+    var endP=path[path.length-1], prevP=path[path.length-2]||endP, ek=key(endP), cand=endIndex[ek]||[];
+    var curBear=bearingBetween(prevP[1],prevP[0],endP[1],endP[0]);
+    var pick=-1,pickRev=false,pickStraight=-1e9;
+    for(var ci=0;ci<cand.length;ci++){ var si=cand[ci]; if(used[si]) continue; var sg=segs[si];
+      var rev=(key(sg[0])!==ek); var np=rev?sg.slice().reverse():sg; if(np.length<2) continue;
+      var nb=bearingBetween(np[0][1],np[0][0],np[1][1],np[1][0]);
+      var diff=Math.abs(((nb-curBear+540)%360)-180);
+      if(-diff>pickStraight){ pickStraight=-diff; pick=si; pickRev=rev; } }
+    if(pick<0) break;
+    used[pick]=1; var add=pickRev?segs[pick].slice().reverse():segs[pick].slice();
+    for(var ai=1;ai<add.length;ai++){ path.push(add[ai]); total+=distMeters(path[path.length-2][1],path[path.length-2][0],add[ai][1],add[ai][0]); }
+  }
+  if(total<150) return null;
+  return pathFromCoords(path);
+}
+function setSimPath(p){ simPath=p; simLen=p.len; simS=0; simV=0; simReady=true; window.__simLen=Math.round(p.len); }
+function ensureSimPath(){
+  if(simReady) return true; if(realGpsSeen) return false;
+  if(LIVE.routeCoords && LIVE.routeCoords.length>1){ var p=pathFromCoords(LIVE.routeCoords); if(p&&p.len>50){ setSimPath(p); return true; } }
+  if(simTried<30){ simTried++; var g=generateDemoPath(); if(g){ setSimPath(g); return true; } }
+  return false;
+}
+function posAtS(s){
+  var pts=simPath.pts, cum=simPath.cum; if(s<0)s=0; if(s>simLen)s=simLen-0.01;
+  for(var i=1;i<cum.length;i++){ if(cum[i]>=s){ var t=(s-cum[i-1])/((cum[i]-cum[i-1])||1);
+    return { lat:pts[i-1].lat+(pts[i].lat-pts[i-1].lat)*t, lon:pts[i-1].lon+(pts[i].lon-pts[i-1].lon)*t,
+             bearing:bearingBetween(pts[i-1].lat,pts[i-1].lon,pts[i].lat,pts[i].lon) }; } }
+  var n=pts.length-1; return { lat:pts[n].lat, lon:pts[n].lon, bearing:0 };
+}
+function curvatureDeg(s, span){ var a=posAtS(s), b=posAtS(s+span); return Math.abs(((b.bearing-a.bearing+540)%360)-180); }
+function simStep(dt){
+  if(!ensureSimPath()) return;
+  if(realGpsSeen){ simReady=false; return; }
+  var s=SIM;
+  var look=Math.max(15, s.anticip*(0.4+0.6*Math.min(1,simV/25)));   // anticipation : regarde + loin si rapide
+  var degAhead=curvatureDeg(simS, look);
+  var vCorner=s.vmax;
+  if(degAhead>6){                                                   // virage : vitesse limitee par latG
+    var rad=degAhead*Math.PI/180, R=look/Math.max(rad,0.01);
+    vCorner=Math.sqrt(s.latG*9.81*R)*3.6;
+    if(degAhead>45) vCorner*=(1-0.5*s.inter);                       // carrefour / virage serre : prudence du mode
+  }
+  var vT=Math.min(s.vmax, vCorner)/3.6, v=simV;                     // m/s
+  var a=(v<vT)?s.accel:-s.brake; v+=a*dt;
+  if(a>0&&v>vT)v=vT; if(a<0&&v<vT)v=vT; if(v<0)v=0;
+  simV=v; simS+=v*dt;
+  if(simS>=simLen){ simS=0; simV=Math.min(simV,8); }               // boucle le trajet
+  var p=posAtS(simS), lat=p.lat, lon=p.lon;
+  if(s.racing>0 && degAhead>8){                                     // trajectoire de corde
+    var sign=((((posAtS(simS+look).bearing-p.bearing)+540)%360)-180)>0?1:-1;
+    var off=offsetForward(lat,lon,p.bearing+sign*90, s.racing*2.2*Math.min(1,degAhead/40));
+    lat=off.lat; lon=off.lon;
+  }
+  LIVE._sim=true; LIVE.lat=lat; LIVE.lon=lon; LIVE.heading=p.bearing;
+  LIVE.speedKmh=simV*3.6; LIVE.active=true; LIVE.lastGps=performance.now();
+  window.__simDbg={ v:Math.round(simV*3.6), s:Math.round(simS), len:Math.round(simLen), mode:ACTIVE_MODE };
+}
+window.__simStep=function(d){ try{ simStep(d); }catch(_){} };   // test deterministe (bypass rAF bride)
+
 function driveTarget(dt){
   // FIX teleportation : une fois qu'on a recu une VRAIE position GPS, on la GARDE
   // (meme si le GPS a un trou > LIVE_TIMEOUT). On NE revient JAMAIS a la position demo
@@ -1028,6 +1177,7 @@ function frame(ts){
   var dt = Math.min(0.05, (ts-lastTs)/1000); lastTs = ts;
 
   if(map && mapReady){
+    if(!realGpsSeen) simStep(dt);          // conduite autonome demo (selon le mode) tant qu'aucun vrai GPS
     var tgt = driveTarget(dt);
     if(!camInit){
       cam.lon=tgt.lon; cam.lat=tgt.lat; cam.bearing=tgt.bearing;
