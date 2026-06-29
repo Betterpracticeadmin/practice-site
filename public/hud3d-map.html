@@ -583,16 +583,17 @@ function feedPosition(lat,lon,heading,spd){
 /* Statut de localisation visible (l'utilisateur sait OU EN EST le GPS au lieu d'une demo muette) */
 function setGeoStatus(kind, acc){
   var el=document.getElementById('geo-status'); if(!el) return;
-  var t='', cls='';
+  var t='', cls='', tip=' — clic droit / appui long sur la carte pour te placer';
   if(kind==='locating'){ t='📍 Localisation en cours…'; cls='loc'; }
   else if(kind==='found'){ var a=Math.round(acc||0);
-    t = (a<=60) ? ('📍 Position trouvée (±'+a+' m)') : ('📍 Position approximative ±'+a+' m (active le GPS précis)');
-    cls = (a<=60)?'ok':'warn'; }
-  else if(kind==='denied'){ t='⚠️ Localisation refusée — autorise-la pour ta position exacte'; cls='err'; }
-  else { t='⚠️ Position indisponible — mode démo'; cls='err'; }
+    if(a<=60){ t='📍 Position trouvée (±'+a+' m)'; cls='ok'; }
+    else { t='📍 ±'+a+' m (imprécis, PC sans GPS)'+tip; cls='warn'; } }
+  else if(kind==='manual'){ t='📍 Position définie manuellement'; cls='ok'; }
+  else if(kind==='denied'){ t='⚠️ Localisation refusée — autorise-la'+tip; cls='err'; }
+  else { t='⚠️ Position indisponible'+tip; cls='err'; }
   el.textContent=t; el.className=cls+' show';
   if(el._h){ clearTimeout(el._h); }
-  if(kind==='found' && (acc||0)<=60){ el._h=setTimeout(function(){ el.classList.remove('show'); }, 4500); }
+  if((kind==='found' && (acc||0)<=60) || kind==='manual'){ el._h=setTimeout(function(){ el.classList.remove('show'); }, 4500); }
 }
 
 window.addEventListener('message', function(e){
@@ -1583,6 +1584,21 @@ if(map){
     startFrame();
     try{ window.hideSplash&&window.hideSplash(); }catch(_){}   // carte prete -> on retire le splash
   });
+  // PLACEMENT MANUEL : clic droit (desktop) / appui long (tactile) sur la carte -> position EXACTE
+  // posee a la main. Indispensable sur PC (pas de GPS) pour avoir une position precise garantie.
+  try{ map.on('contextmenu', function(e){
+    if(!e||!e.lngLat) return;
+    try{ if(e.preventDefault) e.preventDefault(); }catch(_){}
+    realGpsSeen=true; LIVE._sim=false; LIVE._far=0;
+    LIVE.lat=null; LIVE.lon=null; LIVE.prevLat=null;   // reset -> bypass la garde anti-teleportation (placement volontaire)
+    feedPosition(e.lngLat.lat, e.lngLat.lng, LIVE.heading, 0);
+    try{ if(window.__carPos){ window.__carPos.lon=e.lngLat.lng; window.__carPos.lat=e.lngLat.lat; } }catch(_){}  // voiture immediate
+    try{ cam.lon=e.lngLat.lng; cam.lat=e.lngLat.lat; wasLive=true; camInit=true;
+      if(map.jumpTo) map.jumpTo({center:[e.lngLat.lng,e.lngLat.lat]}); }catch(_){}   // snap camera (placement volontaire)
+    try{ if(typeof setFollow==='function') setFollow(true); }catch(_){}
+    setGeoStatus('manual'); window.__manualPos={lat:e.lngLat.lat, lon:e.lngLat.lng};
+    window.__mdbg={rgs:realGpsSeen, liveLat:LIVE.lat, liveLon:LIVE.lon, carLon:(window.__carPos&&window.__carPos.lon)};
+  }); }catch(_){}
   map.on('idle', function(){ try{ window.hideSplash&&window.hideSplash(); }catch(_){} });   // 1re frame rendue -> splash off
   // si 'load' tarde (premier chargement de tuiles vectorielles lent, ou saut GPS lointain),
   // on lance la boucle SANS alarmer ; les vraies erreurs de tuiles sont signalees par map.on('error').
