@@ -654,6 +654,7 @@ window.addEventListener('message', function(e){
         applyRoute(LIVE.routeCoords);
         break;
       }
+      case 'avatar':    { if(typeof d.url==='string'){ try{ window.__loadAvatar && window.__loadAvatar(d.url, d); }catch(_){}} break; }
       case 'mode':      { if(typeof d.mode==='string'){ HUB3D.mode = d.mode; applyDriveMode(d.mode); } break; }
       case 'pause':     { paused=true; break; }                                  // hub ferme/cache -> repos
       case 'resume':    { paused=false; try{ if(map){ map.resize(); map.triggerRepaint(); } }catch(_){}
@@ -1983,6 +1984,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
                 holder.add(inner);
                 holder.rotation.y = (size.x>size.z?Math.PI/2:0) + GLB_YAW;  // longueur -> +Z, + ajust manuel
                 self.car.add(holder);
+                try{ window.__hideAvatarLoad && window.__hideAvatarLoad(); }catch(_){}  // voiture modelisee -> on retire l'ecran de chargement dot
                 // boost reflexions (metaux : roues/chrome/freins) sur tous les materiaux
                 inner.traverse(function(ob){ if(ob.isMesh&&ob.material){ (Array.isArray(ob.material)?ob.material:[ob.material]).forEach(function(mt){ if('envMapIntensity' in mt) mt.envMapIntensity=1.3; mt.needsUpdate=true; }); } });
                 // --- RECONSTRUCTION MIROIR : le modele a ete exporte sans appliquer le modificateur
@@ -2086,6 +2088,61 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     map.on('load', add); map.on('style.load', add);
   }
   start();
+})();
+</script>
+<!-- ===== PracticeOS : ecran de chargement dot-matrix + avatar vehicule choisi ===== -->
+<style id="avLoadCss">
+#avatarLoad{position:fixed;inset:0;z-index:9999;background:#07080a;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:20px;transition:opacity .55s ease;font-family:'JetBrains Mono',monospace;}
+#avatarLoad.hide{opacity:0;pointer-events:none;}
+#avatarLoad .dotgrid{display:grid;grid-template-columns:repeat(12,10px);gap:7px;}
+#avatarLoad .dotgrid i{width:8px;height:8px;background:#fff;opacity:.14;animation:avpulse 1.5s ease-in-out infinite;}
+@keyframes avpulse{0%,100%{opacity:.10;transform:scale(.6)}50%{opacity:1;transform:scale(1)}}
+#avatarLoad .avtx{color:#e6e9ec;font-size:11px;letter-spacing:.34em;text-transform:uppercase;}
+#avatarLoad .avsub{color:#5f6671;font-size:9px;letter-spacing:.26em;}
+</style>
+<script>
+(function(){
+  var ov=document.createElement('div'); ov.id='avatarLoad';
+  var grid=document.createElement('div'); grid.className='dotgrid';
+  for(var i=0;i<144;i++){ var dd=document.createElement('i'); dd.style.animationDelay=(((i%12)+Math.floor(i/12))*0.045)+'s'; grid.appendChild(dd); }
+  var tx=document.createElement('div'); tx.className='avtx'; tx.textContent='Modélisation du véhicule';
+  var sub=document.createElement('div'); sub.className='avsub'; sub.textContent='PRACTICE OS';
+  ov.appendChild(grid); ov.appendChild(tx); ov.appendChild(sub);
+  (function mount(){ if(document.body) document.body.appendChild(ov); else setTimeout(mount,50); })();
+  var hidden=false;
+  window.__showAvatarLoad=function(t){ hidden=false; ov.classList.remove('hide'); if(t)tx.textContent=t; };
+  window.__hideAvatarLoad=function(){ if(hidden)return; hidden=true; ov.classList.add('hide'); };
+  setTimeout(function(){ window.__hideAvatarLoad(); }, 12000);   // filet : ne jamais rester bloque
+
+  /* charge un modele avatar (GLB ou FBX) comme voiture EGO du hub */
+  window.__loadAvatar=function(url, opts){
+    opts=opts||{}; var T=window.THREE, root=window.__carRoot;
+    if(!url){ return; }
+    if(!T || !root){ return setTimeout(function(){ window.__loadAvatar(url,opts); }, 300); }
+    window.__showAvatarLoad('Modélisation du véhicule');
+    var isFbx=/\.fbx($|\?)/i.test(url), target=+opts.len||5.0;
+    var loaderP = isFbx
+      ? import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/FBXLoader.js').then(function(m){return new m.FBXLoader();})
+      : import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js').then(function(m){return new m.GLTFLoader();});
+    loaderP.then(function(loader){
+      loader.load(url, function(res){
+        try{
+          var inner = res.scene || res;                     // GLTF -> .scene ; FBX -> Object3D
+          var box=new T.Box3().setFromObject(inner);
+          var size=box.getSize(new T.Vector3()), ctr=box.getCenter(new T.Vector3());
+          var len=Math.max(size.x,size.z)||1, k=target/len;
+          inner.scale.setScalar(k);
+          inner.position.set(-ctr.x*k, -box.min.y*k, -ctr.z*k);
+          var holder=new T.Group(); holder.add(inner);
+          holder.rotation.y=(size.x>size.z?Math.PI/2:0);     // longueur -> +Z (avant)
+          while(root.children.length) root.remove(root.children[0]);   // retire la voiture courante
+          root.add(holder); window.__avatar=url;
+          window.__hideAvatarLoad();
+        }catch(e){ window.__hideAvatarLoad(); }
+      }, undefined, function(){ window.__hideAvatarLoad(); });
+    }).catch(function(){ window.__hideAvatarLoad(); });
+  };
 })();
 </script>
 </body>

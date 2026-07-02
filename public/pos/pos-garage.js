@@ -53,9 +53,51 @@
     return MAP[bySeg[seg]] || MAP['param-berline'];
   }
 
+  /* --- UI sélecteur (Réglages → Véhicule) : vignettes de modèles ----------- */
+  function injectStyle() {
+    if (document.getElementById('posgarStyle')) return;
+    var s = document.createElement('style'); s.id = 'posgarStyle';
+    s.textContent =
+      '.posgar-h{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:2px 0 10px;}' +
+      '.posgar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;}' +
+      '.posgar-card{position:relative;background:var(--card);border:.5px solid var(--border);border-radius:13px;padding:12px 11px;cursor:pointer;transition:transform .14s,border-color .18s;text-align:left;}' +
+      '.posgar-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--acc) 40%,var(--border));}' +
+      '.posgar-card.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card));box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent);}' +
+      '.posgar-nm{font-size:13px;font-weight:600;color:var(--txt);letter-spacing:-.01em;}' +
+      '.posgar-tag{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:var(--dim);border:.5px solid var(--border);border-radius:6px;padding:2px 6px;}' +
+      '.posgar-card.on .posgar-tag{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 50%,var(--border));}' +
+      '.posgar-ok{position:absolute;top:9px;right:10px;color:var(--acc);font-size:13px;display:none;}' +
+      '.posgar-card.on .posgar-ok{display:block;}';
+    document.head.appendChild(s);
+  }
+
+  function mountPicker(el) {
+    if (!el) return function () {};
+    injectStyle();
+    function render() {
+      var cur = api.currentId();
+      el.innerHTML = '<div class="posgar-h">Ma voiture dans le hub</div>';
+      var grid = document.createElement('div'); grid.className = 'posgar-grid';
+      CATALOG.forEach(function (m) {
+        var c = document.createElement('button'); c.type = 'button';
+        c.className = 'posgar-card' + (m.id === cur ? ' on' : '');
+        c.innerHTML = '<span class="posgar-ok">✓</span><div class="posgar-nm">' + m.label +
+          '</div><span class="posgar-tag">' + (m.tag || '') + '</span>';
+        c.addEventListener('click', function () { api.choose(m.id); render(); });
+        grid.appendChild(c);
+      });
+      el.appendChild(grid);
+    }
+    var off = POS.bus.on('avatar:changed', render);
+    var off2 = POS.bus.on('driver:changed', render);
+    render();
+    return function () { off(); off2(); el.innerHTML = ''; };
+  }
+
   var api = {
     list: function () { return CATALOG.slice(); },
     byId: function (id) { return MAP[id] || null; },
+    mountPicker: mountPicker,
     currentId: function () { return POS.store.get('avatar:id', 'auto'); },
     resolved: function () {
       var id = api.currentId();

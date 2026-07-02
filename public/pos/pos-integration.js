@@ -106,6 +106,28 @@
       }).observe(host);
     }
 
+    /* ---- 7. Avatar véhicule -> hub 3D (hud3d-map) --------------------------
+       Envoie le modèle choisi (pos-garage) au hub par postMessage. Le hub
+       affiche l'écran de chargement dot-matrix puis instancie le modèle. */
+    var garage = POS.registry.get('garage');
+    function postAvatarToHub() {
+      try {
+        var f = document.getElementById('hudFrame');
+        if (!f || !f.contentWindow || !garage) return;
+        var m = garage.resolved();
+        if (!m || !m.src) return; // param/auto sans fichier -> le hub garde son véhicule par défaut
+        var lenByClass = { motorcycle: 2.2, bus: 11, van: 5.2, truck: 5.4, suv: 4.9, car: 4.8 };
+        f.contentWindow.postMessage({ type: 'avatar', url: m.src, len: lenByClass[m.class] || 4.8 }, '*');
+      } catch (e) {}
+    }
+    window.__posPostAvatar = postAvatarToHub;        // appelé par openHud() dans os.html
+    POS.bus.on('avatar:changed', function () { postAvatarToHub(); });
+    /* sélecteur de véhicule (Réglages/vue véhicule) */
+    if (garage && garage.mountPicker) {
+      var gbox = document.getElementById('posGarageUI');
+      if (gbox) { try { garage.mountPicker(gbox); } catch (e) { console.warn('[POS] picker', e); } }
+    }
+
     console.info('[PracticeOS] modules actifs :', POS.registry.list().join(', '));
   });
 })();

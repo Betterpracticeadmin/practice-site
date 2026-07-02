@@ -1640,6 +1640,7 @@
   <section class="veh-pos3d">
     <div id="posVehId" style="display:none;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 4px 8px;"></div>
     <div id="posCar3d" style="width:100%;height:210px;position:relative;"></div>
+    <div id="posGarageUI" style="margin-top:14px;"></div>
   </section>
 
   <!-- GRILLE 2 COLONNES -->
@@ -2766,7 +2767,7 @@
   if($('navExit')){ $('navExit').addEventListener('click',function(){ document.body.removeAttribute('data-navfocus'); setTimeout(function(){if(map)map.invalidateSize();},350); [].forEach.call(navtabs.querySelectorAll('button'),function(x){if(x.id!=='voiceBtn')x.classList.remove('on');}); var hb=navtabs.querySelector('button'); if(hb)hb.classList.add('on'); }); }
   /* ---- three navigation views: Normal (map) · HUD (Practice Vision) · Pulse ---- */
   var currentView='normal';
-  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud3d-map.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(function(){postHudMode();postHudRoute();postHudData();},700); }
+  function openHud(){ var f=$('hudFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/hud3d-map.html?embed=1&mode='+mode); $('hudOv').classList.add('show'); setTimeout(function(){postHudMode();postHudRoute();postHudData();},700); setTimeout(function(){ try{ window.__posPostAvatar && window.__posPostAvatar(); }catch(e){} },1100); }
   function postHudMode(){ var f=$('hudFrame'); if(f&&f.contentWindow&&$('hudOv')&&$('hudOv').classList.contains('show')){ try{f.contentWindow.postMessage({type:'mode',mode:mode},'*');}catch(e){} } }
   /* envoi recurrent de la manoeuvre courante au Hub 3D (pour sortir du mode demo) */
   function postHudData(){ var f=$('hudFrame'); if(!f||!f.contentWindow||!$('hudOv')||!$('hudOv').classList.contains('show'))return;
@@ -11348,6 +11349,7 @@ window.daMotion = window.daMotion || {};
 <script src="/pos/pos-telemetry.js"></script>
 <script src="/pos/pos-coach.js"></script>
 <script src="/pos/pos-car3d.js"></script>
+<script src="/pos/pos-garage.js"></script>
 <script src="/pos/pos-integration.js"></script>
 </body>
 </html>
