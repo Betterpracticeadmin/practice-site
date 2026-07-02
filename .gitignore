@@ -4,3 +4,11 @@ dist
 .env.local
 *.log
 .DS_Store
+
+# outils / fichiers temporaires locaux (ne pas déployer)
+public/_glbviewer.html
+public/_models_montage.html
+public/_icons-preview.html
+public/models/_src_cars.glb
+public/*.bak
+*.zip

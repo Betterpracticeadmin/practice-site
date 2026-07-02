@@ -2095,9 +2095,10 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
 #avatarLoad{position:fixed;inset:0;z-index:9999;background:#07080a;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:20px;transition:opacity .55s ease;font-family:'JetBrains Mono',monospace;}
 #avatarLoad.hide{opacity:0;pointer-events:none;}
-#avatarLoad .dotgrid{display:grid;grid-template-columns:repeat(12,10px);gap:7px;}
-#avatarLoad .dotgrid i{width:8px;height:8px;background:#fff;opacity:.14;animation:avpulse 1.5s ease-in-out infinite;}
-@keyframes avpulse{0%,100%{opacity:.10;transform:scale(.6)}50%{opacity:1;transform:scale(1)}}
+#avatarLoad .dotgrid{display:grid;grid-template-columns:repeat(5,16px);gap:8px;}
+#avatarLoad .dotgrid i{width:13px;height:13px;background:#fff;opacity:.05;}
+#avatarLoad .dotgrid i.on{opacity:.18;animation:avpulse 1.4s ease-in-out infinite;}
+@keyframes avpulse{0%,100%{opacity:.20;transform:scale(.72)}50%{opacity:1;transform:scale(1)}}
 #avatarLoad .avtx{color:#e6e9ec;font-size:11px;letter-spacing:.34em;text-transform:uppercase;}
 #avatarLoad .avsub{color:#5f6671;font-size:9px;letter-spacing:.26em;}
 </style>
@@ -2105,7 +2106,9 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
 (function(){
   var ov=document.createElement('div'); ov.id='avatarLoad';
   var grid=document.createElement('div'); grid.className='dotgrid';
-  for(var i=0;i<144;i++){ var dd=document.createElement('i'); dd.style.animationDelay=(((i%12)+Math.floor(i/12))*0.045)+'s'; grid.appendChild(dd); }
+  /* logo Practice : "P" en grille de points (bright = P, pulse en vague) */
+  var P=[[1,1,1,1,0],[1,0,0,1,0],[1,0,0,1,0],[1,1,1,1,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]];
+  for(var r=0;r<7;r++){ for(var c=0;c<5;c++){ var dd=document.createElement('i'); if(P[r][c]){ dd.className='on'; dd.style.animationDelay=((r+c)*0.09)+'s'; } grid.appendChild(dd); } }
   var tx=document.createElement('div'); tx.className='avtx'; tx.textContent='Modélisation du véhicule';
   var sub=document.createElement('div'); sub.className='avsub'; sub.textContent='PRACTICE OS';
   ov.appendChild(grid); ov.appendChild(tx); ov.appendChild(sub);

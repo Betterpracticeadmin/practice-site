@@ -91,9 +91,11 @@
         if (ok === false) return;
         /* véhicule déjà identifié ? sinon silhouette par défaut (hypercar Practice One) */
         try {
-          if (lastVeh) car3d.buildFromVehicle(lastVeh);
-          else if (vehdb && vehdb.estimate) car3d.buildFromVehicle(vehdb.estimate('hypercar'));
           if (car3d.showDims) car3d.showDims(true);
+          var gm = (POS.registry.get('garage') || {}).resolved && POS.registry.get('garage').resolved();
+          if (gm && gm.src && car3d.loadAvatar) car3d.loadAvatar(gm.src, { len: 4.8 });     // modèle choisi
+          else if (lastVeh) car3d.buildFromVehicle(lastVeh);
+          else if (vehdb && vehdb.estimate) car3d.buildFromVehicle(vehdb.estimate('hypercar'));
         } catch (e) { console.warn('[POS] car3d build', e); }
       });
     }
@@ -121,11 +123,23 @@
       } catch (e) {}
     }
     window.__posPostAvatar = postAvatarToHub;        // appelé par openHud() dans os.html
-    POS.bus.on('avatar:changed', function () { postAvatarToHub(); });
+    var LEN_BY_CLASS = { motorcycle: 2.2, bus: 11, van: 5.2, truck: 5.4, suv: 4.9, car: 4.8 };
+    /* applique le modèle choisi à l'aperçu 3D de la vue véhicule (pos-car3d) */
+    function applyAvatarToPreview() {
+      if (!car3d) return;
+      var m = garage && garage.resolved();
+      try {
+        if (m && m.src && car3d.loadAvatar) car3d.loadAvatar(m.src, { len: LEN_BY_CLASS[m.class] || 4.8 });
+        else if (m && m.paramType) car3d.buildFromVehicle({ segment: m.paramType.toLowerCase(), dims: {}, wheels: {} });
+      } catch (e) {}
+    }
+    POS.bus.on('avatar:changed', function () { postAvatarToHub(); applyAvatarToPreview(); });
     /* sélecteur de véhicule (Réglages/vue véhicule) */
     if (garage && garage.mountPicker) {
-      var gbox = document.getElementById('posGarageUI');
-      if (gbox) { try { garage.mountPicker(gbox); } catch (e) { console.warn('[POS] picker', e); } }
+      ['posGarageUI', 'posGarageUI2'].forEach(function (id) {
+        var box = document.getElementById(id);
+        if (box) { try { garage.mountPicker(box); } catch (e) { console.warn('[POS] picker', e); } }
+      });
     }
 
     console.info('[PracticeOS] modules actifs :', POS.registry.list().join(', '));

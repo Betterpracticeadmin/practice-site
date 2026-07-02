@@ -364,6 +364,39 @@
       if (visible && renderer) renderer.render(scene, camera);
     }
 
+    /* ---------- avatar : charge le modèle low-poly CHOISI (GLB/FBX) ----------
+       Remplace la voiture paramétrique par le modèle sélectionné dans le garage.
+       Se ré-applique au montage si choisi avant que la 3D soit prête. */
+    var pendingAvatar = null, pendingAvatarOpts = null;
+    function loadAvatar(url, opts) {
+      opts = opts || {};
+      pendingAvatar = url; pendingAvatarOpts = opts;
+      if (!url || !THREE || !scene) return;
+      var isFbx = /\.fbx($|\?)/i.test(url), target = +opts.len || 4.6;
+      var lp = isFbx
+        ? import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/FBXLoader.js').then(function (m) { return new m.FBXLoader(); })
+        : import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js').then(function (m) { return new m.GLTFLoader(); });
+      lp.then(function (loader) {
+        loader.load(url, function (res) {
+          if (!THREE || !scene) return;
+          var inner = res.scene || res;
+          disposeModel();
+          root = new THREE.Group(); carGroup = new THREE.Group(); root.add(carGroup); scene.add(root);
+          var box = new THREE.Box3().setFromObject(inner);
+          var size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+          var len = Math.max(size.x, size.z) || 1, k = target / len;
+          inner.scale.setScalar(k);
+          inner.position.set(-ctr.x * k, -box.min.y * k, -ctr.z * k);
+          inner.rotation.y = (size.x > size.z ? Math.PI / 2 : 0);
+          carGroup.add(inner);
+          wheelRadius = 0.34; wheelbaseM = 2.6;
+          if (camera) { var dist = target * 1.4; camera.position.set(dist * 0.85, target * 0.5, dist * 0.95); camera.lookAt(0, target * 0.16, 0); }
+          updateDims(target, size.x * k, size.y * k);
+          if (visible && renderer) renderer.render(scene, camera);
+        }, undefined, function () { /* échec -> on garde le paramétrique */ });
+      }).catch(function () {});
+    }
+
     /* ---------- overlay dimensions ------------------------------------------ */
     function updateDims(L, W, H) {
       if (!dimsDiv) return;
@@ -418,6 +451,7 @@
         mounted = true;
         resize();
         buildFromVehicle(lastVehicle || DEFAULT_VEHICLE);
+        if (pendingAvatar) loadAvatar(pendingAvatar, pendingAvatarOpts);   // avatar choisi avant le montage
 
         /* rendu seulement si visible à l'écran */
         if (typeof IntersectionObserver === 'function') {
@@ -465,7 +499,8 @@
     /* ---------- API publique --------------------------------------------------*/
     var api = {
       mount: mount,
-      buildFromVehicle: function (vehicle) { buildFromVehicle(vehicle); },
+      buildFromVehicle: function (vehicle) { pendingAvatar = null; buildFromVehicle(vehicle); },
+      loadAvatar: function (url, opts) { loadAvatar(url, opts); },
       showDims: function (on) {
         wantDims = !!on;
         if (dimsDiv) dimsDiv.style.display = wantDims ? 'block' : 'none';

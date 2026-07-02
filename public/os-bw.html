@@ -586,6 +586,7 @@
   body[data-setpage] .set-home{display:none;}
   body[data-setpage] .set-backbar{display:flex;}
   body[data-setpage="conducteurs"] .set-sec[data-cat="conducteurs"],
+  body[data-setpage="vehicule"] .set-sec[data-cat="vehicule"],
   body[data-setpage="profil"] .set-sec[data-cat="profil"],
   body[data-setpage="conduite"] .set-sec[data-cat="conduite"],
   body[data-setpage="carte"] .set-sec[data-cat="carte"],
@@ -1220,9 +1221,9 @@ canvas,iframe,video{filter:grayscale(1) contrast(1.35) brightness(1.05)!importan
   <div class="col-l">
     <div class="card w" id="dmCard">
       <div class="w-head"><div><div class="dm-mode">Drive mode ▾</div><div class="dm-perf" id="dmMode">Copilot</div></div><span class="lbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span></div>
-      <div class="glitch-car" style="--gcimg:url('/practice-car.jpg')">
-        <img class="gc-photo" src="/practice-car.jpg" alt="Voiture Practice" loading="lazy"/>
-        <span class="gc-l1"></span><span class="gc-l2"></span><span class="gc-dots"></span><span class="gc-red"></span>
+      <div class="dm-word" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:118px;margin-top:10px;font-family:var(--dot,'DotGothic16',monospace);text-align:center;">
+        <span style="font-size:13px;letter-spacing:.42em;color:var(--faint);">PRACTICE</span>
+        <span style="font-size:30px;letter-spacing:.12em;color:var(--acc);line-height:1;">COPILOT</span>
       </div>
     </div>
     <div class="card w" id="vehCard">
@@ -1460,6 +1461,7 @@ canvas,iframe,video{filter:grayscale(1) contrast(1.35) brightness(1.05)!importan
       <h3 class="set-modes-h">Autres réglages</h3>
       <div class="set-cats" id="setCats">
         <button class="set-cat" data-go="conducteurs"><span class="sc-ic">👤</span><span class="sc-tx"><b>Conducteurs</b><i>Profils, ajout, sélection</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="vehicule"><span class="sc-ic">🚗</span><span class="sc-tx"><b>Véhicule (avatar 3D)</b><i>Choisir ma voiture du hub</i></span><span class="sc-ar">›</span></button>
         <button class="set-cat" data-go="profil"><span class="sc-ic">👤</span><span class="sc-tx"><b>Profil conducteur</b><i>Niveau, points, récompenses</i></span><span class="sc-ar">›</span></button>
         <button class="set-cat" data-go="carte"><span class="sc-ic">🗺️</span><span class="sc-tx"><b>Carte & navigation</b><i>Unités, trafic</i></span><span class="sc-ar">›</span></button>
         <button class="set-cat" data-go="affichage"><span class="sc-ic">🎨</span><span class="sc-tx"><b>Affichage</b><i>Thème & animations</i></span><span class="sc-ar">›</span></button>
@@ -1474,6 +1476,11 @@ canvas,iframe,video{filter:grayscale(1) contrast(1.35) brightness(1.05)!importan
       <!-- UI rendue par le module pos-drivers.js (ajout / sélection / renommage / suppression) -->
       <div id="posDriversUI"></div>
       <div class="key-note">Chaque conducteur possède sa propre sauvegarde : préférences, statistiques, historique, apprentissage de Practice IA. Les données ne sont jamais mélangées.</div>
+    </section>
+    <section class="set-sec" data-cat="vehicule">
+      <!-- sélecteur d'avatar 3D (rendu par pos-garage.js) -->
+      <div id="posGarageUI2"></div>
+      <div class="key-note">Choisis la voiture low-poly qui te représente dans le hub 3D — parmi toutes les voitures du kit, la moto, le bus, ou un modèle généré. Le choix est mémorisé par conducteur.</div>
     </section>
     <section class="set-sec" data-cat="profil">
       <div class="dp-wrap" id="dpWrap">
@@ -1659,9 +1666,6 @@ canvas,iframe,video{filter:grayscale(1) contrast(1.35) brightness(1.05)!importan
       </div>
     </figure>
 
-    <div class="veh-dots" aria-hidden="true">
-      <i class="on"></i><i></i><i></i><i></i>
-    </div>
   </section>
 
   <!-- PracticeOS : modèle 3D low-poly paramétrique (pos-car3d) + reconnaissance VIN (pos-vehdb) -->
@@ -2857,7 +2861,7 @@ canvas,iframe,video{filter:grayscale(1) contrast(1.35) brightness(1.05)!importan
   /* ---------- mode / settings panel ---------- */
   function openPanel(){ syncPanel(); renderMem(); setSettingsPage(null); $('panelBg').classList.add('show'); }
   /* ===== Réglages : navigation catégories <-> sous-pages ===== */
-  function setSettingsPage(p){ if(p){ document.body.setAttribute('data-setpage',p); var t=$('setPgTitle'); if(t){ var nm={conducteurs:'Conducteurs',profil:'Profil conducteur',conduite:'Conduite',carte:'Carte & navigation',affichage:'Affichage',voix:'Voix & assistant',langue:'Langue',pause:'Pauses & sécurité',memoire:'Mémoire & données',partage:'Passager (BYOD)'}; t.textContent=nm[p]||'Paramètres'; } if(p==='profil')renderDriverProfile(); }
+  function setSettingsPage(p){ if(p){ document.body.setAttribute('data-setpage',p); var t=$('setPgTitle'); if(t){ var nm={conducteurs:'Conducteurs',vehicule:'Véhicule (avatar 3D)',profil:'Profil conducteur',conduite:'Conduite',carte:'Carte & navigation',affichage:'Affichage',voix:'Voix & assistant',langue:'Langue',pause:'Pauses & sécurité',memoire:'Mémoire & données',partage:'Passager (BYOD)'}; t.textContent=nm[p]||'Paramètres'; } if(p==='profil')renderDriverProfile(); }
     else { document.body.removeAttribute('data-setpage'); }
     var pn=document.querySelector('#panelBg .panel'); if(pn)pn.scrollTop=0; }
   function renderDriverProfile(){ if(!window.daScore){return;} var s=daScore.state||{};
