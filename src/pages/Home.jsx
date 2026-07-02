@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import heroVideo from '/hero.mp4'
-import carFront from '../assets/car-front.jpg'
-import carRear from '../assets/car-rear.jpg'
-import heroAction from '../assets/hero-action.jpg'
-import interior from '../assets/interior.jpg'
-import engineV10 from '../assets/engine-v10.jpg'
-import enginePorsche from '../assets/engine-porsche.jpg'
-import rimacMotor from '../assets/rimac-motor.png'
-import porscheWhite from '../assets/porsche-911-white.jpg'
+import carFront from '../assets/car-front.webp'
+import carRear from '../assets/car-rear.webp'
+import heroAction from '../assets/hero-action.webp'
+import interior from '../assets/interior.webp'
+import engineV10 from '../assets/engine-v10.webp'
+import enginePorsche from '../assets/engine-porsche.webp'
+import rimacMotor from '../assets/rimac-motor.webp'
+import porscheWhite from '../assets/porsche-911-white.webp'
 
 const budget = [
   ['×4 Rimac PMSM', '~€35k'],
