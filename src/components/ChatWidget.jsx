@@ -43,38 +43,79 @@ export default function ChatWidget() {
     setInput('')
     setStreaming(true)
 
-    // On-device generation: Practice Intelligence runs in the browser.
-    // A short "thinking" beat, then the reply streams word by word —
-    // same feel as the in-car OS resolving a request.
-    // Robustness: if the tab is hidden (timers throttled), flush instantly;
-    // finally-block guarantees the widget never stays locked.
-    const reply = brainRef.current.reply(content)
+    // Practice Intelligence: try the real LLM (Groq) through our secure
+    // serverless function first. If the key is unset, rate-limited, or the
+    // API is down, fall back seamlessly to the on-device engine. Either way
+    // the chat never breaks and never costs anything.
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const setLast = (text) =>
+    const setLast = (t) =>
       setMessages((prev) => {
         const copy = [...prev]
-        copy[copy.length - 1] = { role: 'assistant', content: text }
+        copy[copy.length - 1] = { role: 'assistant', content: t }
         return copy
       })
 
     try {
-      if (reduce || document.hidden) {
-        setLast(reply)
-        return
-      }
-      await new Promise((r) => setTimeout(r, 550 + Math.random() * 500))
-      const words = reply.split(/(\s+)/)
+      const served = await streamFromServer(next, setLast)
+      if (served) return
+
+      // Fallback — on-device engine, always available, offline-safe.
+      // (tab hidden → timers throttle, so flush instantly instead of streaming.)
+      const reply = brainRef.current.reply(content)
+      if (reduce || document.hidden) { setLast(reply); return }
+      await new Promise((r) => setTimeout(r, 500 + Math.random() * 450))
       let acc = ''
-      for (let i = 0; i < words.length; i++) {
-        if (document.hidden) break                      // tab hidden → flush below
-        acc += words[i]
+      for (const w of reply.split(/(\s+)/)) {
+        if (document.hidden) break
+        acc += w
         setLast(acc)
-        if (words[i].trim()) await new Promise((r) => setTimeout(r, 18 + Math.random() * 26))
+        if (w.trim()) await new Promise((r) => setTimeout(r, 18 + Math.random() * 26))
       }
-      setLast(reply)                                    // always end complete
+      setLast(reply)
     } finally {
       setStreaming(false)
     }
+  }
+
+  // Stream a real-LLM reply from /api/chat (Groq, key held server-side).
+  // Returns true if it produced content; false if the endpoint signalled
+  // fallback / errored — the caller then uses the on-device engine.
+  async function streamFromServer(history, setLast) {
+    let res
+    try {
+      res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),
+      })
+    } catch {
+      return false
+    }
+    if (!res.ok || !res.body) return false
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let acc = ''
+    let got = false
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const parts = buffer.split('\n\n')
+      buffer = parts.pop() || ''
+      for (const part of parts) {
+        const line = part.trim()
+        if (!line.startsWith('data:')) continue
+        const payload = line.slice(5).trim()
+        if (payload === '[DONE]') continue
+        try {
+          const obj = JSON.parse(payload)
+          if (obj.fallback) return false
+          if (obj.delta) { acc += obj.delta; got = true; setLast(acc) }
+        } catch { /* partial line */ }
+      }
+    }
+    return got
   }
 
   function onKeyDown(e) {
