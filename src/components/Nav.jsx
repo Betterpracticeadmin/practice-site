@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
+import ThemeToggle from './ThemeToggle.jsx'
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
@@ -30,6 +31,7 @@ export default function Nav() {
       </ul>
 
       <div className="nav-right">
+        <ThemeToggle />
         <Link to="/contact" className="nav-cta">Request a slot</Link>
         <button className="nav-burger" aria-label="Menu" onClick={() => setOpen((v) => !v)}>
           <span /><span /><span />

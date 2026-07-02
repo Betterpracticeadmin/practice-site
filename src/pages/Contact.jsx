@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -10,6 +11,19 @@ export default function Contact() {
   const [sent, setSent] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+
+  // Locked spec arriving from the Build configurator (/contact?donor=&power=&ai=)
+  const [searchParams] = useSearchParams()
+  const pDonor = searchParams.get('donor')
+  const pPower = searchParams.get('power')
+  const pAi = searchParams.get('ai')
+  const locked = pDonor || pPower || pAi
+  const lockedLabel = locked
+    ? `911 ${pDonor === '991' ? '991' : '997'} · ${pPower === 'six' ? 'Original flat-six' : 'Signature V10'} · Practice AI ${pAi === 'core' ? 'Core' : 'Full'}`
+    : ''
+  useEffect(() => {
+    if (pDonor === '997' || pDonor === '991') setForm((f) => ({ ...f, chassis: pDonor }))
+  }, [pDonor])
 
   // Formspree form ID (e.g. "xyzabcd"), set in .env -> VITE_FORMSPREE_ID.
   // Without it, the form stays a local demo that just shows the confirmation.
@@ -110,6 +124,7 @@ export default function Contact() {
             <div className="slot-bar-wrap"><div className="slot-bar" /></div>
             <span className="slot-label">Cohort 1 — <strong>8 / 11 slots</strong></span>
           </div>
+          <p className="left-note">Every Cohort 1 kit ships with Practice OS.</p>
 
           <div className="info-cards">
             <InfoCard label="Response" val="Within 48 hours" />
@@ -122,6 +137,12 @@ export default function Contact() {
 
       {/* RIGHT */}
       <div className="right-panel">
+        {locked && (
+          <div className="cfg-locked-banner">
+            <p className="eyebrow light"><span className="idx">✓</span>Locked spec</p>
+            <p>{lockedLabel}. Build number reserved on submit.</p>
+          </div>
+        )}
         <span className="form-section-label">01 — Your details</span>
         <div className="form-row">
           <Field label="First name" id="fname" value={form.fname} onChange={(v) => set('fname', v)} error={errors.fname} placeholder="Alex" />

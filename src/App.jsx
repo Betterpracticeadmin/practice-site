@@ -1,8 +1,12 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
+import { useLuxeMotion } from './useLuxeMotion.js'
+import { getLenis } from './lenis.js'
 import Nav from './components/Nav.jsx'
 import Footer from './components/Footer.jsx'
 import ChatWidget from './components/ChatWidget.jsx'
+import Loader from './components/Loader.jsx'
+import RouteTransition from './components/RouteTransition.jsx'
 import Home from './pages/Home.jsx'
 import PracticeAI from './pages/PracticeAI.jsx'
 import Build from './pages/Build.jsx'
@@ -12,15 +16,20 @@ import Privacy from './pages/Privacy.jsx'
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
-    window.scrollTo(0, 0)
+    const l = getLenis()
+    if (l) l.scrollTo(0, { immediate: true })
+    else window.scrollTo(0, 0)          // touch / reduced-motion / pre-load fallback
   }, [pathname])
   return null
 }
 
 export default function App() {
   const location = useLocation()
+  useLuxeMotion()
   return (
     <>
+      <Loader />
+      <RouteTransition />
       <ScrollToTop />
       <Nav />
       <main>
