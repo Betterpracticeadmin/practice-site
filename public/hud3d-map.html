@@ -2132,13 +2132,23 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
       loader.load(url, function(res){
         try{
           var inner = res.scene || res;                     // GLTF -> .scene ; FBX -> Object3D
-          var box=new T.Box3().setFromObject(inner);
-          var size=box.getSize(new T.Vector3()), ctr=box.getCenter(new T.Vector3());
-          var len=Math.max(size.x,size.z)||1, k=target/len;
-          inner.scale.setScalar(k);
-          inner.position.set(-ctr.x*k, -box.min.y*k, -ctr.z*k);
-          var holder=new T.Group(); holder.add(inner);
-          holder.rotation.y=(size.x>size.z?Math.PI/2:0);     // longueur -> +Z (avant)
+          var wrap=new T.Group(); wrap.add(inner);
+          // GLB standard = Y-up (hauteur = plus petite dim sur Y) ; le hub attend Z-up
+          // (comme car-real.glb) -> on redresse d'un quart de tour sur X.
+          var s0=new T.Box3().setFromObject(inner).getSize(new T.Vector3());
+          var AVROT = (typeof window.__avRotX==='number') ? window.__avRotX
+                    : ((s0.y<=s0.x && s0.y<=s0.z) ? -Math.PI/2 : 0);  // Y-up -> redresse (-90° = toit en haut)
+          inner.rotation.x = AVROT;
+          wrap.updateMatrixWorld(true);
+          var box=new T.Box3().setFromObject(wrap);
+          var size=box.getSize(new T.Vector3());
+          var k=target/(Math.max(size.x,size.y,size.z)||1);
+          wrap.scale.setScalar(k); wrap.updateMatrixWorld(true);
+          box=new T.Box3().setFromObject(wrap); var ctr=box.getCenter(new T.Vector3());
+          wrap.position.set(-ctr.x, -box.min.y, -ctr.z);    // pose au sol (repère modèle Y)
+          var s2=new T.Box3().setFromObject(wrap).getSize(new T.Vector3());
+          var holder=new T.Group(); holder.add(wrap);
+          holder.rotation.y=(s2.x>s2.z?Math.PI/2:0);         // longueur -> +Z (avant)
           while(root.children.length) root.remove(root.children[0]);   // retire la voiture courante
           root.add(holder); window.__avatar=url;
           window.__hideAvatarLoad();
