@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
+import { createBrain } from '../practiceBrain.js'
 
 const WELCOME = {
   role: 'assistant',
   content:
-    "Hi 👋 I'm Practice AI. Ask me anything about the kit, the V10, the Rimac motors, the Porsche chassis, the budget or booking a build slot.",
+    "Hi — I'm Practice Intelligence, running right here on this page. Ask me anything about the kit, the V10, the Rimac motors, the Porsche chassis, the budget or booking a build slot. (Je parle français aussi.)",
 }
 
 const SUGGESTIONS = [
@@ -20,6 +21,8 @@ export default function ChatWidget() {
   const [streaming, setStreaming] = useState(false)
   const scrollRef = useRef(null)
   const inputRef = useRef(null)
+  const brainRef = useRef(null)
+  if (!brainRef.current) brainRef.current = createBrain()
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -40,65 +43,35 @@ export default function ChatWidget() {
     setInput('')
     setStreaming(true)
 
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: next }),
-      })
-
-      if (!res.ok || !res.body) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Erreur réseau')
-      }
-
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-
-      while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
-        buffer += decoder.decode(value, { stream: true })
-
-        const lines = buffer.split('\n\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          const trimmed = line.trim()
-          if (!trimmed.startsWith('data:')) continue
-          const payload = trimmed.slice(5).trim()
-          if (payload === '[DONE]') continue
-          try {
-            const obj = JSON.parse(payload)
-            if (obj.delta) {
-              setMessages((prev) => {
-                const copy = [...prev]
-                copy[copy.length - 1] = {
-                  role: 'assistant',
-                  content: copy[copy.length - 1].content + obj.delta,
-                }
-                return copy
-              })
-            } else if (obj.error) {
-              throw new Error(obj.error)
-            }
-          } catch {
-            /* ligne partielle, on ignore */
-          }
-        }
-      }
-    } catch (err) {
+    // On-device generation: Practice Intelligence runs in the browser.
+    // A short "thinking" beat, then the reply streams word by word —
+    // same feel as the in-car OS resolving a request.
+    // Robustness: if the tab is hidden (timers throttled), flush instantly;
+    // finally-block guarantees the widget never stays locked.
+    const reply = brainRef.current.reply(content)
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const setLast = (text) =>
       setMessages((prev) => {
         const copy = [...prev]
-        copy[copy.length - 1] = {
-          role: 'assistant',
-          content:
-            '⚠️ ' + (err.message || 'Something went wrong.') +
-            (err.message?.includes('key') ? '' : ' Please try again in a moment.'),
-        }
+        copy[copy.length - 1] = { role: 'assistant', content: text }
         return copy
       })
+
+    try {
+      if (reduce || document.hidden) {
+        setLast(reply)
+        return
+      }
+      await new Promise((r) => setTimeout(r, 550 + Math.random() * 500))
+      const words = reply.split(/(\s+)/)
+      let acc = ''
+      for (let i = 0; i < words.length; i++) {
+        if (document.hidden) break                      // tab hidden → flush below
+        acc += words[i]
+        setLast(acc)
+        if (words[i].trim()) await new Promise((r) => setTimeout(r, 18 + Math.random() * 26))
+      }
+      setLast(reply)                                    // always end complete
     } finally {
       setStreaming(false)
     }
@@ -128,7 +101,7 @@ export default function ChatWidget() {
               <div className="chat-head-title">
                 <span className="chat-fab-dot" /> Practice AI
               </div>
-              <div className="chat-head-sub">Embedded assistant — powered by Claude</div>
+              <div className="chat-head-sub">Practice Intelligence — on-board, runs in your browser</div>
             </div>
             <button className="chat-close" onClick={() => setOpen(false)} aria-label="Close">✕</button>
           </div>
