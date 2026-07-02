@@ -37,38 +37,53 @@ export default function Home() {
         </video>
         <div className="hero-scrim" />
         <div className="hero-content">
-          <p className="hero-eyebrow">/// Project 2026</p>
+          <p className="hero-eyebrow">/// Cohort 1 — 2026</p>
           <h1>PRACTICE</h1>
           <p className="hero-tagline">Build it <span>///</span> Drive it <span>///</span> Master it</p>
+          <p className="hero-lede">The first kit supercar with an intelligence of its own. 2,320&nbsp;hp across four driven wheels, a naturally aspirated V10 at its heart, and a co-pilot trained on twelve thousand laps — assembled by your hands, in your garage.</p>
           <div className="hero-actions">
             <Link to="/contact" className="btn-wh">Request a build slot</Link>
             <a href="#concept" className="btn-gh">Explore the project</a>
           </div>
 
           <div className="hero-specs">
-            <div className="spec-cell"><span className="spec-label">Combined power</span><span className="spec-val">2,320<span className="spec-unit"> hp</span></span></div>
-            <div className="spec-cell"><span className="spec-label">0 — 100 km/h</span><span className="spec-val">&lt; 2<span className="spec-unit"> s</span></span></div>
-            <div className="spec-cell"><span className="spec-label">Target kit price</span><span className="spec-val">€80k</span></div>
+            <div className="spec-cell"><span className="spec-label">Combined power</span><span className="spec-val"><span data-count="2320" data-fmt="thousands">2,320</span><span className="spec-unit"> hp</span></span></div>
+            <div className="spec-cell"><span className="spec-label">0 — 100 km/h</span><span className="spec-val">&lt; <span data-count="2">2</span><span className="spec-unit"> s</span></span></div>
+            <div className="spec-cell"><span className="spec-label">Target kit price</span><span className="spec-val">€<span data-count="80">80</span>k</span></div>
             <div className="spec-cell"><span className="spec-label">Donor base</span><span className="spec-val">911<span className="spec-unit"> 997/991</span></span></div>
           </div>
         </div>
         <span className="scroll-cue">Scroll ↓</span>
       </section>
 
+      {/* MANIFESTO — the why, off the numbered spine */}
+      <section className="s-dark" id="manifesto">
+        <div className="container narrow">
+          <p className="eyebrow light"><span className="idx">—</span>Manifesto</p>
+          <h2 className="sh2 dark">The factory took the last<br />decision <em className="light-em">away from you.</em></h2>
+          <p className="slead dark">A modern supercar is delivered finished, sealed, and updated without you. You sign, you wait, you receive. The relationship ends at the key.</p>
+          <p className="slead dark">Practice begins where that ends. A complete kit, a real Porsche donor chassis, an engineered manual, and an intelligence that learns your hands. You are not a customer of the machine — you are its author.</p>
+          <p className="slead dark"><strong>Build it. Drive it. Master it</strong> — in that order, and it means exactly what it says.</p>
+          <div className="hero-actions" style={{ marginTop: '2rem' }}>
+            <Link to="/build" className="btn-gh">Read the process →</Link>
+          </div>
+        </div>
+      </section>
+
       {/* CONCEPT */}
       <section className="s-light" id="concept">
         <div className="container">
-          <p className="eyebrow">/// The concept</p>
+          <p className="eyebrow"><span className="idx">01</span>The concept</p>
           <h2 className="sh2">The first supercar<br />you <em>assemble.</em></h2>
-          <p className="slead">Complete kit, hybrid V10 + electric quad powertrain, embedded AI coaching — built on a Porsche 911 donor chassis. No factory. No middleman.</p>
+          <p className="slead">A complete kit — carbon body, hybrid V10-plus-electric-quad powertrain, and embedded intelligence — built onto a Porsche 911 donor you already trust. No factory. No dealer margin. No one between you and the machine.</p>
 
           <div className="concept-grid">
             <div className="concept-img"><img src={carFront} alt="Practice — front" loading="lazy" /></div>
             <div className="concept-facts">
-              <Fact k="Platform" v={<><strong>Porsche 911</strong> — 997 (2004–2012) or 991 (2011–2019). Monocoque kept, body fully replaced by the Practice kit.</>} />
-              <Fact k="Powertrain" v={<><strong>Audi V10 FSI</strong> 5.2L 620 hp + <strong>×4 Rimac PMSM</strong> 800V — torque vectoring per wheel. 2,320 hp combined.</>} />
-              <Fact k="Intelligence" v={<><strong>Practice AI</strong> on board — real-time coaching, pace notes, vehicle health, OTA updates.</>} />
-              <Fact k="Model" v={<>Numbered kit, delivered complete, step-by-step manual. <strong>You build it. You drive it.</strong></>} />
+              <Fact k="Platform" v={<><strong>Porsche 911</strong> — 997 (2004–2012) or 991 (2011–2019). The monocoque and its type-approved identity are kept; every body panel is replaced by the Practice carbon kit.</>} />
+              <Fact k="Powertrain" v={<><strong>Audi V10 FSI</strong> 5.2L, 620 naturally aspirated hp, joined by <strong>×4 Rimac PMSM</strong> motors on an 800V bus — torque vectored at each wheel. 2,320 hp combined, without a single turbo.</>} />
+              <Fact k="Intelligence" v={<><strong>Practice AI</strong>, resident on the car — real-time coaching, pace notes, continuous health of tyres, brakes, suspension and powertrain, and OTA updates.</>} />
+              <Fact k="Model" v={<>A numbered kit, delivered complete, with an engineering manual written to be followed. <strong>You build it. You drive it.</strong></>} />
             </div>
           </div>
         </div>
@@ -77,7 +92,7 @@ export default function Home() {
       {/* POWERTRAIN */}
       <section className="s-dark">
         <div className="container">
-          <p className="eyebrow light">/// Powertrain</p>
+          <p className="eyebrow light"><span className="idx">02</span>Powertrain</p>
           <h2 className="sh2 dark">A weapon <em className="light-em">of a machine.</em></h2>
           <p className="slead dark">Naturally aspirated V10, instant electric torque, torque vectoring per wheel. No turbo. No compromise.</p>
 
@@ -85,20 +100,20 @@ export default function Home() {
             <div className="pt-card">
               <img src={engineV10} alt="Audi V10 FSI" className="pt-img" loading="lazy" />
               <div className="pt-logo">Audi R8 FSI</div>
-              <div className="pt-num">620<span>hp</span></div>
+              <div className="pt-num"><span data-count="620">620</span><span>hp</span></div>
               <div className="pt-unit">5,204 cc — 560 Nm — 8,700 rpm</div>
               <div className="pt-desc">Central longitudinal. Naturally aspirated, no lag. The voice of the machine.</div>
             </div>
             <div className="pt-card">
               <img src={rimacMotor} alt="Rimac PMSM motor" className="pt-img contain" loading="lazy" />
               <div className="pt-logo">×4 Rimac PMSM</div>
-              <div className="pt-num">1,700<span>hp</span></div>
+              <div className="pt-num"><span data-count="1700" data-fmt="thousands">1,700</span><span>hp</span></div>
               <div className="pt-unit">800V — torque vectoring per wheel</div>
               <div className="pt-desc">Rear: 480 kW / 900 Nm × 2. Front: 220 kW / 280 Nm × 2. Liquid-cooled.</div>
             </div>
             <div className="pt-card highlight">
               <div className="pt-logo">Full system</div>
-              <div className="pt-num big">&lt; 2<span>s</span></div>
+              <div className="pt-num big">&lt; <span data-count="2">2</span><span>s</span></div>
               <div className="pt-unit">0 — 100 km/h — AWD vectoring</div>
               <div className="pt-desc">Instant electric torque + V10 on top. AWD torque vectoring, single-speed direct drive.</div>
             </div>
@@ -106,7 +121,7 @@ export default function Home() {
 
           <div className="pt-total">
             <div>
-              <div className="pt-total-num">2,320</div>
+              <div className="pt-total-num" data-count="2320" data-fmt="thousands">2,320</div>
               <div className="pt-total-sub">Combined power — hp</div>
             </div>
             <div className="pt-total-bar" />
@@ -121,7 +136,7 @@ export default function Home() {
       {/* ENGINE CHOICE */}
       <section className="s-light">
         <div className="container">
-          <p className="eyebrow">/// Engine choice</p>
+          <p className="eyebrow"><span className="idx">03</span>Engine choice</p>
           <h2 className="sh2">Two philosophies,<br /><em>one chassis.</em></h2>
           <p className="slead">The signature version carries the V10. But you can keep your Porsche's original flat-six for a lighter, far more affordable kit.</p>
 
@@ -151,7 +166,7 @@ export default function Home() {
       {/* CHASSIS */}
       <section className="s-dark">
         <div className="container">
-          <p className="eyebrow light">/// Donor base</p>
+          <p className="eyebrow light"><span className="idx">04</span>Donor base</p>
           <h2 className="sh2 dark">Porsche 911 —<br /><em className="light-em">the right base.</em></h2>
 
           <div className="chassis-layout">
@@ -175,7 +190,7 @@ export default function Home() {
       {/* GALLERY */}
       <section className="s-light">
         <div className="container">
-          <p className="eyebrow">/// Gallery</p>
+          <p className="eyebrow"><span className="idx">05</span>Gallery</p>
           <h2 className="sh2">The detail,<br /><em>everywhere.</em></h2>
           <div className="gallery-grid">
             <div className="gallery-item"><img src={heroAction} alt="Practice on the move" loading="lazy" /><span className="gallery-cap">On the road</span></div>
@@ -185,12 +200,22 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FULL-BLEED PUNCTUATION — one cinematic breath, edge-to-edge */}
+      <section className="fullbleed">
+        <img className="fullbleed-img" src={heroAction} alt="" loading="lazy" />
+        <div className="fullbleed-scrim" />
+        <div className="fullbleed-inner">
+          <p className="eyebrow"><span className="idx">—</span>The object</p>
+          <h2 className="fullbleed-line">Not a replica.<br /><em>A machine you author.</em></h2>
+        </div>
+      </section>
+
       {/* BUILD TEASER */}
       <section className="s-dark">
         <div className="container">
           <div className="teaser">
             <div>
-              <p className="eyebrow">/// The process</p>
+              <p className="eyebrow"><span className="idx">06</span>The process</p>
               <h3>From config to first start.</h3>
               <p>Seven clear steps, at your own pace, in your garage — from choosing the spec to activating Practice AI.</p>
             </div>
@@ -208,7 +233,7 @@ export default function Home() {
               <p className="ai-eyebrow">/// Embedded intelligence</p>
               <h3 className="ai-title">Practice AI —<br />your co-pilot.</h3>
               <p className="ai-desc">Real-time coaching, pace notes in your ear, full vehicle health, OTA. Trained on 12,000+ laps. Calibrated to your car.</p>
-              <Link to="/practice-ai" className="ai-link">Explore Practice AI →</Link>
+              <Link to="/practice-ai" className="ai-link">Explore Practice OS →</Link>
             </div>
             <PaceBox />
           </div>
@@ -218,9 +243,9 @@ export default function Home() {
       {/* BUDGET */}
       <section className="s-dark">
         <div className="container">
-          <p className="eyebrow light">/// Investment</p>
+          <p className="eyebrow light"><span className="idx">07</span>Investment</p>
           <h2 className="sh2 dark">Built for a budget<br /><em className="light-em">that holds.</em></h2>
-          <p className="slead dark">Target kit under €80,000. Every euro justified. No factory markup — direct builder model.</p>
+          <p className="slead dark">Target kit under €80,000 — every line justified, nothing hidden. Direct-builder pricing means no factory overhead and no dealer margin between the parts and your garage. You pay for the machine, not the building it was assembled in.</p>
 
           <div className="budget-row">
             {budget.map(([label, val]) => (
@@ -238,8 +263,27 @@ export default function Home() {
 
           <div className="budget-total">
             <div className="bt-label">Target kit total</div>
-            <div className="bt-val">€80,000</div>
+            <div className="bt-val" data-count="80000" data-fmt="euro">€80,000</div>
           </div>
+        </div>
+      </section>
+
+      {/* THE COHORT — provenance + scarcity, before the final CTA */}
+      <section className="s-dark">
+        <div className="container narrow">
+          <p className="eyebrow light"><span className="idx">—</span>The Cohort</p>
+          <h2 className="sh2 dark">Numbered.<br /><em className="light-em">Not mass-produced.</em></h2>
+          <p className="slead dark">Practice is a Betterstate venture, built on an unfashionable belief: that the people who own machines should understand them. Cohort 1 is a limited run of individually numbered kits, built directly with Betterstate — no factory, no dealer markup, no waitlist theatre. Every build is tracked from donor validation to first start.</p>
+          <div className="features-grid">
+            <div className="feat-cell"><p className="feat-num">01</p><h3 className="feat-title">Numbered, not mass-produced</h3><p className="feat-desc">Every Cohort 1 kit carries a number. When they're allocated, the cohort closes. There is no second batch of the first cars.</p><span className="feat-tag tag-live">Open</span></div>
+            <div className="feat-cell"><p className="feat-num">02</p><h3 className="feat-title">Direct, not through a counter</h3><p className="feat-desc">You deal with the people who designed the kit and trained the AI. No dealer network, no configurator hiding a phone number, no margin stacked between you and the machine.</p><span className="feat-tag tag-live">Direct</span></div>
+            <div className="feat-cell"><p className="feat-num">03</p><h3 className="feat-title">A car that keeps its word</h3><p className="feat-desc">What we promise about health monitoring, coaching and OTA is what the OS already does — you can watch it run before you commit. The demo on this site is the product, not a rendering of one.</p><span className="feat-tag tag-ota">OTA</span></div>
+          </div>
+          <div className="slot-counter" style={{ marginTop: '2.5rem' }}>
+            <div className="slot-bar-wrap"><div className="slot-bar" /></div>
+            <span className="slot-label">Cohort 1 — <strong>8 / 11 slots reserved</strong></span>
+          </div>
+          <p className="slead dark" style={{ marginTop: '1.6rem', opacity: .85 }}>When the eleventh is spoken for, the first Practices exist. After that, they can only be built again — never first.</p>
         </div>
       </section>
 
@@ -247,7 +291,7 @@ export default function Home() {
       <section className="cta-final">
         <div className="cta-inner">
           <h2>Designed by you.<br /><em>Perfected by AI.</em></h2>
-          <p>Project Practice — the first kit supercar with embedded intelligence. Cohort 1 slots are limited.</p>
+          <p>Project Practice — the first kit supercar with an intelligence of its own. Cohort 1 is numbered and closing. The first cars are built once; after that, they are only rebuilt.</p>
           <div className="cta-btns">
             <Link to="/contact" className="btn-wh">Request a build slot</Link>
             <Link to="/practice-ai" className="btn-gh">Discover Practice AI</Link>

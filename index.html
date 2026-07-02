@@ -7,6 +7,24 @@
     <meta name="description" content="Practice — the first kit supercar with embedded intelligence. Audi V10 + Rimac quad on a Porsche 911 base." />
     <!-- PWA / iPad : installable via "Ajouter à l'écran d'accueil" -->
     <meta name="theme-color" content="#0a0c10" />
+    <!-- no-flash theme: set data-theme before first paint -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          // DARK is the brand signature: first impression is always the showroom.
+          // Only a returning visitor's explicit choice overrides it.
+          var theme = stored ? stored : 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+          if (theme === 'light') {
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute('content', '#f7f6f3');
+          }
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Practice" />
@@ -15,7 +33,7 @@
     <link rel="icon" type="image/png" href="/icon-192.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Marcellus&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>
