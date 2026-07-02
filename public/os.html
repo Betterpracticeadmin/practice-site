@@ -585,6 +585,7 @@
   .set-sec{display:none;}
   body[data-setpage] .set-home{display:none;}
   body[data-setpage] .set-backbar{display:flex;}
+  body[data-setpage="conducteurs"] .set-sec[data-cat="conducteurs"],
   body[data-setpage="profil"] .set-sec[data-cat="profil"],
   body[data-setpage="conduite"] .set-sec[data-cat="conduite"],
   body[data-setpage="carte"] .set-sec[data-cat="carte"],
@@ -1430,6 +1431,7 @@
       </div>
       <h3 class="set-modes-h">Autres réglages</h3>
       <div class="set-cats" id="setCats">
+        <button class="set-cat" data-go="conducteurs"><span class="sc-ic">👤</span><span class="sc-tx"><b>Conducteurs</b><i>Profils, ajout, sélection</i></span><span class="sc-ar">›</span></button>
         <button class="set-cat" data-go="profil"><span class="sc-ic">👤</span><span class="sc-tx"><b>Profil conducteur</b><i>Niveau, points, récompenses</i></span><span class="sc-ar">›</span></button>
         <button class="set-cat" data-go="carte"><span class="sc-ic">🗺️</span><span class="sc-tx"><b>Carte & navigation</b><i>Unités, trafic</i></span><span class="sc-ar">›</span></button>
         <button class="set-cat" data-go="affichage"><span class="sc-ic">🎨</span><span class="sc-tx"><b>Affichage</b><i>Thème & animations</i></span><span class="sc-ar">›</span></button>
@@ -1440,6 +1442,11 @@
         <button class="set-cat" data-go="partage"><span class="sc-ic">📱</span><span class="sc-tx"><b>Passager (BYOD)</b><i>Partage par QR</i></span><span class="sc-ar">›</span></button>
       </div>
     </div>
+    <section class="set-sec" data-cat="conducteurs">
+      <!-- UI rendue par le module pos-drivers.js (ajout / sélection / renommage / suppression) -->
+      <div id="posDriversUI"></div>
+      <div class="key-note">Chaque conducteur possède sa propre sauvegarde : préférences, statistiques, historique, apprentissage de Practice IA. Les données ne sont jamais mélangées.</div>
+    </section>
     <section class="set-sec" data-cat="profil">
       <div class="dp-wrap" id="dpWrap">
         <div class="dp-hero">
@@ -1627,6 +1634,12 @@
     <div class="veh-dots" aria-hidden="true">
       <i class="on"></i><i></i><i></i><i></i>
     </div>
+  </section>
+
+  <!-- PracticeOS : modèle 3D low-poly paramétrique (pos-car3d) + reconnaissance VIN (pos-vehdb) -->
+  <section class="veh-pos3d">
+    <div id="posVehId" style="display:none;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 4px 8px;"></div>
+    <div id="posCar3d" style="width:100%;height:210px;position:relative;"></div>
   </section>
 
   <!-- GRILLE 2 COLONNES -->
@@ -2205,6 +2218,8 @@
     if(follow) map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true});
     var spd=c.speed; if(spd==null||isNaN(spd)){ if(last){var dt=(ts-last.t)/1000;spd=dt>0?moved/dt:0;}else spd=0; }
     var spdK=Math.max(0,spd*3.6); if(spdK>maxSpd)maxSpd=spdK; liveSpd=spdK;
+    /* pont PracticeOS : position/vitesse/cap vers le hub télémétrie (modules pos/) */
+    if(window.POS)POS.bus.emit('gps:fix',{lat:lat,lon:lon,spd:spdK,heading:(c.heading!=null&&!isNaN(c.heading))?c.heading:null,t:ts});
     /* stats récap de trajet (lecture par le pop-up via window.__trip) */
     (function(){ var T=window.__trip||(window.__trip={dist:0,max:0,t0:ts,move0:null,harshA:0,harshB:0,last:spdK,lt:ts});
       T.dist=totalDist; T.max=maxSpd;
@@ -2704,7 +2719,9 @@
     demoTimer=setInterval(function(){ if(!demoMode||i>=co.length){clearInterval(demoTimer);demoTimer=null;return;} var c=co[i],pv=co[Math.max(0,i-1)]; var hdg=null;
       if(i>0){var dy=c[1]-pv[1],dx=(c[0]-pv[0])*Math.cos(c[1]*Math.PI/180);hdg=(Math.atan2(dx,dy)*180/Math.PI+360)%360;}
       onPos({latitude:c[1],longitude:c[0],accuracy:5,speed:13,heading:hdg},Date.now()); i+=2; },180); }
-  function startDemo(){ hideGate();Voice.pick();demoMode=true; var from={lat:48.8584,lon:2.2945},to={lat:48.8738,lon:2.2950};
+  function startDemo(){ hideGate();Voice.pick();demoMode=true;
+    if(window.POS)POS.bus.emit('pos:demo',{on:true}); /* pont PracticeOS : active le simulateur télémétrie */
+    var from={lat:48.8584,lon:2.2945},to={lat:48.8738,lon:2.2950};
     pts=[from];meMarker.setLatLng([from.lat,from.lon]).setOpacity(1);map.setView([from.lat,from.lon],15);setMsg(T().reroute,'démo');maybeWeather(from.lat,from.lon);
     getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);return;} currentDest=to;setRouteData(rt);colorRouteTraffic(from,to);
       destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
@@ -2811,7 +2828,7 @@
   /* ---------- mode / settings panel ---------- */
   function openPanel(){ syncPanel(); renderMem(); setSettingsPage(null); $('panelBg').classList.add('show'); }
   /* ===== Réglages : navigation catégories <-> sous-pages ===== */
-  function setSettingsPage(p){ if(p){ document.body.setAttribute('data-setpage',p); var t=$('setPgTitle'); if(t){ var nm={profil:'Profil conducteur',conduite:'Conduite',carte:'Carte & navigation',affichage:'Affichage',voix:'Voix & assistant',langue:'Langue',pause:'Pauses & sécurité',memoire:'Mémoire & données',partage:'Passager (BYOD)'}; t.textContent=nm[p]||'Paramètres'; } if(p==='profil')renderDriverProfile(); }
+  function setSettingsPage(p){ if(p){ document.body.setAttribute('data-setpage',p); var t=$('setPgTitle'); if(t){ var nm={conducteurs:'Conducteurs',profil:'Profil conducteur',conduite:'Conduite',carte:'Carte & navigation',affichage:'Affichage',voix:'Voix & assistant',langue:'Langue',pause:'Pauses & sécurité',memoire:'Mémoire & données',partage:'Passager (BYOD)'}; t.textContent=nm[p]||'Paramètres'; } if(p==='profil')renderDriverProfile(); }
     else { document.body.removeAttribute('data-setpage'); }
     var pn=document.querySelector('#panelBg .panel'); if(pn)pn.scrollTop=0; }
   function renderDriverProfile(){ if(!window.daScore){return;} var s=daScore.state||{};
@@ -4220,6 +4237,18 @@
   })();
   if(/[?&]demo/.test(location.search)) setTimeout(function(){$('gateDemo').click();},700);
   else { hideGate(); beginLocate(); } // cockpit direct : on cache l'intro et on lance la geoloc en arriere-plan
+
+  /* ===== pont PracticeOS (modules pos/) : accès contrôlé aux internes du cockpit =====
+     Les modules (pos-coach, pos-drivers…) vivent hors de cette IIFE ; ce pont expose
+     UNIQUEMENT ce dont ils ont besoin, sans rien changer au comportement existant. */
+  window.posBridge={
+    sayVA:function(t){ try{ sayVA(t); }catch(e){} },                 /* voix de Practice IA (respecte le réglage Voix) */
+    toast:function(t){ try{ toast(t); }catch(e){} },
+    driverName:function(){ try{ return vaName(); }catch(e){ return 'Aldo'; } },
+    setDriverName:function(n){ try{ Mem.prefs.name=n; saveMem(); var i=$('vaName'); if(i)i.value=n; }catch(e){} },
+    isDemo:function(){ return !!demoMode; },
+    lang:function(){ return LANG; }
+  };
 })();
 </script>
 <!-- DA-MODULE-START (auto) -->
@@ -11310,5 +11339,15 @@ window.daMotion = window.daMotion || {};
 })();
 </script>
 <!-- TRIPRECAP-END (auto) -->
+<!-- ===== PracticeOS : plateforme modulaire (OBD-II, base véhicules, 3D low-poly,
+     coach Practice IA, conducteurs) — ordre : core -> modules -> intégration ===== -->
+<script src="/pos/pos-core.js"></script>
+<script src="/pos/pos-drivers.js"></script>
+<script src="/pos/pos-vehdb.js"></script>
+<script src="/pos/pos-obd.js"></script>
+<script src="/pos/pos-telemetry.js"></script>
+<script src="/pos/pos-coach.js"></script>
+<script src="/pos/pos-car3d.js"></script>
+<script src="/pos/pos-integration.js"></script>
 </body>
 </html>

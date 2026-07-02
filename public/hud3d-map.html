@@ -203,6 +203,20 @@ html.embedded #ck-navMan{top:146px;}
 #geo-status.warn{ color:#ffe6ab; border-color:rgba(255,190,80,.45); }
 #geo-status.ok{ color:#bdeccb; border-color:rgba(90,220,140,.45); }
 #geo-status.loc{ color:#cfe0ff; }
+/* ---- RECHERCHE D'ADRESSE (loc precise sur PC) ---- */
+#geo-search-btn{ position:absolute; z-index:31; top:calc(12px + env(safe-area-inset-top)); right:calc(12px + env(safe-area-inset-right));
+  width:38px; height:38px; border-radius:50%; border:1px solid rgba(255,255,255,.16); background:rgba(10,14,20,.80);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); color:#dfe6f0; font-size:17px; cursor:pointer; pointer-events:auto;
+  display:flex; align-items:center; justify-content:center; }
+#geo-search-btn:hover{ border-color:var(--acc,#6AA1FF); }
+#geo-search{ position:absolute; z-index:32; top:calc(10px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%);
+  width:min(440px,86vw); display:none; gap:6px; pointer-events:auto; }
+#geo-search.show{ display:flex; }
+#geo-search input{ flex:1; min-width:0; padding:9px 13px; border-radius:10px; border:1px solid rgba(255,255,255,.18);
+  background:rgba(10,14,20,.92); color:#eef2f8; font:500 13px system-ui,sans-serif; outline:none; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+#geo-search input::placeholder{ color:#8b93a2; }
+#geo-search button{ padding:0 14px; border-radius:10px; border:1px solid var(--acc,#6AA1FF); background:var(--acc,#6AA1FF);
+  color:#04101f; font:700 13px system-ui,sans-serif; cursor:pointer; }
 
 /* ---- BOUTON RECENTRER (mode libre) ---- */
 #ck-recenter{
@@ -319,6 +333,14 @@ html.embedded #ck-navMan{top:146px;}
 
   <!-- BADGE STATUT GPS : indique localisation en cours / trouvee (±m) / refusee / indispo -->
   <div id="geo-status"></div>
+
+  <!-- RECHERCHE D'ADRESSE : localisation precise sur PC (tape ton adresse) -->
+  <button id="geo-search-btn" aria-label="Chercher une adresse">🔍</button>
+  <div id="geo-search">
+    <input id="geo-search-in" type="text" inputmode="search" autocomplete="off"
+           placeholder="Ton adresse (ex. 1 rue Félix Faure, Sèvres)"/>
+    <button id="geo-search-go">OK</button>
+  </div>
 
   <!-- BOUTON RECENTRER : visible seulement en MODE LIBRE (user a deplace la carte).
        Clic -> position GPS fraiche + retour au suivi + snap doux sur la position courante. -->
@@ -581,10 +603,13 @@ function feedPosition(lat,lon,heading,spd){
 }
 
 /* Statut de localisation visible (l'utilisateur sait OU EN EST le GPS au lieu d'une demo muette) */
-function setGeoStatus(kind, acc){
+function setGeoStatus(kind, acc, label){
   var el=document.getElementById('geo-status'); if(!el) return;
-  var t='', cls='', tip=' — clic droit / appui long sur la carte pour te placer';
+  var t='', cls='', tip=' — 🔍 cherche ton adresse, ou clic droit / appui long sur la carte';
   if(kind==='locating'){ t='📍 Localisation en cours…'; cls='loc'; }
+  else if(kind==='searching'){ t='🔍 Recherche de l’adresse…'; cls='loc'; }
+  else if(kind==='address'){ t='📍 '+(label||'Adresse trouvée'); cls='ok'; }
+  else if(kind==='addr-none'){ t='⚠️ Adresse introuvable — réessaie (ex. « 1 rue Félix Faure, Sèvres »)'; cls='err'; }
   else if(kind==='found'){ var a=Math.round(acc||0);
     if(a<=60){ t='📍 Position trouvée (±'+a+' m)'; cls='ok'; }
     else { t='📍 ±'+a+' m (imprécis, PC sans GPS)'+tip; cls='warn'; } }
@@ -593,7 +618,7 @@ function setGeoStatus(kind, acc){
   else { t='⚠️ Position indisponible'+tip; cls='err'; }
   el.textContent=t; el.className=cls+' show';
   if(el._h){ clearTimeout(el._h); }
-  if((kind==='found' && (acc||0)<=60) || kind==='manual'){ el._h=setTimeout(function(){ el.classList.remove('show'); }, 4500); }
+  if((kind==='found' && (acc||0)<=60) || kind==='manual' || kind==='address'){ el._h=setTimeout(function(){ el.classList.remove('show'); }, 5000); }
 }
 
 window.addEventListener('message', function(e){
@@ -1133,6 +1158,38 @@ function recenter(){
 }
 window.__hubRecenter = recenter;
 
+/* Pose une position EXACTE (clic droit OU adresse geocodee) : bypass la garde anti-teleport,
+   snap camera/voiture, recentre. */
+function setExactPosition(lat, lon, label){
+  if(!(isFinite(lat)&&isFinite(lon))) return;
+  realGpsSeen=true; LIVE._sim=false; LIVE._far=0; LIVE.lat=null; LIVE.lon=null; LIVE.prevLat=null;  // bypass anti-teleport
+  feedPosition(lat, lon, LIVE.heading, 0);
+  try{ if(window.__carPos){ window.__carPos.lon=lon; window.__carPos.lat=lat; } }catch(_){}
+  try{ cam.lon=lon; cam.lat=lat; wasLive=true; camInit=true; if(map&&map.jumpTo) map.jumpTo({center:[lon,lat]}); }catch(_){}
+  try{ if(typeof setFollow==='function') setFollow(true); }catch(_){}
+  setGeoStatus(label?'address':'manual', null, label);
+  window.__manualPos={lat:lat, lon:lon};
+}
+window.__hubSetPos = setExactPosition;
+
+/* GEOCODAGE d'adresse (Nominatim / OpenStreetMap, gratuit, sans cle, CORS ok).
+   -> position PRECISE a partir d'une adresse tapee (ideal sur PC sans GPS). */
+function geocodeAddress(q){
+  q=(q||'').trim(); if(!q) return;
+  setGeoStatus('searching');
+  var url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=0&q='+encodeURIComponent(q);
+  fetch(url, { headers:{'Accept':'application/json'} })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(j && j.length){ var lat=parseFloat(j[0].lat), lon=parseFloat(j[0].lon);
+        var nm=(j[0].display_name||q).split(',').slice(0,2).join(',');
+        setExactPosition(lat, lon, nm);
+      } else { setGeoStatus('addr-none'); }
+    })
+    .catch(function(){ setGeoStatus('addr-none'); });
+}
+window.__hubGeocode = geocodeAddress;
+
 // position cible de conduite : LIVE -> GPS reel ; DEMO -> deplacement anime.
 var demoT=0;
 /* ============================================================
@@ -1589,15 +1646,7 @@ if(map){
   try{ map.on('contextmenu', function(e){
     if(!e||!e.lngLat) return;
     try{ if(e.preventDefault) e.preventDefault(); }catch(_){}
-    realGpsSeen=true; LIVE._sim=false; LIVE._far=0;
-    LIVE.lat=null; LIVE.lon=null; LIVE.prevLat=null;   // reset -> bypass la garde anti-teleportation (placement volontaire)
-    feedPosition(e.lngLat.lat, e.lngLat.lng, LIVE.heading, 0);
-    try{ if(window.__carPos){ window.__carPos.lon=e.lngLat.lng; window.__carPos.lat=e.lngLat.lat; } }catch(_){}  // voiture immediate
-    try{ cam.lon=e.lngLat.lng; cam.lat=e.lngLat.lat; wasLive=true; camInit=true;
-      if(map.jumpTo) map.jumpTo({center:[e.lngLat.lng,e.lngLat.lat]}); }catch(_){}   // snap camera (placement volontaire)
-    try{ if(typeof setFollow==='function') setFollow(true); }catch(_){}
-    setGeoStatus('manual'); window.__manualPos={lat:e.lngLat.lat, lon:e.lngLat.lng};
-    window.__mdbg={rgs:realGpsSeen, liveLat:LIVE.lat, liveLon:LIVE.lon, carLon:(window.__carPos&&window.__carPos.lon)};
+    setExactPosition(e.lngLat.lat, e.lngLat.lng);   // placement manuel exact
   }); }catch(_){}
   map.on('idle', function(){ try{ window.hideSplash&&window.hideSplash(); }catch(_){} });   // 1re frame rendue -> splash off
   // si 'load' tarde (premier chargement de tuiles vectorielles lent, ou saut GPS lointain),
@@ -1780,6 +1829,13 @@ window.__hubMap = map;
       if(typeof window.__hubLocate==='function') window.__hubLocate();   // re-demande une position GPS fraiche (geste user = prompt fiable)
       if(typeof window.__hubRecenter==='function') window.__hubRecenter();
     });
+    /* RECHERCHE D'ADRESSE : ouvre la barre, geocode (loc precise sur PC) */
+    var gsb=$('geo-search-btn'), gs=$('geo-search'), gin=$('geo-search-in'), ggo=$('geo-search-go');
+    function gsToggle(on){ if(!gs)return; var show=(on!==undefined)?on:!gs.classList.contains('show'); gs.classList.toggle('show',show); if(show&&gin){ setTimeout(function(){gin.focus();},30); } }
+    function gsSubmit(){ if(gin && typeof window.__hubGeocode==='function'){ window.__hubGeocode(gin.value); gsToggle(false); gin.blur(); } }
+    if(gsb) gsb.addEventListener('click', function(e){ e.stopPropagation(); gsToggle(); });
+    if(ggo) ggo.addEventListener('click', function(e){ e.stopPropagation(); gsSubmit(); });
+    if(gin) gin.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); gsSubmit(); } else if(e.key==='Escape'){ gsToggle(false); } });
   })();
   $('ck-bFull').addEventListener('click', function(){
     var el=document.documentElement, btn=this;
