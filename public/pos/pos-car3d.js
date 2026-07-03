@@ -368,6 +368,18 @@
        Remplace la voiture paramétrique par le modèle sélectionné dans le garage.
        Se ré-applique au montage si choisi avant que la 3D soit prête. */
     var pendingAvatar = null, pendingAvatarOpts = null;
+    /* normalise un modèle véhicule en Y-up : plus courte dim -> Y, plus longue -> Z */
+    function uprightCar(model) {
+      model.updateMatrixWorld(true);
+      var s = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
+      var mn = Math.min(s.x, s.y, s.z);
+      if (mn === s.z) model.rotation.x = -Math.PI / 2; else if (mn === s.x) model.rotation.z = Math.PI / 2;
+      var g = new THREE.Group(); g.add(model); g.updateMatrixWorld(true);
+      var s2 = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3());
+      if (Math.max(s2.x, s2.y, s2.z) === s2.x) g.rotation.y = -Math.PI / 2;
+      g.updateMatrixWorld(true);
+      return g;
+    }
     function loadAvatar(url, opts) {
       opts = opts || {};
       pendingAvatar = url; pendingAvatarOpts = opts;
@@ -379,16 +391,17 @@
       lp.then(function (loader) {
         loader.load(url, function (res) {
           if (!THREE || !scene) return;
-          var inner = res.scene || res;
+          var upr = uprightCar(res.scene || res);        // normalise -> Y-up (hauteur Y, longueur Z)
           disposeModel();
           root = new THREE.Group(); carGroup = new THREE.Group(); root.add(carGroup); scene.add(root);
-          var box = new THREE.Box3().setFromObject(inner);
-          var size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
-          var len = Math.max(size.x, size.z) || 1, k = target / len;
-          inner.scale.setScalar(k);
-          inner.position.set(-ctr.x * k, -box.min.y * k, -ctr.z * k);
-          inner.rotation.y = (size.x > size.z ? Math.PI / 2 : 0);
-          carGroup.add(inner);
+          upr.updateMatrixWorld(true);
+          var box = new THREE.Box3().setFromObject(upr);
+          var size = box.getSize(new THREE.Vector3());
+          var k = target / (Math.max(size.x, size.y, size.z) || 1);
+          upr.scale.setScalar(k); upr.updateMatrixWorld(true);
+          box = new THREE.Box3().setFromObject(upr); var ctr = box.getCenter(new THREE.Vector3());
+          upr.position.set(-ctr.x, -box.min.y, -ctr.z);
+          carGroup.add(upr);
           wheelRadius = 0.34; wheelbaseM = 2.6;
           if (camera) { var dist = target * 1.4; camera.position.set(dist * 0.85, target * 0.5, dist * 0.95); camera.lookAt(0, target * 0.16, 0); }
           updateDims(target, size.x * k, size.y * k);

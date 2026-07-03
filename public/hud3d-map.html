@@ -2118,6 +2118,21 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
   window.__hideAvatarLoad=function(){ if(hidden)return; hidden=true; ov.classList.add('hide'); };
   setTimeout(function(){ window.__hideAvatarLoad(); }, 12000);   // filet : ne jamais rester bloque
 
+  /* normalise un modele vehicule en Y-up (convention car-real du hub) :
+     plus courte dimension -> Y (hauteur), plus longue -> Z (longueur). Les modeles
+     du kit/FBX ont des axes differents -> cette normalisation les redresse tous. */
+  function uprightCar(model, T){
+    model.updateMatrixWorld(true);
+    var s=new T.Box3().setFromObject(model).getSize(new T.Vector3());
+    var mn=Math.min(s.x,s.y,s.z);
+    if(mn===s.z) model.rotation.x=-Math.PI/2; else if(mn===s.x) model.rotation.z=Math.PI/2;
+    var g=new T.Group(); g.add(model); g.updateMatrixWorld(true);
+    var s2=new T.Box3().setFromObject(g).getSize(new T.Vector3());
+    if(Math.max(s2.x,s2.y,s2.z)===s2.x) g.rotation.y=-Math.PI/2;   // plus long -> Z
+    g.updateMatrixWorld(true);
+    return g;
+  }
+
   /* charge un modele avatar (GLB ou FBX) comme voiture EGO du hub */
   window.__loadAvatar=function(url, opts){
     opts=opts||{}; var T=window.THREE, root=window.__carRoot;
@@ -2132,20 +2147,14 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
       loader.load(url, function(res){
         try{
           var inner = res.scene || res;                     // GLTF -> .scene ; FBX -> Object3D
-          var wrap=new T.Group(); wrap.add(inner);
-          // GLB standard = Y-up (hauteur = plus petite dim sur Y) ; le hub attend Z-up
-          // (comme car-real.glb) -> on redresse d'un quart de tour sur X.
-          var s0=new T.Box3().setFromObject(inner).getSize(new T.Vector3());
-          var AVROT = (typeof window.__avRotX==='number') ? window.__avRotX
-                    : ((s0.y<=s0.x && s0.y<=s0.z) ? -Math.PI/2 : 0);  // Y-up -> redresse (-90° = toit en haut)
-          inner.rotation.x = AVROT;
+          var wrap = uprightCar(inner, T);                  // normalise -> Y-up (hauteur Y, longueur Z)
           wrap.updateMatrixWorld(true);
           var box=new T.Box3().setFromObject(wrap);
           var size=box.getSize(new T.Vector3());
           var k=target/(Math.max(size.x,size.y,size.z)||1);
           wrap.scale.setScalar(k); wrap.updateMatrixWorld(true);
           box=new T.Box3().setFromObject(wrap); var ctr=box.getCenter(new T.Vector3());
-          wrap.position.set(-ctr.x, -box.min.y, -ctr.z);    // pose au sol (repère modèle Y)
+          wrap.position.set(-ctr.x, -box.min.y, -ctr.z);    // Y-up : sol = min.y
           var s2=new T.Box3().setFromObject(wrap).getSize(new T.Vector3());
           var holder=new T.Group(); holder.add(wrap);
           holder.rotation.y=(s2.x>s2.z?Math.PI/2:0);         // longueur -> +Z (avant)

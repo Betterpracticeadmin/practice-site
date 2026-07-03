@@ -47,6 +47,8 @@
       '.posgar-card{position:relative;background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:11px 10px;cursor:pointer;transition:transform .14s,border-color .18s;text-align:left;}' +
       '.posgar-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--acc) 40%,var(--border));}' +
       '.posgar-card.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card));box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent);}' +
+      '.posgar-thumb{width:100%;height:60px;object-fit:contain;display:block;margin-bottom:7px;}' +
+      '.posgar-thumb-gen{display:flex;align-items:center;justify-content:center;height:60px;margin-bottom:7px;color:var(--faint);font-size:26px;}' +
       '.posgar-nm{font-size:12.5px;font-weight:600;color:var(--txt);letter-spacing:-.01em;}' +
       '.posgar-tag{display:inline-block;margin-top:5px;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--dim);border:.5px solid var(--border);border-radius:6px;padding:2px 6px;}' +
       '.posgar-card.on .posgar-tag{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 50%,var(--border));}' +
@@ -65,7 +67,11 @@
       items.forEach(function (m) {
         var c = document.createElement('button'); c.type = 'button';
         c.className = 'posgar-card' + (m.id === cur ? ' on' : '');
-        c.innerHTML = '<span class="posgar-ok">✓</span><div class="posgar-nm">' + m.label +
+        var hasThumb = (m.kind === 'glb' || m.kind === 'fbx');
+        var thumb = hasThumb
+          ? '<img class="posgar-thumb" src="/models/thumbs/' + m.id + '.png" alt="" loading="lazy">'
+          : '<div class="posgar-thumb-gen">▦</div>';
+        c.innerHTML = '<span class="posgar-ok">✓</span>' + thumb + '<div class="posgar-nm">' + m.label +
           '</div><span class="posgar-tag">' + (m.tag || '') + '</span>';
         c.addEventListener('click', function () { api.choose(m.id); render(); });
         grid.appendChild(c);
