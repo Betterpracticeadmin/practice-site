@@ -7,6 +7,8 @@
     "backgroundColor": "#0a0c10"
   },
   "server": {
-    "iosScheme": "practice"
+    "iosScheme": "practice",
+    "url": "https://practice-site-five.vercel.app/os.html",
+    "allowNavigation": ["practice-site-five.vercel.app"]
   }
 }
