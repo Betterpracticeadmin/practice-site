@@ -7,8 +7,10 @@
 set -eu
 cd "$(dirname "$0")/.."
 
-echo "==> 1/5  Dependances..."
+echo "==> 1/5  Dependances (dont plugin Bluetooth OBD natif)..."
 npm install
+# garantit le plugin Bluetooth (OBD ELM327) meme si package.json n'a pas ete tire
+npm ls @capacitor-community/bluetooth-le >/dev/null 2>&1 || npm i @capacitor-community/bluetooth-le@^7.0.0
 
 echo "==> 2/5  Build du site..."
 npm run build
@@ -17,7 +19,7 @@ printf '%s' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" con
 echo "==> 3/5  Plateforme iOS..."
 [ -d ios ] || npx cap add ios
 
-echo "==> 4/5  Autorisations (camera / position) dans Info.plist..."
+echo "==> 4/5  Autorisations (camera / Bluetooth / position) dans Info.plist..."
 node deploy/ios-permissions.cjs || echo "   (permissions: a ajouter dans Xcode si besoin)"
 
 echo "==> 5/5  Synchronisation + ouverture Xcode..."

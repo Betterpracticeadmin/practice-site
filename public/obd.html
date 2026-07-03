@@ -91,54 +91,75 @@
 (function(){
   var $=function(id){return document.getElementById(id);};
   var log=function(m){ var l=$('log'); l.textContent=(l.textContent+'\n'+m).split('\n').slice(-40).join('\n'); l.scrollTop=l.scrollHeight; };
+  function sleep(ms){ return new Promise(function(r){setTimeout(r,ms);}); }
 
-  // Known BLE serial services exposed by ELM327-class OBD adapters (Vgate, Veepeak, OBDLink, V-Link, Konnwei…)
+  /* ============================================================================
+     Transport double :
+       • WEB Bluetooth (navigator.bluetooth)  → PC/Android Chrome, Bluefy iOS
+       • NATIF CoreBluetooth (plugin Capacitor @capacitor-community/bluetooth-le)
+         → app Practice sur iPad/iPhone, où le Bluetooth web n'existe pas.
+     Tout le protocole ELM327 (init, PID, DTC) est IDENTIQUE : seul le transport change.
+     ========================================================================== */
+  var CAP = window.Capacitor;
+  var NATIVE = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform() && CAP.Plugins && CAP.Plugins.BluetoothLe);
+  var Ble = NATIVE ? CAP.Plugins.BluetoothLe : null;
+  var isApple=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+
+  /* ---- helpers hex (le pont natif iOS échange des chaînes hex minuscules) ---- */
+  function toHex(s){ var o=''; for(var i=0;i<s.length;i++){ o+=('0'+s.charCodeAt(i).toString(16)).slice(-2); } return o; }
+  function fromWire(v){ // hex (iOS) ou base64 (repli anciens builds) -> ASCII
+    if(v==null) return '';
+    v=String(v);
+    if(v.length%2===0 && /^[0-9a-fA-F]+$/.test(v)){ var o=''; for(var i=0;i<v.length;i+=2){ o+=String.fromCharCode(parseInt(v.substr(i,2),16)); } return o; }
+    try{ return atob(v); }catch(e){ return v; }
+  }
+  function n2u(n){ return ('0000'+n.toString(16)).slice(-4)+'-0000-1000-8000-00805f9b34fb'; } // 16-bit -> 128-bit
+
+  /* services série exposés par les ELM327 BLE (Vgate, Veepeak, OBDLink, V-Link, Konnwei…) */
   var UART='6e400001-b5a3-f393-e0a9-e50e24dcca9e';         // Nordic UART (V-Link & co)
   var ISSC='49535343-fe7d-4ae5-8fa9-9fafd205e455';         // Microchip/ISSC Transparent UART (OBDLink MX+ BLE, Konnwei)
-  var SERVICES=[
-    0xFFE0,0xFFF0,0xFFE5,0xFFC0,0xFEE7,0x18F0,0xFFB0,0xFD00,
+  var NUMS=[0xFFE0,0xFFF0,0xFFE5,0xFFC0,0xFEE7,0x18F0,0xFFB0,0xFD00];
+  var SERVICES=NUMS.concat([                               // WEB : navigator.bluetooth accepte les 16-bit
     UART, ISSC,
     '0000ffe0-0000-1000-8000-00805f9b34fb',
     '0000fff0-0000-1000-8000-00805f9b34fb',
     '0000ffe5-0000-1000-8000-00805f9b34fb',
     '0000ffc0-0000-1000-8000-00805f9b34fb',
     '0000fee7-0000-1000-8000-00805f9b34fb'
-  ];
+  ]);
+  var NSVC=NUMS.map(n2u).concat([UART,ISSC]);              // NATIF : full 128-bit lowercase
 
-  var dev=null, gatt=null, wCh=null, nCh=null, buf='', queue=[], pending=null, connected=false;
+  var buf='', queue=[], pending=null, connected=false, initialized=false;
+  var txWrite=null;                 // function(str)->Promise, posé par le transport
+  var txDisconnect=function(){};
   var userDisconnect=false, reconnectTries=0, pollTok=0;
 
-  // feature detection — Web Bluetooth is Android Chrome / desktop Chrome / Bluefy(iOS). Not Safari.
-  var isApple=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  if(!navigator.bluetooth){
+  // détection : sur iPad WKWebView navigator.bluetooth est absent -> on n'affiche PAS l'avertissement en natif
+  if(!navigator.bluetooth && !NATIVE){
     var u=$('unsupp'); u.style.display='block';
     u.innerHTML= isApple
       ? '<b>iPad / iPhone :</b> Safari ne gère pas le Bluetooth web (Chrome iOS non plus — il tourne sur Safari en dessous). Pour l’OBD réel, c’est l’<b>app native Practice</b> qui s’en charge nativement (100 % autonome, sans autre navigateur). Le reste (carte, copilote, vision caméra) marche déjà ici.'
       : '<b>Bluetooth web non disponible ici.</b> Sur PC/Android : <b>Chrome ou Edge</b>. Sur iPad/iPhone : l’<b>app native Practice</b> (le Bluetooth web n’existe pas dans Safari).';
     $('connectBtn').disabled=true;
-  }
+  } else if(NATIVE){ log('mode natif — Bluetooth CoreBluetooth prêt.'); }
   $('hint').innerHTML='Compatible avec les adaptateurs <b>ELM327 Bluetooth LE</b> (Vgate iCar Pro BLE, Veepeak BLE+, OBDLink CX/MX+, V‑Link…). Branche le lecteur sur la prise OBD, contact mis, puis « Connecter ». <b>Reconnexion automatique</b> si la liaison se coupe. L\'adaptateur Carly d\'origine est chiffré et ne répondra pas — un ELM327 BLE générique est recommandé.';
 
-  function writeCmd(cmd){ // returns Promise resolved with full response (up to '>')
-    return new Promise(function(res,rej){
-      queue.push({cmd:cmd,res:res,rej:rej}); pump();
-    });
-  }
-  function pump(){ if(pending||!queue.length||!wCh)return; pending=queue.shift(); buf='';
-    var data=new TextEncoder().encode(pending.cmd+'\r');
-    (wCh.writeValueWithoutResponse?wCh.writeValueWithoutResponse(data):wCh.writeValue(data)).catch(function(e){ if(pending){pending.rej(e);pending=null;} pump(); });
-    pending._to=setTimeout(function(){ if(pending){ var p=pending; pending=null; p.res(buf); pump(); } },1400);
-  }
-  function onNotify(ev){ var v=ev.target.value; var s=''; for(var i=0;i<v.byteLength;i++)s+=String.fromCharCode(v.getUint8(i)); buf+=s;
-    if(buf.indexOf('>')>=0 && pending){ clearTimeout(pending._to); var p=pending; pending=null; p.res(buf.replace('>','').trim()); pump(); }
+  /* ---------------- couche protocole (transport-agnostique) ---------------- */
+  function feed(s){ buf+=s; if(buf.indexOf('>')>=0 && pending){ clearTimeout(pending._to); var p=pending; pending=null; p.res(buf.replace(/>/g,'').trim()); pump(); } }
+  function writeCmd(cmd){ return new Promise(function(res,rej){ queue.push({cmd:cmd,res:res,rej:rej}); pump(); }); }
+  function pump(){ if(pending||!queue.length||!txWrite)return; pending=queue.shift(); buf='';
+    var cmd=pending.cmd;
+    var to=(!initialized && (cmd==='ATZ'||cmd==='0100'))?4500:1400;   // le 1er reset + 1re détection protocole sont lents
+    txWrite(cmd+'\r').catch(function(e){ if(pending){pending.rej(e);pending=null;} pump(); });
+    pending._to=setTimeout(function(){ if(pending){ var p=pending; pending=null; p.res(buf); pump(); } },to);
   }
 
   function setConn(state,txt,sub){ var c=$('conn'); c.classList.remove('on','busy');
     if(state==='on')c.classList.add('on'); else if(state==='busy')c.classList.add('busy');
     if(txt)$('connTxt').textContent=txt; if(sub!=null)$('connSub').textContent=sub; }
 
-  // choisit un couple écriture/notification DANS LE MÊME service (privilégie une seule caractéristique mixte)
-  async function pickChars(svcs){ var gW=null,gN=null;
+  /* ------- WEB : choix d'un couple write/notify dans le même service ------- */
+  async function pickCharsWeb(svcs){ var gW=null,gN=null;
     for(var i=0;i<svcs.length;i++){ var chs; try{ chs=await svcs[i].getCharacteristics(); }catch(e){ continue; }
       var w=null,n=null,both=null;
       for(var j=0;j<chs.length;j++){ var c=chs[j],p=c.properties;
@@ -150,49 +171,99 @@
       gW=gW||w; gN=gN||n; }
     return (gW&&gN)?{w:gW,n:gN}:null; }
 
+  /* ------- NATIF : idem sur les objets renvoyés par getServices() ------- */
+  function pickCharsNative(services){ var gw=null,gws=null,gwr=false,gn=null,gns=null;
+    for(var i=0;i<services.length;i++){ var s=services[i], chs=s.characteristics||[];
+      var w=null,wr=false,n=null,both=null,bothR=false;
+      for(var j=0;j<chs.length;j++){ var c=chs[j],p=c.properties||{};
+        var canW=p.write||p.writeWithoutResponse, canN=p.notify||p.indicate;
+        if(canW&&canN&&!both){both=c;bothR=!!p.write;}
+        if(canN&&!n)n=c;
+        if(canW&&!w){w=c;wr=!!p.write;} }
+      var su=(s.uuid||'').toLowerCase();
+      if(both){var bu=(both.uuid||'').toLowerCase();return {wsvc:su,w:bu,wResp:bothR,nsvc:su,n:bu};}
+      if(w&&n)return {wsvc:su,w:(w.uuid||'').toLowerCase(),wResp:wr,nsvc:su,n:(n.uuid||'').toLowerCase()};
+      if(w&&!gw){gw=(w.uuid||'').toLowerCase();gws=su;gwr=wr;}
+      if(n&&!gn){gn=(n.uuid||'').toLowerCase();gns=su;} }
+    return (gw&&gn)?{wsvc:gws,w:gw,wResp:gwr,nsvc:gns,n:gn}:null; }
+
+  /* ---------------- transports ---------------- */
+  var dev=null, gatt=null, bleId=null, bleInit=false, bleListeners=[];
+  function clearNativeListeners(){ bleListeners.forEach(function(h){ try{ if(h&&h.remove)h.remove(); else if(h&&h.then)h.then(function(x){x&&x.remove&&x.remove();}); }catch(e){} }); bleListeners=[]; }
+
+  async function openDevice(){   // 1re fois : affiche le sélecteur d'appareil
+    if(NATIVE){
+      if(!bleInit){ await Ble.initialize({androidNeverForLocation:false}); bleInit=true; }
+      var d=await Ble.requestDevice({optionalServices:NSVC});   // PAS de filtre `services` (clones invisibles sinon)
+      bleId=d.deviceId; return d.name||d.deviceId||'OBD';
+    }
+    dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SERVICES});
+    dev.addEventListener('gattserverdisconnected',onDisconnect);
+    return dev.name||'OBD';
+  }
+
+  async function setupLink(){    // (re)connecte + découvre + abonne notifications ; pose txWrite
+    queue=[]; pending=null; buf=''; txWrite=null;
+    if(NATIVE){
+      clearNativeListeners();
+      bleListeners.push(Ble.addListener('disconnected|'+bleId,function(){ onDisconnect(); }));
+      await Ble.connect({deviceId:bleId});
+      var res=await Ble.getServices({deviceId:bleId});
+      var ch=pickCharsNative((res&&res.services)||[]);
+      if(!ch){ var e=new Error('NO_SERIAL'); e.code='NO_SERIAL'; throw e; }
+      log('service '+ch.wsvc.slice(0,8)+'… — '+(ch.wResp?'write':'writeNR'));
+      txWrite=function(str){ var a={deviceId:bleId,service:ch.wsvc,characteristic:ch.w,value:toHex(str)}; return ch.wResp?Ble.write(a):Ble.writeWithoutResponse(a); };
+      await Ble.startNotifications({deviceId:bleId,service:ch.nsvc,characteristic:ch.n});
+      var first=true;
+      bleListeners.push(Ble.addListener('notification|'+bleId+'|'+ch.nsvc+'|'+ch.n,function(e){ var raw=(e&&e.value)||''; if(first){first=false;log('rx: '+String(raw).slice(0,40));} feed(fromWire(raw)); }));
+      txDisconnect=function(){ try{Ble.disconnect({deviceId:bleId});}catch(e){} clearNativeListeners(); };
+    } else {
+      gatt=await dev.gatt.connect();
+      var svcs=await gatt.getPrimaryServices();
+      var c=await pickCharsWeb(svcs);
+      if(!c){ var e2=new Error('NO_SERIAL'); e2.code='NO_SERIAL'; throw e2; }
+      var wCh=c.w;
+      txWrite=function(str){ var data=new TextEncoder().encode(str); return (wCh.writeValueWithoutResponse?wCh.writeValueWithoutResponse(data):wCh.writeValue(data)); };
+      await c.n.startNotifications();
+      c.n.addEventListener('characteristicvaluechanged',function(ev){ var v=ev.target.value,s=''; for(var i=0;i<v.byteLength;i++)s+=String.fromCharCode(v.getUint8(i)); feed(s); });
+      txDisconnect=function(){ try{gatt.disconnect();}catch(e){} };
+    }
+  }
+
   async function initELM(){ var seq=['ATZ','ATE0','ATL0','ATS0','ATH0','ATSP0'];
     for(var k=0;k<seq.length;k++){ try{ await writeCmd(seq[k]); }catch(e){} await sleep(seq[k]==='ATZ'?420:90); }
     try{ await writeCmd('0100'); }catch(e){} }
 
-  async function setupGatt(){
-    gatt=await dev.gatt.connect();
-    var svcs=await gatt.getPrimaryServices();
-    var ch=await pickChars(svcs);
-    if(!ch){ var e=new Error('NO_SERIAL'); e.code='NO_SERIAL'; throw e; }
-    wCh=ch.w; nCh=ch.n; queue=[]; pending=null; buf='';
-    await nCh.startNotifications(); nCh.addEventListener('characteristicvaluechanged',onNotify);
-    await initELM(); connected=true; reconnectTries=0;
-    $('scanBtn').disabled=false; $('clearBtn').disabled=false; }
-
   function startPoll(){ pollTok++; poll(pollTok); }
 
-  async function connect(){ userDisconnect=false;
+  async function connect(){ userDisconnect=false; initialized=false;
     try{
       setConn('busy','Recherche du lecteur…','Sélectionne ton adaptateur OBD'); log('recherche de l\'adaptateur…');
-      dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SERVICES});
-      dev.addEventListener('gattserverdisconnected',onDisconnect);
-      setConn('busy','Connexion…',dev.name||'OBD'); log('appairage : '+(dev.name||'OBD')+' — ouverture du canal série…');
-      await setupGatt();
-      setConn('on','Lecteur connecté',dev.name||'OBD'); $('connectBtn').textContent='Déconnecter';
+      var name=await openDevice();
+      setConn('busy','Connexion…',name); log('appairage : '+name+' — ouverture du canal série…');
+      await setupLink();
+      await initELM(); connected=true; initialized=true; reconnectTries=0;
+      $('scanBtn').disabled=false; $('clearBtn').disabled=false;
+      setConn('on','Lecteur connecté',name); $('connectBtn').textContent='Déconnecter';
       log('connecté ✓ — lecture des PID en direct.'); startPoll();
     }catch(e){ handleErr(e); }
   }
 
-  function onDisconnect(){ connected=false; wCh=null; nCh=null; pending=null; queue=[]; $('conn').classList.remove('on');
+  function onDisconnect(){ connected=false; initialized=false; txWrite=null; pending=null; queue=[]; $('conn').classList.remove('on');
     if(userDisconnect){ setConn('off','Lecteur non connecté','Adaptateur ELM327 Bluetooth LE requis'); return; }
-    if(dev && reconnectTries<4){ reconnectTries++;
-      setConn('busy','Reconnexion ('+reconnectTries+'/4)…',dev.name||'OBD'); log('liaison perdue — reconnexion '+reconnectTries+'/4…');
+    if(reconnectTries<4){ reconnectTries++;
+      setConn('busy','Reconnexion ('+reconnectTries+'/4)…',''); log('liaison perdue — reconnexion '+reconnectTries+'/4…');
       setTimeout(function(){ if(userDisconnect)return;
-        setupGatt().then(function(){ setConn('on','Lecteur reconnecté',dev.name||'OBD'); log('reconnecté ✓'); startPoll(); })
+        setupLink().then(function(){ return initELM(); }).then(function(){ connected=true; initialized=true; setConn('on','Lecteur reconnecté',''); log('reconnecté ✓'); startPoll(); })
                    .catch(function(){ onDisconnect(); }); }, 700*reconnectTries);
     } else { setConn('off','Déconnecté','Reconnecte le lecteur puis « Connecter »'); $('connectBtn').textContent='Connecter'; $('scanBtn').disabled=true; $('clearBtn').disabled=true; log('reconnexion abandonnée.'); }
   }
 
   function handleErr(e){ var msg=(e&&e.message)||String(e), name=(e&&e.name)||'', u;
-    if(name==='NotFoundError'||/cancel|chooser|User cancelled/i.test(msg)) u='Aucun appareil sélectionné. Réessaie et choisis ton adaptateur dans la liste.';
+    if(name==='NotFoundError'||/cancel|chooser|User cancelled|no device|aucun/i.test(msg)) u='Aucun appareil sélectionné. Réessaie et choisis ton adaptateur dans la liste.';
     else if((e&&e.code==='NO_SERIAL')||/NO_SERIAL/.test(msg)) u='Canal série introuvable sur cet adaptateur — il est peut-être chiffré (type Carly) ou non‑ELM327. Utilise un ELM327 BLE générique (Vgate iCar Pro BLE, Veepeak BLE+, OBDLink CX).';
-    else if(name==='SecurityError') u='Bluetooth bloqué — autorise le Bluetooth pour ce site (et ouvre la page en HTTPS).';
-    else if(name==='NetworkError'||/GATT|connection|connect/i.test(msg)) u='Connexion GATT échouée — rapproche le téléphone du lecteur, coupe puis remets le contact, et réessaie.';
+    else if(name==='SecurityError'||/unsupported|permission|denied/i.test(msg)) u='Bluetooth bloqué — autorise le Bluetooth pour l\'app (Réglages) et réessaie.';
+    else if(name==='NetworkError'||/GATT|connection|connect/i.test(msg)) u='Connexion échouée — rapproche l\'appareil du lecteur, coupe puis remets le contact, et réessaie.';
     else u='Échec : '+msg;
     setConn('off','Échec de connexion',u); $('connectBtn').textContent='Connecter'; log('✕ '+u);
   }
@@ -206,10 +277,10 @@
     {pid:'0111',id:'thr',f:function(b){return b[0]*100/255;},max:100},
     {pid:'012F',id:'fuel',f:function(b){return b[0]*100/255;},max:100},
   ];
-  function parseBytes(resp,pid){ // resp like "41 0C 1A F8"
+  function parseBytes(resp,pid){ // resp comme "41 0C 1A F8"
     var hex=resp.replace(/[^0-9A-Fa-f ]/g,' ').trim().split(/\s+/);
     var i=hex.findIndex(function(h,k){return h==='41'&&hex[k+1]&&('01'+hex[k+1])===pid;});
-    if(i<0){ // some adapters strip spaces
+    if(i<0){ // certains adaptateurs suppriment les espaces
       var flat=resp.replace(/[^0-9A-Fa-f]/g,''); var key='41'+pid.slice(2); var p=flat.indexOf(key);
       if(p<0)return null; var bytes=[]; for(var q=p+4;q<flat.length;q+=2)bytes.push(parseInt(flat.substr(q,2),16)); return bytes;
     }
@@ -224,7 +295,7 @@
     var b=$(id+'B'); if(b){ var pct=Math.max(0,Math.min(100,val/max*100)); b.style.width=pct+'%';
       b.style.background = (id==='cool'&&val>106)||(id==='rpm'&&val>6500)?'var(--crit)':(id==='cool'&&val>98)||(id==='rpm'&&val>5000)?'var(--alert)':'var(--acc)'; } }
 
-  // DTC decoding (mode 03)
+  // DTC (mode 03)
   function decodeDTC(resp){ var flat=resp.replace(/[^0-9A-Fa-f]/g,'').toUpperCase(); var p=flat.indexOf('43'); if(p<0)return []; flat=flat.slice(p+2);
     var codes=[]; for(var i=0;i+4<=flat.length;i+=4){ var a=parseInt(flat.substr(i,2),16), b=flat.substr(i+2,2); if(isNaN(a)||(a===0&&b==='00'))continue;
       var L='PCBU'[(a>>6)&3]; var code=L+((a>>4)&3)+(a&15).toString(16).toUpperCase()+b; if(code!=='P0000')codes.push(code); } return codes; }
@@ -234,9 +305,8 @@
     log(codes.length+' code(s) : '+(codes.join(', ')||'aucun')); }catch(e){ log('scan échoué'); } $('scanBtn').disabled=false; }
   async function clearDTC(){ if(!confirm('Effacer les codes défaut du véhicule ? (éteint aussi le voyant moteur)'))return; log('effacement (mode 04)…'); try{ await writeCmd('04'); $('dtcList').innerHTML='<span class="muted">✓ Codes effacés. Re-scanne pour confirmer.</span>'; log('codes effacés.'); }catch(e){ log('effacement échoué'); } }
 
-  function sleep(ms){ return new Promise(function(r){setTimeout(r,ms);}); }
   $('connectBtn').addEventListener('click',function(){
-    if(connected&&gatt){ userDisconnect=true; pollTok++; connected=false; try{gatt.disconnect();}catch(e){}
+    if(connected){ userDisconnect=true; pollTok++; connected=false; try{txDisconnect();}catch(e){}
       this.textContent='Connecter'; setConn('off','Lecteur non connecté','Adaptateur ELM327 Bluetooth LE requis'); $('scanBtn').disabled=true; $('clearBtn').disabled=true; }
     else connect();
   });
