@@ -2686,8 +2686,14 @@ canvas,iframe,video{filter:grayscale(1) contrast(1.35) brightness(1.05)!importan
     rt.cum=[0];rt.total=0; for(var i=1;i<rt.coords.length;i++){var a=rt.coords[i-1],b=rt.coords[i];rt.total+=haversine({lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]});rt.cum[i]=rt.total;}
     routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); document.body.setAttribute('data-navigating','1'); document.body.removeAttribute('data-explore'); document.body.removeAttribute('data-maptools'); refilterMarkers(); if(raceLayer)raceLayer.clearLayers(); postHudRoute(); }
   function postHudRoute(){ var f=$('hudFrame'); if(f&&f.contentWindow){ try{ f.contentWindow.postMessage({type:'route',coords:(navActive&&route&&route.coords)?route.coords:null},'*'); }catch(e){} } }
+  /* annonce vocale : Practice répète à voix haute l'adresse saisie dès qu'on lance un trajet */
+  var DEST_PREFIX={fr:'Destination : ',en:'Destination: ',es:'Destino: ',de:'Ziel: ',it:'Destinazione: ',pt:'Destino: ',nl:'Bestemming: ',ja:'目的地：',zh:'目的地：',ar:'الوجهة: ',ru:'Пункт назначения: '};
+  function sayDestination(name){ if(!name||!Voice.on)return; name=(''+name).split(',')[0].trim(); if(!name)return;
+    var base=((typeof T==='function'&&T()&&T().code)||'fr').slice(0,2); var pre=(DEST_PREFIX[base]!=null)?DEST_PREFIX[base]:'';
+    Voice.say(pre+name,3); }
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
     pendingNav=null;
+    sayDestination(($('dest')&&$('dest').value)||(to&&to.name));
     currentDest=to;hideSuggest();hideFavs();addFav(to);setNavContext(to);rememberPlace(to,($('dest').value||to.name));setUiMode('active');setMsg(T().reroute,'');requestWake();
     getRoutes(from,to).then(function(rts){ if(!rts||!rts.length){toast(T().netErr);setMsg(T().ready,'');return;} var rt=rts[0]; altRoute=rts[1]||null; setRouteData(rt); colorRouteTraffic(from,to); drawGhost(altRoute); setTimeout(compareRoutes,1600);
       if(destMarker)map.removeLayer(destMarker); destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
