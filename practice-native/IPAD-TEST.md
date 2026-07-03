@@ -46,6 +46,54 @@ Le dossier **`PracticeVision.swiftpm`** est une app prête à compiler **sur l'i
 
 ---
 
+## ✅ Option 3 — Xcode sur Mac + compte Apple Developer (ce que tu veux)
+
+Même app (`PracticeVision.swiftpm`), mais compilée et déployée depuis **Xcode** sur
+le Mac. Xcode n'existe **que sur macOS** — impossible depuis le PC Windows.
+
+**Pré-requis Mac** : Xcode 16+ (App Store), un Apple ID (gratuit suffit), l'iPad en USB-C.
+> Rien d'autre : cette app charge le site déployé, donc **pas de npm / build / CocoaPods**.
+
+### Le faire
+
+```bash
+# 1. Récupère le projet sur le Mac
+git clone https://github.com/Betterpracticeadmin/practice-site.git
+cd practice-site/practice-native
+
+# 2. Ouvre l'app dans Xcode (le script affiche aussi toutes les étapes)
+./run-ipad.command
+#   … ou directement :  open -a Xcode PracticeVision.swiftpm
+```
+
+### Dans Xcode
+1. Branche l'iPad en USB-C, déverrouille-le, **« Se fier à cet ordinateur »**.
+2. Projet **Practice Vision** → onglet **Signing & Capabilities** → coche
+   **Automatically manage signing** → **Team** = ton Apple ID.
+   - Gratuit → *(Personal Team)*, app valide **~7 jours**, 3 appareils.
+   - Apple Developer payant → **~1 an**.
+3. Erreur `Failed to register bundle identifier` ? Mets un Bundle ID unique, ex
+   `fm.betterstate.practicevision.alessandro`.
+4. Sélecteur d'appareil (à droite de ▶) → choisis **ton iPad** (pas un simulateur).
+5. **▶ Run** (Cmd+R) : Xcode compile, signe, installe et lance sur l'iPad.
+
+### Côté iPad (1re fois)
+- **Mode développeur** : Réglages › Confidentialité et sécurité › **Mode développeur**
+  → activer → **Redémarrer** (la ligne n'apparaît qu'après un 1er build Xcode).
+- **Faire confiance** : Réglages › Général › **VPN et gestion de l'appareil** →
+  *App du développeur* → ton Apple ID → **Se fier** (iPadOS 18 : *Autoriser et redémarrer*).
+- Relance l'app → le cockpit (os.html) s'affiche en plein écran.
+
+> Compte gratuit : après ~7 jours l'app refuse de démarrer → rebranche l'iPad,
+> ré-appuie **▶** dans Xcode pour re-signer.
+
+**Et Capacitor ?** Le projet a aussi une config **Capacitor 7** (`capacitor.config.json`,
+scripts `ios:add/sync/open`). Elle sert quand tu voudras des **plugins natifs**
+(ex. OBD en Bluetooth via CoreBluetooth). Pour juste voir le cockpit sur l'iPad,
+la `.swiftpm` ci-dessus est plus rapide (aucun CocoaPods, aucun build web).
+
+---
+
 ## Et le vrai CarPlay / Android Auto ?
 Toujours pareil, sans détour : ça exige une **app native publiée** (catégorie Navigation, entitlement
 Apple). Le squelette est dans `practice-native/ios` et `practice-native/android`. Cette app
