@@ -545,7 +545,7 @@
   body[data-mode="night"] .orb{box-shadow:inset 0 0 0 .5px rgba(255,255,255,.4),0 0 26px rgba(255,255,255,.18);}
   body[data-mode="copilot"] .orb{box-shadow:inset 0 0 0 .5px rgba(106,161,255,.5),0 0 24px rgba(106,161,255,.28);}
   /* density: ULTRA RACE strips the superfluous — only the essentials remain */
-  body[data-mode="ultra"] #mediaCard,body[data-mode="ultra"] #wxCard{opacity:.18;filter:grayscale(.7);pointer-events:none;}
+  body[data-mode="ultra"] #mediaCard,body[data-mode="ultra"] #wxCard{opacity:1;filter:none;pointer-events:auto;}
   body[data-mode="ultra"] .speed-ov .v{font-size:92px;}
   /* l'image de la voiture reste pleinement visible dans tous les modes (correctif) */
   body[data-mode="performance"] #dmCard .glitch-car,body[data-mode="ultra"] #dmCard .glitch-car{opacity:1;}
@@ -2094,7 +2094,7 @@ canvas,iframe,video{filter:grayscale(1) contrast(1.35) brightness(1.05)!importan
     rally:{name:'Rally',rate:1.12,say:'Mode rally. Style, drift et liberté.'}
   };
   function tileStyle(){ if(mode==='gt')return 'rastertiles/voyager_nolabels'; return 'rastertiles/voyager'; /* coloured Voyager everywhere; per-mode tint via CSS filter on .leaflet-tile-pane */ }
-  function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; if(!silent && window.daLoader){ window.daLoader.show('Mode '+MODES[m].name); setTimeout(function(){ if(window.daLoader)window.daLoader.hide(); },650); } applyTheme(); syncPanel(); if(typeof renderRouteOverlay==='function'&&navActive)renderRouteOverlay(); if(typeof postHudMode==='function')postHudMode(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} if(!silent){Mem.prefs.mode=m;saveMem();} }
+  function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; if(!silent && window.daLoader){ window.daLoader.show('Mode '+MODES[m].name); setTimeout(function(){ if(window.daLoader)window.daLoader.hide(); },650); } applyTheme(); syncPanel(); if(typeof renderRouteOverlay==='function'&&navActive)renderRouteOverlay(); if(typeof postHudMode==='function')postHudMode(); if(typeof postHudRoute==='function')postHudRoute(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} if(!silent){Mem.prefs.mode=m;saveMem();} }
 
   function haversine(a,b){var R=6371000,r=Math.PI/180;var dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;var s=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(s)));}
   function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}

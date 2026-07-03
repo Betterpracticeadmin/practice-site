@@ -380,6 +380,17 @@
       g.updateMatrixWorld(true);
       return g;
     }
+    /* ajoute 4 roues procédurales (les voitures du kit n'ont que la carrosserie) */
+    function addWheels(model) {
+      model.updateMatrixWorld(true);
+      var b = new THREE.Box3().setFromObject(model), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+      var r = Math.min(s.y * 0.32, s.z * 0.13), ww = s.x * 0.16, wx = s.x * 0.40, wz = s.z * 0.31;
+      var geo = track(new THREE.CylinderGeometry(r, r, ww, 18));
+      var mat = track(new THREE.MeshLambertMaterial({ color: 0x0b0b0d, flatShading: true }));
+      [[-wx, wz], [wx, wz], [-wx, -wz], [wx, -wz]].forEach(function (p) {
+        var w = new THREE.Mesh(geo, mat); w.rotation.z = Math.PI / 2; w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); model.add(w);
+      });
+    }
     function loadAvatar(url, opts) {
       opts = opts || {};
       pendingAvatar = url; pendingAvatarOpts = opts;
@@ -392,6 +403,7 @@
         loader.load(url, function (res) {
           if (!THREE || !scene) return;
           var upr = uprightCar(res.scene || res);        // normalise -> Y-up (hauteur Y, longueur Z)
+          if (!isFbx) addWheels(upr);                    // kit = carrosserie seule -> roues ajoutées
           disposeModel();
           root = new THREE.Group(); carGroup = new THREE.Group(); root.add(carGroup); scene.add(root);
           upr.updateMatrixWorld(true);

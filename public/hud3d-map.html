@@ -655,7 +655,7 @@ window.addEventListener('message', function(e){
         break;
       }
       case 'avatar':    { if(typeof d.url==='string'){ try{ window.__loadAvatar && window.__loadAvatar(d.url, d); }catch(_){}} break; }
-      case 'mode':      { if(typeof d.mode==='string'){ HUB3D.mode = d.mode; applyDriveMode(d.mode); } break; }
+      case 'mode':      { if(typeof d.mode==='string'){ HUB3D.mode = d.mode; applyDriveMode(d.mode); } try{ if(LIVE.routeCoords) applyRoute(LIVE.routeCoords); }catch(_){} break; }
       case 'pause':     { paused=true; break; }                                  // hub ferme/cache -> repos
       case 'resume':    { paused=false; try{ if(map){ map.resize(); map.triggerRepaint(); } }catch(_){}
                           try{ if(typeof window.__hubLocate==='function') window.__hubLocate(); }catch(_){}
@@ -2132,6 +2132,17 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     g.updateMatrixWorld(true);
     return g;
   }
+  /* les voitures du kit n'ont que la carrosserie -> on ajoute 4 roues dans les passages */
+  function addWheels(model, T){
+    model.updateMatrixWorld(true);
+    var b=new T.Box3().setFromObject(model), s=b.getSize(new T.Vector3()), c=b.getCenter(new T.Vector3());
+    var r=Math.min(s.y*0.32, s.z*0.13), ww=s.x*0.16, wx=s.x*0.40, wz=s.z*0.31;
+    var geo=new T.CylinderGeometry(r,r,ww,18);
+    var mat=new T.MeshStandardMaterial({color:0x0b0b0d, roughness:0.85, metalness:0.1});
+    [[-wx,wz],[wx,wz],[-wx,-wz],[wx,-wz]].forEach(function(p){
+      var w=new T.Mesh(geo,mat); w.rotation.z=Math.PI/2; w.position.set(c.x+p[0], b.min.y+r, c.z+p[1]); model.add(w);
+    });
+  }
 
   /* charge un modele avatar (GLB ou FBX) comme voiture EGO du hub */
   window.__loadAvatar=function(url, opts){
@@ -2148,6 +2159,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         try{
           var inner = res.scene || res;                     // GLTF -> .scene ; FBX -> Object3D
           var wrap = uprightCar(inner, T);                  // normalise -> Y-up (hauteur Y, longueur Z)
+          if(!isFbx) addWheels(wrap, T);                    // kit = carrosserie seule -> roues ajoutées
           wrap.updateMatrixWorld(true);
           var box=new T.Box3().setFromObject(wrap);
           var size=box.getSize(new T.Vector3());
