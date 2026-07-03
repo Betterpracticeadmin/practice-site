@@ -21,6 +21,16 @@
   body[data-theme="dark"]{--bg:#070708;--bg2:#0c0d10;--card:rgba(255,255,255,.045);--border:rgba(255,255,255,.10);--txt:#F2F3F5;--dim:#8b9298;--faint:#565b61;--mapbg:#08090b;--dotc:rgba(255,255,255,.05);}
   body[data-theme="light"]{--bg:#EDEEEF;--bg2:#F6F7F7;--card:rgba(255,255,255,.84);--border:rgba(0,0,0,.12);--txt:#0E0F11;--dim:#5f6671;--faint:#9aa0a8;--mapbg:#e6eaee;--dotc:rgba(0,0,0,.07);}
   html,body{height:100%;}
+  /* ===== confort tactile "app native" (iPad / iOS) — n'affecte pas la mise en page ===== */
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}          /* pas d'inflation du texte en paysage iOS */
+  html,body{overscroll-behavior:none;}                                 /* pas de rebond élastique global */
+  *{-webkit-tap-highlight-color:transparent;}                          /* pas de flash gris au tap */
+  button,a,.navtabs,.navtabs *,[role="button"],.set-cat,.mode-btn,.chip,input[type="button"],input[type="submit"]{
+    touch-action:manipulation;                                         /* supprime le délai 300ms + double-tap zoom sur les contrôles */
+    -webkit-touch-callout:none;}                                       /* pas de menu au appui long */
+  @media (pointer:coarse){                                             /* évite le zoom auto de Safari au focus d'un champ */
+    input:not([type="range"]),textarea,select{font-size:16px;}
+  }
   body{font-family:'Inter',sans-serif;background-color:#0a2a6e;
     /* dégradé "ciel" vertical lisse (façon photo d'atmosphère), teinté par le mode */
     background-image:linear-gradient(180deg,
