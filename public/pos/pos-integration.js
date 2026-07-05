@@ -134,12 +134,10 @@
       } catch (e) {}
     }
     POS.bus.on('avatar:changed', function () { postAvatarToHub(); applyAvatarToPreview(); });
-    /* sélecteur de véhicule (Réglages/vue véhicule) */
+    /* sélecteur d'avatar — uniquement dans Réglages › Avatar du hub (retiré du diagnostic) */
     if (garage && garage.mountPicker) {
-      ['posGarageUI', 'posGarageUI2'].forEach(function (id) {
-        var box = document.getElementById(id);
-        if (box) { try { garage.mountPicker(box); } catch (e) { console.warn('[POS] picker', e); } }
-      });
+      var box = document.getElementById('posGarageUI2');
+      if (box) { try { garage.mountPicker(box); } catch (e) { console.warn('[POS] picker', e); } }
     }
 
     console.info('[PracticeOS] modules actifs :', POS.registry.list().join(', '));

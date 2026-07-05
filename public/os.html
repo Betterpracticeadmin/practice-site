@@ -1443,7 +1443,7 @@
       <h3 class="set-modes-h">Autres réglages</h3>
       <div class="set-cats" id="setCats">
         <button class="set-cat" data-go="conducteurs"><span class="sc-ic">👤</span><span class="sc-tx"><b>Conducteurs</b><i>Profils, ajout, sélection</i></span><span class="sc-ar">›</span></button>
-        <button class="set-cat" data-go="vehicule"><span class="sc-ic">🚗</span><span class="sc-tx"><b>Véhicule (avatar 3D)</b><i>Choisir ma voiture du hub</i></span><span class="sc-ar">›</span></button>
+        <button class="set-cat" data-go="vehicule"><span class="sc-ic">🚗</span><span class="sc-tx"><b>Avatar du hub</b><i>Choisir ma voiture 3D du hub</i></span><span class="sc-ar">›</span></button>
         <button class="set-cat" data-go="profil"><span class="sc-ic">👤</span><span class="sc-tx"><b>Profil conducteur</b><i>Niveau, points, récompenses</i></span><span class="sc-ar">›</span></button>
         <button class="set-cat" data-go="carte"><span class="sc-ic">🗺️</span><span class="sc-tx"><b>Carte & navigation</b><i>Unités, trafic</i></span><span class="sc-ar">›</span></button>
         <button class="set-cat" data-go="affichage"><span class="sc-ic">🎨</span><span class="sc-tx"><b>Affichage</b><i>Thème & animations</i></span><span class="sc-ar">›</span></button>
@@ -1460,9 +1460,11 @@
       <div class="key-note">Chaque conducteur possède sa propre sauvegarde : préférences, statistiques, historique, apprentissage de Practice IA. Les données ne sont jamais mélangées.</div>
     </section>
     <section class="set-sec" data-cat="vehicule">
-      <!-- sélecteur d'avatar 3D (rendu par pos-garage.js) -->
-      <div id="posGarageUI2"></div>
-      <div class="key-note">Choisis la voiture low-poly qui te représente dans le hub 3D — parmi toutes les voitures du kit, la moto, le bus, ou un modèle généré. Le choix est mémorisé par conducteur.</div>
+      <!-- aperçu 3D + sélecteur d'avatar (rendus par pos-car3d.js / pos-garage.js) -->
+      <div id="posVehId" style="display:none;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 4px 8px;"></div>
+      <div id="posCar3d" style="width:100%;height:210px;position:relative;margin-bottom:6px;"></div>
+      <div id="posGarageUI2" style="margin-top:8px;"></div>
+      <div class="key-note">Clique une voiture pour changer ton avatar dans le hub 3D — parmi toutes les voitures du kit, la moto, le bus, ou un modèle généré. Le choix est mémorisé par conducteur.</div>
     </section>
     <section class="set-sec" data-cat="profil">
       <div class="dp-wrap" id="dpWrap">
@@ -1650,12 +1652,7 @@
 
   </section>
 
-  <!-- PracticeOS : modèle 3D low-poly paramétrique (pos-car3d) + reconnaissance VIN (pos-vehdb) -->
-  <section class="veh-pos3d">
-    <div id="posVehId" style="display:none;font-family:var(--mono);font-size:11px;color:var(--dim);padding:2px 4px 8px;"></div>
-    <div id="posCar3d" style="width:100%;height:210px;position:relative;"></div>
-    <div id="posGarageUI" style="margin-top:14px;"></div>
-  </section>
+  <!-- (aperçu 3D + sélecteur d'avatar déplacés dans Réglages › Avatar du hub) -->
 
   <!-- GRILLE 2 COLONNES -->
   <div class="veh-grid">
