@@ -380,15 +380,32 @@
       g.updateMatrixWorld(true);
       return g;
     }
-    /* ajoute 4 roues procédurales (les voitures du kit n'ont que la carrosserie) */
+    /* roue alliage réelle (GLB issu du STL), chargée une fois puis clonée ×4 (les voitures du kit n'ont que la carrosserie) */
+    var wheelProtoP = null;
+    function loadWheelProto() {
+      if (wheelProtoP) return wheelProtoP;
+      wheelProtoP = import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js')
+        .then(function (m) { return new Promise(function (res, rej) { new m.GLTFLoader().load('/models/wheel.glb', function (g) { res(g.scene); }, undefined, rej); }); });
+      return wheelProtoP;
+    }
     function addWheels(model) {
       model.updateMatrixWorld(true);
       var b = new THREE.Box3().setFromObject(model), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
-      var r = Math.min(s.y * 0.32, s.z * 0.13), ww = s.x * 0.16, wx = s.x * 0.40, wz = s.z * 0.31;
-      var geo = track(new THREE.CylinderGeometry(r, r, ww, 18));
-      var mat = track(new THREE.MeshLambertMaterial({ color: 0x0b0b0d, flatShading: true }));
-      [[-wx, wz], [wx, wz], [-wx, -wz], [wx, -wz]].forEach(function (p) {
-        var w = new THREE.Mesh(geo, mat); w.rotation.z = Math.PI / 2; w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); model.add(w);
+      var r = Math.min(s.y * 0.32, s.z * 0.13), wx = s.x * 0.40, wz = s.z * 0.31;
+      var mat = track(new THREE.MeshStandardMaterial({ color: 0x15171c, roughness: 0.5, metalness: 0.55, side: THREE.DoubleSide }));
+      var slots = [[-wx, wz], [wx, wz], [-wx, -wz], [wx, -wz]];
+      loadWheelProto().then(function (proto) {
+        slots.forEach(function (p) {
+          var w = proto.clone(true);
+          w.traverse(function (o) { if (o.isMesh) { o.geometry = o.geometry.clone(); track(o.geometry); o.material = mat; } });
+          w.scale.setScalar(2 * r);                    // GLB diamètre 1 -> diamètre 2r ; axe déjà sur X
+          w.rotation.y = p[0] < 0 ? Math.PI : 0;        // jante vers l'extérieur des deux côtés
+          w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); model.add(w);
+        });
+        if (visible && renderer && scene && camera) renderer.render(scene, camera);
+      }).catch(function () {                            // repli : cylindres
+        var geo = track(new THREE.CylinderGeometry(r, r, s.x * 0.16, 18));
+        slots.forEach(function (p) { var w = new THREE.Mesh(geo, mat); w.rotation.z = Math.PI / 2; w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); model.add(w); });
       });
     }
     function loadAvatar(url, opts) {
