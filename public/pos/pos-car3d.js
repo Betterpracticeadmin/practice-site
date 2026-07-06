@@ -436,9 +436,9 @@
           upr.scale.setScalar(k); upr.updateMatrixWorld(true);
           box = new THREE.Box3().setFromObject(upr); var ctr = box.getCenter(new THREE.Vector3());
           upr.position.set(-ctr.x, -box.min.y, -ctr.z);
-          carGroup.add(upr);
+          carGroup.add(upr); carGroup.rotation.y = -0.5;   // présentation 3/4 élégante
           wheelRadius = 0.34; wheelbaseM = 2.6;
-          if (camera) { var dist = target * 1.4; camera.position.set(dist * 0.85, target * 0.5, dist * 0.95); camera.lookAt(0, target * 0.16, 0); }
+          if (camera) { var dist = target * 1.5; camera.position.set(dist * 0.7, target * 0.62, dist * 1.0); camera.lookAt(0, target * 0.14, 0); }
           updateDims(target, size.x * k, size.y * k);
           if (visible && renderer) renderer.render(scene, camera);
         }, undefined, function () { /* échec -> on garde le paramétrique */ });
@@ -461,7 +461,7 @@
         THREE = T;
         container = containerEl;
 
-        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.setClearColor(0x000000, 0); // fond TRANSPARENT (cockpit derrière)
         canvas = renderer.domElement;
@@ -475,10 +475,11 @@
         camera = new THREE.PerspectiveCamera(35, 1.5, 0.1, 100);
 
         /* lumières : directionnelle + ambiante (suffisant en flat shading) */
-        var sun = new THREE.DirectionalLight(0xffffff, 1.6);
-        sun.position.set(3, 6, 4);
-        scene.add(sun);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+        /* éclairage studio premium : key + fill bleuté + rim chaud + ambiante */
+        var key = new THREE.DirectionalLight(0xffffff, 2.1); key.position.set(4, 7, 5); scene.add(key);
+        var fill = new THREE.DirectionalLight(0x9db4ff, 0.7); fill.position.set(-5, 2, -3); scene.add(fill);
+        var rim = new THREE.DirectionalLight(0xfff0d8, 0.95); rim.position.set(-2, 4, -6); scene.add(rim);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.75));
 
         /* sol : grille discrète semi-transparente */
         var grid = new THREE.GridHelper(12, 12, 0x3a3f46, 0x22262c);
