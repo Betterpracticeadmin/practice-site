@@ -436,7 +436,9 @@
           upr.scale.setScalar(k); upr.updateMatrixWorld(true);
           box = new THREE.Box3().setFromObject(upr); var ctr = box.getCenter(new THREE.Vector3());
           upr.position.set(-ctr.x, -box.min.y, -ctr.z);
-          carGroup.add(upr); carGroup.rotation.y = -0.5;   // présentation 3/4 élégante
+          carGroup.add(upr);
+          var _s2 = new THREE.Box3().setFromObject(upr).getSize(new THREE.Vector3());
+          carGroup.rotation.y = (_s2.x > _s2.z ? Math.PI / 2 : 0) - 0.5;   // oriente longueur->Z (comme les vignettes) + présentation 3/4
           try {                                            // ombre de contact douce au sol (DA premium)
             var _cv = document.createElement('canvas'); _cv.width = _cv.height = 128; var _cx = _cv.getContext('2d');
             var _gr = _cx.createRadialGradient(64, 64, 3, 64, 64, 60); _gr.addColorStop(0, 'rgba(0,0,0,0.45)'); _gr.addColorStop(1, 'rgba(0,0,0,0)');
@@ -449,7 +451,7 @@
           wheelRadius = 0.34; wheelbaseM = 2.6;
           if (camera) { var dist = target * 1.5; camera.position.set(dist * 0.7, target * 0.62, dist * 1.0); camera.lookAt(0, target * 0.14, 0); }
           updateDims(target, size.x * k, size.y * k);
-          if (visible && renderer) renderer.render(scene, camera);
+          if (renderer && scene && camera) { renderer.render(scene, camera); setTimeout(function () { try { renderer.render(scene, camera); } catch (e) {} }, 220); setTimeout(function () { try { renderer.render(scene, camera); } catch (e) {} }, 550); } // re-render (nouvel avatar + textures chargées)
         }, undefined, function () { /* échec -> on garde le paramétrique */ });
       }).catch(function () {});
     }
