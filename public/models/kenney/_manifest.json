@@ -1,0 +1,18 @@
+[
+ {"id":"k-sedan","file":"/models/kenney/sedan.glb","label":"Berline","class":"car"},
+ {"id":"k-sedan-sports","file":"/models/kenney/sedan-sports.glb","label":"Berline sport","class":"car"},
+ {"id":"k-hatchback","file":"/models/kenney/hatchback-sports.glb","label":"Sportive","class":"car"},
+ {"id":"k-suv","file":"/models/kenney/suv.glb","label":"SUV","class":"suv"},
+ {"id":"k-suv-luxury","file":"/models/kenney/suv-luxury.glb","label":"SUV luxe","class":"suv"},
+ {"id":"k-van","file":"/models/kenney/van.glb","label":"Van","class":"van"},
+ {"id":"k-taxi","file":"/models/kenney/taxi.glb","label":"Taxi","class":"car"},
+ {"id":"k-police","file":"/models/kenney/police.glb","label":"Police","class":"car"},
+ {"id":"k-ambulance","file":"/models/kenney/ambulance.glb","label":"Ambulance","class":"van"},
+ {"id":"k-firetruck","file":"/models/kenney/firetruck.glb","label":"Pompiers","class":"truck"},
+ {"id":"k-garbage","file":"/models/kenney/garbage-truck.glb","label":"Benne","class":"truck"},
+ {"id":"k-delivery","file":"/models/kenney/delivery.glb","label":"Livraison","class":"van"},
+ {"id":"k-race","file":"/models/kenney/race.glb","label":"Course","class":"car"},
+ {"id":"k-race-future","file":"/models/kenney/race-future.glb","label":"Course futur","class":"car"},
+ {"id":"k-truck","file":"/models/kenney/truck.glb","label":"Camion","class":"truck"},
+ {"id":"k-tractor","file":"/models/kenney/tractor.glb","label":"Tracteur","class":"truck"}
+]

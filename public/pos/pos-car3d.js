@@ -423,7 +423,7 @@
           var upr = uprightCar(_inner);                  // normalise -> Y-up (hauteur Y, longueur Z)
           disposeModel();                                // libère l'ancien AVANT de tracker le matériau des roues (évite un dispose prématuré)
           root = new THREE.Group(); carGroup = new THREE.Group(); root.add(carGroup); scene.add(root);
-          if (!isFbx) {                                  // kit = carrosserie seule -> couleur + roues
+          if (!isFbx && url.indexOf('/kenney/') < 0) {   // kit body-only -> couleur + roues (les Kenney sont déjà complets)
             var _pal = [0xC62828, 0x1565C0, 0xE8EAED, 0x1A1A1A, 0x9AA0A6, 0x2E7D32, 0xEF6C00, 0x6A1B9A, 0x00838F, 0xF9A825, 0x37474F, 0x8D6E63];
             var _n = parseInt(('' + url).replace(/[^0-9]/g, ''), 10) || 0, _c = _pal[_n % _pal.length];
             upr.traverse(function (o) { if (o.isMesh) o.material = track(new THREE.MeshStandardMaterial({ color: _c, roughness: 0.4, metalness: 0.5 })); }); // peinture métallisée par voiture

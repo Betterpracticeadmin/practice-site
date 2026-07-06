@@ -81,7 +81,7 @@
     }
     function render() {
       var cur = api.currentId(); el.innerHTML = '';
-      section('Voitures du kit', kit, cur, el);
+      section('Véhicules', kit, cur, el);
       section('Autres véhicules', BASE.filter(function (m) { return m.kind === 'fbx'; }), cur, el);
       section('Générés / auto', BASE.filter(function (m) { return m.kind === 'param' || m.kind === 'auto'; }), cur, el);
     }
@@ -112,9 +112,9 @@
     POS.registry.register('garage', api);
     /* charge toutes les voitures du kit */
     try {
-      fetch('/models/kit/_manifest.json').then(function (r) { return r.json(); }).then(function (list) {
+      fetch('/models/kenney/_manifest.json').then(function (r) { return r.json(); }).then(function (list) {
         kit = (list || []).map(function (e, i) {
-          return { id: e.id, label: 'Voiture ' + String(i + 1).padStart(2, '0'), kind: 'glb', src: e.file, class: 'car', tag: 'KIT' };
+          return { id: e.id, label: e.label || ('Véhicule ' + (i + 1)), kind: 'glb', src: e.file, class: e.class || 'car', tag: 'KENNEY' };
         });
         rebuild();
         POS.bus.emit('garage:catalog', { count: kit.length });
