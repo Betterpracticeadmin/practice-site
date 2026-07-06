@@ -447,11 +447,11 @@
   /* année-modèle via le caractère 10 (index 9) ; gestion du cycle de 30 ans */
   function decodeYear(vin) {
     var c = vin.charAt(9), y = null;
-    if (c >= '1' && c <= '9') y = 2000 + (c.charCodeAt(0) - 48); // 1-9 → 2001-2009
+    var max = new Date().getFullYear() + 1;
+    if (c >= '1' && c <= '9') { y = 2031 + (c.charCodeAt(0) - 49); if (y > max) y -= 30; } // 1-9 : 2031-2039, ramené à 2001-2009 tant que dans le futur
     else if (YEARC[c] !== undefined) y = YEARC[c];               // A-Y → 2010-2030
     if (y === null) return null;
     /* si l'année dépasse l'année courante + 1 → cycle précédent (-30 ans) */
-    var max = new Date().getFullYear() + 1;
     if (y > max) y -= 30;
     return y;
   }

@@ -132,7 +132,7 @@
   var buf='', queue=[], pending=null, connected=false, initialized=false;
   var txWrite=null;                 // function(str)->Promise, posé par le transport
   var txDisconnect=function(){};
-  var userDisconnect=false, reconnectTries=0, pollTok=0;
+  var userDisconnect=false, reconnectTries=0, pollTok=0, reconnecting=false;
 
   // détection : sur iPad WKWebView navigator.bluetooth est absent -> on n'affiche PAS l'avertissement en natif
   if(!navigator.bluetooth && !NATIVE){
@@ -251,11 +251,12 @@
 
   function onDisconnect(){ connected=false; initialized=false; txWrite=null; pending=null; queue=[]; $('conn').classList.remove('on');
     if(userDisconnect){ setConn('off','Lecteur non connecté','Adaptateur ELM327 Bluetooth LE requis'); return; }
-    if(reconnectTries<4){ reconnectTries++;
+    if(reconnecting) return;                              // une seule chaîne de reconnexion à la fois (onDisconnect ré-entrant)
+    if(reconnectTries<4){ reconnectTries++; reconnecting=true;
       setConn('busy','Reconnexion ('+reconnectTries+'/4)…',''); log('liaison perdue — reconnexion '+reconnectTries+'/4…');
-      setTimeout(function(){ if(userDisconnect)return;
-        setupLink().then(function(){ return initELM(); }).then(function(){ connected=true; initialized=true; setConn('on','Lecteur reconnecté',''); log('reconnecté ✓'); startPoll(); })
-                   .catch(function(){ onDisconnect(); }); }, 700*reconnectTries);
+      setTimeout(function(){ if(userDisconnect){ reconnecting=false; return; }
+        setupLink().then(function(){ return initELM(); }).then(function(){ reconnecting=false; reconnectTries=0; connected=true; initialized=true; setConn('on','Lecteur reconnecté',''); log('reconnecté ✓'); startPoll(); })
+                   .catch(function(){ reconnecting=false; onDisconnect(); }); }, 700*reconnectTries);
     } else { setConn('off','Déconnecté','Reconnecte le lecteur puis « Connecter »'); $('connectBtn').textContent='Connecter'; $('scanBtn').disabled=true; $('clearBtn').disabled=true; log('reconnexion abandonnée.'); }
   }
 
@@ -277,11 +278,11 @@
     {pid:'0111',id:'thr',f:function(b){return b[0]*100/255;},max:100},
     {pid:'012F',id:'fuel',f:function(b){return b[0]*100/255;},max:100},
   ];
-  function parseBytes(resp,pid){ // resp comme "41 0C 1A F8"
-    var hex=resp.replace(/[^0-9A-Fa-f ]/g,' ').trim().split(/\s+/);
+  function parseBytes(resp,pid){ // resp comme "41 0C 1A F8" (insensible à la casse renvoyée par l'adaptateur)
+    var hex=resp.toUpperCase().replace(/[^0-9A-F ]/g,' ').trim().split(/\s+/);
     var i=hex.findIndex(function(h,k){return h==='41'&&hex[k+1]&&('01'+hex[k+1])===pid;});
     if(i<0){ // certains adaptateurs suppriment les espaces
-      var flat=resp.replace(/[^0-9A-Fa-f]/g,''); var key='41'+pid.slice(2); var p=flat.indexOf(key);
+      var flat=resp.toUpperCase().replace(/[^0-9A-F]/g,''); var key='41'+pid.slice(2); var p=flat.indexOf(key);
       if(p<0)return null; var bytes=[]; for(var q=p+4;q<flat.length;q+=2)bytes.push(parseInt(flat.substr(q,2),16)); return bytes;
     }
     var b=[]; for(var j=i+2;j<hex.length;j++){ var n=parseInt(hex[j],16); if(!isNaN(n))b.push(n); } return b;

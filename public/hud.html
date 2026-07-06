@@ -737,7 +737,7 @@
     var override=risk>=P0, level=override?'CRITICAL':risk>P1?'ALERT':'SAFE';
 
     /* SPEED SOURCE: real (OBD/GPS) > manual > auto sim. Real speed = advisory mode (no override of the car) */
-    if(real.speed!=null && real.src==='GPS' && Date.now()-real.at>4000) real.speed=null;
+    if(real.speed!=null && Date.now()-real.at>4000){ real.speed=null; real.rpm=null; real.cool=null; real.src=null; }  // purge la télémétrie figée (OBD ou GPS) après 4 s sans maj
     if(real.speed!=null){ egoAccel=clamp((real.speed-lastV)/Math.max(dt,0.001),-9,5); world.egoV=clamp(real.speed,0,90); }
     else if(auto){ var dcap=(typeof world.demoSpeed==='number')?world.demoSpeed:38; var target=override?0:risk>P1?world.egoV*(1-risk*0.6):(world.egoV<dcap?Math.min(world.egoV+2.4*dt*8,dcap):Math.max(world.egoV-2.4*dt*8,dcap));
       var dv=target-world.egoV; egoAccel=clamp(dv/Math.max(dt,0.001),-9,4); world.egoV=clamp(world.egoV+egoAccel*dt,0,60); }

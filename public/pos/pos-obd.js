@@ -150,7 +150,7 @@
       if (pending || !queue.length) return;
       pending = queue.shift(); buf = '';
       writeRaw(pending.cmd + '\r').catch(function (e) {
-        if (pending) { pending.rej(e); pending = null; }
+        if (pending) { clearTimeout(pending._to); pending.rej(e); pending = null; }
         pump();
       });
       pending._to = setTimeout(function () {

@@ -420,9 +420,9 @@
         loader.load(url, function (res) {
           if (!THREE || !scene) return;
           var upr = uprightCar(res.scene || res);        // normalise -> Y-up (hauteur Y, longueur Z)
-          if (!isFbx) addWheels(upr);                    // kit = carrosserie seule -> roues ajoutées
-          disposeModel();
+          disposeModel();                                // libère l'ancien AVANT de tracker le matériau des roues (évite un dispose prématuré)
           root = new THREE.Group(); carGroup = new THREE.Group(); root.add(carGroup); scene.add(root);
+          if (!isFbx) addWheels(upr);                    // kit = carrosserie seule -> roues ajoutées
           upr.updateMatrixWorld(true);
           var box = new THREE.Box3().setFromObject(upr);
           var size = box.getSize(new THREE.Vector3());

@@ -1956,7 +1956,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         this.scene=new THREE.Scene();
         this.scene.add(new THREE.AmbientLight(0xffffff,1.15));
         var d=new THREE.DirectionalLight(0xffffff,1.5); d.position.set(40,-60,120); this.scene.add(d);
-        this.car=new THREE.Group(); this.scene.add(this.car);
+        this.car=new THREE.Group(); this.scene.add(this.car); window.__carRoot=this.car;  // racine dispo même si car-real.glb échoue (évite la boucle de retry)
         var fallback=buildCar(); fallback.visible=false; this.car.add(fallback);  // cache : on ne montre PAS l'ancienne voiture
         var fbTimer=null;
         if(CAR_GLB_URL){
@@ -2163,10 +2163,10 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
   }
 
   /* charge un modele avatar (GLB ou FBX) comme voiture EGO du hub */
-  window.__loadAvatar=function(url, opts){
+  window.__loadAvatar=function(url, opts, tries){
     opts=opts||{}; var T=window.THREE, root=window.__carRoot;
     if(!url){ return; }
-    if(!T || !root){ return setTimeout(function(){ window.__loadAvatar(url,opts); }, 300); }
+    if(!T || !root){ if((tries||0)<40){ return setTimeout(function(){ window.__loadAvatar(url,opts,(tries||0)+1); }, 300); } try{ window.__hideAvatarLoad&&window.__hideAvatarLoad(); }catch(_){} return; }
     window.__showAvatarLoad('Modélisation du véhicule');
     var isFbx=/\.fbx($|\?)/i.test(url), target=+opts.len||5.0;
     var loaderP = isFbx

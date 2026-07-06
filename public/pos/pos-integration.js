@@ -86,9 +86,10 @@
       if (!host) return;
       var r = host.getBoundingClientRect();
       if (r.width < 10 || r.height < 10) return; /* pas encore visible */
-      mounted = true;
       Promise.resolve(car3d.mount(host)).then(function (ok) {
-        if (ok === false) return;
+        if (ok === false) return;                        // échec (ex. three.js hors-ligne) -> mounted reste false, remontage possible plus tard
+        mounted = true;
+        try { document.removeEventListener('click', onClickTry, true); } catch (e) {}
         /* véhicule déjà identifié ? sinon silhouette par défaut (hypercar Practice One) */
         try {
           if (car3d.showDims) car3d.showDims(true);
@@ -100,7 +101,8 @@
       });
     }
     /* la vue véhicule s'ouvre par interaction → on tente au clic + à l'observation */
-    document.addEventListener('click', function () { setTimeout(tryMount, 450); }, true);
+    function onClickTry() { setTimeout(tryMount, 450); }
+    document.addEventListener('click', onClickTry, true);
     if ('IntersectionObserver' in window) {
       var host = document.getElementById('posCar3d');
       if (host) new IntersectionObserver(function (es) {
