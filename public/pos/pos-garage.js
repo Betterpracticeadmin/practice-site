@@ -19,6 +19,7 @@
     { id: 'auto',           label: 'Auto (selon mon véhicule)', kind: 'auto',  class: 'car', tag: 'AUTO' },
     { id: 'moto',           label: 'Moto',     kind: 'fbx', src: '/models/moto.fbx', class: 'motorcycle', tag: 'RÉEL' },
     { id: 'bus',            label: 'Bus',      kind: 'fbx', src: '/models/bus.fbx',  class: 'bus',        tag: 'RÉEL' },
+    { id: 'toybus',         label: 'Bus de ville', kind: 'fbx', src: '/models/toybus.fbx', class: 'bus',   tag: 'RÉEL' },
     { id: 'param-citadine', label: 'Citadine', kind: 'param', paramType: 'citadine', class: 'car', tag: 'GÉN.' },
     { id: 'param-berline',  label: 'Berline',  kind: 'param', paramType: 'berline',  class: 'car', tag: 'GÉN.' },
     { id: 'param-suv',      label: 'SUV',      kind: 'param', paramType: 'SUV',      class: 'suv', tag: 'GÉN.' },

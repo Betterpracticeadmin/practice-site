@@ -2176,6 +2176,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
       loader.load(url, function(res){
         try{
           var inner = res.scene || res;                     // GLTF -> .scene ; FBX -> Object3D
+          if(isFbx) inner.traverse(function(o){ if(o.isLine||o.isLineSegments) o.visible=false; });  // retire les courbes parasites (NURBS FBX)
           var wrap = uprightCar(inner, T);                  // normalise -> Y-up (hauteur Y, longueur Z)
           if(!isFbx) addWheels(wrap, T);                    // kit = carrosserie seule -> roues ajoutées
           wrap.updateMatrixWorld(true);

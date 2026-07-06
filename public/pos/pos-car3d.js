@@ -419,7 +419,8 @@
       lp.then(function (loader) {
         loader.load(url, function (res) {
           if (!THREE || !scene) return;
-          var upr = uprightCar(res.scene || res);        // normalise -> Y-up (hauteur Y, longueur Z)
+          var _inner = res.scene || res; if (isFbx) _inner.traverse(function (o) { if (o.isLine || o.isLineSegments) o.visible = false; }); // retire les courbes parasites (NURBS FBX)
+          var upr = uprightCar(_inner);                  // normalise -> Y-up (hauteur Y, longueur Z)
           disposeModel();                                // libère l'ancien AVANT de tracker le matériau des roues (évite un dispose prématuré)
           root = new THREE.Group(); carGroup = new THREE.Group(); root.add(carGroup); scene.add(root);
           if (!isFbx) addWheels(upr);                    // kit = carrosserie seule -> roues ajoutées
