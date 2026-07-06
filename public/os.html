@@ -2024,7 +2024,7 @@
         if(self.gender==='male'){ if(male.test(n))x+=75; if(fem.test(n))x-=25; }
         else { if(fem.test(n))x+=75; if(male.test(n))x-=25; }
         return x; } },
-    say:function(t,p){ if(!this.on||!t) return; if(typeof sayVA==='function'){ sayVA(t,true); return; } /* voix unifiée : tout passe par la voix humaine (Jessica), repli moteur navigateur géré dans sayVA */ if(this.busy){ if(!this.queue.length)this.queue.push({t:t,p:p}); else if(p>this.queue[0].p)this.queue[0]={t:t,p:p}; return;} this._speak(t,p); },
+    say:function(t,p){ if(!this.on||!t) return; if(typeof sayVA==='function'){ sayVA(t,true,+p>=2); return; } /* voix unifiée : tout passe par la voix humaine (Jessica), repli moteur navigateur géré dans sayVA */ if(this.busy){ if(!this.queue.length)this.queue.push({t:t,p:p}); else if(p>this.queue[0].p)this.queue[0]={t:t,p:p}; return;} this._speak(t,p); },
     _speak:function(t){ this.busy=true; var self=this,called=false; var done=function(){if(called)return;called=true;clearTimeout(self.safety);self.busy=false;if(self.queue.length){var n=self.queue.shift();self._speak(n.t,n.p);}};
       if(!this.supported){setTimeout(done,300);return;}
       var u=new SpeechSynthesisUtterance(t); if(this.voice){u.voice=this.voice;u.lang=this.voice.lang;}else u.lang=T().code;
@@ -2137,7 +2137,7 @@
   function fetchAlt(lat,lon,cb){ var k=lat.toFixed(3)+','+lon.toFixed(3); if(altCache[k]!==undefined){cb(altCache[k]);return;}
     fetch('https://api.open-meteo.com/v1/elevation?latitude='+lat.toFixed(4)+'&longitude='+lon.toFixed(4)).then(function(r){return r.json();}).then(function(j){ var a=(j&&j.elevation&&j.elevation.length&&j.elevation[0]!=null)?j.elevation[0]:null; altCache[k]=a; cb(a); }).catch(function(){ cb(null); }); }
   function updateAlt(lat,lon,gpsAlt){ var el=$('altVal'); if(!el)return;
-    if(gpsAlt!=null&&!isNaN(gpsAlt)){ el.textContent=Math.round(gpsAlt)+(UMI?' ft':' m'); if(UMI)el.textContent=Math.round(gpsAlt*3.281)+' ft'; return; }
+    if(gpsAlt!=null&&!isNaN(gpsAlt)){ el.textContent=UMI?(Math.round(gpsAlt*3.281)+' ft'):(Math.round(gpsAlt)+' m'); return; }
     var now=Date.now(); if(now-altAt<60000)return; altAt=now; fetchAlt(lat,lon,function(a){ if(a!=null)el.textContent=UMI?(Math.round(a*3.281)+' ft'):(Math.round(a)+' m'); }); }
   /* ---- suggestions de catégories (Overpass/OSM, sans clé) ---- */
   var CATQ={
@@ -2214,7 +2214,7 @@
   }
   function renderDiscover(filter){ var KMAP={sights:['attraction','monument','memorial','castle','monastery','ruins','fort','archaeological_site','artwork','theme_park','zoo'],museum:['museum','gallery'],view:['viewpoint'],food:['restaurant']};
     var KLBL={attraction:'Site',monument:'Monument',memorial:'Mémorial',castle:'Château',monastery:'Monastère',ruins:'Ruines',fort:'Fort',archaeological_site:'Site archéo.',artwork:'Œuvre',theme_park:'Parc',zoo:'Zoo',museum:'Musée',gallery:'Galerie',viewpoint:'Point de vue',restaurant:'Resto local'};
-    var items=(dscData||[]).filter(function(x){ if(filter==='all')return x.kind!=='restaurant'||true; var arr=KMAP[filter]||[]; return arr.indexOf(x.kind)>=0; }).sort(function(a,b){return a.d-b.d;}).slice(0,40);
+    var items=(dscData||[]).filter(function(x){ if(filter==='all')return x.kind!=='restaurant'; var arr=KMAP[filter]||[]; return arr.indexOf(x.kind)>=0; }).sort(function(a,b){return a.d-b.d;}).slice(0,40);
     var list=items.map(function(x){ return { title:x.nm, sub:(KLBL[x.kind]||'Lieu')+' · '+fDist(x.d), cover:'', onPlay:function(){ $('discoverOv').classList.remove('show'); mapPickPoint({lat:x.lat,lng:x.lon},x.nm); } }; });
     if(window.llList)window.llList($('dscList'),list,{}); else if($('dscList'))$('dscList').innerHTML='<div class="ll-empty">Liste indisponible.</div>';
     if(!list.length&&$('dscList'))$('dscList').innerHTML='<div class="ll-empty">Aucun lieu trouvé dans cette catégorie ici.</div>';
@@ -2728,7 +2728,8 @@
     watchId=navigator.geolocation.watchPosition(
       function(p){ if(!located){ located=true; hideGate(); follow=true; $('followBtn').textContent='⊙'; setMsg(T().ready,''); } onPos(p.coords,Date.now()); },
       function(err){ $('gateGo').textContent='Activer ma position';
-        if(err.code===1) gateHelp(iosHelp()); else if(err.code===2) gateHelp('Position indisponible — réessaie en extérieur, ciel dégagé.'); else gateHelp('Délai dépassé — touche « Activer ma position » pour réessayer.'); },
+        if(err.code===1) gateHelp(iosHelp()); else if(err.code===2) gateHelp('Position indisponible — réessaie en extérieur, ciel dégagé.'); else gateHelp('Délai dépassé — touche « Activer ma position » pour réessayer.');
+        if($('gate')&&$('gate').style.display==='none') toast(err.code===1?'Localisation refusée — autorise la position pour la carte et la navigation.':err.code===2?'Position indisponible — réessaie en extérieur.':'Localisation : délai dépassé.'); },
       {enableHighAccuracy:true,maximumAge:1000,timeout:15000});
   }
   var startGeo = beginLocate;
@@ -2932,8 +2933,10 @@
         if(t.length<=70&&ttsCacheN<160){ ttsCache[key]=url; ttsCacheN++; }   /* on garde les phrases courtes en cache (limité à 160) */
         else { if(lastTmpUrl){ try{URL.revokeObjectURL(lastTmpUrl);}catch(e){} } lastTmpUrl=url; }   /* phrase longue : temporaire */
         playUrl(url,t); return true; }); }
-  function sayVA(t,quiet){ if(!t)return; if(!Voice.on){if(!quiet)toast('🔇 '+t);return;}
-    /* file d'attente : si Practice parle déjà, une annonce de GUIDAGE (quiet) attend la fin (pas de coupure) ; une réponse conversationnelle prend la priorité */
+  window.addEventListener('pagehide',function(){ for(var k in ttsCache){ try{URL.revokeObjectURL(ttsCache[k]);}catch(e){} } ttsCache={}; ttsCacheN=0; if(lastTmpUrl){ try{URL.revokeObjectURL(lastTmpUrl);}catch(e){} lastTmpUrl=null; } });   /* libère les blobs TTS à la fermeture */
+  function sayVA(t,quiet,urgent){ if(!t)return; if(!Voice.on){if(!quiet)toast('🔇 '+t);return;}
+    /* file d'attente : le guidage (quiet) attend la fin ; une alerte URGENTE (sécurité, prio>=2) coupe la parole en cours SANS couper le micro */
+    if(urgent){ try{speechSynthesis.cancel();}catch(e){} if(typeof stopNeural==='function')stopNeural(); spkQ=null; _emitSpeak(t,true); return; }
     if(spkBusy&&quiet){ spkQ={t:t,quiet:true}; return; }
     spkQ=null; _emitSpeak(t,quiet); }
   function _emitSpeak(t,quiet){ spkBusy=true; lastSpoken=t;
@@ -3966,7 +3969,7 @@
   $('mPlay').addEventListener('click',mediaToggle);
   $('mPrev').addEventListener('click',mediaPrev);
   $('mNext').addEventListener('click',mediaNext);
-  $('mShuffle').addEventListener('click',function(){ if(mediaSource==='sc'&&scWidget&&mQueue.length){ var r=Math.floor((Date.now()/97)%mQueue.length); scWidget.skip(r); setTimeout(updateTrack,400);} else if(rpList.length){ playAudioItem(Math.floor((Date.now()/97)%rpList.length)); } });
+  $('mShuffle').addEventListener('click',function(){ if(mediaSource==='sc'){ if(scWidget&&mQueue.length){ var r=Math.floor((Date.now()/97)%mQueue.length); scWidget.skip(r); setTimeout(updateTrack,400);} return; } if(rpList.length){ playAudioItem(Math.floor((Date.now()/97)%rpList.length)); } });
   $('mTrack').addEventListener('click',function(e){ var r=e.offsetX/this.clientWidth; r=Math.max(0,Math.min(1,r)); if(mediaSource==='sc'){ if(scWidget&&mDur)scWidget.seekTo(r*mDur); } else if(mediaSource==='podcast'&&rpAudio.duration){ rpAudio.currentTime=r*rpAudio.duration; } });
   $('mLike').addEventListener('click',function(){ if(mediaSource==='sc'&&scWidget){ scWidget.getCurrentSound(function(s){ if(!s)return; var on=toggleLike(s); $('mLike').classList.toggle('on',on); updateRowLike(s.id,on); }); }
     else { var cur=rpList[rpIdx]; if(!cur)return; var on=toggleLike({id:cur.url,title:cur.title,user:{username:cur.artist},art:cur.art}); $('mLike').classList.toggle('on',on); } });
@@ -4133,7 +4136,7 @@
     res.forEach(function(s){ var row=document.createElement('div'); row.className='mq-row'; row.innerHTML='<span class="c" style="background-image:'+(s.art?'url('+s.art+')':'none')+'"></span><span class="x"><span class="a">'+(s.title||'—')+'</span><span class="b">'+(s.artist||'')+'</span></span>'; row.addEventListener('click',function(){ playLiked(s); }); L.appendChild(row); });
   }
   function _filterItems(items,q){ q=(q||'').toLowerCase(); return items.filter(function(it){ return ((it.title||'')+' '+(it.sub||'')).toLowerCase().indexOf(q)>=0; }); }
-  $('mediaSearch').addEventListener('input',function(){ var q=this.value.trim(); clearTimeout(rpTimer); var mq=$('mQueue');
+  $('mediaSearch').addEventListener('input',function(){ var q=this.value.trim(); clearTimeout(rpTimer); var mq=$('mQueue'); if(!mq||!window.llList)return;
     if(mediaSource==='sc'){ if(!q){ showMusicHub(); } else { _llCtx='sc'; window.llList(mq,_filterItems(_scItems(),q),{title:'Recherche'}); } }
     else if(mediaSource==='liked'){ if(!q){ openLikedList(); } else { _llCtx='liked'; window.llList(mq,_filterItems(_likedItems(),q),{title:'Favoris'}); } }
     else if(mediaSource==='podcast'){ if(!q){ showBooksHub(); } else { _llCtx='book'; var all=[]; (BOOK_CATS||[]).forEach(function(c){ all=all.concat(_bookItems(c[0])); }); window.llList(mq,_filterItems(all,q),{title:'Recherche'}); } }
@@ -5761,13 +5764,14 @@ html[data-da-off] .panel.dt-reveal > *{ animation:none !important; }
     var p = inst.pointer;
     var localPX = -999, localPY = -999, pActive = false;
     if (p.active && (now - p.ts) < POINTER_TTL){
-      refreshRect(inst);
-      var ddx = p.x - inst.cx, ddy = p.y - inst.cy;
-      var pd = Math.sqrt(ddx*ddx+ddy*ddy);
-      if (pd < inst.rad*1.9){
-        localPX = p.x - (inst.cx - w/2);
-        localPY = p.y - (inst.cy - h/2);
-        pActive = true;
+      if (refreshRect(inst)){
+        var ddx = p.x - inst.cx, ddy = p.y - inst.cy;
+        var pd = Math.sqrt(ddx*ddx+ddy*ddy);
+        if (pd < inst.rad*1.9){
+          localPX = p.x - (inst.cx - w/2);
+          localPY = p.y - (inst.cy - h/2);
+          pActive = true;
+        }
       }
     } else if (p.active && (now - p.ts) >= POINTER_TTL){
       p.active = false;
@@ -7279,9 +7283,7 @@ html[data-da-off] .dvf-fx .dvf-rev{ color:inherit; text-shadow:none; }
 
       if (st.anim){
         if (st.anim.target !== newText){
-          var keep = st.anim.start;
-          st.anim = plan(newText);
-          st.anim.start = keep;
+          st.anim = plan(newText);   /* repart proprement du début (start fixé au prochain tick) — évite un scramble sauté */
         }
         scheduleFrame();
         return;
