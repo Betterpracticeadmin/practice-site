@@ -23,6 +23,8 @@
   .conn.on .dot{background:var(--safe);color:var(--safe);}
   .conn.busy .dot{background:var(--alert);color:var(--alert);animation:obdPulse 1s ease-in-out infinite;}
   @keyframes obdPulse{0%,100%{opacity:.4}50%{opacity:1}}
+  /* Accessibilité : respecte prefers-reduced-motion (fige le clignotement du voyant de connexion). */
+  @media (prefers-reduced-motion: reduce){.conn.busy .dot{animation:none;opacity:1;}}
   .conn .st{flex:1;font-size:13px;}
   .conn .st small{display:block;color:var(--dim);font-size:11px;font-family:var(--mono);margin-top:2px;}
   .btn{background:var(--acc);color:#000;border:none;border-radius:12px;padding:11px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter';}

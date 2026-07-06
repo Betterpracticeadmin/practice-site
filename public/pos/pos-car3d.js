@@ -437,6 +437,15 @@
           box = new THREE.Box3().setFromObject(upr); var ctr = box.getCenter(new THREE.Vector3());
           upr.position.set(-ctr.x, -box.min.y, -ctr.z);
           carGroup.add(upr); carGroup.rotation.y = -0.5;   // présentation 3/4 élégante
+          try {                                            // ombre de contact douce au sol (DA premium)
+            var _cv = document.createElement('canvas'); _cv.width = _cv.height = 128; var _cx = _cv.getContext('2d');
+            var _gr = _cx.createRadialGradient(64, 64, 3, 64, 64, 60); _gr.addColorStop(0, 'rgba(0,0,0,0.45)'); _gr.addColorStop(1, 'rgba(0,0,0,0)');
+            _cx.fillStyle = _gr; _cx.fillRect(0, 0, 128, 128);
+            var _shTex = track(new THREE.CanvasTexture(_cv));
+            var _b3 = new THREE.Box3().setFromObject(upr), _s3 = _b3.getSize(new THREE.Vector3());
+            var _sh = new THREE.Mesh(track(new THREE.PlaneGeometry(_s3.x * 2.3, _s3.z * 2.1)), track(new THREE.MeshBasicMaterial({ map: _shTex, transparent: true, depthWrite: false })));
+            _sh.rotation.x = -Math.PI / 2; _sh.position.y = 0.012; carGroup.add(_sh);
+          } catch (e) {}
           wheelRadius = 0.34; wheelbaseM = 2.6;
           if (camera) { var dist = target * 1.5; camera.position.set(dist * 0.7, target * 0.62, dist * 1.0); camera.lookAt(0, target * 0.14, 0); }
           updateDims(target, size.x * k, size.y * k);
@@ -464,6 +473,7 @@
         renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.setClearColor(0x000000, 0); // fond TRANSPARENT (cockpit derrière)
+        try { renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15; if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace; } catch (e) {} // rendu filmique premium
         canvas = renderer.domElement;
         canvas.style.display = 'block';
         canvas.style.width = '100%';
@@ -479,7 +489,8 @@
         var key = new THREE.DirectionalLight(0xffffff, 2.1); key.position.set(4, 7, 5); scene.add(key);
         var fill = new THREE.DirectionalLight(0x9db4ff, 0.7); fill.position.set(-5, 2, -3); scene.add(fill);
         var rim = new THREE.DirectionalLight(0xfff0d8, 0.95); rim.position.set(-2, 4, -6); scene.add(rim);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x2a2f3a, 0.55)); // ambiance ciel/sol premium
 
         /* sol : grille discrète semi-transparente */
         var grid = new THREE.GridHelper(12, 12, 0x3a3f46, 0x22262c);
