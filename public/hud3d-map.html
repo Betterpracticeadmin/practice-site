@@ -1970,6 +1970,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
             try{ loader.setMeshoptDecoder(mods[1].MeshoptDecoder); }catch(_){}   // glb compresse meshopt
             loader.load(CAR_GLB_URL, function(gltf){
               try{
+                if(window.__avatar){ if(fbTimer)clearTimeout(fbTimer); try{ self.car.remove(fallback); }catch(_){} return; }  // un avatar est deja choisi -> NE PAS ajouter la voiture par defaut (evite la superposition)
                 if(fbTimer) clearTimeout(fbTimer);          // glb arrive a temps -> pas de placeholder
                 self.car.remove(fallback);                 // glb charge -> on retire le procedural
                 var inner=gltf.scene;                       // glb Blender glTF : Y-up + VRAIS materiaux/feux
@@ -2193,7 +2194,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
           wrap.position.set(-ctr.x, -box.min.y, -ctr.z);    // Y-up : sol = min.y
           var s2=new T.Box3().setFromObject(wrap).getSize(new T.Vector3());
           var holder=new T.Group(); holder.add(wrap);
-          holder.rotation.y=(s2.x>s2.z?Math.PI/2:0);         // longueur -> +Z (avant)
+          holder.rotation.y=(s2.x>s2.z?Math.PI/2:0) + (url.indexOf('/kenney/')>=0?Math.PI:0);   // longueur -> +Z ; Kenney face -Z nativement -> flip 180° (montrer le dos)
           while(root.children.length) root.remove(root.children[0]);   // retire la voiture courante
           root.add(holder); window.__avatar=url;
           window.__hideAvatarLoad();
