@@ -2178,7 +2178,12 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
           var inner = res.scene || res;                     // GLTF -> .scene ; FBX -> Object3D
           if(isFbx) inner.traverse(function(o){ if(o.isLine||o.isLineSegments) o.visible=false; });  // retire les courbes parasites (NURBS FBX)
           var wrap = uprightCar(inner, T);                  // normalise -> Y-up (hauteur Y, longueur Z)
-          if(!isFbx) addWheels(wrap, T);                    // kit = carrosserie seule -> roues ajoutées
+          if(!isFbx){                                       // kit = carrosserie seule -> couleur + roues
+            var _pal=[0xC62828,0x1565C0,0xE8EAED,0x1A1A1A,0x9AA0A6,0x2E7D32,0xEF6C00,0x6A1B9A,0x00838F,0xF9A825,0x37474F,0x8D6E63];
+            var _n=parseInt((''+url).replace(/[^0-9]/g,''),10)||0, _c=_pal[_n%_pal.length];
+            wrap.traverse(function(o){ if(o.isMesh) o.material=new T.MeshStandardMaterial({color:_c,roughness:0.4,metalness:0.5}); });  // peinture métallisée par voiture
+            addWheels(wrap, T);
+          }
           wrap.updateMatrixWorld(true);
           var box=new T.Box3().setFromObject(wrap);
           var size=box.getSize(new T.Vector3());
