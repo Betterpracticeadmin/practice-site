@@ -81,6 +81,11 @@
   .shift-light.go.up { color: var(--teal); }
   .shift-light.go.down { color: var(--amber); }
   @keyframes blink { 50% { opacity: 0.25; } }
+  /* Accessibilité : si l'OS demande moins d'animation, on fige les boucles infinies (voyants, orbe, pastille live, flashs de rapport) sans masquer l'info. */
+  @media (prefers-reduced-motion: reduce){
+    .live-dot, .ai-orb, .shift-light.ready.up, .shift-light.ready.down,
+    .dh-gear-num.flash-up, .dh-gear-num.flash-down { animation: none; }
+  }
   .dh-note { font-size: 13px; color: var(--teal); font-style: italic; font-family: var(--mono); }
 
   /* right column blocks */

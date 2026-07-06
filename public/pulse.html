@@ -30,6 +30,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:#060607;color:#fff;
 .nav-arrow{font-size:48px;color:var(--teal);margin-bottom:8px;transition:all 0.4s ease;display:inline-block;}
 .nav-zone.critical .nav-arrow{font-size:88px;animation:pulse-arrow 0.8s ease-in-out infinite;}
 @keyframes pulse-arrow{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+/* Accessibilité : respecte prefers-reduced-motion (fige le pulse de la flèche, l'agrandissement critique reste). */
+@media (prefers-reduced-motion: reduce){.nav-zone.critical .nav-arrow{animation:none;}}
 .nav-dist{font-family:var(--mono);font-weight:300;letter-spacing:-0.02em;color:var(--txt);transition:font-size 0.4s ease;font-size:36px;}
 .nav-zone.critical .nav-dist{font-size:64px;}
 .nav-instr{font-size:14px;color:var(--txt2);margin-top:6px;font-weight:400;}
