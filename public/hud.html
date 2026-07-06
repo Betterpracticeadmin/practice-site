@@ -761,6 +761,9 @@
     return {risk:risk,front:front,level:level,override:override,grip:grip,pred:pred};
   }
 
+  /* diagnostic léger (GPS, OBD…) — évite un "log is not defined" au chargement ; sortie console, sans effet de bord UI */
+  function log(m){ try{ if(window.console&&console.log) console.log('[HUD] '+m); }catch(_){} }
+
   function sayArb(text,prio,now){
     if(!text)return; var key=Math.round(prio);
     var cool=prio<=2?2600:9000; if(flashVoiceForce&&prio<=1){flashVoiceForce=false;voiceCool[key]=0;}
