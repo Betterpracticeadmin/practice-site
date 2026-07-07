@@ -2146,7 +2146,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     target = target || model;                       // dimensionne d'après model, ajoute à target (wrapper sans rotation)
     model.updateMatrixWorld(true);
     var b=new T.Box3().setFromObject(model), s=b.getSize(new T.Vector3()), c=b.getCenter(new T.Vector3());
-    var r=Math.min(s.y*0.30, s.z*0.12), wx=s.x*0.42, wz=s.z*0.30;
+    var r=Math.min(s.y*0.42, s.z*0.080), wx=s.x*0.42, wz=s.z*0.31;  // rayon ~8% de la longueur (cap hauteur) -> roues calées dans les passages
     var mat=new T.MeshStandardMaterial({color:0x15171c, roughness:0.5, metalness:0.55, side:T.DoubleSide});
     var slots=[[-wx,wz],[wx,wz],[-wx,-wz],[wx,-wz]];
     loadWheelProto().then(function(proto){

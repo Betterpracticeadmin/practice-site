@@ -415,7 +415,7 @@
       target = target || model;
       model.updateMatrixWorld(true);
       var b = new THREE.Box3().setFromObject(model), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
-      var r = Math.min(s.y * 0.30, s.z * 0.12), wx = s.x * 0.42, wz = s.z * 0.30;
+      var r = Math.min(s.y * 0.42, s.z * 0.080), wx = s.x * 0.42, wz = s.z * 0.31;  // rayon ~8% de la longueur (cap hauteur) -> roues calées dans les passages
       var mat = track(new THREE.MeshStandardMaterial({ color: 0x15171c, roughness: 0.5, metalness: 0.55, side: THREE.DoubleSide }));
       var slots = [[-wx, wz], [wx, wz], [-wx, -wz], [wx, -wz]];
       loadWheelProto().then(function (proto) {
