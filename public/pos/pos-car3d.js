@@ -411,25 +411,44 @@
        les GLB normalisés qui portent une rotation (uprightCar), on passe un wrapper
        SANS rotation comme target -> sinon les positions calculées en repère monde
        sont décalées par la rotation et les roues « flottent » à côté. */
+    /* sépare la roue (un seul mesh) en 2 groupes : pneu (rayon élevé) + jante (rayon
+       faible), pour appliquer 2 matériaux (pneu noir mat / jante gris métallique). */
+    function splitWheelGeom(geom) {
+      geom = geom.index ? geom : geom.toNonIndexed();
+      var pos = geom.attributes.position, idx = geom.index;
+      if (!idx) { var ai = []; for (var i0 = 0; i0 < pos.count; i0++) ai.push(i0); geom.setIndex(ai); idx = geom.index; }
+      var maxR = 0; for (var i = 0; i < pos.count; i++) { var y = pos.getY(i), z = pos.getZ(i); var rr = Math.sqrt(y * y + z * z); if (rr > maxR) maxR = rr; }
+      var thr = maxR * 0.74, arr = idx.array, tire = [], rim = [];
+      for (var t = 0; t < arr.length; t += 3) {
+        var A = arr[t], B = arr[t + 1], C = arr[t + 2];
+        var my = (pos.getY(A) + pos.getY(B) + pos.getY(C)) / 3, mz = (pos.getZ(A) + pos.getZ(B) + pos.getZ(C)) / 3;
+        if (Math.sqrt(my * my + mz * mz) >= thr) tire.push(A, B, C); else rim.push(A, B, C);
+      }
+      geom.setIndex(tire.concat(rim)); geom.clearGroups();
+      geom.addGroup(0, tire.length, 0); geom.addGroup(tire.length, rim.length, 1);
+      return geom;
+    }
     function addWheels(model, target) {
       target = target || model;
       model.updateMatrixWorld(true);
       var b = new THREE.Box3().setFromObject(model), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
-      var r = Math.min(s.y * 0.42, s.z * 0.080), wx = s.x * 0.42, wz = s.z * 0.31;  // rayon ~8% de la longueur (cap hauteur) -> roues calées dans les passages
-      var mat = track(new THREE.MeshStandardMaterial({ color: 0x15171c, roughness: 0.5, metalness: 0.55, side: THREE.DoubleSide }));
-      var slots = [[-wx, wz], [wx, wz], [-wx, -wz], [wx, -wz]];
+      var r = Math.min(s.y * 0.42, s.z * 0.072), wx = s.x * 0.42, IN = 0.19;         // rayon ~7% de la longueur
+      var fz = b.max.z - IN * s.z, rz = b.min.z + IN * s.z;                          // roues calées depuis les EXTRÉMITÉS (porte-à-faux asymétriques)
+      var tireMat = track(new THREE.MeshStandardMaterial({ color: 0x0e0f12, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide }));
+      var rimMat = track(new THREE.MeshStandardMaterial({ color: 0xb9bfc9, roughness: 0.35, metalness: 0.9, envMapIntensity: 1.2, side: THREE.DoubleSide })); // jante gris métallique
+      var slots = [[-wx, fz], [wx, fz], [-wx, rz], [wx, rz]];
       loadWheelProto().then(function (proto) {
         slots.forEach(function (p) {
           var w = proto.clone(true);
-          w.traverse(function (o) { if (o.isMesh) { o.geometry = o.geometry.clone(); track(o.geometry); o.material = mat; } });
+          w.traverse(function (o) { if (o.isMesh) { o.geometry = splitWheelGeom(o.geometry.clone()); track(o.geometry); o.material = [tireMat, rimMat]; } });
           w.scale.setScalar(2 * r);                    // GLB diamètre 1 -> diamètre 2r ; axe déjà sur X
           w.rotation.y = p[0] < 0 ? Math.PI : 0;        // jante vers l'extérieur des deux côtés
-          w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); target.add(w);
+          w.position.set(c.x + p[0], b.min.y + r, p[1]); target.add(w);   // p[1] = z absolu (repère bbox)
         });
         if (visible && renderer && scene && camera) renderer.render(scene, camera);
       }).catch(function () {                            // repli : cylindres
         var geo = track(new THREE.CylinderGeometry(r, r, s.x * 0.16, 18));
-        slots.forEach(function (p) { var w = new THREE.Mesh(geo, mat); w.rotation.z = Math.PI / 2; w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); target.add(w); });
+        slots.forEach(function (p) { var w = new THREE.Mesh(geo, rimMat); w.rotation.z = Math.PI / 2; w.position.set(c.x + p[0], b.min.y + r, p[1]); target.add(w); });
       });
     }
     function loadAvatar(url, opts) {
