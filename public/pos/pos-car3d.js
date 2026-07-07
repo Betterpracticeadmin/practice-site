@@ -432,8 +432,8 @@
       target = target || model;
       model.updateMatrixWorld(true);
       var b = new THREE.Box3().setFromObject(model), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
-      var r = Math.min(s.y * 0.42, s.z * 0.072), wx = s.x * 0.42, IN = 0.19;         // rayon ~7% de la longueur
-      var fz = b.max.z - IN * s.z, rz = b.min.z + IN * s.z;                          // roues calées depuis les EXTRÉMITÉS (porte-à-faux asymétriques)
+      var r = Math.min(s.y * 0.42, s.z * 0.072), wx = s.x * 0.42, FIN = 0.31, RIN = 0.19;  // rayon ~7% de la longueur
+      var fz = b.max.z - FIN * s.z, rz = b.min.z + RIN * s.z;                        // avant (+Z) reculé (porte-à-faux avant plus long) ; arrière depuis l'arrière
       var tireMat = track(new THREE.MeshStandardMaterial({ color: 0x0e0f12, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide }));
       var rimMat = track(new THREE.MeshStandardMaterial({ color: 0xb9bfc9, roughness: 0.35, metalness: 0.9, envMapIntensity: 1.2, side: THREE.DoubleSide })); // jante gris métallique
       var slots = [[-wx, fz], [wx, fz], [-wx, rz], [wx, rz]];

@@ -2160,8 +2160,8 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     target = target || model;                       // dimensionne d'après model, ajoute à target (wrapper sans rotation)
     model.updateMatrixWorld(true);
     var b=new T.Box3().setFromObject(model), s=b.getSize(new T.Vector3()), c=b.getCenter(new T.Vector3());
-    var r=Math.min(s.y*0.42, s.z*0.072), wx=s.x*0.42, IN=0.19;      // rayon ~7% de la longueur
-    var fz=b.max.z-IN*s.z, rz=b.min.z+IN*s.z;                       // roues calées depuis les EXTRÉMITÉS
+    var r=Math.min(s.y*0.42, s.z*0.072), wx=s.x*0.42, FIN=0.31, RIN=0.19;  // rayon ~7% de la longueur
+    var fz=b.max.z-FIN*s.z, rz=b.min.z+RIN*s.z;                     // avant (+Z) reculé (porte-à-faux avant plus long) ; arrière depuis l'arrière
     var tireMat=new T.MeshStandardMaterial({color:0x0e0f12, roughness:0.85, metalness:0.2, side:T.DoubleSide});
     var rimMat=new T.MeshStandardMaterial({color:0xb9bfc9, roughness:0.35, metalness:0.9, envMapIntensity:1.2, side:T.DoubleSide}); // jante gris métallique
     var slots=[[-wx,fz],[wx,fz],[-wx,rz],[wx,rz]];
