@@ -2,6 +2,11 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<!-- importmap : permet aux loaders ESM (GLTFLoader/FBXLoader) de résoudre le specifier nu 'three'
+     -> sans ça, import('.../GLTFLoader.js') échoue et l'aperçu 3D retombe sur la voiture paramétrique -->
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#060607">
 <meta name="apple-mobile-web-app-capable" content="yes">
