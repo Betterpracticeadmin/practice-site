@@ -406,10 +406,16 @@
         .then(function (m) { return new Promise(function (res, rej) { new m.GLTFLoader().load('/models/wheel.glb', function (g) { res(g.scene); }, undefined, rej); }); });
       return wheelProtoP;
     }
-    function addWheels(model) {
+    /* addWheels(model, target) : dimensionne les roues d'après la bbox de `model`
+       (carrosserie normalisée) mais les AJOUTE à `target` (par défaut model). Pour
+       les GLB normalisés qui portent une rotation (uprightCar), on passe un wrapper
+       SANS rotation comme target -> sinon les positions calculées en repère monde
+       sont décalées par la rotation et les roues « flottent » à côté. */
+    function addWheels(model, target) {
+      target = target || model;
       model.updateMatrixWorld(true);
       var b = new THREE.Box3().setFromObject(model), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
-      var r = Math.min(s.y * 0.32, s.z * 0.13), wx = s.x * 0.40, wz = s.z * 0.31;
+      var r = Math.min(s.y * 0.30, s.z * 0.12), wx = s.x * 0.42, wz = s.z * 0.30;
       var mat = track(new THREE.MeshStandardMaterial({ color: 0x15171c, roughness: 0.5, metalness: 0.55, side: THREE.DoubleSide }));
       var slots = [[-wx, wz], [wx, wz], [-wx, -wz], [wx, -wz]];
       loadWheelProto().then(function (proto) {
@@ -418,12 +424,12 @@
           w.traverse(function (o) { if (o.isMesh) { o.geometry = o.geometry.clone(); track(o.geometry); o.material = mat; } });
           w.scale.setScalar(2 * r);                    // GLB diamètre 1 -> diamètre 2r ; axe déjà sur X
           w.rotation.y = p[0] < 0 ? Math.PI : 0;        // jante vers l'extérieur des deux côtés
-          w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); model.add(w);
+          w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); target.add(w);
         });
         if (visible && renderer && scene && camera) renderer.render(scene, camera);
       }).catch(function () {                            // repli : cylindres
         var geo = track(new THREE.CylinderGeometry(r, r, s.x * 0.16, 18));
-        slots.forEach(function (p) { var w = new THREE.Mesh(geo, mat); w.rotation.z = Math.PI / 2; w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); model.add(w); });
+        slots.forEach(function (p) { var w = new THREE.Mesh(geo, mat); w.rotation.z = Math.PI / 2; w.position.set(c.x + p[0], b.min.y + r, c.z + p[1]); target.add(w); });
       });
     }
     function loadAvatar(url, opts) {
@@ -446,8 +452,11 @@
             var _n = parseInt(('' + url).replace(/[^0-9]/g, ''), 10) || 0, _c = _pal[_n % _pal.length];
             upr.traverse(function (o) { if (o.isMesh) o.material = track(new THREE.MeshStandardMaterial({ color: _c, roughness: 0.4, metalness: 0.5 })); }); // peinture métallisée par voiture
             addWheels(upr);
-          } else {                                        // GLB complet texturé (lpc) -> rehausse le PBR pour capter l'environnement studio
+          } else {                                        // GLB texturé -> rehausse le PBR pour capter l'environnement studio
             upr.traverse(function (o) { if (o.isMesh && o.material) { var m = o.material; m.metalness = 0.35; if (m.roughness === undefined || m.roughness > 0.7) m.roughness = 0.5; m.envMapIntensity = 1.15; m.needsUpdate = true; } });
+            if (url.indexOf('/lpc/') >= 0) {              // lpc : carrosserie SANS roues -> ajoute 4 roues alliage (wrapper sans rotation)
+              var _cw = new THREE.Group(); _cw.add(upr); addWheels(upr, _cw); upr = _cw;
+            }
           }
           upr.updateMatrixWorld(true);
           var box = new THREE.Box3().setFromObject(upr);

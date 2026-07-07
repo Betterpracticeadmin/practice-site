@@ -2142,10 +2142,11 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     return __wheelProto;
   }
   /* les voitures du kit n'ont que la carrosserie -> on ajoute 4 roues dans les passages */
-  function addWheels(model, T){
+  function addWheels(model, T, target){
+    target = target || model;                       // dimensionne d'après model, ajoute à target (wrapper sans rotation)
     model.updateMatrixWorld(true);
     var b=new T.Box3().setFromObject(model), s=b.getSize(new T.Vector3()), c=b.getCenter(new T.Vector3());
-    var r=Math.min(s.y*0.32, s.z*0.13), wx=s.x*0.40, wz=s.z*0.31;
+    var r=Math.min(s.y*0.30, s.z*0.12), wx=s.x*0.42, wz=s.z*0.30;
     var mat=new T.MeshStandardMaterial({color:0x15171c, roughness:0.5, metalness:0.55, side:T.DoubleSide});
     var slots=[[-wx,wz],[wx,wz],[-wx,-wz],[wx,-wz]];
     loadWheelProto().then(function(proto){
@@ -2155,11 +2156,11 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         w.scale.setScalar(2*r);                    // GLB diamètre 1 -> diamètre 2r ; axe déjà sur X
         w.rotation.y = p[0]<0 ? Math.PI : 0;        // jante vers l'extérieur des deux côtés
         w.position.set(c.x+p[0], b.min.y+r, c.z+p[1]);
-        model.add(w);
+        target.add(w);
       });
     }).catch(function(){                            // repli : cylindres si le GLB échoue
       var geo=new T.CylinderGeometry(r,r,s.x*0.16,18);
-      slots.forEach(function(p){ var w=new T.Mesh(geo,mat); w.rotation.z=Math.PI/2; w.position.set(c.x+p[0], b.min.y+r, c.z+p[1]); model.add(w); });
+      slots.forEach(function(p){ var w=new T.Mesh(geo,mat); w.rotation.z=Math.PI/2; w.position.set(c.x+p[0], b.min.y+r, c.z+p[1]); target.add(w); });
     });
   }
 
@@ -2184,8 +2185,11 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
             var _n=parseInt((''+url).replace(/[^0-9]/g,''),10)||0, _c=_pal[_n%_pal.length];
             wrap.traverse(function(o){ if(o.isMesh) o.material=new T.MeshStandardMaterial({color:_c,roughness:0.4,metalness:0.5}); });  // peinture métallisée par voiture
             addWheels(wrap, T);
-          } else {                                        // GLB complet texturé (lpc) -> boost reflets PBR (capte l'environnement studio)
+          } else {                                        // GLB texturé -> boost reflets PBR (capte l'environnement studio)
             wrap.traverse(function(o){ if(o.isMesh&&o.material){ (Array.isArray(o.material)?o.material:[o.material]).forEach(function(mt){ if('envMapIntensity' in mt) mt.envMapIntensity=1.25; if('metalness' in mt) mt.metalness=Math.max(mt.metalness||0,0.35); mt.needsUpdate=true; }); } });
+            if(url.indexOf('/lpc/')>=0){                  // lpc : carrosserie SANS roues -> ajoute 4 roues alliage (wrapper sans rotation)
+              var _cw=new T.Group(); _cw.add(wrap); addWheels(wrap, T, _cw); wrap=_cw;
+            }
           }
           wrap.updateMatrixWorld(true);
           var box=new T.Box3().setFromObject(wrap);
