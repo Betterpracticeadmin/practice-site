@@ -112,9 +112,9 @@
     POS.registry.register('garage', api);
     /* charge toutes les voitures du kit */
     try {
-      fetch('/models/kenney/_manifest.json').then(function (r) { return r.json(); }).then(function (list) {
+      fetch('/models/lpc/_manifest.json').then(function (r) { return r.json(); }).then(function (list) {
         kit = (list || []).map(function (e, i) {
-          return { id: e.id, label: e.label || ('Véhicule ' + (i + 1)), kind: 'glb', src: e.file, class: e.class || 'car', tag: 'KENNEY' };
+          return { id: e.id, label: e.label || ('Véhicule ' + (i + 1)), kind: 'glb', src: e.file, class: e.class || 'car', tag: 'LOW-POLY' };
         });
         rebuild();
         POS.bus.emit('garage:catalog', { count: kit.length });

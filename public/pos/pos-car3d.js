@@ -113,6 +113,24 @@
     return SILHOUETTES.berline;
   }
 
+  /* environnement studio (PMREM depuis un dégradé) -> reflets métalliques premium sur
+     les matériaux PBR, sans dépendance externe (tout window.THREE / UMD). */
+  function studioEnv(THREE, renderer) {
+    var cv = document.createElement('canvas'); cv.width = 16; cv.height = 128;
+    var g = cv.getContext('2d');
+    var grad = g.createLinearGradient(0, 0, 0, 128);
+    grad.addColorStop(0.00, '#eef3ff');  // ciel clair
+    grad.addColorStop(0.48, '#8b95a8');
+    grad.addColorStop(0.50, '#3a4150');  // ligne d'horizon
+    grad.addColorStop(1.00, '#14171d');  // sol sombre
+    g.fillStyle = grad; g.fillRect(0, 0, 16, 128);
+    var tex = new THREE.CanvasTexture(cv); tex.mapping = THREE.EquirectangularReflectionMapping;
+    var pmrem = new THREE.PMREMGenerator(renderer);
+    var env = pmrem.fromEquirectangular(tex).texture;
+    tex.dispose(); pmrem.dispose();
+    return env;
+  }
+
   /* couleur carrosserie depuis la variable CSS --acc (thème PracticeOS) */
   function accColor() {
     var c = '';
@@ -423,11 +441,13 @@
           var upr = uprightCar(_inner);                  // normalise -> Y-up (hauteur Y, longueur Z)
           disposeModel();                                // libère l'ancien AVANT de tracker le matériau des roues (évite un dispose prématuré)
           root = new THREE.Group(); carGroup = new THREE.Group(); root.add(carGroup); scene.add(root);
-          if (!isFbx && url.indexOf('/kenney/') < 0) {   // kit body-only -> couleur + roues (les Kenney sont déjà complets)
+          if (!isFbx && url.indexOf('/kenney/') < 0 && url.indexOf('/lpc/') < 0) {   // ancien kit body-only -> couleur + roues
             var _pal = [0xC62828, 0x1565C0, 0xE8EAED, 0x1A1A1A, 0x9AA0A6, 0x2E7D32, 0xEF6C00, 0x6A1B9A, 0x00838F, 0xF9A825, 0x37474F, 0x8D6E63];
             var _n = parseInt(('' + url).replace(/[^0-9]/g, ''), 10) || 0, _c = _pal[_n % _pal.length];
             upr.traverse(function (o) { if (o.isMesh) o.material = track(new THREE.MeshStandardMaterial({ color: _c, roughness: 0.4, metalness: 0.5 })); }); // peinture métallisée par voiture
             addWheels(upr);
+          } else {                                        // GLB complet texturé (lpc) -> rehausse le PBR pour capter l'environnement studio
+            upr.traverse(function (o) { if (o.isMesh && o.material) { var m = o.material; m.metalness = 0.35; if (m.roughness === undefined || m.roughness > 0.7) m.roughness = 0.5; m.envMapIntensity = 1.15; m.needsUpdate = true; } });
           }
           upr.updateMatrixWorld(true);
           var box = new THREE.Box3().setFromObject(upr);
@@ -484,6 +504,7 @@
         container.appendChild(canvas);
 
         scene = new THREE.Scene();
+        try { scene.environment = studioEnv(THREE, renderer); } catch (e) {} // reflets PBR premium
         camera = new THREE.PerspectiveCamera(35, 1.5, 0.1, 100);
 
         /* lumières : directionnelle + ambiante (suffisant en flat shading) */
