@@ -2156,12 +2156,15 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     return geom;
   }
   /* les voitures du kit n'ont que la carrosserie -> on ajoute 4 roues dans les passages */
-  function addWheels(model, T, target){
+  var WHEEL_TUNE={ 'lp-citadine-rouge':{fin:0.34,rin:0.19,rz:0.078}, 'lp-van-jaune':{fin:0.24,rin:0.34,rz:0.072} };  // réglages roues par modèle
+  function addWheels(model, T, target, url){
     target = target || model;                       // dimensionne d'après model, ajoute à target (wrapper sans rotation)
     model.updateMatrixWorld(true);
     var b=new T.Box3().setFromObject(model), s=b.getSize(new T.Vector3()), c=b.getCenter(new T.Vector3());
-    var r=Math.min(s.y*0.42, s.z*0.072), wx=s.x*0.42, FIN=0.31, RIN=0.19;  // rayon ~7% de la longueur
-    var fz=b.max.z-FIN*s.z, rz=b.min.z+RIN*s.z;                     // avant (+Z) reculé (porte-à-faux avant plus long) ; arrière depuis l'arrière
+    var _tn=WHEEL_TUNE[(''+(url||'')).split('/').pop().replace(/\.glb.*$/,'')]||{};
+    var FIN=_tn.fin||0.31, RIN=_tn.rin||0.19, wx=s.x*0.42;
+    var r=Math.min(s.y*0.42, s.z*(_tn.rz||0.072));
+    var fz=b.max.z-FIN*s.z, rz=b.min.z+RIN*s.z;
     var tireMat=new T.MeshStandardMaterial({color:0x0e0f12, roughness:0.85, metalness:0.2, side:T.DoubleSide});
     var rimMat=new T.MeshStandardMaterial({color:0xb9bfc9, roughness:0.35, metalness:0.9, envMapIntensity:1.2, side:T.DoubleSide}); // jante gris métallique
     var slots=[[-wx,fz],[wx,fz],[-wx,rz],[wx,rz]];
@@ -2212,7 +2215,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
           } else {                                        // GLB texturé -> boost reflets PBR (capte l'environnement studio)
             wrap.traverse(function(o){ if(o.isMesh&&o.material){ (Array.isArray(o.material)?o.material:[o.material]).forEach(function(mt){ if('envMapIntensity' in mt) mt.envMapIntensity=1.25; if('metalness' in mt) mt.metalness=Math.max(mt.metalness||0,0.35); mt.needsUpdate=true; }); } });
             if(url.indexOf('/lpc/')>=0){                  // lpc : carrosserie SANS roues -> ajoute 4 roues alliage (wrapper sans rotation)
-              var _cw=new T.Group(); _cw.add(wrap); addWheels(wrap, T, _cw); wrap=_cw;
+              var _cw=new T.Group(); _cw.add(wrap); addWheels(wrap, T, _cw, url); wrap=_cw;
             }
           }
           wrap.updateMatrixWorld(true);

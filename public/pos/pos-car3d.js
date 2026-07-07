@@ -428,12 +428,19 @@
       geom.addGroup(0, tire.length, 0); geom.addGroup(tire.length, rim.length, 1);
       return geom;
     }
-    function addWheels(model, target) {
+    /* réglages roues PAR MODÈLE (avant/arrière/rayon) — placement calé voiture par voiture */
+    var WHEEL_TUNE = {
+      'lp-citadine-rouge': { fin: 0.34, rin: 0.19, rz: 0.078 },
+      'lp-van-jaune':      { fin: 0.24, rin: 0.34, rz: 0.072 }
+    };
+    function addWheels(model, target, url) {
       target = target || model;
       model.updateMatrixWorld(true);
       var b = new THREE.Box3().setFromObject(model), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
-      var r = Math.min(s.y * 0.42, s.z * 0.072), wx = s.x * 0.42, FIN = 0.31, RIN = 0.19;  // rayon ~7% de la longueur
-      var fz = b.max.z - FIN * s.z, rz = b.min.z + RIN * s.z;                        // avant (+Z) reculé (porte-à-faux avant plus long) ; arrière depuis l'arrière
+      var _tn = WHEEL_TUNE[('' + (url || '')).split('/').pop().replace(/\.glb.*$/, '')] || {};
+      var FIN = _tn.fin || 0.31, RIN = _tn.rin || 0.19, wx = s.x * 0.42;  // avant/arrière % depuis les extrémités
+      var r = Math.min(s.y * 0.42, s.z * (_tn.rz || 0.072));             // rayon ~7% de la longueur (réglable par modèle)
+      var fz = b.max.z - FIN * s.z, rz = b.min.z + RIN * s.z;
       var tireMat = track(new THREE.MeshStandardMaterial({ color: 0x0e0f12, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide }));
       var rimMat = track(new THREE.MeshStandardMaterial({ color: 0xb9bfc9, roughness: 0.35, metalness: 0.9, envMapIntensity: 1.2, side: THREE.DoubleSide })); // jante gris métallique
       var slots = [[-wx, fz], [wx, fz], [-wx, rz], [wx, rz]];
@@ -483,7 +490,7 @@
           } else {                                        // GLB texturé -> rehausse le PBR pour capter l'environnement studio
             upr.traverse(function (o) { if (o.isMesh && o.material) { var m = o.material; m.metalness = 0.35; if (m.roughness === undefined || m.roughness > 0.7) m.roughness = 0.5; m.envMapIntensity = 1.15; m.needsUpdate = true; } });
             if (url.indexOf('/lpc/') >= 0) {              // lpc : carrosserie SANS roues -> ajoute 4 roues alliage (wrapper sans rotation)
-              var _cw = new THREE.Group(); _cw.add(upr); addWheels(upr, _cw); upr = _cw;
+              var _cw = new THREE.Group(); _cw.add(upr); addWheels(upr, _cw, url); upr = _cw;
             }
           }
           upr.updateMatrixWorld(true);
