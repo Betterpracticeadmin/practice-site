@@ -2194,7 +2194,15 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
       loader.load(url, function(res){
         try{
           var inner = res.scene || res;                     // GLTF -> .scene ; FBX -> Object3D
-          if(isFbx) inner.traverse(function(o){ if(o.isLine||o.isLineSegments) o.visible=false; });  // retire les courbes parasites (NURBS FBX)
+          if(isFbx){                                        // FBX : retire les courbes NURBS + REPEINT (matériaux souvent absents/noirs)
+            inner.traverse(function(o){ if(o.isLine||o.isLineSegments) o.visible=false; });
+            inner.updateMatrixWorld(true);
+            var _mbs=new T.Box3().setFromObject(inner).getSize(new T.Vector3()), _mmax=Math.max(_mbs.x,_mbs.y,_mbs.z)||1;
+            var _bc=/moto/i.test(url)?0xC62828:(/bus/i.test(url)?0xEDEFF2:0x9AA0A6);
+            var _bodyM=new T.MeshStandardMaterial({color:_bc,metalness:0.45,roughness:0.45,side:T.DoubleSide});
+            var _wheelM=new T.MeshStandardMaterial({color:0x15171c,metalness:0.5,roughness:0.55,side:T.DoubleSide});
+            inner.traverse(function(o){ if(o.isMesh){ if(o.geometry&&!o.geometry.attributes.normal)o.geometry.computeVertexNormals(); var _ss=new T.Box3().setFromObject(o).getSize(new T.Vector3()); o.material=(Math.max(_ss.x,_ss.y,_ss.z)<_mmax*0.30)?_wheelM:_bodyM; } }); // normales manquantes -> recalcul
+          }
           var wrap = uprightCar(inner, T);                  // normalise -> Y-up (hauteur Y, longueur Z)
           if(!isFbx && url.indexOf('/kenney/')<0 && url.indexOf('/lpc/')<0){          // ancien kit body-only -> couleur + roues
             var _pal=[0xC62828,0x1565C0,0xE8EAED,0x1A1A1A,0x9AA0A6,0x2E7D32,0xEF6C00,0x6A1B9A,0x00838F,0xF9A825,0x37474F,0x8D6E63];

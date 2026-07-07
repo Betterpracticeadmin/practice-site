@@ -462,7 +462,16 @@
       lp.then(function (loader) {
         loader.load(url, function (res) {
           if (!THREE || !scene) return;
-          var _inner = res.scene || res; if (isFbx) _inner.traverse(function (o) { if (o.isLine || o.isLineSegments) o.visible = false; }); // retire les courbes parasites (NURBS FBX)
+          var _inner = res.scene || res;
+          if (isFbx) {                                     // FBX : retire les courbes NURBS + REPEINT (matériaux souvent absents/noirs -> invisibles)
+            _inner.traverse(function (o) { if (o.isLine || o.isLineSegments) o.visible = false; });
+            _inner.updateMatrixWorld(true);
+            var _mbs = new THREE.Box3().setFromObject(_inner).getSize(new THREE.Vector3()), _mmax = Math.max(_mbs.x, _mbs.y, _mbs.z) || 1;
+            var _bc = /moto/i.test(url) ? 0xC62828 : (/bus/i.test(url) ? 0xEDEFF2 : 0x9AA0A6);
+            var _bodyM = track(new THREE.MeshStandardMaterial({ color: _bc, metalness: 0.45, roughness: 0.45, side: THREE.DoubleSide }));
+            var _wheelM = track(new THREE.MeshStandardMaterial({ color: 0x15171c, metalness: 0.5, roughness: 0.55, side: THREE.DoubleSide }));
+            _inner.traverse(function (o) { if (o.isMesh) { o.frustumCulled = false; if (o.geometry) { o.geometry.computeVertexNormals(); o.geometry.computeBoundingSphere(); } var _ss = new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()); o.material = (Math.max(_ss.x, _ss.y, _ss.z) < _mmax * 0.30) ? _wheelM : _bodyM; } }); // FBX robuste : recalcul normales + bornes (sinon invisible sous MeshStandard)
+          }
           var upr = uprightCar(_inner);                  // normalise -> Y-up (hauteur Y, longueur Z)
           disposeModel();                                // libère l'ancien AVANT de tracker le matériau des roues (évite un dispose prématuré)
           root = new THREE.Group(); carGroup = new THREE.Group(); root.add(carGroup); scene.add(root);

@@ -1,26 +1,14 @@
 [
  {
+  "id": "lp-suv-bleu",
+  "file": "/models/lpc/lp-suv-bleu.glb",
+  "label": "SUV bleu",
+  "class": "suv"
+ },
+ {
   "id": "lp-citadine-rouge",
   "file": "/models/lpc/lp-citadine-rouge.glb",
   "label": "Citadine rouge",
-  "class": "car"
- },
- {
-  "id": "lp-citadine-orange",
-  "file": "/models/lpc/lp-citadine-orange.glb",
-  "label": "Citadine orange",
-  "class": "car"
- },
- {
-  "id": "lp-citadine-creme",
-  "file": "/models/lpc/lp-citadine-creme.glb",
-  "label": "Citadine crème",
-  "class": "car"
- },
- {
-  "id": "lp-citadine-argent",
-  "file": "/models/lpc/lp-citadine-argent.glb",
-  "label": "Citadine argent",
   "class": "car"
  },
  {
@@ -30,46 +18,10 @@
   "class": "car"
  },
  {
-  "id": "lp-berline-bordeaux",
-  "file": "/models/lpc/lp-berline-bordeaux.glb",
-  "label": "Berline bordeaux",
-  "class": "car"
- },
- {
   "id": "lp-berline-grise",
   "file": "/models/lpc/lp-berline-grise.glb",
   "label": "Berline grise",
   "class": "car"
- },
- {
-  "id": "lp-berline-creme",
-  "file": "/models/lpc/lp-berline-creme.glb",
-  "label": "Berline crème",
-  "class": "car"
- },
- {
-  "id": "lp-suv-argent",
-  "file": "/models/lpc/lp-suv-argent.glb",
-  "label": "SUV argent",
-  "class": "suv"
- },
- {
-  "id": "lp-suv-bleu",
-  "file": "/models/lpc/lp-suv-bleu.glb",
-  "label": "SUV bleu",
-  "class": "suv"
- },
- {
-  "id": "lp-suv-blanc",
-  "file": "/models/lpc/lp-suv-blanc.glb",
-  "label": "SUV blanc",
-  "class": "suv"
- },
- {
-  "id": "lp-van-blanc",
-  "file": "/models/lpc/lp-van-blanc.glb",
-  "label": "Van blanc",
-  "class": "van"
  },
  {
   "id": "lp-van-jaune",
@@ -78,21 +30,9 @@
   "class": "van"
  },
  {
-  "id": "lp-compacte-turquoise",
-  "file": "/models/lpc/lp-compacte-turquoise.glb",
-  "label": "Compacte turquoise",
-  "class": "car"
- },
- {
   "id": "lp-compacte-verte",
   "file": "/models/lpc/lp-compacte-verte.glb",
   "label": "Compacte verte",
-  "class": "car"
- },
- {
-  "id": "lp-compacte-rose",
-  "file": "/models/lpc/lp-compacte-rose.glb",
-  "label": "Compacte rose",
   "class": "car"
  }
 ]

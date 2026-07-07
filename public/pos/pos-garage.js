@@ -16,14 +16,9 @@
 
   /* catalogue de base (le kit s'insère juste après 'auto' une fois chargé) */
   var BASE = [
-    { id: 'auto',           label: 'Auto (selon mon véhicule)', kind: 'auto',  class: 'car', tag: 'AUTO' },
-    { id: 'moto',           label: 'Moto',     kind: 'fbx', src: '/models/moto.fbx', class: 'motorcycle', tag: 'RÉEL' },
-    { id: 'bus',            label: 'Bus',      kind: 'fbx', src: '/models/bus.fbx',  class: 'bus',        tag: 'RÉEL' },
-    { id: 'toybus',         label: 'Bus de ville', kind: 'fbx', src: '/models/toybus.fbx', class: 'bus',   tag: 'RÉEL' },
-    { id: 'param-citadine', label: 'Citadine', kind: 'param', paramType: 'citadine', class: 'car', tag: 'GÉN.' },
-    { id: 'param-berline',  label: 'Berline',  kind: 'param', paramType: 'berline',  class: 'car', tag: 'GÉN.' },
-    { id: 'param-suv',      label: 'SUV',      kind: 'param', paramType: 'SUV',      class: 'suv', tag: 'GÉN.' },
-    { id: 'param-sportive', label: 'Sportive', kind: 'param', paramType: 'sportive', class: 'car', tag: 'GÉN.' }
+    { id: 'auto',           label: 'Auto (selon mon véhicule)', kind: 'auto',  class: 'car', tag: 'AUTO' }
+    /* moto + bus : anciens FBX à problème (moto corrompue = géométrie non rendue ;
+       bus = échelle géante non normalisée -> invisible). Retirés en attendant des GLB propres. */
   ];
   var kit = [];                 // voitures du kit (chargées async)
   var CATALOG = BASE.slice();
@@ -33,10 +28,11 @@
 
   function autoModel() {
     var seg = null; try { var v = window.__posLastVehicle; if (v && v.segment) seg = v.segment; } catch (e) {}
-    var bySeg = { citadine: 'param-citadine', compacte: 'param-citadine', berline: 'param-berline',
-      break: 'param-berline', SUV: 'param-suv', sportive: 'param-sportive', hypercar: 'param-sportive',
-      utilitaire: 'bus' };
-    return MAP[bySeg[seg]] || (kit[0] || MAP['param-berline']);
+    /* choisit un avatar du set réel selon le segment reconnu (repli : 1re voiture du kit) */
+    var bySeg = { citadine: 'lp-citadine-rouge', compacte: 'lp-compacte-verte', berline: 'lp-berline-grise',
+      break: 'lp-berline-grise', SUV: 'lp-suv-bleu', sportive: 'lp-coupe-orange', hypercar: 'lp-coupe-orange',
+      utilitaire: 'lp-van-jaune', bus: 'bus' };
+    return MAP[bySeg[seg]] || kit[0] || MAP['bus'];
   }
 
   function injectStyle() {
