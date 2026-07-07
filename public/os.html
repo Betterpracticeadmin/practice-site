@@ -4335,6 +4335,15 @@
 html[data-da-off] .da-fx::after{ display:none; }
 html[data-da-off] .da-fx .da-rev{ color:inherit; animation:none; }
 
+/* ===== PERF audio/GPU : le backdrop-filter (flou d'arrière-plan) est le poste GPU n°1.
+   L'app en a 100+ actifs en permanence -> compositing GPU continu qui SATURE et fait
+   grésiller la sortie audio de Chrome (Windows). En mode « effets réduits » on coupe
+   TOUS les flous d'arrière-plan + les animations décoratives (::before/::after). ===== */
+html[data-da-off] *, html[data-da-off] *::before, html[data-da-off] *::after{
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+html[data-da-off] *::before, html[data-da-off] *::after{ animation:none !important; }
+
 /* orbcells (cell-blob) retiré a la demande */
 
 /* ===== Glowing pill toggles (scoped to .seg) ===== */
