@@ -2216,7 +2216,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
           wrap.position.set(-ctr.x, -box.min.y, -ctr.z);    // Y-up : sol = min.y
           var s2=new T.Box3().setFromObject(wrap).getSize(new T.Vector3());
           var holder=new T.Group(); holder.add(wrap);
-          holder.rotation.y=(s2.x>s2.z?Math.PI/2:0) + ((url.indexOf('/kenney/')>=0||url.indexOf('/lpc/')>=0)?Math.PI:0);   // longueur -> +Z ; kenney & lpc ont l'avant en +Z -> flip 180° (montrer le dos)
+          holder.rotation.y=(s2.x>s2.z?Math.PI/2:0) + (url.indexOf('/kenney/')>=0?Math.PI:0);   // longueur -> +Z ; lpc : avant en +Z = face caméra -> on voit le PARE-BRISE (pas de flip)
           while(root.children.length) root.remove(root.children[0]);   // retire la voiture courante
           root.add(holder); window.__avatar=url;
           window.__hideAvatarLoad();
