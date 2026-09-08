@@ -25,6 +25,7 @@
   #vig{position:fixed;inset:0;pointer-events:none;z-index:3;
        box-shadow:inset 0 0 200px 40px rgba(0,0,0,.45);}
 .tiles-dark .leaflet-tile-container{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92) saturate(.9);}
+.tiles-dark .leaflet-tile{filter:none;} /* leaflet.css met filter:inherit sur les tuiles -> sinon inversion appliquée 2 fois */
 </style>
 
 <style>

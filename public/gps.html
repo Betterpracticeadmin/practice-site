@@ -71,6 +71,7 @@
   footer{margin-top:auto;padding-top:14px;text-align:center;font-size:10px;color:var(--faint);font-family:var(--mono);}
   @media(max-width:430px){ .grid{grid-template-columns:repeat(2,1fr);} }
 .tiles-dark .leaflet-tile-container{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92) saturate(.9);}
+.tiles-dark .leaflet-tile{filter:none;} /* leaflet.css met filter:inherit sur les tuiles -> sinon inversion appliquée 2 fois */
 </style>
   <link rel="stylesheet" href="/bitmap.css">
 </head>

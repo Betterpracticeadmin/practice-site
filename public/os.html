@@ -2065,23 +2065,35 @@
   var pts=[], totalDist=0, route=null, stepIdx=0, stepAnnounced=false, navActive=false, lastSpeedState=null, maxSpd=0;
   var currentDest=null, offCount=0, rerouting=false, wakeLock=null, suggTimer=null, stepMinD=Infinity, lastCruise=0;
   /* Fond de plan SANS clé API. (CARTO exige une clé depuis 2026 -> ses tuiles arrivent marquées « API KEY REQUIRED ».)
-     Tuiles claires uniquement : les modes sombres passent par le filtre CSS sur .leaflet-tile-pane.
-     Si un fournisseur tombe (erreurs de tuiles en rafale), on bascule automatiquement sur le suivant. */
+     Tuiles claires uniquement : seul le mode Nuit inverse la carte (filtre CSS sur .leaflet-tile-pane, cf. règle !important plus haut).
+     Si un fournisseur tombe (erreurs de tuiles en rafale ALORS QU'ON EST EN LIGNE), on bascule sur le suivant sans trou visuel,
+     et on revient au fournisseur préféré au retour du réseau. Aucun raster sans clé n'existe en version « sans libellés » (ex-mode GT). */
   var PLAN_PROVIDERS=[
     {url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',sub:'abc',maxNative:19,attr:'&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> &middot; tuiles <a href="https://hot.openstreetmap.org/">HOT</a> / OSM France'},
     {url:'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',sub:'abc',maxNative:20,attr:'&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> &middot; OSM France'},
     {url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',sub:'a',maxNative:19,attr:'Tiles &copy; Esri'}
   ];
-  var planIdx=0, themeMode='auto';
+  var planIdx=0, planSwapping=false, _planExtra=null, themeMode='auto';
+  function swapPlanLayer(newIdx){                          // remplace la couche plan par le fournisseur newIdx SANS trou visuel
+    if(!map || mapStyle!=='plan' || planSwapping || newIdx<0 || newIdx>=PLAN_PROVIDERS.length) return;
+    planSwapping=true; planIdx=newIdx;
+    var old=tileLayer, n=planLayer(_planExtra), done=false;
+    try{ n.setOpacity(0); n.addTo(map); try{ n.bringToBack(); }catch(e){} }catch(e){ planSwapping=false; return; }
+    function fin(){ if(done) return; done=true; planSwapping=false; try{ n.setOpacity(1); }catch(e){} tileLayer=n;
+      if(old && old!==n){ setTimeout(function(){ try{ map.removeLayer(old); }catch(e){} },480); } }   // l'ancienne couche reste affichée jusqu'à ce que la nouvelle ait chargé
+    n.once('load',fin); setTimeout(fin,4000);
+  }
+  try{ window.addEventListener('online',function(){ if(planIdx===0) return; if(mapStyle==='plan') swapPlanLayer(0); else planIdx=0; }); }catch(e){}   // réseau de retour -> fournisseur préféré
   function planLayer(extra){
+    if(extra) _planExtra=extra;
     var p=PLAN_PROVIDERS[planIdx], o={maxZoom:20,maxNativeZoom:p.maxNative,subdomains:p.sub,attribution:p.attr,keepBuffer:6,detectRetina:false};
     if(extra){ for(var k in extra) o[k]=extra[k]; }
     var l=L.tileLayer(p.url,o), errs=0;
     l.on('tileload',function(){ errs=0; });
     l.on('tileerror',function(){
-      if(++errs<8 || planIdx>=PLAN_PROVIDERS.length-1 || mapStyle!=='plan' || tileLayer!==l) return;
-      errs=0; planIdx++;
-      try{ var n=planLayer(extra); n.addTo(map); try{ n.bringToBack(); }catch(e){} tileLayer=n; map.removeLayer(l); }catch(e){}
+      if(navigator.onLine===false) return;                  // hors-ligne (tunnel, zone blanche) : le fournisseur n'y est pour rien -> on garde les tuiles déjà affichées
+      if(++errs<8 || planIdx>=PLAN_PROVIDERS.length-1 || tileLayer!==l) return;
+      errs=0; swapPlanLayer(planIdx+1);
     });
     return l;
   }

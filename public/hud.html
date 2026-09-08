@@ -153,6 +153,7 @@
   @media(max-width:900px){ #tactic{width:185px;top:calc(238px + env(safe-area-inset-top));} }
   @media(max-width:760px){ #tactic{display:none;} }
 .tiles-dark .leaflet-tile-container{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92) saturate(.9);}
+.tiles-dark .leaflet-tile{filter:none;} /* leaflet.css met filter:inherit sur les tuiles -> sinon inversion appliquée 2 fois */
 </style>
 <style>
   /* ---- cluster RACING (SimHub-like) ---- */

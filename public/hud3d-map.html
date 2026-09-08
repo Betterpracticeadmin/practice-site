@@ -1661,6 +1661,7 @@ if(map){
 
 /* exposer pour le toggle vue/nord du cockpit */
 window.__hubMap = map;
+window.__refreshBridges3D = refreshBridges3D;   // hook debug/mesure (perf ponts fusionnes)
 })();
 </script>
 
@@ -1696,7 +1697,8 @@ window.__hubMap = map;
       var el=document.createElement('div'); el.className='ck-me-dot';
       miniMarker = new maplibregl.Marker({element:el}).setLngLat([DEMO_POS[1],DEMO_POS[0]]).addTo(mini);
       var fb=$('ck-mapFallback'); if(fb) fb.style.display='none';
-      mini.on('error', function(e){ var m=(e&&e.error&&e.error.message)||''; if(/style|Failed to fetch|NetworkError|planet/i.test(m)) showMapFallback(); }); /* seules les erreurs de style/réseau masquent la carte */
+      mini.on('error', function(e){ if(e&&e.tile) return; /* erreur d'UNE tuile (5xx, micro-coupure) : la carte marche, on ne masque pas */ var m=(e&&e.error&&e.error.message)||''; if(/style|Failed to fetch|NetworkError|planet/i.test(m)) showMapFallback(); });
+      mini.once('idle', function(){ var fb=$('ck-mapFallback'); if(fb) fb.style.display='none'; });   /* la carte a fini de charger -> on s'assure que le fallback est masqué */
     }catch(e){ showMapFallback(); }
   }
   function showMapFallback(){ var fb=$('ck-mapFallback'); if(fb) fb.style.display='grid'; }
