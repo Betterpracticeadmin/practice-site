@@ -2064,7 +2064,27 @@
   var follow=true, watchId=null, demoTimer=null, demoMode=false;
   var pts=[], totalDist=0, route=null, stepIdx=0, stepAnnounced=false, navActive=false, lastSpeedState=null, maxSpd=0;
   var currentDest=null, offCount=0, rerouting=false, wakeLock=null, suggTimer=null, stepMinD=Infinity, lastCruise=0;
-  var THEMES={dark:'dark_all',light:'light_all'}; var themeMode='auto';
+  /* Fond de plan SANS clé API. (CARTO exige une clé depuis 2026 -> ses tuiles arrivent marquées « API KEY REQUIRED ».)
+     Tuiles claires uniquement : les modes sombres passent par le filtre CSS sur .leaflet-tile-pane.
+     Si un fournisseur tombe (erreurs de tuiles en rafale), on bascule automatiquement sur le suivant. */
+  var PLAN_PROVIDERS=[
+    {url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',sub:'abc',maxNative:19,attr:'&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> &middot; tuiles <a href="https://hot.openstreetmap.org/">HOT</a> / OSM France'},
+    {url:'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',sub:'abc',maxNative:20,attr:'&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> &middot; OSM France'},
+    {url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',sub:'a',maxNative:19,attr:'Tiles &copy; Esri'}
+  ];
+  var planIdx=0, themeMode='auto';
+  function planLayer(extra){
+    var p=PLAN_PROVIDERS[planIdx], o={maxZoom:20,maxNativeZoom:p.maxNative,subdomains:p.sub,attribution:p.attr,keepBuffer:6,detectRetina:false};
+    if(extra){ for(var k in extra) o[k]=extra[k]; }
+    var l=L.tileLayer(p.url,o), errs=0;
+    l.on('tileload',function(){ errs=0; });
+    l.on('tileerror',function(){
+      if(++errs<8 || planIdx>=PLAN_PROVIDERS.length-1 || mapStyle!=='plan' || tileLayer!==l) return;
+      errs=0; planIdx++;
+      try{ var n=planLayer(extra); n.addTo(map); try{ n.bringToBack(); }catch(e){} tileLayer=n; map.removeLayer(l); }catch(e){}
+    });
+    return l;
+  }
   /* ---------- ADAPTIVE IDENTITY: modes ---------- */
   var mode='copilot';
   var MODES={
@@ -2077,7 +2097,7 @@
     magma:{name:'Magma',rate:1.08,say:'Mode Magma. Incandescent.'},
     rally:{name:'Rally',rate:1.12,say:'Mode rally. Style, drift et liberté.'}
   };
-  function tileStyle(){ if(mode==='gt')return 'rastertiles/voyager_nolabels'; return 'rastertiles/voyager'; /* coloured Voyager everywhere; per-mode tint via CSS filter on .leaflet-tile-pane */ }
+  /* (tileStyle() supprimé : le fond de plan ne dépend plus du thème ni du mode — voir PLAN_PROVIDERS) */
   function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; if(!silent && window.daLoader){ window.daLoader.show('Mode '+MODES[m].name); setTimeout(function(){ if(window.daLoader)window.daLoader.hide(); },650); } applyTheme(); syncPanel(); if(typeof renderRouteOverlay==='function'&&navActive)renderRouteOverlay(); if(typeof postHudMode==='function')postHudMode(); if(typeof postHudRoute==='function')postHudRoute(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} if(!silent){Mem.prefs.mode=m;saveMem();} }
 
   function haversine(a,b){var R=6371000,r=Math.PI/180;var dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;var s=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(s)));}
@@ -2091,7 +2111,7 @@
   function applyTheme(){
     var t=effectiveTheme(); document.body.setAttribute('data-theme',t);
     $('themeBtn').textContent = themeMode==='auto'?'◐ Auto':(themeMode==='dark'?'● Nuit':'○ Jour');
-    if(map&&tileLayer&&mapStyle==='plan'){ tileLayer.setUrl('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}.png'); }
+    /* fond de plan : le même pour tous les thèmes/modes (la teinte vient du filtre CSS) */
     if(routeLine){ var dk=(t==='dark')||mode==='night'||mode==='ultra'||mode==='performance'; routeLine.setStyle({color: dk?'#ffffff':'#111111'}); }
   }
   setInterval(function(){ if(themeMode==='auto') applyTheme(); }, 60000);
@@ -2100,7 +2120,7 @@
   function initMap(){
     map=L.map('map',{zoomControl:false,attributionControl:true,zoomSnap:.5,wheelPxPerZoomLevel:110,wheelDebounceTime:28,inertia:true,inertiaDeceleration:2600,fadeAnimation:true,zoomAnimation:true,markerZoomAnimation:true,zoomAnimationThreshold:6}).setView([46.6,2.4],5);
     var t=effectiveTheme();
-    tileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+THEMES[t]+'/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',updateWhenIdle:false,updateWhenZooming:false,keepBuffer:6,detectRetina:false}).addTo(map);
+    tileLayer=planLayer({updateWhenIdle:false,updateWhenZooming:false}).addTo(map);
     routeLine=L.polyline([],{color:t==='dark'?'#fff':'#111',weight:6,opacity:.92,lineJoin:'round'}).addTo(map);
     accCircle=L.circle([46.6,2.4],{radius:0,color:'#888',weight:1,opacity:.3,fillOpacity:.05}).addTo(map);
     poiLayer=L.layerGroup().addTo(map);
@@ -2128,7 +2148,7 @@
   function updateMapLayerBtns(){ [].forEach.call(document.querySelectorAll('#mapLayers button'),function(b){ b.classList.toggle('on',b.dataset.ml===mapStyle); }); }
   function setMapStyle(s){ if(!map)return; if(s!=='satellite'&&s!=='relief')s='plan'; mapStyle=s; document.body.setAttribute('data-mapstyle',s);
     var old=tileLayer, nl;
-    if(s==='plan'){ nl=L.tileLayer('https://{s}.basemaps.cartocdn.com/'+tileStyle()+'/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO',keepBuffer:6}); }
+    if(s==='plan'){ nl=planLayer(); }
     else { var d=TILEDEF[s]; nl=L.tileLayer(d.url,d.opts); }
     nl.setOpacity(0); nl.addTo(map); tileLayer=nl; try{nl.bringToBack();}catch(e){}
     var done=false; function fade(){ if(done)return; done=true; try{nl.setOpacity(1);}catch(e){} if(old){ setTimeout(function(){ try{map.removeLayer(old);}catch(e){} },480); } }

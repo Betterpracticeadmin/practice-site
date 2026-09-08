@@ -70,6 +70,7 @@
   .note b{color:var(--dim);}
   footer{margin-top:auto;padding-top:14px;text-align:center;font-size:10px;color:var(--faint);font-family:var(--mono);}
   @media(max-width:430px){ .grid{grid-template-columns:repeat(2,1fr);} }
+.tiles-dark .leaflet-tile-container{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92) saturate(.9);}
 </style>
   <link rel="stylesheet" href="/bitmap.css">
 </head>
@@ -136,9 +137,9 @@
   // ---- map init (dark, Waze-like) ----
   function initMap() {
     map = L.map('map', { zoomControl: true, attributionControl: true, preferCanvas: true }).setView([46.6, 2.4], 5); // France default
-    tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 20, subdomains: 'abcd',
-      attribution: '&copy; OpenStreetMap &copy; CARTO'
+    tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { /* sans clé (CARTO exige une clé depuis 2026) ; sombre via CSS */
+      maxZoom: 20, maxNativeZoom: 19, subdomains: 'abc', className: 'tiles-dark',
+      attribution: '&copy; OpenStreetMap &middot; tuiles HOT / OSM France'
     }).addTo(map);
     trail = L.polyline([], { color: '#5DCAA5', weight: 4, opacity: 0.85, lineJoin: 'round' }).addTo(map);
     accCircle = L.circle([46.6, 2.4], { radius: 0, color: '#5DCAA5', weight: 1, opacity: 0.4, fillColor: '#5DCAA5', fillOpacity: 0.08 }).addTo(map);

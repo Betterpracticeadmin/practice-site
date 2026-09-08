@@ -152,6 +152,7 @@
   .tac-foot{font-size:8px;color:#3a3d42;margin-top:9px;font-family:var(--mono);letter-spacing:.04em;line-height:1.45;}
   @media(max-width:900px){ #tactic{width:185px;top:calc(238px + env(safe-area-inset-top));} }
   @media(max-width:760px){ #tactic{display:none;} }
+.tiles-dark .leaflet-tile-container{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92) saturate(.9);}
 </style>
 <style>
   /* ---- cluster RACING (SimHub-like) ---- */
@@ -1273,7 +1274,7 @@
   var map=null, meMarker=null, geoAt=0, lastGeo=null;
   function initMap(){ if(map||typeof L==='undefined'||!$('miniMap'))return;
     map=L.map('miniMap',{zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,keyboard:false}).setView([48.8566,2.3522],15);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',{maxZoom:19,className:'tiles-dark'}).addTo(map); /* sans clé (CARTO exige une clé depuis 2026) ; sombre via CSS */
     meMarker=L.marker([48.8566,2.3522],{icon:L.divIcon({className:'',html:'<div class="me-dot"></div>',iconSize:[14,14],iconAnchor:[7,7]}),interactive:false}).addTo(map);
     radarLayer=L.layerGroup().addTo(map);
     setTimeout(function(){map.invalidateSize();},300);

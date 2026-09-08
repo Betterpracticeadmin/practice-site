@@ -96,6 +96,7 @@
   .gate small{display:block;margin-top:24px;color:var(--faint);font-size:10.5px;font-family:var(--mono);letter-spacing:.03em;}
   .toast{position:fixed;top:calc(76px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:40;background:rgba(226,85,79,.94);color:#fff;font-size:12.5px;font-family:var(--mono);padding:10px 16px;border-radius:11px;display:none;max-width:90%;text-align:center;}
   .toast.show{display:block;}
+.tiles-dark .leaflet-tile-container{filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.92) saturate(.9);}
 </style>
   <link rel="stylesheet" href="/bitmap.css">
 </head>
@@ -263,7 +264,7 @@
 
   function initMap() {
     map = L.map('map', { zoomControl: true, attributionControl: true }).setView([46.6, 2.4], 5);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 20, subdomains: 'abcd', attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { maxZoom: 20, maxNativeZoom: 19, subdomains: 'abc', className: 'tiles-dark', attribution: '&copy; OpenStreetMap &middot; tuiles HOT / OSM France' }).addTo(map); /* sans clé (CARTO exige une clé depuis 2026) */
     routeLine = L.polyline([], { color: '#ffffff', weight: 6, opacity: .92, lineJoin: 'round' }).addTo(map);
     accCircle = L.circle([46.6, 2.4], { radius: 0, color: '#ffffff', weight: 1, opacity: .3, fillColor: '#ffffff', fillOpacity: .05 }).addTo(map);
     var icon = L.divIcon({ className: '', html: '<div class="me-wrap"><div class="me-arrow" id="meArrow"></div><div class="me-dot"></div></div>', iconSize: [20, 20], iconAnchor: [10, 10] });

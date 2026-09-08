@@ -1689,24 +1689,14 @@ window.__hubMap = map;
     try{
       mini = new maplibregl.Map({
         container:'ck-miniMap',
-        style:{
-          version:8,
-          sources:{ 'carto-dark':{
-            type:'raster',
-            tiles:['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                   'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
-            tileSize:256,
-            attribution:'© OpenStreetMap, © CARTO'
-          }},
-          layers:[{ id:'carto-dark', type:'raster', source:'carto-dark' }]
-        },
+        style:'https://tiles.openfreemap.org/styles/dark', /* vecteur OpenFreeMap, sans clé (CARTO exige une clé depuis 2026) */
         center:[DEMO_POS[1], DEMO_POS[0]],
         zoom:14, attributionControl:false, interactive:false
       });
       var el=document.createElement('div'); el.className='ck-me-dot';
       miniMarker = new maplibregl.Marker({element:el}).setLngLat([DEMO_POS[1],DEMO_POS[0]]).addTo(mini);
       var fb=$('ck-mapFallback'); if(fb) fb.style.display='none';
-      mini.on('error', function(){ showMapFallback(); });
+      mini.on('error', function(e){ var m=(e&&e.error&&e.error.message)||''; if(/style|Failed to fetch|NetworkError|planet/i.test(m)) showMapFallback(); }); /* seules les erreurs de style/réseau masquent la carte */
     }catch(e){ showMapFallback(); }
   }
   function showMapFallback(){ var fb=$('ck-mapFallback'); if(fb) fb.style.display='grid'; }
