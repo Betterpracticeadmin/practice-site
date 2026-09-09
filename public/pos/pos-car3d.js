@@ -402,9 +402,7 @@
         if (seen.indexOf(m) >= 0) return; seen.push(m); track(m);
         var n = (m.name || '').toLowerCase();
         if (n === 'body') { if (tint) { try { m.color.set(tint); } catch (e) {} } if ('roughness' in m) { m.roughness = 0.5; m.metalness = 0.15; } if ('clearcoat' in m) { m.clearcoat = 0.5; m.clearcoatRoughness = 0.25; } if ('envMapIntensity' in m) m.envMapIntensity = 1.15; }
-        else if (n === 'glass') { try { m.color.set('#0c0f13'); } catch (e) {} if ('roughness' in m) { m.roughness = 0.26; m.metalness = 0.0; } if ('envMapIntensity' in m) m.envMapIntensity = 0.55; }
-        else if (n === 'rim') { if ('metalness' in m) { m.metalness = 0.8; m.roughness = 0.45; } }
-        else if (n === 'tire') { if ('roughness' in m) { m.roughness = 0.9; m.metalness = 0.1; } }
+        else if (n === 'glass' || n === 'rim' || n === 'tire' || n === 'trim') { /* valeurs du GLB conservées (réglées par le générateur, jugées telles quelles) */ }
         m.needsUpdate = true; }); });
     }
     function uprightCar(model) {

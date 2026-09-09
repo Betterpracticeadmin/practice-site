@@ -2318,9 +2318,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
       if(seen.indexOf(m)>=0) return; seen.push(m);
       var n=(m.name||'').toLowerCase();
       if(n==='body'){ if(tint){ try{ m.color.set(tint); }catch(_){} } if('roughness' in m){ m.roughness=0.5; m.metalness=0.15; } if('clearcoat' in m){ m.clearcoat=0.5; m.clearcoatRoughness=0.25; } if('envMapIntensity' in m) m.envMapIntensity=1.15; }
-      else if (n === 'glass') { try { m.color.set('#0c0f13'); } catch (e) {} if ('roughness' in m) { m.roughness = 0.26; m.metalness = 0.0; } if ('envMapIntensity' in m) m.envMapIntensity = 0.55; }
-      else if(n==='rim'){ if('metalness' in m){ m.metalness=0.8; m.roughness=0.45; } }
-      else if(n==='tire'){ if('roughness' in m){ m.roughness=0.9; m.metalness=0.1; } }
+      else if (n === 'glass' || n === 'rim' || n === 'tire' || n === 'trim') { /* valeurs du GLB conservées (réglées par le générateur, jugées telles quelles) */ }
       m.needsUpdate=true; }); });
   }
   /* modèles du pack lpc dont l'AVANT est en -Z après uprightCar (mesuré par playwright/wheel_fit.cjs) -> retournés de 180° */
