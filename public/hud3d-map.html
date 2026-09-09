@@ -404,22 +404,22 @@ var DEMO_POS  = { lon:2.32114, lat:48.8655 };   // Paris, rives de la Seine (sit
    car MapLibre ne place pas la camera librement (cf. LIMITE API ci-dessus). */
 var BEHIND_M       = 10;     // camera ~10 m DERRIERE le vehicule (le long de -cap)
 var UP_M           = 6;      // camera ~6 m AU-DESSUS du sol
-var AHEAD_SLOW     = 6;      // a l'arret/lent : vise pres -> voiture VISIBLE au 1er plan (pas hors-champ)
-var AHEAD_FAST     = 16;     // a vitesse : vise plus loin (route devant)
+var AHEAD_SLOW     = 3;      // a l arret/lent : axe optique ~sur le nez de la voiture (Tesla)
+var AHEAD_FAST     = 10;     // a vitesse : vise un peu plus loin (route devant)
 
 /* --- PITCH / FOV cibles (inclinaison ~60, jamais vertical ni horizontal) --- */
 var PITCH          = 60;     // inclinaison camera cible (~atan(AHEAD/UP) ramene en 55-65)
-var PITCH_SLOW     = 52;     // basse vitesse : camera basse derriere la voiture (cinematique)
-var PITCH_FAST     = 58;     // vitesse elevee : un peu plus rasante (profondeur/vitesse)
+var PITCH_SLOW     = 62;     // plongee ~28 deg depuis l horizontale (chase-cam Tesla : 22-30 deg)
+var PITCH_FAST     = 61;
 var MAX_PITCH      = 70;     // maxPitch a l'init (marge au-dessus de PITCH_FAST, < 85)
-var FOV            = 75;     // FOV grand-angle (immersion/vitesse/profondeur max) - setVerticalFieldOfView
+var FOV            = 55;     // FOV vertical type camera reelle (Tesla estime 45-60)
 
 /* --- ZOOM DYNAMIQUE selon la vitesse ---
    Recule par rapport a l'ancien reglage : la voiture doit etre PETITE (~6-8% de
    l'ecran). Lent -> un peu plus proche, Rapide -> plus recule (voit + de route). */
-var ZOOM_SLOW      = 20.6;   // vitesse faible  : camera QUASI-COLLEE (immersion max), voiture grande
-var ZOOM_MID       = 19.6;   // vitesse moyenne : reste tres proche
-var ZOOM_FAST      = 18.8;   // vitesse elevee  : recule un peu mais garde l'immersion
+var ZOOM_SLOW      = 22.3;   // lent : camera ~16 m du point vise -> ~11 m derriere la voiture, ~7.5 m de haut, voiture ~21 % de l ecran (lat Paris, 834 px)
+var ZOOM_MID       = 21.9;
+var ZOOM_FAST      = 21.5;   // rapide : ~28 m du point vise -> ~15 m derriere, ~13 m de haut (autoroute Tesla dezoomee : 15-20 m / 8-12 m)
 var SPD_SLOW       = 15;     // km/h : en dessous = ZOOM_SLOW / PITCH_SLOW
 var SPD_MID        = 50;     // km/h : palier intermediaire
 var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
@@ -427,7 +427,7 @@ var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
 /* --- CADRAGE : vehicule bas (~18% depuis le bas) ---
    Le decalage AHEAD_M du center fait deja descendre la voiture ; ce padding.top
    complementaire remonte le pivot pour caler la voiture vers ~18% du bas. */
-var CAM_PAD_FACTOR = 0.12;   // padding.top : remonte la voiture pour qu'elle reste DANS l'ecran (quart inferieur)
+var CAM_PAD_FACTOR = 0.10;   // padding.top : la voiture se pose vers 60 % de la hauteur (Tesla : 58-65 %)
 
 /* --- AMORTI (frame-rate-independant : k = 1 - exp(-RATE*dt)) ---
    Plus le RATE est BAS, plus il y a de lag/inertie (ressenti premium).
@@ -435,6 +435,7 @@ var CAM_PAD_FACTOR = 0.12;   // padding.top : remonte la voiture pour qu'elle re
 var DAMP_POS       = 4.5;    // suivi position (lon/lat)
 var DAMP_ROT       = 3.2;    // suivi cap (bearing) — plus mou = virages absorbes
 var DAMP_ZOOM      = 3.0;    // transition zoom (~equiv. 300-500ms)
+window.AVATAR_FACE_CAMERA = false;  // false = vue de chasse (on voit l'ARRIÈRE de l'avatar, comme Tesla/Google Maps — 9 sept. 2026) ; true = pare-brise vers la caméra (ancien choix). GLOBAL : lu par la couche 3D (module) et par __loadAvatar (script classique)
 var DAMP_PITCH     = 2.6;    // transition pitch (douce)
 
 /* --- ANTICIPATION VIRAGES ---
@@ -454,23 +455,23 @@ var TURN_BIAS_MAX  = 12;     // deg : biais maximal de cap (a 0 m de la manoeuvr
    en virage), anticip(m), racing(0..1 trajectoire de corde), inter(0..1 prudence carrefour),
    gap(distance de suivi), jerk(brusquerie). ============================================ */
 var DRIVE_MODES = {
-  copilot:{ label:'Copilot', ahead:[7,18], pitch:[50,56], maxPitch:68, zoom:[20.4,19.4,18.8], spd:[15,50,110],
-    damp:{pos:4.0,rot:2.8,zoom:2.8,pitch:2.4}, turn:{look:140,bias:11}, fov:72, pad:0.13,
+  copilot:{ label:'Copilot', ahead:[3,10], pitch:[62,61], maxPitch:70, zoom:[22.3,21.9,21.5], spd:[15,50,110],
+    damp:{pos:4.0,rot:2.8,zoom:2.8,pitch:2.4}, turn:{look:140,bias:11}, fov:55, pad:0.10,
     sim:{ vmax:90, accel:1.6, brake:2.2, latG:2.6, anticip:95, racing:0.15, inter:0.7, gap:1.0, jerk:1.2 } },
-  learning:{ label:'Apprentissage', ahead:[6,13], pitch:[48,53], maxPitch:64, zoom:[20.6,19.9,19.3], spd:[12,40,90],
-    damp:{pos:3.1,rot:2.1,zoom:2.2,pitch:1.9}, turn:{look:175,bias:9}, fov:68, pad:0.14,
+  learning:{ label:'Apprentissage', ahead:[3,9], pitch:[60,59], maxPitch:68, zoom:[22.1,21.8,21.5], spd:[12,40,90],
+    damp:{pos:3.1,rot:2.1,zoom:2.2,pitch:1.9}, turn:{look:175,bias:9}, fov:52, pad:0.12,
     sim:{ vmax:55, accel:1.0, brake:1.6, latG:1.8, anticip:135, racing:0.0, inter:1.0, gap:1.5, jerk:0.7 } },
-  gt:{ label:'GT', ahead:[9,22], pitch:[52,59], maxPitch:72, zoom:[20.0,19.0,18.2], spd:[18,60,140],
-    damp:{pos:4.6,rot:3.2,zoom:3.2,pitch:2.8}, turn:{look:125,bias:12}, fov:76, pad:0.12,
+  gt:{ label:'GT', ahead:[4,12], pitch:[63,62], maxPitch:72, zoom:[22.3,21.8,21.3], spd:[18,60,140],
+    damp:{pos:4.6,rot:3.2,zoom:3.2,pitch:2.8}, turn:{look:125,bias:12}, fov:57, pad:0.10,
     sim:{ vmax:150, accel:2.4, brake:3.0, latG:3.2, anticip:105, racing:0.30, inter:0.6, gap:0.9, jerk:1.0 } },
-  performance:{ label:'Performance', ahead:[8,24], pitch:[54,61], maxPitch:74, zoom:[20.0,18.8,18.0], spd:[20,70,160],
-    damp:{pos:6.0,rot:4.6,zoom:4.0,pitch:3.6}, turn:{look:105,bias:14}, fov:80, pad:0.11,
+  performance:{ label:'Performance', ahead:[4,14], pitch:[64,63], maxPitch:74, zoom:[22.4,21.8,21.2], spd:[20,70,160],
+    damp:{pos:6.0,rot:4.6,zoom:4.0,pitch:3.6}, turn:{look:105,bias:14}, fov:60, pad:0.09,
     sim:{ vmax:185, accel:3.3, brake:4.6, latG:4.3, anticip:78, racing:0.55, inter:0.45, gap:0.7, jerk:2.1 } },
-  ultra:{ label:'Ultra', ahead:[10,28], pitch:[56,64], maxPitch:78, zoom:[19.6,18.4,17.6], spd:[25,90,200],
-    damp:{pos:7.6,rot:6.2,zoom:5.0,pitch:4.4}, turn:{look:88,bias:16}, fov:84, pad:0.10,
+  ultra:{ label:'Ultra', ahead:[5,16], pitch:[65,64], maxPitch:78, zoom:[22.4,21.7,21.0], spd:[25,90,200],
+    damp:{pos:7.6,rot:6.2,zoom:5.0,pitch:4.4}, turn:{look:88,bias:16}, fov:62, pad:0.08,
     sim:{ vmax:235, accel:4.6, brake:6.2, latG:5.6, anticip:60, racing:0.85, inter:0.30, gap:0.5, jerk:3.6 } },
-  night:{ label:'Nuit', ahead:[6,15], pitch:[49,54], maxPitch:66, zoom:[20.6,19.8,19.2], spd:[12,45,95],
-    damp:{pos:3.4,rot:2.4,zoom:2.4,pitch:2.1}, turn:{look:160,bias:10}, fov:70, pad:0.13,
+  night:{ label:'Nuit', ahead:[3,9], pitch:[61,60], maxPitch:68, zoom:[22.2,21.8,21.4], spd:[12,45,95],
+    damp:{pos:3.4,rot:2.4,zoom:2.4,pitch:2.1}, turn:{look:160,bias:10}, fov:54, pad:0.12,
     sim:{ vmax:70, accel:1.2, brake:1.8, latG:2.0, anticip:120, racing:0.05, inter:0.9, gap:1.3, jerk:0.8 } }
 };
 var MODE_ALIAS = { magma:'performance', confort:'copilot', comfort:'copilot', eco:'learning', sport:'performance', track:'ultra' };
@@ -705,6 +706,7 @@ try{
     pitch:PITCH,            // pitch cible ~60 a l'init (range dynamique = PITCH_SLOW..PITCH_FAST)
     bearing:0,
     maxPitch:MAX_PITCH,
+    maxZoom:23,               // chase-cam proche (zoom 22-22.4) : au-dela du 22 par defaut
     attributionControl:{ compact:true },
     antialias:true,
     pixelRatio:Math.min(window.devicePixelRatio||1, 1.5),   // iPad (dpr 2) : 44% de pixels en moins a remplir (MapLibre + Three partagent le canvas)
@@ -1948,7 +1950,6 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
 (function(){
   var CARSCALE = 1.0;        // multiplicateur de taille global (1 = taille reelle TARGET_CAR_LEN)
   var CAR_YAW_OFFSET = 0;    // decalage d'orientation (radians) cote rendu
-  var AVATAR_FACE_CAMERA = true;   // true = on voit le pare-brise de l'avatar (choix utilisateur, juil. 2026) ; false = vue de chasse classique (on voit l'arrière)
   var TARGET_CAR_LEN = 5.0;  // longueur reelle visee de la voiture (metres) — auto-mise a l'echelle
   var GLB_LIFT = 0;          // ajuste la hauteur au sol (0 = roues au sol ; + pour remonter)
   var GLB_YAW  = 0;          // oriente l'avant : 0 / Math.PI (marche arriere) / +-Math.PI/2 (de travers)
@@ -2124,7 +2125,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
            la caméra) ; FWD = sens du modèle par rapport au sens de marche. */
         var _now=performance.now(), dt=this._dynT?Math.min(0.1,(_now-this._dynT)/1000):0.016; this._dynT=_now;
         var dyn=this._dyn||(this._dyn={yaw:null,yawRate:0,roll:0,pitch:0,steer:0,spin:0,v:0});
-        var FWD=AVATAR_FACE_CAMERA?-1:1, v=((window.HUB3D&&window.HUB3D.speedKmh)||0)/3.6;
+        var FWD=window.AVATAR_FACE_CAMERA?-1:1, v=((window.HUB3D&&window.HUB3D.speedKmh)||0)/3.6;
         var tgtYaw=pos.bearing||0; if(dyn.yaw==null) dyn.yaw=tgtYaw;
         var dY=((tgtYaw-dyn.yaw+540)%360)-180, kY=1-Math.exp(-7*dt);     // plus court chemin, amorti ~140 ms
         dyn.yaw=(dyn.yaw+dY*kY+360)%360;
@@ -2349,7 +2350,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
           wrap.position.set(-ctr.x, -box.min.y, -ctr.z);    // Y-up : sol = min.y
           var s2=new T.Box3().setFromObject(wrap).getSize(new T.Vector3());
           var holder=new T.Group(); holder.add(wrap);
-          holder.rotation.y=(s2.x>s2.z?Math.PI/2:0) + (url.indexOf('/kenney/')>=0?Math.PI:0) + (LPC_FLIP[key]?Math.PI:0);   // longueur -> +Z ; convention hub : avant en +Z ; les lpc dont l'avant est en -Z (coupé/compacte/van) sont retournés
+          holder.rotation.y=(s2.x>s2.z?Math.PI/2:0) + (url.indexOf('/kenney/')>=0?Math.PI:0) + (LPC_FLIP[key]?Math.PI:0) + (window.AVATAR_FACE_CAMERA?0:Math.PI);   // +PI : l'avant (+Z) part dans le sens de marche -> on voit l'arrière   // longueur -> +Z ; convention hub : avant en +Z ; les lpc dont l'avant est en -Z (coupé/compacte/van) sont retournés
           while(root.children.length) root.remove(root.children[0]);   // retire la voiture courante
           var dynG=new T.Group(); dynG.name='dyn'; dynG.add(holder); root.add(dynG); window.__avatar=url;   // 'dyn' = groupe animé (roulis / tangage)
           window.__hideAvatarLoad();
