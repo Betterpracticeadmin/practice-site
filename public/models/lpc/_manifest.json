@@ -1,37 +1,50 @@
 [
  {
-  "id": "lp-berline-grise",
-  "file": "/models/lpc/lp-berline-grise.glb",
-  "label": "Berline grise",
+  "id": "pr-berline",
+  "file": "/models/practice/berline.glb",
+  "label": "Berline",
   "class": "car",
-  "tint": "#575B61"
+  "tint": "#575B61",
+  "wheels": false
  },
  {
-  "id": "lp-citadine-rouge",
-  "file": "/models/lpc/lp-citadine-rouge.glb",
-  "label": "Citadine rouge",
+  "id": "pr-citadine",
+  "file": "/models/practice/citadine.glb",
+  "label": "Citadine",
   "class": "car",
-  "tint": "#6B3B33"
+  "tint": "#6B3B33",
+  "wheels": false
  },
  {
-  "id": "lp-coupe-orange",
-  "file": "/models/lpc/lp-coupe-orange.glb",
-  "label": "Sportive orange",
+  "id": "pr-sportive",
+  "file": "/models/practice/sportive.glb",
+  "label": "Sportive",
   "class": "car",
-  "tint": "#E6E2DA"
+  "tint": "#E6E2DA",
+  "wheels": false
  },
  {
-  "id": "lp-van-jaune",
-  "file": "/models/lpc/lp-van-jaune.glb",
-  "label": "Camionnette jaune",
+  "id": "pr-suv",
+  "file": "/models/practice/suv.glb",
+  "label": "SUV",
+  "class": "suv",
+  "tint": "#2F3236",
+  "wheels": false
+ },
+ {
+  "id": "pr-camionnette",
+  "file": "/models/practice/camionnette.glb",
+  "label": "Camionnette",
   "class": "van",
-  "tint": "#9AA1A9"
+  "tint": "#9AA1A9",
+  "wheels": false
  },
  {
-  "id": "lp-compacte-verte",
-  "file": "/models/lpc/lp-compacte-verte.glb",
-  "label": "Compacte verte",
+  "id": "pr-compacte",
+  "file": "/models/practice/compacte.glb",
+  "label": "Compacte",
   "class": "car",
-  "tint": "#3B4A62"
+  "tint": "#3B4A62",
+  "wheels": false
  }
 ]

@@ -395,6 +395,18 @@
     /* thème du cockpit : le halo est additif sur fond sombre, en fusion normale sur le thème clair */
     function isNightTheme() { try { return document.body.getAttribute('data-theme') !== 'light'; } catch (e) { return true; } }
     /* normalise un modèle véhicule en Y-up : plus courte dim -> Y, plus longue -> Z */
+    /* avatars procéduraux Practice : teinte la peinture ('body'), durcit le vitrage, garde feux / trim / roues du GLB */
+    function applyPracticeTint(obj, tint) {
+      var seen = [];
+      obj.traverse(function (o) { if (!o.isMesh || !o.material) return; (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) {
+        if (seen.indexOf(m) >= 0) return; seen.push(m); track(m);
+        var n = (m.name || '').toLowerCase();
+        if (n === 'body') { if (tint) { try { m.color.set(tint); } catch (e) {} } if ('roughness' in m) { m.roughness = 0.5; m.metalness = 0.15; } if ('clearcoat' in m) { m.clearcoat = 0.5; m.clearcoatRoughness = 0.25; } if ('envMapIntensity' in m) m.envMapIntensity = 1.15; }
+        else if (n === 'glass') { if ('roughness' in m) { m.roughness = 0.12; m.metalness = 0.0; } if ('envMapIntensity' in m) m.envMapIntensity = 1.4; }
+        else if (n === 'rim') { if ('metalness' in m) { m.metalness = 0.8; m.roughness = 0.45; } }
+        else if (n === 'tire') { if ('roughness' in m) { m.roughness = 0.9; m.metalness = 0.1; } }
+        m.needsUpdate = true; }); });
+    }
     function uprightCar(model) {
       model.updateMatrixWorld(true);
       var s = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
@@ -508,11 +520,13 @@
           var upr = uprightCar(_inner);                  // normalise -> Y-up (hauteur Y, longueur Z)
           disposeModel();                                // libère l'ancien AVANT de tracker le matériau des roues (évite un dispose prématuré)
           root = new THREE.Group(); carGroup = new THREE.Group(); root.add(carGroup); scene.add(root);
-          if (!isFbx && url.indexOf('/kenney/') < 0 && url.indexOf('/lpc/') < 0) {   // ancien kit body-only -> couleur + roues
+          if (!isFbx && url.indexOf('/kenney/') < 0 && url.indexOf('/lpc/') < 0 && url.indexOf('/models/practice/') < 0) {   // ancien kit body-only -> couleur + roues (PAS les avatars Practice)
             var _pal = [0xC62828, 0x1565C0, 0xE8EAED, 0x1A1A1A, 0x9AA0A6, 0x2E7D32, 0xEF6C00, 0x6A1B9A, 0x00838F, 0xF9A825, 0x37474F, 0x8D6E63];
             var _n = parseInt(('' + url).replace(/[^0-9]/g, ''), 10) || 0, _c = _pal[_n % _pal.length];
             upr.traverse(function (o) { if (o.isMesh) o.material = track(new THREE.MeshStandardMaterial({ color: _c, roughness: 0.4, metalness: 0.5 })); }); // peinture métallisée par voiture
             addWheels(upr);
+          } else if (url.indexOf('/models/practice/') >= 0) {   // avatars PROCÉDURAUX Practice : matériaux nommés du GLB conservés, body teinté, roues embarquées
+            applyPracticeTint(upr, opts.tint || null);
           } else if (url.indexOf('/lpc/') >= 0 && window.PracticeLook) {   // lpc : look « clay Practice » = atlas mono × tint (manifest) en MeshPhysicalMaterial satiné
             var _LK = window.PracticeLook, _body = upr;
             _LK.apply(upr, THREE, opts.tint || null).forEach(track);         // sans tint : couleur cuite du GLB, puis repli manifest (asynchrone, seulement si le modèle est encore monté)
@@ -529,7 +543,7 @@
           upr.updateMatrixWorld(true);
           var box = new THREE.Box3().setFromObject(upr);
           var size = box.getSize(new THREE.Vector3());
-          var k = target / (Math.max(size.x, size.y, size.z) || 1);
+          var k = (url.indexOf('/models/practice/') >= 0) ? 1 : target / (Math.max(size.x, size.y, size.z) || 1);   // practice : mètres réels
           upr.scale.setScalar(k); upr.updateMatrixWorld(true);
           box = new THREE.Box3().setFromObject(upr); var ctr = box.getCenter(new THREE.Vector3());
           upr.position.set(-ctr.x, -box.min.y, -ctr.z);

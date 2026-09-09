@@ -2311,6 +2311,18 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
       });
     });
   }
+  /* avatars procéduraux Practice : teinte la peinture (matériau 'body'), durcit le vitrage, garde feux émissifs / trim / roues */
+  function applyPracticeTint(obj, T, tint){
+    var seen=[];
+    obj.traverse(function(o){ if(!o.isMesh||!o.material) return; (Array.isArray(o.material)?o.material:[o.material]).forEach(function(m){
+      if(seen.indexOf(m)>=0) return; seen.push(m);
+      var n=(m.name||'').toLowerCase();
+      if(n==='body'){ if(tint){ try{ m.color.set(tint); }catch(_){} } if('roughness' in m){ m.roughness=0.5; m.metalness=0.15; } if('clearcoat' in m){ m.clearcoat=0.5; m.clearcoatRoughness=0.25; } if('envMapIntensity' in m) m.envMapIntensity=1.15; }
+      else if(n==='glass'){ if('roughness' in m){ m.roughness=0.12; m.metalness=0.0; } if('envMapIntensity' in m) m.envMapIntensity=1.4; }
+      else if(n==='rim'){ if('metalness' in m){ m.metalness=0.8; m.roughness=0.45; } }
+      else if(n==='tire'){ if('roughness' in m){ m.roughness=0.9; m.metalness=0.1; } }
+      m.needsUpdate=true; }); });
+  }
   /* modèles du pack lpc dont l'AVANT est en -Z après uprightCar (mesuré par playwright/wheel_fit.cjs) -> retournés de 180° */
   var LPC_FLIP={'lp-coupe-orange':1,'lp-compacte-verte':1,'lp-compacte-rose':1,'lp-compacte-turquoise':1,'lp-van-jaune':1,'lp-van-blanc':1};
   /* charge un modele avatar (GLB ou FBX) comme voiture EGO du hub */
@@ -2345,11 +2357,13 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
             inner.traverse(function(o){ if(o.isMesh){ if(o.geometry&&!o.geometry.attributes.normal)o.geometry.computeVertexNormals(); var _ss=new T.Box3().setFromObject(o).getSize(new T.Vector3()); o.material=(Math.max(_ss.x,_ss.y,_ss.z)<_mmax*0.30)?_wheelM:_bodyM; } }); // normales manquantes -> recalcul
           }
           var wrap = uprightCar(inner, T);                  // normalise -> Y-up (hauteur Y, longueur Z)
-          if(!isFbx && url.indexOf('/kenney/')<0 && url.indexOf('/lpc/')<0){          // ancien kit body-only -> couleur + roues
+          if(!isFbx && url.indexOf('/kenney/')<0 && url.indexOf('/lpc/')<0 && url.indexOf('/models/practice/')<0){   // ancien kit body-only -> couleur + roues (PAS les avatars Practice)
             var _pal=[0xC62828,0x1565C0,0xE8EAED,0x1A1A1A,0x9AA0A6,0x2E7D32,0xEF6C00,0x6A1B9A,0x00838F,0xF9A825,0x37474F,0x8D6E63];
             var _n=parseInt((''+url).replace(/[^0-9]/g,''),10)||0, _c=_pal[_n%_pal.length];
             wrap.traverse(function(o){ if(o.isMesh) o.material=new T.MeshStandardMaterial({color:_c,roughness:0.4,metalness:0.5}); });  // peinture métallisée par voiture
             addWheels(wrap, T);
+          } else if(url.indexOf('/models/practice/')>=0){        // avatars PROCÉDURAUX Practice : matériaux nommés du GLB (body/glass/trim/light_*/tire/rim), roues embarquées (pivots wheel_* avec userData.wheel)
+            applyPracticeTint(wrap, T, opts.tint||null);
           } else if(url.indexOf('/lpc/')>=0 && window.PracticeLook){   // lpc : look « clay Practice » = atlas mono × tint (manifest) en MeshPhysicalMaterial satiné
             var _LK=window.PracticeLook, _body=wrap;
             _LK.apply(wrap, T, opts.tint||null);                         // sans tint dans le message : couleur cuite du GLB, puis repli manifest ci-dessous
@@ -2366,7 +2380,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
           wrap.updateMatrixWorld(true);
           var box=new T.Box3().setFromObject(wrap);
           var size=box.getSize(new T.Vector3());
-          var k=target/(Math.max(size.x,size.y,size.z)||1);
+          var k=(url.indexOf('/models/practice/')>=0) ? 1 : target/(Math.max(size.x,size.y,size.z)||1);   // practice : déjà en mètres réels (chaque type garde sa taille)
           wrap.scale.setScalar(k); wrap.updateMatrixWorld(true);
           box=new T.Box3().setFromObject(wrap); var ctr=box.getCenter(new T.Vector3());
           wrap.position.set(-ctr.x, -box.min.y, -ctr.z);    // Y-up : sol = min.y
