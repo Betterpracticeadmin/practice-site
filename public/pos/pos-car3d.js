@@ -64,12 +64,16 @@
   function loadThree() {
     if (threePromise) return threePromise;
     threePromise = new Promise(function (resolve) {
-      if (window.THREE) { resolve(window.THREE); return; }
+      /* look « clay Practice » partagé avec le hub (pos-look.js) : chargé en parallèle de three,
+         attendu avant de résoudre pour que loadAvatar le trouve (repli inline s'il manque) */
+      var lookP = window.PracticeLook ? Promise.resolve(true) : injectScript('/pos/pos-look.js?v=1');
+      function done(T) { lookP.then(function () { resolve(T); }); }
+      if (window.THREE) { done(window.THREE); return; }
       var i = 0;
       function next() {
-        if (i >= THREE_URLS.length) { resolve(null); return; }
+        if (i >= THREE_URLS.length) { done(null); return; }
         injectScript(THREE_URLS[i++]).then(function (ok) {
-          if (ok && window.THREE) resolve(window.THREE); else next();
+          if (ok && window.THREE) done(window.THREE); else next();
         });
       }
       next();
@@ -211,6 +215,7 @@
       pitchCur = POS.util.lerp(pitchCur, POS.util.clamp(longAcc * 0.015, -PITCH_MAX, PITCH_MAX), k * 0.6);
 
       if (carGroup) { carGroup.rotation.z = rollCur; carGroup.rotation.x = pitchCur; }
+      if (groundG) { try { groundG.setNight(isNightTheme()); } catch (e) {} }   // halo accent : suit le thème du cockpit (bon marché : retour immédiat si inchangé)
 
       /* orientation par le cap GPS (arc le plus court, amorti) */
       if (root) {
@@ -253,7 +258,7 @@
       wheels = [];
       frontPivots = [];
       if (root && scene) { scene.remove(root); }
-      root = null; carGroup = null;
+      root = null; carGroup = null; groundG = null;
     }
 
     /* mémorise géométrie/matériau pour libération ultérieure */
@@ -386,6 +391,9 @@
        Remplace la voiture paramétrique par le modèle sélectionné dans le garage.
        Se ré-applique au montage si choisi avant que la 3D soit prête. */
     var pendingAvatar = null, pendingAvatarOpts = null;
+    var groundG = null;                                  // sol (ombre + halo accent) de l'avatar courant, cf. pos-look.js
+    /* thème du cockpit : le halo est additif sur fond sombre, en fusion normale sur le thème clair */
+    function isNightTheme() { try { return document.body.getAttribute('data-theme') !== 'light'; } catch (e) { return true; } }
     /* normalise un modèle véhicule en Y-up : plus courte dim -> Y, plus longue -> Z */
     function uprightCar(model) {
       model.updateMatrixWorld(true);
@@ -446,8 +454,9 @@
       model.updateMatrixWorld(true);
       var b = new THREE.Box3().setFromObject(model), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
       var key = ('' + (url || '')).split('/').pop().replace(/\.glb.*$/, '');   // clé = nom de fichier sans .glb
-      var tireMat = track(new THREE.MeshStandardMaterial({ color: 0x0e0f12, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide }));
-      var rimMat = track(new THREE.MeshStandardMaterial({ color: 0xb9bfc9, roughness: 0.35, metalness: 0.9, envMapIntensity: 1.2, side: THREE.DoubleSide })); // jante gris métallique
+      var LK = window.PracticeLook;                 // look Practice : pneu noir mat + jante gris canon (repli inline si le module manque)
+      var tireMat = track(LK ? LK.tireMat(THREE) : new THREE.MeshStandardMaterial({ color: 0x0e0f12, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide }));
+      var rimMat = track(LK ? LK.rimMat(THREE) : new THREE.MeshStandardMaterial({ color: 0xb9bfc9, roughness: 0.35, metalness: 0.9, envMapIntensity: 1.2, side: THREE.DoubleSide }));
       loadWheelParams().then(function (P) {
         var W = (P && P[key]) || null, r, fz, rz, wx, wy;
         if (W) {                                          // placement mesuré sur la carrosserie
@@ -504,10 +513,17 @@
             var _n = parseInt(('' + url).replace(/[^0-9]/g, ''), 10) || 0, _c = _pal[_n % _pal.length];
             upr.traverse(function (o) { if (o.isMesh) o.material = track(new THREE.MeshStandardMaterial({ color: _c, roughness: 0.4, metalness: 0.5 })); }); // peinture métallisée par voiture
             addWheels(upr);
+          } else if (url.indexOf('/lpc/') >= 0 && window.PracticeLook) {   // lpc : look « clay Practice » = atlas mono × tint (manifest) en MeshPhysicalMaterial satiné
+            var _LK = window.PracticeLook, _body = upr;
+            _LK.apply(upr, THREE, opts.tint || null).forEach(track);         // sans tint : couleur cuite du GLB, puis repli manifest (asynchrone, seulement si le modèle est encore monté)
+            if (!opts.tint) { _LK.tintFor(url).then(function (t) { try { if (t && _body.parent && scene) _LK.apply(_body, THREE, t); } catch (e) {} }); }
+            if (opts.wheels !== false) {                  // carrosserie SANS roues -> 4 roues alliage (wrapper sans rotation) ; "wheels": false = le mesh embarque ses roues
+              var _cw = new THREE.Group(); _cw.add(upr); addWheels(upr, _cw, url); upr = _cw;
+            }
           } else {                                        // GLB texturé -> rehausse le PBR pour capter l'environnement studio
             upr.traverse(function (o) { if (o.isMesh && o.material) { var m = o.material; m.metalness = 0.35; if (m.roughness === undefined || m.roughness > 0.7) m.roughness = 0.5; m.envMapIntensity = 1.15; m.needsUpdate = true; } });
-            if (url.indexOf('/lpc/') >= 0) {              // lpc : carrosserie SANS roues -> ajoute 4 roues alliage (wrapper sans rotation)
-              var _cw = new THREE.Group(); _cw.add(upr); addWheels(upr, _cw, url); upr = _cw;
+            if (url.indexOf('/lpc/') >= 0 && opts.wheels !== false) {   // lpc sans module look : roues quand même
+              var _cw2 = new THREE.Group(); _cw2.add(upr); addWheels(upr, _cw2, url); upr = _cw2;
             }
           }
           upr.updateMatrixWorld(true);
@@ -520,14 +536,19 @@
           carGroup.add(upr);
           var _s2 = new THREE.Box3().setFromObject(upr).getSize(new THREE.Vector3());
           carGroup.rotation.y = (_s2.x > _s2.z ? Math.PI / 2 : 0) - 0.5;   // oriente longueur->Z (comme les vignettes) + présentation 3/4
-          try {                                            // ombre de contact douce au sol (DA premium)
-            var _cv = document.createElement('canvas'); _cv.width = _cv.height = 128; var _cx = _cv.getContext('2d');
-            var _gr = _cx.createRadialGradient(64, 64, 3, 64, 64, 60); _gr.addColorStop(0, 'rgba(0,0,0,0.45)'); _gr.addColorStop(1, 'rgba(0,0,0,0)');
-            _cx.fillStyle = _gr; _cx.fillRect(0, 0, 128, 128);
-            var _shTex = track(new THREE.CanvasTexture(_cv));
+          try {                                            // sol : ombre de contact + halo accent (pos-look.js), dans `root` = suit le cap mais PAS le roulis/tangage de carGroup
             var _b3 = new THREE.Box3().setFromObject(upr), _s3 = _b3.getSize(new THREE.Vector3());
-            var _sh = new THREE.Mesh(track(new THREE.PlaneGeometry(_s3.x * 2.3, _s3.z * 2.1)), track(new THREE.MeshBasicMaterial({ map: _shTex, transparent: true, depthWrite: false })));
-            _sh.rotation.x = -Math.PI / 2; _sh.position.y = 0.012; carGroup.add(_sh);
+            if (window.PracticeLook) {
+              var _gh = new THREE.Group(); _gh.rotation.y = carGroup.rotation.y;   // même orientation de présentation que la voiture (longueur -> Z)
+              groundG = track(window.PracticeLook.ground(THREE, Math.max(_s3.x, _s3.z), Math.min(_s3.x, _s3.z)));
+              groundG.setNight(isNightTheme()); _gh.add(groundG); root.add(_gh);
+            } else {                                       // repli : ombre radiale seule
+              var _cv = document.createElement('canvas'); _cv.width = _cv.height = 128; var _cx = _cv.getContext('2d');
+              var _gr = _cx.createRadialGradient(64, 64, 3, 64, 64, 60); _gr.addColorStop(0, 'rgba(0,0,0,0.45)'); _gr.addColorStop(1, 'rgba(0,0,0,0)');
+              _cx.fillStyle = _gr; _cx.fillRect(0, 0, 128, 128);
+              var _sh = new THREE.Mesh(track(new THREE.PlaneGeometry(_s3.x * 2.3, _s3.z * 2.1)), track(new THREE.MeshBasicMaterial({ map: track(new THREE.CanvasTexture(_cv)), transparent: true, depthWrite: false })));
+              _sh.rotation.x = -Math.PI / 2; _sh.position.y = 0.012; carGroup.add(_sh);
+            }
           } catch (e) {}
           wheelRadius = 0.34; wheelbaseM = 2.6;
           if (camera) { var dist = target * 1.5; camera.position.set(dist * 0.7, target * 0.62, dist * 1.0); camera.lookAt(0, target * 0.14, 0); }

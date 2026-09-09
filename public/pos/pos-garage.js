@@ -110,7 +110,8 @@
     try {
       fetch('/models/lpc/_manifest.json').then(function (r) { return r.json(); }).then(function (list) {
         kit = (list || []).map(function (e, i) {
-          return { id: e.id, label: e.label || ('Véhicule ' + (i + 1)), kind: 'glb', src: e.file, class: e.class || 'car', tag: 'LOW-POLY' };
+          return { id: e.id, label: e.label || ('Véhicule ' + (i + 1)), kind: 'glb', src: e.file, class: e.class || 'car', tag: 'LOW-POLY',
+                   tint: e.tint || null, wheels: e.wheels !== false };   // tint = teinte « clay Practice » (pos-look.js) ; wheels:false = le mesh embarque ses roues
         });
         rebuild();
         POS.bus.emit('garage:catalog', { count: kit.length });

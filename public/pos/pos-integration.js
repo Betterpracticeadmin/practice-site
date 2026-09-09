@@ -97,7 +97,7 @@
         try {
           if (car3d.showDims) car3d.showDims(true);
           var gm = (POS.registry.get('garage') || {}).resolved && POS.registry.get('garage').resolved();
-          if (gm && gm.src && car3d.loadAvatar) car3d.loadAvatar(gm.src, { len: 4.8 });     // modèle choisi
+          if (gm && gm.src && car3d.loadAvatar) car3d.loadAvatar(gm.src, { len: 4.8, tint: gm.tint || null, wheels: gm.wheels !== false });     // modèle choisi (+ teinte clay Practice)
           else if (lastVeh) car3d.buildFromVehicle(lastVeh);
           else if (vehdb && vehdb.estimate) car3d.buildFromVehicle(vehdb.estimate('hypercar'));
         } catch (e) { console.warn('[POS] car3d build', e); }
@@ -128,7 +128,7 @@
         var m = garage.resolved();
         if (!m || !m.src) return; // param/auto sans fichier -> le hub garde son véhicule par défaut
         var lenByClass = { motorcycle: 2.2, bus: 11, van: 5.2, truck: 5.4, suv: 4.9, car: 4.8 };
-        f.contentWindow.postMessage({ type: 'avatar', url: m.src, len: lenByClass[m.class] || 4.8 }, '*');
+        f.contentWindow.postMessage({ type: 'avatar', url: m.src, len: lenByClass[m.class] || 4.8, tint: m.tint || null, wheels: m.wheels !== false }, '*');   // tint/wheels : look « clay Practice » (manifest lpc)
       } catch (e) {}
     }
     window.__posPostAvatar = postAvatarToHub;        // appelé par openHud() dans os.html
@@ -138,7 +138,7 @@
       if (!car3d) return;
       var m = garage && garage.resolved();
       try {
-        if (m && m.src && car3d.loadAvatar) car3d.loadAvatar(m.src, { len: LEN_BY_CLASS[m.class] || 4.8 });
+        if (m && m.src && car3d.loadAvatar) car3d.loadAvatar(m.src, { len: LEN_BY_CLASS[m.class] || 4.8, tint: m.tint || null, wheels: m.wheels !== false });
         else if (m && m.paramType) car3d.buildFromVehicle({ segment: m.paramType.toLowerCase(), dims: {}, wheels: {} });
       } catch (e) {}
     }

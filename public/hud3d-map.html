@@ -656,7 +656,8 @@ window.addEventListener('message', function(e){
         applyRoute(LIVE.routeCoords);
         break;
       }
-      case 'avatar':    { if(typeof d.url==='string'){ window.__avatarPending=d.url; window.__avatarQueued={url:d.url,opts:d}; try{ window.__loadAvatar && window.__loadAvatar(d.url, d); }catch(_){}} break; }   // __avatarPending : bloque le téléchargement de car-real.glb ; __avatarQueued : rejoué par onAdd si la couche 3D n'existe pas encore
+      case 'avatar':    { if(typeof d.url==='string'){ if(d.url===window.__avatar || d.url===window.__avatarPending) break;   // deja chargee / en cours (hub:ready envoye 2 fois) -> pas de double chargement ni de clignotement
+                          window.__avatarPending=d.url; window.__avatarQueued={url:d.url,opts:d}; try{ window.__loadAvatar && window.__loadAvatar(d.url, d); }catch(_){}} break; }   // __avatarPending : bloque le téléchargement de car-real.glb ; __avatarQueued : rejoué par onAdd si la couche 3D n'existe pas encore
       case 'mode':      { if(typeof d.mode==='string'){ HUB3D.mode = d.mode; applyDriveMode(d.mode); } try{ if(LIVE.routeCoords) applyRoute(LIVE.routeCoords); }catch(_){} break; }
       case 'pause':     { paused=true; break; }                                  // hub ferme/cache -> repos
       case 'resume':    { paused=false; try{ if(map){ map.resize(); map.triggerRepaint(); } }catch(_){}
@@ -667,6 +668,12 @@ window.addEventListener('message', function(e){
     }
   }catch(err){ /* jamais lever d'erreur cote hub */ }
 }, false);
+/* POIGNEE DE MAIN hub -> os.html : des que l'ecouteur 'message' ci-dessus est pose on previent le parent,
+   qui renvoie mode/route/nav + avatar (sinon, a cache froid, ses messages partaient AVANT l'ecouteur et
+   etaient perdus -> voiture par defaut au lieu de l'avatar). Renvoye aussi par onAdd (couche 3D prete).
+   Idempotent : le parent peut le recevoir plusieurs fois (l'avatar identique n'est pas recharge). */
+window.__hubReady=function(stage){ try{ if(window.parent && window.parent!==window) window.parent.postMessage({type:'hub:ready',stage:stage||'listener'},'*'); }catch(_){} };
+window.__hubReady('listener');
 
 /* ============================================================
    GEOLOCALISATION REELLE de l'appareil (mode autonome).
@@ -2015,6 +2022,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         this.scene.add(new THREE.AmbientLight(0xffffff,1.15));
         var d=new THREE.DirectionalLight(0xffffff,1.5); d.position.set(40,-60,120); this.scene.add(d);
         this.car=new THREE.Group(); this.scene.add(this.car); window.__carRoot=this.car;  // racine dispo même si car-real.glb échoue (évite la boucle de retry)
+        try{ window.__hubReady && window.__hubReady('3d'); }catch(_){}   // poignee de main : couche 3D prete -> le parent (os.html) renvoie l'avatar si besoin
         var fallback=buildCar(); fallback.visible=false; this.car.add(fallback);  // cache : on ne montre PAS l'ancienne voiture
         var fbTimer=null;
         function loadDefaultCar(force){   // telecharge car-real.glb (7 Mo) — une seule fois
@@ -2141,6 +2149,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         var _root=window.__carRoot;
         if(_root){ var _g=_root.children[0];
           if(_g && _g.name==='dyn'){ _g.rotation.z=dyn.roll; _g.rotation.x=dyn.pitch; }
+          if(window.__ground && window.__ground.parent===_root){ try{ window.__ground.setNight(!document.documentElement.classList.contains('hub-day')); }catch(_){} }   // halo accent : fusion normale (jour) / additive (nuit), suit le thème
           if(!this._wheels || !this._wheels.length || this._lastCar!==_g || ((this._wscan=(this._wscan||0)+1)%30===0)){ var _ws=[]; _root.traverse(function(o){ if(o.userData&&o.userData.wheel) _ws.push(o); }); this._wheels=_ws; this._lastCar=_g; }   // roues ajoutées en asynchrone -> on rescanne tant qu'il n'y en a pas, puis périodiquement
           for(var _wi=0;_wi<this._wheels.length;_wi++){ var _pv=this._wheels[_wi], _ud=_pv.userData.wheel, _wh=_pv.children[0];
             _pv.rotation.y=(_ud.front && FWD>0) ? dyn.steer : 0;             // braquage seulement si les roues avant mènent la marche
@@ -2199,6 +2208,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
 #avatarLoad .avtx{color:#e6e9ec;font-size:11px;letter-spacing:.34em;text-transform:uppercase;}
 #avatarLoad .avsub{color:#5f6671;font-size:9px;letter-spacing:.26em;}
 </style>
+<script src="/pos/pos-look.js?v=1"></script>   <!-- look « clay Practice » commun (matériau teinté, roues, halo + ombre) : window.PracticeLook -->
 <script>
 (function(){
   var ov=document.createElement('div'); ov.id='avatarLoad';
@@ -2210,10 +2220,11 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
   var sub=document.createElement('div'); sub.className='avsub'; sub.textContent='PRACTICE OS';
   ov.appendChild(grid); ov.appendChild(tx); ov.appendChild(sub);
   (function mount(){ if(document.body) document.body.appendChild(ov); else setTimeout(mount,50); })();
-  var hidden=false;
-  window.__showAvatarLoad=function(t){ hidden=false; ov.classList.remove('hide'); if(t)tx.textContent=t; };
-  window.__hideAvatarLoad=function(){ if(hidden)return; hidden=true; ov.classList.add('hide'); };
-  setTimeout(function(){ window.__hideAvatarLoad(); }, 12000);   // filet : ne jamais rester bloque
+  var hidden=false, net=null;
+  function armNet(){ if(net)clearTimeout(net); net=setTimeout(function(){ window.__hideAvatarLoad(); }, 12000); }   // filet : ne jamais rester bloque (12 s apres le DERNIER affichage)
+  window.__showAvatarLoad=function(t){ hidden=false; ov.classList.remove('hide'); if(t)tx.textContent=t; armNet(); };   // re-arme le filet a chaque affichage (attente couche 3D / changement d'avatar)
+  window.__hideAvatarLoad=function(){ if(hidden)return; hidden=true; ov.classList.add('hide'); if(net){ clearTimeout(net); net=null; } };
+  armNet();
 
   /* normalise un modele vehicule en Y-up (convention car-real du hub) :
      plus courte dimension -> Y (hauteur), plus longue -> Z (longueur). Les modeles
@@ -2269,8 +2280,9 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     model.updateMatrixWorld(true);
     var b=new T.Box3().setFromObject(model), s=b.getSize(new T.Vector3()), c=b.getCenter(new T.Vector3());
     var key=(''+(url||'')).split('/').pop().replace(/\.glb.*$/,'');   // clé = nom de fichier sans .glb
-    var tireMat=new T.MeshStandardMaterial({color:0x0e0f12, roughness:0.85, metalness:0.2, side:T.DoubleSide});
-    var rimMat=new T.MeshStandardMaterial({color:0xb9bfc9, roughness:0.35, metalness:0.9, envMapIntensity:1.2, side:T.DoubleSide}); // jante gris métallique
+    var LK=window.PracticeLook;                     // look Practice : pneu noir mat + jante gris canon (repli inline si le module manque)
+    var tireMat=LK?LK.tireMat(T):new T.MeshStandardMaterial({color:0x0e0f12, roughness:0.85, metalness:0.2, side:T.DoubleSide});
+    var rimMat=LK?LK.rimMat(T):new T.MeshStandardMaterial({color:0xb9bfc9, roughness:0.35, metalness:0.9, envMapIntensity:1.2, side:T.DoubleSide});
     loadWheelParams().then(function(P){
       var W=(P&&P[key])||null, r, fz, rz, wx, wy;
       if(W){                                          // placement mesuré sur la carrosserie
@@ -2306,12 +2318,15 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     opts=opts||{}; var T=window.THREE, root=window.__carRoot;
     if(!url){ return; }
     window.__avatarPending=url;
-    if(!T || !root){ if((tries||0)<40){ window.__avatarRetrying=true; return setTimeout(function(){ window.__loadAvatar(url,opts,(tries||0)+1); }, 300); }
-      window.__avatarRetrying=false; window.__avatarPending=null;           // couche 3D toujours absente après ~12 s : on libère le repli ; onAdd rejouera __avatarQueued si la couche arrive plus tard
+    if(!T || !root){ if((tries||0)<40){ window.__avatarRetrying=true; try{ window.__showAvatarLoad('Modélisation du véhicule'); }catch(_){} return setTimeout(function(){ window.__loadAvatar(url,opts,(tries||0)+1); }, 300); }
+      window.__avatarRetrying=false;                                          // couche 3D toujours absente après ~12 s : on arrête d'insister, onAdd rejouera __avatarQueued dès que la couche existe
+      if(!root){ return; }                                                    // pas de couche 3D : on GARDE l'écran dot (filet 12 s) et __avatarPending (bloque car-real.glb) -> ni carte sans voiture ni clignotement
+      window.__avatarPending=null;                                            // couche présente mais THREE absent : on libère le repli
       try{ window.__hideAvatarLoad&&window.__hideAvatarLoad(); }catch(_){} try{ if(!window.__avatar && window.__loadDefaultCar) window.__loadDefaultCar(true); }catch(_){} return; }
     window.__avatarRetrying=false;
     var key=(''+url).split('/').pop().replace(/\.glb.*$/,'');
     window.__showAvatarLoad('Modélisation du véhicule');
+    var prevDyn=[]; if(url!==window.__avatar){ for(var pi=0;pi<root.children.length;pi++){ var pc=root.children[pi]; if(pc.name==='dyn'&&pc.visible){ pc.visible=false; prevDyn.push(pc); } } }   // changement d'avatar : l'ancienne voiture disparait tout de suite (sous l'ecran dot), root vide a l'arrivee du nouveau modele
     var isFbx=/\.fbx($|\?)/i.test(url), target=+opts.len||5.0;
     var loaderP = isFbx
       ? import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/FBXLoader.js').then(function(m){return new m.FBXLoader();})
@@ -2335,10 +2350,17 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
             var _n=parseInt((''+url).replace(/[^0-9]/g,''),10)||0, _c=_pal[_n%_pal.length];
             wrap.traverse(function(o){ if(o.isMesh) o.material=new T.MeshStandardMaterial({color:_c,roughness:0.4,metalness:0.5}); });  // peinture métallisée par voiture
             addWheels(wrap, T);
+          } else if(url.indexOf('/lpc/')>=0 && window.PracticeLook){   // lpc : look « clay Practice » = atlas mono × tint (manifest) en MeshPhysicalMaterial satiné
+            var _LK=window.PracticeLook, _body=wrap;
+            _LK.apply(wrap, T, opts.tint||null);                         // sans tint dans le message : couleur cuite du GLB, puis repli manifest ci-dessous
+            if(!opts.tint){ _LK.tintFor(url).then(function(t){ try{ if(t && _body.parent) _LK.apply(_body, T, t); }catch(_){} }); }
+            if(opts.wheels!==false){                     // carrosserie SANS roues -> 4 roues alliage (wrapper sans rotation) ; "wheels": false (manifest) = le mesh embarque ses roues
+              var _cw=new T.Group(); _cw.add(wrap); addWheels(wrap, T, _cw, url); wrap=_cw;
+            }
           } else {                                        // GLB texturé -> boost reflets PBR (capte l'environnement studio)
             wrap.traverse(function(o){ if(o.isMesh&&o.material){ (Array.isArray(o.material)?o.material:[o.material]).forEach(function(mt){ if('envMapIntensity' in mt) mt.envMapIntensity=1.25; if('metalness' in mt) mt.metalness=Math.max(mt.metalness||0,0.35); mt.needsUpdate=true; }); } });
-            if(url.indexOf('/lpc/')>=0){                  // lpc : carrosserie SANS roues -> ajoute 4 roues alliage (wrapper sans rotation)
-              var _cw=new T.Group(); _cw.add(wrap); addWheels(wrap, T, _cw, url); wrap=_cw;
+            if(url.indexOf('/lpc/')>=0 && opts.wheels!==false){   // lpc sans module look : roues quand même
+              var _cw2=new T.Group(); _cw2.add(wrap); addWheels(wrap, T, _cw2, url); wrap=_cw2;
             }
           }
           wrap.updateMatrixWorld(true);
@@ -2352,13 +2374,17 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
           var holder=new T.Group(); holder.add(wrap);
           holder.rotation.y=(s2.x>s2.z?Math.PI/2:0) + (url.indexOf('/kenney/')>=0?Math.PI:0) + (LPC_FLIP[key]?Math.PI:0) + (window.AVATAR_FACE_CAMERA?0:Math.PI);   // +PI : l'avant (+Z) part dans le sens de marche -> on voit l'arrière   // longueur -> +Z ; convention hub : avant en +Z ; les lpc dont l'avant est en -Z (coupé/compacte/van) sont retournés
           while(root.children.length) root.remove(root.children[0]);   // retire la voiture courante
-          var dynG=new T.Group(); dynG.name='dyn'; dynG.add(holder); root.add(dynG); window.__avatar=url;   // 'dyn' = groupe animé (roulis / tangage)
+          var dynG=new T.Group(); dynG.name='dyn'; dynG.add(holder); root.add(dynG); window.__avatar=url;   // 'dyn' = groupe animé (roulis / tangage) — TOUJOURS root.children[0] (lu par la boucle de rendu)
+          try{ if(window.PracticeLook){                     // sol : ombre de contact + halo accent, HORS du groupe 'dyn' (ne roule/tangue pas), longueur -> Z (convention hub)
+            var _gd=window.PracticeLook.ground(T, Math.max(s2.x,s2.z), Math.min(s2.x,s2.z));
+            _gd.setNight(!document.documentElement.classList.contains('hub-day')); root.add(_gd); window.__ground=_gd; } }catch(_){}
           window.__hideAvatarLoad();
         }catch(e){ avatarFail(); }
       }, undefined, function(){ avatarFail(); });
     }).catch(function(){ avatarFail(); });
     function avatarFail(){   // avatar KO -> ecran retire + voiture par defaut en repli (sinon hub sans voiture en embed)
       window.__hideAvatarLoad(); window.__avatarPending=null;
+      for(var ri=0;ri<prevDyn.length;ri++){ try{ prevDyn[ri].visible=true; }catch(_){} }   // nouveau modele KO -> on remontre l'ancienne voiture
       try{ if(!window.__avatar && window.__loadDefaultCar) window.__loadDefaultCar(true); }catch(_){}
     }
   };

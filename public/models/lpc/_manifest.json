@@ -3,30 +3,35 @@
   "id": "lp-berline-grise",
   "file": "/models/lpc/lp-berline-grise.glb",
   "label": "Berline grise",
-  "class": "car"
+  "class": "car",
+  "tint": "#575B61"
  },
  {
   "id": "lp-citadine-rouge",
   "file": "/models/lpc/lp-citadine-rouge.glb",
   "label": "Citadine rouge",
-  "class": "car"
+  "class": "car",
+  "tint": "#6B3B33"
  },
  {
   "id": "lp-coupe-orange",
   "file": "/models/lpc/lp-coupe-orange.glb",
   "label": "Sportive orange",
-  "class": "car"
+  "class": "car",
+  "tint": "#E6E2DA"
  },
  {
   "id": "lp-van-jaune",
   "file": "/models/lpc/lp-van-jaune.glb",
   "label": "Camionnette jaune",
-  "class": "van"
+  "class": "van",
+  "tint": "#9AA1A9"
  },
  {
   "id": "lp-compacte-verte",
   "file": "/models/lpc/lp-compacte-verte.glb",
   "label": "Compacte verte",
-  "class": "car"
+  "class": "car",
+  "tint": "#3B4A62"
  }
 ]

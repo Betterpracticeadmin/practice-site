@@ -2862,6 +2862,14 @@ canvas,iframe,video{filter:grayscale(1) contrast(1.35) brightness(1.05)!importan
       arrow:($('mvArrow')?($('mvArrow').textContent||'↑'):'↑'),
       eta:($('navEta')?(($('navEta').textContent||'').replace(/\s*[0-9]+%\s*$/,'').trim()):'') },'*'); }catch(e){} }
   function closeHud(){ $('hudOv').classList.remove('show'); var f=$('hudFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
+  /* POIGNEE DE MAIN hub -> os : le hub (hud3d-map.html) envoie {type:'hub:ready'} des que son ecouteur 'message' est pose,
+     puis a nouveau quand sa couche 3D existe. On lui renvoie alors mode/route/nav + avatar du garage : a cache froid les envois
+     differes d'openHud (0,7 s / 1,1 s) partaient AVANT l'ecouteur du hub et etaient perdus (-> Porsche par defaut).
+     Les timers d'openHud restent en secours ; le hub ignore un avatar identique (idempotent). */
+  window.addEventListener('message', function(e){ var d=e&&e.data; if(!d||typeof d!=='object'||d.type!=='hub:ready') return;
+    var f=$('hudFrame'); if(!f||!f.contentWindow||e.source!==f.contentWindow) return;   // seulement notre iframe hub
+    try{ postHudMode(); postHudRoute(); postHudData(); }catch(_){}
+    try{ window.__posPostAvatar && window.__posPostAvatar(); }catch(_){} }, false);
   function openPulse(){ var f=$('pulseFrame'); if(f && !f.getAttribute('src')) f.setAttribute('src','/pulse.html'); $('pulseOv').classList.add('show'); setTimeout(postPulseData,600); }
   function closePulse(){ $('pulseOv').classList.remove('show'); var f=$('pulseFrame'); if(f){ f.setAttribute('src','about:blank'); setTimeout(function(){f.removeAttribute('src');},60); } }
   function postPulseData(){ var f=$('pulseFrame'); if(!f||!f.contentWindow||!$('pulseOv').classList.contains('show'))return;
