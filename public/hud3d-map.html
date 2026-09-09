@@ -12,7 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <!-- PREFETCH des gros assets (mis en cache des le prechargement -> ouverture instantanee) -->
-<link rel="prefetch" href="car-real.glb"/>
+<script>/* prefetch de la voiture par defaut (7 Mo) SAUF en embed (os.html envoie toujours un avatar) */
+if(!/[?&]embed=1(&|$)/.test(location.search)){ var _pf=document.createElement('link'); _pf.rel='prefetch'; _pf.href='car-real.glb'; document.head.appendChild(_pf); }</script>
 <link rel="prefetch" href="unesco.json"/>
 
 <!-- Practice fonts (NON bloquant : on n'attend pas les polices pour afficher le hub) -->
@@ -654,7 +655,7 @@ window.addEventListener('message', function(e){
         applyRoute(LIVE.routeCoords);
         break;
       }
-      case 'avatar':    { if(typeof d.url==='string'){ try{ window.__loadAvatar && window.__loadAvatar(d.url, d); }catch(_){}} break; }
+      case 'avatar':    { if(typeof d.url==='string'){ window.__avatarPending=d.url; window.__avatarQueued={url:d.url,opts:d}; try{ window.__loadAvatar && window.__loadAvatar(d.url, d); }catch(_){}} break; }   // __avatarPending : bloque le téléchargement de car-real.glb ; __avatarQueued : rejoué par onAdd si la couche 3D n'existe pas encore
       case 'mode':      { if(typeof d.mode==='string'){ HUB3D.mode = d.mode; applyDriveMode(d.mode); } try{ if(LIVE.routeCoords) applyRoute(LIVE.routeCoords); }catch(_){} break; }
       case 'pause':     { paused=true; break; }                                  // hub ferme/cache -> repos
       case 'resume':    { paused=false; try{ if(map){ map.resize(); map.triggerRepaint(); } }catch(_){}
@@ -706,6 +707,7 @@ try{
     maxPitch:MAX_PITCH,
     attributionControl:{ compact:true },
     antialias:true,
+    pixelRatio:Math.min(window.devicePixelRatio||1, 1.5),   // iPad (dpr 2) : 44% de pixels en moins a remplir (MapLibre + Three partagent le canvas)
     fadeDuration:120,
     refreshExpiredTiles:false,
     dragRotate:false, pitchWithRotate:false   // controle camera = nous, pas le doigt
@@ -1358,7 +1360,7 @@ function frame(ts){
   }
 
   updateState(dt);
-  if(window.updateCockpit) window.updateCockpit();
+  // (updateCockpit n'est PLUS appele ici a chaque frame : le setInterval 200 ms du cockpit suffit)
   requestAnimationFrame(frame);
 }
 
@@ -1427,8 +1429,8 @@ function poiColor(cls){
 function makePoiBeacon(color){
   var T=window.THREE; if(!T) return null;
   var g=new T.Group(); var mat=new T.MeshBasicMaterial({color:color});
-  var pole=new T.Mesh(new T.CylinderGeometry(0.18,0.18,5,8), mat); pole.position.y=2.5; g.add(pole);
-  var head=new T.Mesh(new T.SphereGeometry(1.0,16,12), mat); head.position.y=6; g.add(head);
+  // mat + tete fusionnes en 1 seul mesh (1 draw call au lieu de 2)
+  g.add(new T.Mesh(mergeGeoms([ new T.CylinderGeometry(0.18,0.18,5,8).translate(0,2.5,0), new T.SphereGeometry(1.0,16,12).translate(0,6,0) ]), mat));
   var halo=new T.Mesh(new T.RingGeometry(1.5,2.1,28),
     new T.MeshBasicMaterial({color:color,transparent:true,opacity:0.45,side:T.DoubleSide,depthWrite:false}));
   halo.rotation.x=-Math.PI/2; halo.position.y=0.08; g.add(halo);
@@ -1437,9 +1439,9 @@ function makePoiBeacon(color){
 function makeDestPin(){
   var T=window.THREE; if(!T) return null;
   var g=new T.Group(); var col=0x2f7bff; var mat=new T.MeshBasicMaterial({color:col});
-  var pole=new T.Mesh(new T.CylinderGeometry(0.22,0.22,8,10), mat); pole.position.y=4; g.add(pole);
-  var ball=new T.Mesh(new T.SphereGeometry(1.6,18,14), mat); ball.position.y=9; g.add(ball);
-  var cone=new T.Mesh(new T.ConeGeometry(1.0,2.0,16), mat); cone.position.y=7.4; cone.rotation.x=Math.PI; g.add(cone);
+  // mat + boule + cone fusionnes en 1 seul mesh (1 draw call au lieu de 3)
+  g.add(new T.Mesh(mergeGeoms([ new T.CylinderGeometry(0.22,0.22,8,10).translate(0,4,0), new T.SphereGeometry(1.6,18,14).translate(0,9,0),
+    new T.ConeGeometry(1.0,2.0,16).rotateX(Math.PI).translate(0,7.4,0) ]), mat));
   for(var i=0;i<3;i++){ var ring=new T.Mesh(new T.RingGeometry(2.0+i*1.4,2.4+i*1.4,30),
       new T.MeshBasicMaterial({color:col,transparent:true,opacity:0.40-i*0.10,side:T.DoubleSide,depthWrite:false}));
     ring.rotation.x=-Math.PI/2; ring.position.y=0.06; g.add(ring); }
@@ -1488,8 +1490,8 @@ function makeUnescoMarker(c){
   var T=window.THREE; if(!T) return null; var col=unescoColor(c); var g=new T.Group();
   var mat=new T.MeshBasicMaterial({color:col});
   // obelisque haut (repere de loin) + diamant lumineux au sommet
-  var ob=new T.Mesh(new T.CylinderGeometry(0.5,1.4,26,4), mat); ob.position.y=13; ob.rotation.y=Math.PI/4; g.add(ob);
-  var top=new T.Mesh(new T.OctahedronGeometry(2.2,0), mat); top.position.y=28; g.add(top);
+  // obelisque + diamant fusionnes en 1 seul mesh (1 draw call au lieu de 2)
+  g.add(new T.Mesh(mergeGeoms([ new T.CylinderGeometry(0.5,1.4,26,4).rotateY(Math.PI/4).translate(0,13,0), new T.OctahedronGeometry(2.2,0).translate(0,28,0) ]), mat));
   for(var i=0;i<2;i++){ var ring=new T.Mesh(new T.RingGeometry(2.6+i*1.8,3.3+i*1.8,32),
      new T.MeshBasicMaterial({color:col,transparent:true,opacity:0.42-i*0.16,side:T.DoubleSide,depthWrite:false}));
     ring.rotation.x=-Math.PI/2; ring.position.y=0.07; g.add(ring); }
@@ -1522,13 +1524,51 @@ function roadMetersForClass(cls, ramp){
   if(cls==='path'||cls==='pedestrian'||cls==='footway') return 2.5;
   return 7;
 }
-function buildBridgeRibbon(coords, widthM, aLon, aLat){
-  // VIADUC (inspire du modele "pour claude pont") : tablier epais + rambardes + piliers au sol
-  var T=window.THREE; if(!T||!coords||coords.length<2) return null;
+/* Fusion geometrique : concatene des BufferGeometry indexees (position + normale) en UNE seule
+   geometrie -> 1 seul draw call par materiau. Les geometries sources sont pre-transformees
+   (translate/rotate) puis liberees. Utilise pour les balises POI/UNESCO/destination. */
+function mergeGeoms(list){
+  var T=window.THREE; var pos=[], nor=[], idx=[], off=0, hasN=true, i, k;
+  for(i=0;i<list.length;i++){ if(!list[i].attributes.normal) hasN=false; }
+  for(i=0;i<list.length;i++){ var g=list[i], p=g.attributes.position, n=g.attributes.normal;
+    for(k=0;k<p.count;k++){ pos.push(p.getX(k),p.getY(k),p.getZ(k)); if(hasN) nor.push(n.getX(k),n.getY(k),n.getZ(k)); }
+    if(g.index){ var a=g.index.array; for(k=0;k<a.length;k++) idx.push(a[k]+off); } else { for(k=0;k<p.count;k++) idx.push(k+off); }
+    off+=p.count; try{ g.dispose(); }catch(_){}
+  }
+  var out=new T.BufferGeometry(); out.setAttribute('position',new T.Float32BufferAttribute(pos,3));
+  if(hasN) out.setAttribute('normal',new T.Float32BufferAttribute(nor,3)); else out.computeVertexNormals();
+  out.setIndex(idx); return out;
+}
+/* Accumulateur de ponts : tous les ponts d'une passe sont ecrits dans 3 tampons (tablier /
+   rambardes / piliers) exprimes dans un REPERE COMMUN (ancre = 1er pont, le plus proche), puis
+   transformes en 3 meshes au total au lieu de ~10 meshes PAR pont (goulot = draw calls Three). */
+function newBridgeAcc(){ return { deck:{pos:[],idx:[],off:0}, rail:{pos:[],idx:[],off:0}, pier:{pos:[],nor:[],idx:[],off:0} }; }
+function accPushGeom(buf, geom){   // copie une geometrie Three (CylinderGeometry...) dans le tampon piliers
+  var p=geom.attributes.position, n=geom.attributes.normal, k;
+  for(k=0;k<p.count;k++){ buf.pos.push(p.getX(k),p.getY(k),p.getZ(k)); buf.nor.push(n.getX(k),n.getY(k),n.getZ(k)); }
+  var a=geom.index?geom.index.array:null;
+  if(a){ for(k=0;k<a.length;k++) buf.idx.push(a[k]+buf.off); } else { for(k=0;k<p.count;k++) buf.idx.push(k+buf.off); }
+  buf.off+=p.count; try{ geom.dispose(); }catch(_){}
+}
+var __bridgeMats=null;
+function bridgeMaterials(){   // 3 materiaux partages, crees une seule fois
+  var T=window.THREE; if(__bridgeMats) return __bridgeMats;
+  __bridgeMats={
+    deck:new T.MeshStandardMaterial({color:0x8b95a4,emissive:0x2a3039,roughness:0.85,metalness:0.05,side:T.DoubleSide}),
+    rail:new T.MeshStandardMaterial({color:0xb6bdc9,emissive:0x2c323b,roughness:0.5,metalness:0.4,side:T.DoubleSide}),
+    pier:new T.MeshStandardMaterial({color:0x767e8c,emissive:0x222730,roughness:0.9,metalness:0.04})
+  };
+  return __bridgeMats;
+}
+function buildBridgeRibbon(coords, widthM, aLon, aLat, acc){
+  // VIADUC (inspire du modele "pour claude pont") : tablier epais + rambardes + piliers au sol.
+  // (aLon,aLat) = ancre COMMUNE a tous les ponts de la passe ; la geometrie est ecrite dans acc
+  // (voir newBridgeAcc) et non plus dans un Group par pont. Retourne true si le pont a ete ajoute.
+  var T=window.THREE; if(!T||!coords||coords.length<2||!acc) return false;
   var mLat=111320, mLon=111320*Math.cos(aLat*Math.PI/180);
   var pts=coords.map(function(c){ return { x:(c[0]-aLon)*mLon, z:-(c[1]-aLat)*mLat }; });
   var cum=[0]; for(var i=1;i<pts.length;i++){ var dx=pts[i].x-pts[i-1].x, dz=pts[i].z-pts[i-1].z; cum[i]=cum[i-1]+Math.hypot(dx,dz); }
-  var Tlen=cum[cum.length-1]; if(Tlen<3) return null;
+  var Tlen=cum[cum.length-1]; if(Tlen<3) return false;
   var H=5.5, Lr=Math.min(Tlen*0.32,16), hw=Math.max(widthM/2,1.4), deck=0.7, rail=0.95;
   function hAt(d){ var ru=Math.min(1,d/Lr), rd=Math.min(1,(Tlen-d)/Lr), t=Math.min(ru,rd); return H*(t*t*(3-2*t)); }
   var F=[];
@@ -1537,45 +1577,51 @@ function buildBridgeRibbon(coords, widthM, aLon, aLat){
     var dx=b.x-a.x, dz=b.z-a.z, dl=Math.hypot(dx,dz)||1; dx/=dl; dz/=dl;
     F.push({ x:pts[i].x, z:pts[i].z, px:-dz, pz:dx, hy:hAt(cum[i]) });
   }
-  var grp=new T.Group();
   // ---- TABLIER (boite : dessus / dessous / cotes) ----
-  var dp=[], di=[];
+  var dp=acc.deck.pos, di=acc.deck.idx, d0=acc.deck.off;
   for(var i=0;i<F.length;i++){ var f=F[i];
     dp.push(f.x+f.px*hw, f.hy,      f.z+f.pz*hw);     // 0 hautG
     dp.push(f.x-f.px*hw, f.hy,      f.z-f.pz*hw);     // 1 hautD
     dp.push(f.x+f.px*hw, f.hy-deck, f.z+f.pz*hw);     // 2 basG
     dp.push(f.x-f.px*hw, f.hy-deck, f.z-f.pz*hw);     // 3 basD
   }
-  for(var i=0;i<F.length-1;i++){ var k=i*4, n=(i+1)*4;
+  for(var i=0;i<F.length-1;i++){ var k=d0+i*4, n=d0+(i+1)*4;
     di.push(k,k+1,n, k+1,n+1,n);          // dessus
     di.push(k+2,n+2,k+3, k+3,n+2,n+3);    // dessous
     di.push(k,n,k+2, k+2,n,n+2);          // cote G
     di.push(k+1,k+3,n+1, k+3,n+3,n+1);    // cote D
   }
-  var dg=new T.BufferGeometry(); dg.setAttribute('position',new T.Float32BufferAttribute(dp,3)); dg.setIndex(di); dg.computeVertexNormals();
-  grp.add(new T.Mesh(dg,new T.MeshStandardMaterial({color:0x8b95a4,emissive:0x2a3039,roughness:0.85,metalness:0.05,side:T.DoubleSide})));
+  acc.deck.off+=F.length*4;
   // ---- RAMBARDES (2 cotes) ----
-  var rp=[], ri=[], vc=0;
-  function railSide(sign){ var base=vc;
+  var rp=acc.rail.pos, ri=acc.rail.idx;
+  function railSide(sign){ var base=acc.rail.off;
     for(var i=0;i<F.length;i++){ var f=F[i], ox=f.px*hw*sign, oz=f.pz*hw*sign;
-      rp.push(f.x+ox, f.hy, f.z+oz); rp.push(f.x+ox, f.hy+rail, f.z+oz); vc+=2; }
+      rp.push(f.x+ox, f.hy, f.z+oz); rp.push(f.x+ox, f.hy+rail, f.z+oz); acc.rail.off+=2; }
     for(var i=0;i<F.length-1;i++){ var a=base+i*2, b=base+(i+1)*2; ri.push(a,a+1,b, a+1,b+1,b); }
   }
   railSide(1); railSide(-1);
-  var rg=new T.BufferGeometry(); rg.setAttribute('position',new T.Float32BufferAttribute(rp,3)); rg.setIndex(ri); rg.computeVertexNormals();
-  grp.add(new T.Mesh(rg,new T.MeshStandardMaterial({color:0xb6bdc9,emissive:0x2c323b,roughness:0.5,metalness:0.4,side:T.DoubleSide})));
-  // ---- PILIERS (colonnes au sol) ----
+  // ---- PILIERS (colonnes au sol) : cylindres pre-positionnes puis copies dans le tampon ----
   var pr=Math.min(Math.max(hw*0.45,0.7),2.2);
-  var pierMat=new T.MeshStandardMaterial({color:0x767e8c,emissive:0x222730,roughness:0.9,metalness:0.04});
   function ptAt(d){ for(var i=1;i<cum.length;i++){ if(cum[i]>=d){ var t=(d-cum[i-1])/((cum[i]-cum[i-1])||1);
     return { x:pts[i-1].x+(pts[i].x-pts[i-1].x)*t, z:pts[i-1].z+(pts[i].z-pts[i-1].z)*t, hy:hAt(d) }; } }
     return { x:pts[pts.length-1].x, z:pts[pts.length-1].z, hy:hAt(d) }; }
   var piers=0;
   for(var d=Lr; d<Tlen-Lr+0.1; d+=28){ var q=ptAt(d); var colH=q.hy-deck; if(colH<1.2) continue;
-    var col=new T.Mesh(new T.CylinderGeometry(pr*0.8,pr,colH,10), pierMat); col.position.set(q.x,colH/2,q.z); grp.add(col);
-    var cap=new T.Mesh(new T.CylinderGeometry(pr*1.5,pr*0.9,0.8,10), pierMat); cap.position.set(q.x,colH+0.1,q.z); grp.add(cap); piers++; }
+    accPushGeom(acc.pier, new T.CylinderGeometry(pr*0.8,pr,colH,10).translate(q.x,colH/2,q.z));
+    accPushGeom(acc.pier, new T.CylinderGeometry(pr*1.5,pr*0.9,0.8,10).translate(q.x,colH+0.1,q.z)); piers++; }
   if(piers===0){ var q=ptAt(Tlen/2), colH=Math.max(q.hy-deck,1.2);
-    var col=new T.Mesh(new T.CylinderGeometry(pr*0.8,pr,colH,10), pierMat); col.position.set(q.x,colH/2,q.z); grp.add(col); }
+    accPushGeom(acc.pier, new T.CylinderGeometry(pr*0.8,pr,colH,10).translate(q.x,colH/2,q.z)); }
+  return true;
+}
+/* Transforme l'accumulateur en UN Group de 3 meshes max (tablier / rambardes / piliers). */
+function buildBridgeGroup(acc){
+  var T=window.THREE, M=bridgeMaterials(), grp=new T.Group();
+  function mk(buf, mat, withNor){ if(!buf.idx.length) return;
+    var g=new T.BufferGeometry(); g.setAttribute('position',new T.Float32BufferAttribute(buf.pos,3));
+    if(withNor) g.setAttribute('normal',new T.Float32BufferAttribute(buf.nor,3));
+    g.setIndex(buf.idx); if(!withNor) g.computeVertexNormals();
+    var m=new T.Mesh(g,mat); m.frustumCulled=false; grp.add(m); }   // pas de culling : la boite englobe tous les ponts, la voiture est toujours dedans
+  mk(acc.deck,M.deck,false); mk(acc.rail,M.rail,false); mk(acc.pier,M.pier,true);
   return grp;
 }
 var __bridgeAnchor=null, __bridgeTick=0;
@@ -1585,6 +1631,7 @@ function hide2DBridges(){
     st.layers.forEach(function(L){ if(L.type==='line'&&L['source-layer']==='transportation'&&L.id.indexOf('bridge')===0&&!/rail|transit/.test(L.id)){ try{ map.setLayoutProperty(L.id,'visibility','none'); }catch(_){} } });
     window.__bridge2dHidden=true; }catch(_){}
 }
+var __bridgeGroup=null;   // Group courant (3 meshes fusionnes) -> libere avant reconstruction
 function refreshBridges3D(force){
   if(!window.__geo3d || !window.THREE || !map.querySourceFeatures) return;
   var c=map.getCenter();
@@ -1599,9 +1646,10 @@ function refreshBridges3D(force){
   catch(_){ try{ feats=map.querySourceFeatures(vectorSourceId(),{sourceLayer:'transportation'}); }catch(e){} }
   if(!feats) return;
   __bridgeAnchor={lng:c.lng,lat:c.lat};
-  var count=0, seen={}, anchors=[];
-  window.__geo3d.clear('bridge');
-  for(var i=0;i<feats.length && count<400;i++){ var f=feats[i];   // TOUS les ponts des tuiles chargees (partout)
+  // 1) collecte + dedup + distance au centre ; on ne garde que les ponts a moins de MAX_D metres,
+  //    les plus proches d'abord, plafonnes a MAX_N (au-dela : invisibles au zoom de conduite)
+  var MAX_D=4500, MAX_N=200, mLat=111320, mLon=111320*Math.cos(c.lat*Math.PI/180), seen={}, cand=[];
+  for(var i=0;i<feats.length;i++){ var f=feats[i];
     if(!f.properties || f.properties.brunnel!=='bridge') continue;
     var g=f.geometry; if(!g) continue;
     var parts = g.type==='LineString' ? [g.coordinates] : (g.type==='MultiLineString' ? g.coordinates : null);
@@ -1610,8 +1658,23 @@ function refreshBridges3D(force){
     for(var pi=0; pi<parts.length; pi++){ var coords=parts[pi]; if(!coords||coords.length<2) continue;
       var a=coords[0];
       var key=a[0].toFixed(5)+','+a[1].toFixed(5)+':'+coords.length; if(seen[key]) continue; seen[key]=1;
-      var mesh=buildBridgeRibbon(coords, wm, a[0], a[1]); if(mesh){ window.__geo3d.add(mesh, a[0], a[1], 'bridge', 0); anchors.push([a[0],a[1]]); count++; }
+      var dx=(a[0]-c.lng)*mLon, dy=(a[1]-c.lat)*mLat, d2=dx*dx+dy*dy;
+      if(d2>MAX_D*MAX_D) continue;
+      cand.push({coords:coords, wm:wm, a:a, d2:d2});
     }
+  }
+  cand.sort(function(p,q){ return p.d2-q.d2; });
+  if(cand.length>MAX_N) cand.length=MAX_N;
+  // 2) liberation de l'ancien groupe fusionne (geometries GPU) puis reconstruction
+  if(__bridgeGroup){ try{ __bridgeGroup.traverse(function(o){ if(o.isMesh&&o.geometry) o.geometry.dispose(); }); }catch(_){} __bridgeGroup=null; }
+  window.__geo3d.clear('bridge');
+  var count=0, anchors=[];
+  if(cand.length){
+    var ref=cand[0].a, acc=newBridgeAcc();   // repere commun = ancre du pont le plus proche
+    for(var ci=0; ci<cand.length; ci++){ var cd=cand[ci];
+      if(buildBridgeRibbon(cd.coords, cd.wm, ref[0], ref[1], acc)){ anchors.push([cd.a[0],cd.a[1]]); count++; }
+    }
+    if(count>0){ __bridgeGroup=buildBridgeGroup(acc); window.__geo3d.add(__bridgeGroup, ref[0], ref[1], 'bridge', 0); }
   }
   window.__bridge3dCount=count; window.__bridgeAnchors=anchors;
   if(count>0) hide2DBridges();
@@ -1885,12 +1948,14 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
 (function(){
   var CARSCALE = 1.0;        // multiplicateur de taille global (1 = taille reelle TARGET_CAR_LEN)
   var CAR_YAW_OFFSET = 0;    // decalage d'orientation (radians) cote rendu
+  var AVATAR_FACE_CAMERA = true;   // true = on voit le pare-brise de l'avatar (choix utilisateur, juil. 2026) ; false = vue de chasse classique (on voit l'arrière)
   var TARGET_CAR_LEN = 5.0;  // longueur reelle visee de la voiture (metres) — auto-mise a l'echelle
   var GLB_LIFT = 0;          // ajuste la hauteur au sol (0 = roues au sol ; + pour remonter)
   var GLB_YAW  = 0;          // oriente l'avant : 0 / Math.PI (marche arriere) / +-Math.PI/2 (de travers)
   var GLB_FLIP = false;      // true si le modele apparait couche (glb exporte en Z-up)
   var GLB_MIRROR = true;     // true : reconstruit la moitie manquante (modele exporte sans appliquer le miroir Blender)
   var ACCENT = 0x2f7bff;     // accent anneau FSD (DA hub)
+  var EMBED = /[?&]embed=1(&|$)/.test(location.search);   // charge dans os.html (iframe) -> un avatar arrive toujours par postMessage
   function start(){
     var map = window.__hubMap, ml = window.maplibregl;
     if(!map || !ml){ return setTimeout(start, 250); }
@@ -1951,9 +2016,12 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         this.car=new THREE.Group(); this.scene.add(this.car); window.__carRoot=this.car;  // racine dispo même si car-real.glb échoue (évite la boucle de retry)
         var fallback=buildCar(); fallback.visible=false; this.car.add(fallback);  // cache : on ne montre PAS l'ancienne voiture
         var fbTimer=null;
-        if(CAR_GLB_URL){
+        function loadDefaultCar(force){   // telecharge car-real.glb (7 Mo) — une seule fois
+          if(!CAR_GLB_URL || self._defaultCarStarted) return;
+          if(!force && (window.__avatar || window.__avatarPending)) return;   // un avatar est deja demande/charge -> pas de telechargement inutile
+          self._defaultCarStarted=true;
           fbTimer=setTimeout(function(){ try{ fallback.visible=true; }catch(_){} }, 9000);  // secours seulement si glb tres lent
-          var self=this;
+          // (self = la couche, declare en tete de onAdd ; pas de re-declaration locale ici)
           Promise.all([
             import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js'),
             import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/meshopt_decoder.module.js')
@@ -1976,7 +2044,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
                 var holder=new THREE.Group();
                 holder.add(inner);
                 holder.rotation.y = (size.x>size.z?Math.PI/2:0) + GLB_YAW;  // longueur -> +Z, + ajust manuel
-                self.car.add(holder);
+                var dynG=new THREE.Group(); dynG.name='dyn'; dynG.add(holder); self.car.add(dynG);   // 'dyn' = groupe animé (roulis / tangage) par la boucle de rendu
                 try{ window.__hideAvatarLoad && window.__hideAvatarLoad(); }catch(_){}  // voiture modelisee -> on retire l'ecran de chargement dot
                 // boost reflexions (metaux : roues/chrome/freins) sur tous les materiaux
                 inner.traverse(function(ob){ if(ob.isMesh&&ob.material){ (Array.isArray(ob.material)?ob.material:[ob.material]).forEach(function(mt){ if('envMapIntensity' in mt) mt.envMapIntensity=1.3; mt.needsUpdate=true; }); } });
@@ -2003,6 +2071,12 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
             }, undefined, function(){ try{ if(fbTimer)clearTimeout(fbTimer); fallback.visible=true; }catch(_){} }); })   // echec -> placeholder
             .catch(function(){ try{ fallback.visible=true; }catch(_){} });
         }
+        window.__loadDefaultCar=loadDefaultCar;   // repli si l'avatar demande echoue
+        try{ var _q=window.__avatarQueued;        // avatar demandé AVANT que la couche existe (retries épuisés) -> on le rejoue maintenant que __carRoot est posé
+          if(_q && !window.__avatar && !window.__avatarRetrying && typeof window.__loadAvatar==='function'){ setTimeout(function(){ try{ window.__loadAvatar(_q.url,_q.opts); }catch(_){} },0); } }catch(_){}
+        // EMBED (os.html) : on n'engage PAS les 7 Mo de car-real.glb tout de suite -> on attend le
+        // message 'avatar' ; repli sur la voiture par defaut apres 6 s sans avatar. Hors embed : inchange.
+        if(EMBED){ setTimeout(loadDefaultCar, 6000); setTimeout(function(){ if(!window.__avatar) loadDefaultCar(true); }, 25000); } else { loadDefaultCar(); }   // embed : 6 s sans avatar -> défaut ; 25 s sans voiture du tout -> défaut forcé
         this.camera=new THREE.Camera();
         // pattern canonique MapLibre + Three : partage canvas + contexte WebGL de la carte.
         // (En WebGL software headless, Chromium peut logguer "different context type" -> sans
@@ -2043,6 +2117,35 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         // (fallback : argument direct = ancienne API). Source : doc Context7.
         var mat=(args && args.defaultProjectionData && args.defaultProjectionData.mainMatrix) ? args.defaultProjectionData.mainMatrix : args;
         if(!mat){ map.triggerRepaint(); return; }   // pas de matrice fournie -> on saute la frame proprement
+        /* ---- DYNAMIQUE VÉHICULE (animations fluides, indépendantes du framerate) ----
+           cap lissé (plus de saut à chaque point GPS), roulis vers l'extérieur du virage,
+           tangage à l'accélération/freinage, roues qui roulent (+ braquage des roues avant).
+           AVATAR_FACE_CAMERA : convention actuelle du hub = on voit le PARE-BRISE (avant +Z vers
+           la caméra) ; FWD = sens du modèle par rapport au sens de marche. */
+        var _now=performance.now(), dt=this._dynT?Math.min(0.1,(_now-this._dynT)/1000):0.016; this._dynT=_now;
+        var dyn=this._dyn||(this._dyn={yaw:null,yawRate:0,roll:0,pitch:0,steer:0,spin:0,v:0});
+        var FWD=AVATAR_FACE_CAMERA?-1:1, v=((window.HUB3D&&window.HUB3D.speedKmh)||0)/3.6;
+        var tgtYaw=pos.bearing||0; if(dyn.yaw==null) dyn.yaw=tgtYaw;
+        var dY=((tgtYaw-dyn.yaw+540)%360)-180, kY=1-Math.exp(-7*dt);     // plus court chemin, amorti ~140 ms
+        dyn.yaw=(dyn.yaw+dY*kY+360)%360;
+        var rate=(dY*kY)/Math.max(dt,1e-3)*Math.PI/180;                  // lacet effectif (rad/s), > 0 = virage à droite
+        dyn.yawRate+=(rate-dyn.yawRate)*(1-Math.exp(-10*dt));
+        var acc=(v-dyn.v)/Math.max(dt,1e-3); dyn.v=v;
+        var rollT=Math.max(-0.10,Math.min(0.10, FWD*dyn.yawRate*v*0.012));  // roulis (rad) : côté extérieur du virage qui monte
+        var pitchT=Math.max(-0.05,Math.min(0.05, -FWD*acc*0.008));          // tangage : accélération -> nez qui se lève
+        var steerT=Math.max(-0.45,Math.min(0.45, dyn.yawRate*0.9));         // braquage des roues avant (rad)
+        var kS=1-Math.exp(-6*dt);
+        dyn.roll+=(rollT-dyn.roll)*kS; dyn.pitch+=(pitchT-dyn.pitch)*kS; dyn.steer+=(steerT-dyn.steer)*(1-Math.exp(-9*dt));
+        dyn.spin+=v*dt;                                                    // distance parcourue (m) -> angle roue = spin / r
+        var _root=window.__carRoot;
+        if(_root){ var _g=_root.children[0];
+          if(_g && _g.name==='dyn'){ _g.rotation.z=dyn.roll; _g.rotation.x=dyn.pitch; }
+          if(!this._wheels || !this._wheels.length || this._lastCar!==_g || ((this._wscan=(this._wscan||0)+1)%30===0)){ var _ws=[]; _root.traverse(function(o){ if(o.userData&&o.userData.wheel) _ws.push(o); }); this._wheels=_ws; this._lastCar=_g; }   // roues ajoutées en asynchrone -> on rescanne tant qu'il n'y en a pas, puis périodiquement
+          for(var _wi=0;_wi<this._wheels.length;_wi++){ var _pv=this._wheels[_wi], _ud=_pv.userData.wheel, _wh=_pv.children[0];
+            _pv.rotation.y=(_ud.front && FWD>0) ? dyn.steer : 0;             // braquage seulement si les roues avant mènent la marche
+            if(_wh && _ud.r>0) _wh.rotation.x=FWD*(dyn.spin/_ud.r)*(_ud.side<0?-1:1); }   // roulement dans le sens de marche (roue gauche retournée -> signe inversé)
+        }
+        window.__carDyn=dyn;
         var merc=ml.MercatorCoordinate.fromLngLat([pos.lon,pos.lat],0);
         var s=merc.meterInMercatorCoordinateUnits();
         // MapLibre = Z-up ; le modele EGO est Y-up (avant +Z, haut +Y).
@@ -2052,7 +2155,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
         // Matrices PRE-ALLOUEES (this._m*) reutilisees : aucun new THREE.Matrix4() par frame.
         var l=this._mModel.makeTranslation(merc.x,merc.y,merc.z)
           .multiply(this._mTmp.makeScale(s,-s,s))
-          .multiply(this._mTmp.makeRotationZ(-(pos.bearing||0)*Math.PI/180 + CAR_YAW_OFFSET))
+          .multiply(this._mTmp.makeRotationZ(-(dyn.yaw||0)*Math.PI/180 + CAR_YAW_OFFSET))   // cap LISSÉ (dyn.yaw), pas le cap brut
           .multiply(this._mTmp.makeRotationX(Math.PI/2))
           .multiply(this._mTmp.makeScale(CARSCALE,CARSCALE,CARSCALE));
         this.camera.projectionMatrix=this._mProj.fromArray(mat).multiply(l);
@@ -2147,39 +2250,66 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
     geom.addGroup(0,tire.length,0); geom.addGroup(tire.length,rim.length,1);
     return geom;
   }
-  /* les voitures du kit n'ont que la carrosserie -> on ajoute 4 roues dans les passages */
-  var WHEEL_TUNE={ 'lp-citadine-rouge':{fin:0.34,rin:0.19,rz:0.078}, 'lp-van-jaune':{fin:0.24,rin:0.34,rz:0.072} };  // réglages roues par modèle
+  /* les voitures du kit n'ont que la carrosserie -> on ajoute 4 roues dans les passages.
+     Paramètres PAR MODÈLE : /models/lpc/_wheels.json (calculés hors ligne par playwright/wheel_fit.cjs :
+     plus grand cercle inscrit dans chaque passage de roue). Fractions de la bbox normalisée :
+     front/rear = recul des essieux depuis les extrémités (/L), r = rayon (/L), hw = demi-voie (/W),
+     dy = hauteur du centre (/H). Chargé UNE fois ; repli silencieux sur les valeurs génériques. */
+  var __wheelParams=null;
+  function loadWheelParams(){
+    if(__wheelParams) return __wheelParams;
+    __wheelParams = (typeof fetch==='function'
+      ? fetch('/models/lpc/_wheels.json').then(function(r){ return r.ok ? r.json() : {}; })
+      : Promise.resolve({})).catch(function(){ return {}; });
+    return __wheelParams;
+  }
   function addWheels(model, T, target, url){
     target = target || model;                       // dimensionne d'après model, ajoute à target (wrapper sans rotation)
     model.updateMatrixWorld(true);
     var b=new T.Box3().setFromObject(model), s=b.getSize(new T.Vector3()), c=b.getCenter(new T.Vector3());
-    var _tn=WHEEL_TUNE[(''+(url||'')).split('/').pop().replace(/\.glb.*$/,'')]||{};
-    var FIN=_tn.fin||0.31, RIN=_tn.rin||0.19, wx=s.x*0.42;
-    var r=Math.min(s.y*0.42, s.z*(_tn.rz||0.072));
-    var fz=b.max.z-FIN*s.z, rz=b.min.z+RIN*s.z;
+    var key=(''+(url||'')).split('/').pop().replace(/\.glb.*$/,'');   // clé = nom de fichier sans .glb
     var tireMat=new T.MeshStandardMaterial({color:0x0e0f12, roughness:0.85, metalness:0.2, side:T.DoubleSide});
     var rimMat=new T.MeshStandardMaterial({color:0xb9bfc9, roughness:0.35, metalness:0.9, envMapIntensity:1.2, side:T.DoubleSide}); // jante gris métallique
-    var slots=[[-wx,fz],[wx,fz],[-wx,rz],[wx,rz]];
-    loadWheelProto().then(function(proto){
-      slots.forEach(function(p){
-        var w=proto.clone(true);
-        w.traverse(function(o){ if(o.isMesh){ o.geometry=splitWheelGeom(o.geometry.clone()); o.material=[tireMat,rimMat]; } });
-        w.scale.setScalar(2*r);                    // GLB diamètre 1 -> diamètre 2r ; axe déjà sur X
-        w.rotation.y = p[0]<0 ? Math.PI : 0;        // jante vers l'extérieur des deux côtés
-        w.position.set(c.x+p[0], b.min.y+r, p[1]);  // p[1] = z absolu (repère bbox)
-        target.add(w);
+    loadWheelParams().then(function(P){
+      var W=(P&&P[key])||null, r, fz, rz, wx, wy;
+      if(W){                                          // placement mesuré sur la carrosserie
+        r=W.r*s.z; fz=b.max.z-W.front*s.z; rz=b.min.z+W.rear*s.z; wx=W.hw*s.x; wy=b.min.y+W.dy*s.y;
+      } else {                                        // repli générique : essieux à 31 % / 19 % des extrémités, rayon ~7 % L
+        r=Math.min(s.y*0.42, s.z*0.072); fz=b.max.z-0.31*s.z; rz=b.min.z+0.19*s.z; wx=s.x*0.42; wy=b.min.y+r;
+      }
+      /* les roues mesurées descendent sous la caisse : on remonte la caisse d'autant pour que le
+         bas des pneus reste à b.min.y (= le sol posé par le loader d'après la bbox carrosserie) */
+      var lift=(target!==model) ? Math.max(0, b.min.y-(wy-r)) : 0;
+      if(lift){ model.position.y+=lift; wy+=lift; }
+      var slots=[[-wx,fz],[wx,fz],[-wx,rz],[wx,rz]];
+      return loadWheelProto().then(function(proto){
+        slots.forEach(function(p,i){
+          var w=proto.clone(true);
+          w.traverse(function(o){ if(o.isMesh){ o.geometry=splitWheelGeom(o.geometry.clone()); o.material=[tireMat,rimMat]; } });
+          w.scale.setScalar(2*r);                    // GLB diamètre 1 -> diamètre 2r ; axe déjà sur X
+          w.rotation.y = p[0]<0 ? Math.PI : 0;        // jante vers l'extérieur des deux côtés
+          var piv=new T.Group(); piv.position.set(c.x+p[0], wy, p[1]); piv.add(w);   // pivot = braquage (rotation.y) ; roulement = rotation.x de la roue
+          piv.userData.wheel={front:(i<2), side:(p[0]<0?-1:1), r:r};            // étiquette lue par la boucle de rendu (animation)
+          target.add(piv);
+        });
+      }).catch(function(){                            // repli : cylindres si le GLB échoue
+        var geo=new T.CylinderGeometry(r,r,s.x*0.16,18);
+        slots.forEach(function(p){ var w=new T.Mesh(geo,rimMat); w.rotation.z=Math.PI/2; w.position.set(c.x+p[0], wy, p[1]); target.add(w); });
       });
-    }).catch(function(){                            // repli : cylindres si le GLB échoue
-      var geo=new T.CylinderGeometry(r,r,s.x*0.16,18);
-      slots.forEach(function(p){ var w=new T.Mesh(geo,rimMat); w.rotation.z=Math.PI/2; w.position.set(c.x+p[0], b.min.y+r, p[1]); target.add(w); });
     });
   }
-
+  /* modèles du pack lpc dont l'AVANT est en -Z après uprightCar (mesuré par playwright/wheel_fit.cjs) -> retournés de 180° */
+  var LPC_FLIP={'lp-coupe-orange':1,'lp-compacte-verte':1,'lp-compacte-rose':1,'lp-compacte-turquoise':1,'lp-van-jaune':1,'lp-van-blanc':1};
   /* charge un modele avatar (GLB ou FBX) comme voiture EGO du hub */
   window.__loadAvatar=function(url, opts, tries){
     opts=opts||{}; var T=window.THREE, root=window.__carRoot;
     if(!url){ return; }
-    if(!T || !root){ if((tries||0)<40){ return setTimeout(function(){ window.__loadAvatar(url,opts,(tries||0)+1); }, 300); } try{ window.__hideAvatarLoad&&window.__hideAvatarLoad(); }catch(_){} return; }
+    window.__avatarPending=url;
+    if(!T || !root){ if((tries||0)<40){ window.__avatarRetrying=true; return setTimeout(function(){ window.__loadAvatar(url,opts,(tries||0)+1); }, 300); }
+      window.__avatarRetrying=false; window.__avatarPending=null;           // couche 3D toujours absente après ~12 s : on libère le repli ; onAdd rejouera __avatarQueued si la couche arrive plus tard
+      try{ window.__hideAvatarLoad&&window.__hideAvatarLoad(); }catch(_){} try{ if(!window.__avatar && window.__loadDefaultCar) window.__loadDefaultCar(true); }catch(_){} return; }
+    window.__avatarRetrying=false;
+    var key=(''+url).split('/').pop().replace(/\.glb.*$/,'');
     window.__showAvatarLoad('Modélisation du véhicule');
     var isFbx=/\.fbx($|\?)/i.test(url), target=+opts.len||5.0;
     var loaderP = isFbx
@@ -2219,13 +2349,17 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
           wrap.position.set(-ctr.x, -box.min.y, -ctr.z);    // Y-up : sol = min.y
           var s2=new T.Box3().setFromObject(wrap).getSize(new T.Vector3());
           var holder=new T.Group(); holder.add(wrap);
-          holder.rotation.y=(s2.x>s2.z?Math.PI/2:0) + (url.indexOf('/kenney/')>=0?Math.PI:0);   // longueur -> +Z ; lpc : avant en +Z = face caméra -> on voit le PARE-BRISE (pas de flip)
+          holder.rotation.y=(s2.x>s2.z?Math.PI/2:0) + (url.indexOf('/kenney/')>=0?Math.PI:0) + (LPC_FLIP[key]?Math.PI:0);   // longueur -> +Z ; convention hub : avant en +Z ; les lpc dont l'avant est en -Z (coupé/compacte/van) sont retournés
           while(root.children.length) root.remove(root.children[0]);   // retire la voiture courante
-          root.add(holder); window.__avatar=url;
+          var dynG=new T.Group(); dynG.name='dyn'; dynG.add(holder); root.add(dynG); window.__avatar=url;   // 'dyn' = groupe animé (roulis / tangage)
           window.__hideAvatarLoad();
-        }catch(e){ window.__hideAvatarLoad(); }
-      }, undefined, function(){ window.__hideAvatarLoad(); });
-    }).catch(function(){ window.__hideAvatarLoad(); });
+        }catch(e){ avatarFail(); }
+      }, undefined, function(){ avatarFail(); });
+    }).catch(function(){ avatarFail(); });
+    function avatarFail(){   // avatar KO -> ecran retire + voiture par defaut en repli (sinon hub sans voiture en embed)
+      window.__hideAvatarLoad(); window.__avatarPending=null;
+      try{ if(!window.__avatar && window.__loadDefaultCar) window.__loadDefaultCar(true); }catch(_){}
+    }
   };
 })();
 </script>

@@ -1,9 +1,9 @@
 [
  {
-  "id": "lp-suv-bleu",
-  "file": "/models/lpc/lp-suv-bleu.glb",
-  "label": "SUV bleu",
-  "class": "suv"
+  "id": "lp-berline-grise",
+  "file": "/models/lpc/lp-berline-grise.glb",
+  "label": "Berline grise",
+  "class": "car"
  },
  {
   "id": "lp-citadine-rouge",
@@ -14,19 +14,13 @@
  {
   "id": "lp-coupe-orange",
   "file": "/models/lpc/lp-coupe-orange.glb",
-  "label": "Coupé orange",
-  "class": "car"
- },
- {
-  "id": "lp-berline-grise",
-  "file": "/models/lpc/lp-berline-grise.glb",
-  "label": "Berline grise",
+  "label": "Sportive orange",
   "class": "car"
  },
  {
   "id": "lp-van-jaune",
   "file": "/models/lpc/lp-van-jaune.glb",
-  "label": "Van jaune",
+  "label": "Camionnette jaune",
   "class": "van"
  },
  {

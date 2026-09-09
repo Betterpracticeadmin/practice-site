@@ -30,7 +30,7 @@
     var seg = null; try { var v = window.__posLastVehicle; if (v && v.segment) seg = v.segment; } catch (e) {}
     /* choisit un avatar du set réel selon le segment reconnu (repli : 1re voiture du kit) */
     var bySeg = { citadine: 'lp-citadine-rouge', compacte: 'lp-compacte-verte', berline: 'lp-berline-grise',
-      break: 'lp-berline-grise', SUV: 'lp-suv-bleu', sportive: 'lp-coupe-orange', hypercar: 'lp-coupe-orange',
+      break: 'lp-berline-grise', SUV: 'lp-berline-grise', sportive: 'lp-coupe-orange', hypercar: 'lp-coupe-orange',
       utilitaire: 'lp-van-jaune', bus: 'bus' };
     return MAP[bySeg[seg]] || kit[0] || MAP['bus'];
   }

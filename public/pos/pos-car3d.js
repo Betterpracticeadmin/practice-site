@@ -428,34 +428,51 @@
       geom.addGroup(0, tire.length, 0); geom.addGroup(tire.length, rim.length, 1);
       return geom;
     }
-    /* réglages roues PAR MODÈLE (avant/arrière/rayon) — placement calé voiture par voiture */
-    var WHEEL_TUNE = {
-      'lp-citadine-rouge': { fin: 0.34, rin: 0.19, rz: 0.078 },
-      'lp-van-jaune':      { fin: 0.24, rin: 0.34, rz: 0.072 }
-    };
+    /* paramètres de roues PAR MODÈLE : /models/lpc/_wheels.json, calculés hors ligne
+       (playwright/wheel_fit.cjs : plus grand cercle inscrit dans chaque passage de roue de la
+       carrosserie normalisée). Fractions de la bbox : front/rear = recul des essieux depuis les
+       extrémités (/L), r = rayon (/L), hw = demi-voie (/W), dy = hauteur du centre (/H).
+       Chargé UNE fois (promesse en cache) ; repli silencieux sur les valeurs génériques. */
+    var wheelParamsP = null;
+    function loadWheelParams() {
+      if (wheelParamsP) return wheelParamsP;
+      wheelParamsP = (typeof fetch === 'function'
+        ? fetch('/models/lpc/_wheels.json').then(function (r) { return r.ok ? r.json() : {}; })
+        : Promise.resolve({})).catch(function () { return {}; });
+      return wheelParamsP;
+    }
     function addWheels(model, target, url) {
       target = target || model;
       model.updateMatrixWorld(true);
       var b = new THREE.Box3().setFromObject(model), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
-      var _tn = WHEEL_TUNE[('' + (url || '')).split('/').pop().replace(/\.glb.*$/, '')] || {};
-      var FIN = _tn.fin || 0.31, RIN = _tn.rin || 0.19, wx = s.x * 0.42;  // avant/arrière % depuis les extrémités
-      var r = Math.min(s.y * 0.42, s.z * (_tn.rz || 0.072));             // rayon ~7% de la longueur (réglable par modèle)
-      var fz = b.max.z - FIN * s.z, rz = b.min.z + RIN * s.z;
+      var key = ('' + (url || '')).split('/').pop().replace(/\.glb.*$/, '');   // clé = nom de fichier sans .glb
       var tireMat = track(new THREE.MeshStandardMaterial({ color: 0x0e0f12, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide }));
       var rimMat = track(new THREE.MeshStandardMaterial({ color: 0xb9bfc9, roughness: 0.35, metalness: 0.9, envMapIntensity: 1.2, side: THREE.DoubleSide })); // jante gris métallique
-      var slots = [[-wx, fz], [wx, fz], [-wx, rz], [wx, rz]];
-      loadWheelProto().then(function (proto) {
-        slots.forEach(function (p) {
-          var w = proto.clone(true);
-          w.traverse(function (o) { if (o.isMesh) { o.geometry = splitWheelGeom(o.geometry.clone()); track(o.geometry); o.material = [tireMat, rimMat]; } });
-          w.scale.setScalar(2 * r);                    // GLB diamètre 1 -> diamètre 2r ; axe déjà sur X
-          w.rotation.y = p[0] < 0 ? Math.PI : 0;        // jante vers l'extérieur des deux côtés
-          w.position.set(c.x + p[0], b.min.y + r, p[1]); target.add(w);   // p[1] = z absolu (repère bbox)
+      loadWheelParams().then(function (P) {
+        var W = (P && P[key]) || null, r, fz, rz, wx, wy;
+        if (W) {                                          // placement mesuré sur la carrosserie
+          r = W.r * s.z; fz = b.max.z - W.front * s.z; rz = b.min.z + W.rear * s.z; wx = W.hw * s.x; wy = b.min.y + W.dy * s.y;
+        } else {                                          // repli générique : essieux à 31 % / 19 % des extrémités, rayon ~7 % L
+          r = Math.min(s.y * 0.42, s.z * 0.072); fz = b.max.z - 0.31 * s.z; rz = b.min.z + 0.19 * s.z; wx = s.x * 0.42; wy = b.min.y + r;
+        }
+        /* les roues mesurées descendent sous la caisse : on remonte la caisse d'autant pour que le
+           bas des pneus reste à b.min.y (= le sol posé par le loader d'après la bbox carrosserie) */
+        var lift = (target !== model) ? Math.max(0, b.min.y - (wy - r)) : 0;
+        if (lift) { model.position.y += lift; wy += lift; }
+        var slots = [[-wx, fz], [wx, fz], [-wx, rz], [wx, rz]];
+        return loadWheelProto().then(function (proto) {
+          slots.forEach(function (p) {
+            var w = proto.clone(true);
+            w.traverse(function (o) { if (o.isMesh) { o.geometry = splitWheelGeom(o.geometry.clone()); track(o.geometry); o.material = [tireMat, rimMat]; } });
+            w.scale.setScalar(2 * r);                    // GLB diamètre 1 -> diamètre 2r ; axe déjà sur X
+            w.rotation.y = p[0] < 0 ? Math.PI : 0;        // jante vers l'extérieur des deux côtés
+            w.position.set(c.x + p[0], wy, p[1]); target.add(w);   // p[1] = z absolu (repère bbox)
+          });
+          if (visible && renderer && scene && camera) renderer.render(scene, camera);
+        }).catch(function () {                            // repli : cylindres
+          var geo = track(new THREE.CylinderGeometry(r, r, s.x * 0.16, 18));
+          slots.forEach(function (p) { var w = new THREE.Mesh(geo, rimMat); w.rotation.z = Math.PI / 2; w.position.set(c.x + p[0], wy, p[1]); target.add(w); });
         });
-        if (visible && renderer && scene && camera) renderer.render(scene, camera);
-      }).catch(function () {                            // repli : cylindres
-        var geo = track(new THREE.CylinderGeometry(r, r, s.x * 0.16, 18));
-        slots.forEach(function (p) { var w = new THREE.Mesh(geo, rimMat); w.rotation.z = Math.PI / 2; w.position.set(c.x + p[0], b.min.y + r, p[1]); target.add(w); });
       });
     }
     function loadAvatar(url, opts) {
