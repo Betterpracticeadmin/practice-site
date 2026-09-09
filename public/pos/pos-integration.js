@@ -79,14 +79,17 @@
     /* ---- 6. 3D low-poly : montage paresseux --------------------------------
        On ne charge three.js qu'au premier affichage réel du conteneur
        (vue véhicule ouverte), jamais au boot → zéro coût sinon.              */
-    var mounted = false;
+    var mounted = false, mounting = false, pendingTry = 0;
     function tryMount() {
-      if (mounted || !car3d) return;
+      pendingTry = 0;
+      if (mounted || mounting || !car3d) return;         // déjà monté ou montage en cours
       var host = document.getElementById('posCar3d');
       if (!host) return;
       var r = host.getBoundingClientRect();
       if (r.width < 10 || r.height < 10) return; /* pas encore visible */
+      mounting = true;
       Promise.resolve(car3d.mount(host)).then(function (ok) {
+        mounting = false;
         if (ok === false) return;                        // échec (ex. three.js hors-ligne) -> mounted reste false, remontage possible plus tard
         mounted = true;
         try { document.removeEventListener('click', onClickTry, true); } catch (e) {}
@@ -98,10 +101,14 @@
           else if (lastVeh) car3d.buildFromVehicle(lastVeh);
           else if (vehdb && vehdb.estimate) car3d.buildFromVehicle(vehdb.estimate('hypercar'));
         } catch (e) { console.warn('[POS] car3d build', e); }
-      });
+      }, function () { mounting = false; });      // échec du montage -> on autorise une nouvelle tentative
     }
-    /* la vue véhicule s'ouvre par interaction → on tente au clic + à l'observation */
-    function onClickTry() { setTimeout(tryMount, 450); }
+    /* la vue véhicule s'ouvre par interaction → on tente au clic + à l'observation.
+       Un seul essai différé à la fois : évite d'empiler des timers à chaque clic. */
+    function onClickTry() {
+      if (mounted || mounting || pendingTry) return;
+      pendingTry = setTimeout(tryMount, 450);
+    }
     document.addEventListener('click', onClickTry, true);
     if ('IntersectionObserver' in window) {
       var host = document.getElementById('posCar3d');
