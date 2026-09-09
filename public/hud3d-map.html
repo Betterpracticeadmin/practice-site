@@ -409,17 +409,17 @@ var AHEAD_FAST     = 10;     // a vitesse : vise un peu plus loin (route devant)
 
 /* --- PITCH / FOV cibles (inclinaison ~60, jamais vertical ni horizontal) --- */
 var PITCH          = 60;     // inclinaison camera cible (~atan(AHEAD/UP) ramene en 55-65)
-var PITCH_SLOW     = 62;     // plongee ~28 deg depuis l horizontale (chase-cam Tesla : 22-30 deg)
-var PITCH_FAST     = 61;
+var PITCH_SLOW     = 60;     // plongee ~28 deg depuis l horizontale (chase-cam Tesla : 22-30 deg)
+var PITCH_FAST     = 59;
 var MAX_PITCH      = 70;     // maxPitch a l'init (marge au-dessus de PITCH_FAST, < 85)
 var FOV            = 55;     // FOV vertical type camera reelle (Tesla estime 45-60)
 
 /* --- ZOOM DYNAMIQUE selon la vitesse ---
    Recule par rapport a l'ancien reglage : la voiture doit etre PETITE (~6-8% de
    l'ecran). Lent -> un peu plus proche, Rapide -> plus recule (voit + de route). */
-var ZOOM_SLOW      = 22.3;   // lent : camera ~16 m du point vise -> ~11 m derriere la voiture, ~7.5 m de haut, voiture ~21 % de l ecran (lat Paris, 834 px)
-var ZOOM_MID       = 21.9;
-var ZOOM_FAST      = 21.5;   // rapide : ~28 m du point vise -> ~15 m derriere, ~13 m de haut (autoroute Tesla dezoomee : 15-20 m / 8-12 m)
+var ZOOM_SLOW      = 22.0;   // lent : camera ~16 m du point vise -> ~11 m derriere la voiture, ~7.5 m de haut, voiture ~21 % de l ecran (lat Paris, 834 px)
+var ZOOM_MID       = 21.6;
+var ZOOM_FAST      = 21.2;   // rapide : ~28 m du point vise -> ~15 m derriere, ~13 m de haut (autoroute Tesla dezoomee : 15-20 m / 8-12 m)
 var SPD_SLOW       = 15;     // km/h : en dessous = ZOOM_SLOW / PITCH_SLOW
 var SPD_MID        = 50;     // km/h : palier intermediaire
 var SPD_FAST       = 110;    // km/h : au-dessus = ZOOM_FAST / PITCH_FAST
@@ -455,22 +455,22 @@ var TURN_BIAS_MAX  = 12;     // deg : biais maximal de cap (a 0 m de la manoeuvr
    en virage), anticip(m), racing(0..1 trajectoire de corde), inter(0..1 prudence carrefour),
    gap(distance de suivi), jerk(brusquerie). ============================================ */
 var DRIVE_MODES = {
-  copilot:{ label:'Copilot', ahead:[3,10], pitch:[62,61], maxPitch:70, zoom:[22.3,21.9,21.5], spd:[15,50,110],
+  copilot:{ label:'Copilot', ahead:[3,10], pitch:[60,59], maxPitch:70, zoom:[22.0,21.6,21.2], spd:[15,50,110],
     damp:{pos:4.0,rot:2.8,zoom:2.8,pitch:2.4}, turn:{look:140,bias:11}, fov:55, pad:0.10,
     sim:{ vmax:90, accel:1.6, brake:2.2, latG:2.6, anticip:95, racing:0.15, inter:0.7, gap:1.0, jerk:1.2 } },
-  learning:{ label:'Apprentissage', ahead:[3,9], pitch:[60,59], maxPitch:68, zoom:[22.1,21.8,21.5], spd:[12,40,90],
+  learning:{ label:'Apprentissage', ahead:[3,9], pitch:[58,57], maxPitch:68, zoom:[21.8,21.5,21.2], spd:[12,40,90],
     damp:{pos:3.1,rot:2.1,zoom:2.2,pitch:1.9}, turn:{look:175,bias:9}, fov:52, pad:0.12,
     sim:{ vmax:55, accel:1.0, brake:1.6, latG:1.8, anticip:135, racing:0.0, inter:1.0, gap:1.5, jerk:0.7 } },
-  gt:{ label:'GT', ahead:[4,12], pitch:[63,62], maxPitch:72, zoom:[22.3,21.8,21.3], spd:[18,60,140],
+  gt:{ label:'GT', ahead:[4,12], pitch:[61,60], maxPitch:72, zoom:[22.0,21.5,21.0], spd:[18,60,140],
     damp:{pos:4.6,rot:3.2,zoom:3.2,pitch:2.8}, turn:{look:125,bias:12}, fov:57, pad:0.10,
     sim:{ vmax:150, accel:2.4, brake:3.0, latG:3.2, anticip:105, racing:0.30, inter:0.6, gap:0.9, jerk:1.0 } },
-  performance:{ label:'Performance', ahead:[4,14], pitch:[64,63], maxPitch:74, zoom:[22.4,21.8,21.2], spd:[20,70,160],
+  performance:{ label:'Performance', ahead:[4,14], pitch:[62,61], maxPitch:74, zoom:[22.1,21.5,20.9], spd:[20,70,160],
     damp:{pos:6.0,rot:4.6,zoom:4.0,pitch:3.6}, turn:{look:105,bias:14}, fov:60, pad:0.09,
     sim:{ vmax:185, accel:3.3, brake:4.6, latG:4.3, anticip:78, racing:0.55, inter:0.45, gap:0.7, jerk:2.1 } },
-  ultra:{ label:'Ultra', ahead:[5,16], pitch:[65,64], maxPitch:78, zoom:[22.4,21.7,21.0], spd:[25,90,200],
+  ultra:{ label:'Ultra', ahead:[5,16], pitch:[63,62], maxPitch:78, zoom:[22.1,21.4,20.7], spd:[25,90,200],
     damp:{pos:7.6,rot:6.2,zoom:5.0,pitch:4.4}, turn:{look:88,bias:16}, fov:62, pad:0.08,
     sim:{ vmax:235, accel:4.6, brake:6.2, latG:5.6, anticip:60, racing:0.85, inter:0.30, gap:0.5, jerk:3.6 } },
-  night:{ label:'Nuit', ahead:[3,9], pitch:[61,60], maxPitch:68, zoom:[22.2,21.8,21.4], spd:[12,45,95],
+  night:{ label:'Nuit', ahead:[3,9], pitch:[59,58], maxPitch:68, zoom:[21.9,21.5,21.1], spd:[12,45,95],
     damp:{pos:3.4,rot:2.4,zoom:2.4,pitch:2.1}, turn:{look:160,bias:10}, fov:54, pad:0.12,
     sim:{ vmax:70, accel:1.2, brake:1.8, latG:2.0, anticip:120, racing:0.05, inter:0.9, gap:1.3, jerk:0.8 } }
 };
