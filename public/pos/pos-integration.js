@@ -88,6 +88,8 @@
       var r = host.getBoundingClientRect();
       if (r.width < 10 || r.height < 10) return; /* pas encore visible */
       mounting = true;
+      /* avatar choisi ? on le déclare AVANT le montage : mount() saute la silhouette paramétrique (plus de flash low-poly) et charge le GLB directement */
+      var gm0 = null; try { var g0 = POS.registry.get('garage'); gm0 = g0 && g0.resolved && g0.resolved(); if (gm0 && gm0.src && car3d.loadAvatar) car3d.loadAvatar(gm0.src, { len: 4.8, tint: gm0.tint || null, wheels: gm0.wheels !== false }); } catch (e) {}
       Promise.resolve(car3d.mount(host)).then(function (ok) {
         mounting = false;
         if (ok === false) return;                        // échec (ex. three.js hors-ligne) -> mounted reste false, remontage possible plus tard
@@ -97,7 +99,7 @@
         try {
           if (car3d.showDims) car3d.showDims(true);
           var gm = (POS.registry.get('garage') || {}).resolved && POS.registry.get('garage').resolved();
-          if (gm && gm.src && car3d.loadAvatar) car3d.loadAvatar(gm.src, { len: 4.8, tint: gm.tint || null, wheels: gm.wheels !== false });     // modèle choisi (+ teinte clay Practice)
+          if (gm && gm.src) { /* déjà demandé avant le montage : mount() l'a chargé, pas de 2e téléchargement */ }
           else if (lastVeh) car3d.buildFromVehicle(lastVeh);
           else if (vehdb && vehdb.estimate) car3d.buildFromVehicle(vehdb.estimate('hypercar'));
         } catch (e) { console.warn('[POS] car3d build', e); }

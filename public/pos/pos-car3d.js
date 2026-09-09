@@ -185,7 +185,7 @@
     offBusFns.push(POS.bus.on('vehicle:identified', function (d) {
       if (!d || !d.vehicle) return;
       lastVehicle = d.vehicle;
-      if (mounted && THREE) buildFromVehicle(lastVehicle); // rebuild auto
+      if (mounted && THREE && !pendingAvatar) buildFromVehicle(lastVehicle); // rebuild auto (pas si un avatar est choisi : il resterait le modèle affiché)
     }));
 
     /* ---------- boucle de rendu (ajoutée UNIQUEMENT si visible) ------------ */
@@ -629,8 +629,9 @@
 
         mounted = true;
         resize();
-        buildFromVehicle(lastVehicle || DEFAULT_VEHICLE);
+        if (!pendingAvatar) buildFromVehicle(lastVehicle || DEFAULT_VEHICLE);   // silhouette paramétrique SEULEMENT si aucun avatar n'est choisi (sinon flash low-poly avant le GLB)
         if (pendingAvatar) loadAvatar(pendingAvatar, pendingAvatarOpts);   // avatar choisi avant le montage
+        try { window.__posCar3dScene = scene; } catch (e) {}   // debug / tests
 
         /* rendu seulement si visible à l'écran */
         if (typeof IntersectionObserver === 'function') {
