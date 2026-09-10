@@ -454,24 +454,24 @@ var TURN_BIAS_MAX  = 12;     // deg : biais maximal de cap (a 0 m de la manoeuvr
    Bloc 'sim' = conduite autonome : vmax(km/h), accel/brake(m/s2), latG(g lateral->vitesse
    en virage), anticip(m), racing(0..1 trajectoire de corde), inter(0..1 prudence carrefour),
    gap(distance de suivi), jerk(brusquerie). ============================================ */
-var DRIVE_MODES = {
-  copilot:{ label:'Copilot', ahead:[3,10], pitch:[60,59], maxPitch:70, zoom:[22.0,21.6,21.2], spd:[15,50,110],
-    damp:{pos:4.0,rot:2.8,zoom:2.8,pitch:2.4}, turn:{look:140,bias:11}, fov:55, pad:0.10,
+var DRIVE_MODES = {   // 10 sept. 2026 : camera rapprochee (zoom +0,25) sur demande utilisateur (capture zoom manuel) ; point vise 3->2 m a l arret et ahead[1] = ahead[0]*2^(zoom[0]-zoom[2])*1.15 a vitesse (decalage voiture/pivot ~constant a l ecran), pad -0,02 : voiture entiere dans l ecran a toute vitesse (iPad 834 px)
+  copilot:{ label:'Copilot', ahead:[2.0,4.0], pitch:[60,59], maxPitch:70, zoom:[22.25,21.85,21.45], spd:[15,50,110],
+    damp:{pos:4.0,rot:2.8,zoom:2.8,pitch:2.4}, turn:{look:140,bias:11}, fov:55, pad:0.08,
     sim:{ vmax:90, accel:1.6, brake:2.2, latG:2.6, anticip:95, racing:0.15, inter:0.7, gap:1.0, jerk:1.2 } },
-  learning:{ label:'Apprentissage', ahead:[3,9], pitch:[58,57], maxPitch:68, zoom:[21.8,21.5,21.2], spd:[12,40,90],
-    damp:{pos:3.1,rot:2.1,zoom:2.2,pitch:1.9}, turn:{look:175,bias:9}, fov:52, pad:0.12,
+  learning:{ label:'Apprentissage', ahead:[2.0,3.5], pitch:[58,57], maxPitch:68, zoom:[22.05,21.75,21.45], spd:[12,40,90],
+    damp:{pos:3.1,rot:2.1,zoom:2.2,pitch:1.9}, turn:{look:175,bias:9}, fov:52, pad:0.10,
     sim:{ vmax:55, accel:1.0, brake:1.6, latG:1.8, anticip:135, racing:0.0, inter:1.0, gap:1.5, jerk:0.7 } },
-  gt:{ label:'GT', ahead:[4,12], pitch:[61,60], maxPitch:72, zoom:[22.0,21.5,21.0], spd:[18,60,140],
-    damp:{pos:4.6,rot:3.2,zoom:3.2,pitch:2.8}, turn:{look:125,bias:12}, fov:57, pad:0.10,
+  gt:{ label:'GT', ahead:[2.7,6.2], pitch:[61,60], maxPitch:72, zoom:[22.25,21.75,21.25], spd:[18,60,140],
+    damp:{pos:4.6,rot:3.2,zoom:3.2,pitch:2.8}, turn:{look:125,bias:12}, fov:57, pad:0.08,
     sim:{ vmax:150, accel:2.4, brake:3.0, latG:3.2, anticip:105, racing:0.30, inter:0.6, gap:0.9, jerk:1.0 } },
-  performance:{ label:'Performance', ahead:[4,14], pitch:[62,61], maxPitch:74, zoom:[22.1,21.5,20.9], spd:[20,70,160],
-    damp:{pos:6.0,rot:4.6,zoom:4.0,pitch:3.6}, turn:{look:105,bias:14}, fov:60, pad:0.09,
+  performance:{ label:'Performance', ahead:[2.7,7.1], pitch:[62,61], maxPitch:74, zoom:[22.35,21.75,21.15], spd:[20,70,160],
+    damp:{pos:6.0,rot:4.6,zoom:4.0,pitch:3.6}, turn:{look:105,bias:14}, fov:60, pad:0.07,
     sim:{ vmax:185, accel:3.3, brake:4.6, latG:4.3, anticip:78, racing:0.55, inter:0.45, gap:0.7, jerk:2.1 } },
-  ultra:{ label:'Ultra', ahead:[5,16], pitch:[63,62], maxPitch:78, zoom:[22.1,21.4,20.7], spd:[25,90,200],
-    damp:{pos:7.6,rot:6.2,zoom:5.0,pitch:4.4}, turn:{look:88,bias:16}, fov:62, pad:0.08,
+  ultra:{ label:'Ultra', ahead:[3.4,10.3], pitch:[63,62], maxPitch:78, zoom:[22.35,21.65,20.95], spd:[25,90,200],
+    damp:{pos:7.6,rot:6.2,zoom:5.0,pitch:4.4}, turn:{look:88,bias:16}, fov:62, pad:0.06,
     sim:{ vmax:235, accel:4.6, brake:6.2, latG:5.6, anticip:60, racing:0.85, inter:0.30, gap:0.5, jerk:3.6 } },
-  night:{ label:'Nuit', ahead:[3,9], pitch:[59,58], maxPitch:68, zoom:[21.9,21.5,21.1], spd:[12,45,95],
-    damp:{pos:3.4,rot:2.4,zoom:2.4,pitch:2.1}, turn:{look:160,bias:10}, fov:54, pad:0.12,
+  night:{ label:'Nuit', ahead:[2.0,4.0], pitch:[59,58], maxPitch:68, zoom:[22.15,21.75,21.35], spd:[12,45,95],
+    damp:{pos:3.4,rot:2.4,zoom:2.4,pitch:2.1}, turn:{look:160,bias:10}, fov:54, pad:0.10,
     sim:{ vmax:70, accel:1.2, brake:1.8, latG:2.0, anticip:120, racing:0.05, inter:0.9, gap:1.3, jerk:0.8 } }
 };
 var MODE_ALIAS = { magma:'performance', confort:'copilot', comfort:'copilot', eco:'learning', sport:'performance', track:'ultra' };
