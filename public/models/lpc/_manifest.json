@@ -4,7 +4,7 @@
   "file": "/models/practice/berline.glb",
   "label": "Berline",
   "class": "car",
-  "tint": "#575B61",
+  "tint": "#EDEEF0",
   "wheels": false
  },
  {
@@ -12,7 +12,7 @@
   "file": "/models/practice/citadine.glb",
   "label": "Citadine",
   "class": "car",
-  "tint": "#6B3B33",
+  "tint": "#EDEEF0",
   "wheels": false
  },
  {
@@ -20,7 +20,7 @@
   "file": "/models/practice/sportive.glb",
   "label": "Sportive",
   "class": "car",
-  "tint": "#E6E2DA",
+  "tint": "#EDEEF0",
   "wheels": false
  },
  {
@@ -28,7 +28,7 @@
   "file": "/models/practice/suv.glb",
   "label": "SUV",
   "class": "suv",
-  "tint": "#2F3236",
+  "tint": "#EDEEF0",
   "wheels": false
  },
  {
@@ -36,7 +36,7 @@
   "file": "/models/practice/camionnette.glb",
   "label": "Camionnette",
   "class": "van",
-  "tint": "#9AA1A9",
+  "tint": "#EDEEF0",
   "wheels": false
  },
  {
@@ -44,7 +44,7 @@
   "file": "/models/practice/compacte.glb",
   "label": "Compacte",
   "class": "car",
-  "tint": "#3B4A62",
+  "tint": "#EDEEF0",
   "wheels": false
  }
 ]

@@ -2153,7 +2153,7 @@ var CAR_GLB_URL = 'car-real.glb';   // Maybach Blender glTF (vrais materiaux/pei
           if(!this._wheels || !this._wheels.length || this._lastCar!==_g || ((this._wscan=(this._wscan||0)+1)%30===0)){ var _ws=[]; _root.traverse(function(o){ if(o.userData&&o.userData.wheel) _ws.push(o); }); this._wheels=_ws; this._lastCar=_g; }   // roues ajoutées en asynchrone -> on rescanne tant qu'il n'y en a pas, puis périodiquement
           for(var _wi=0;_wi<this._wheels.length;_wi++){ var _pv=this._wheels[_wi], _ud=_pv.userData.wheel, _wh=_pv.children[0];
             _pv.rotation.y=(_ud.front && FWD>0) ? dyn.steer : 0;             // braquage seulement si les roues avant mènent la marche
-            if(_wh && _ud.r>0) _wh.rotation.x=FWD*(dyn.spin/_ud.r)*(_ud.side<0?-1:1); }   // roulement dans le sens de marche (roue gauche retournée -> signe inversé)
+            if(_wh && _ud.r>0) _wh.rotation.x=FWD*(dyn.spin/_ud.r)*(_ud.spinSign!=null ? _ud.spinSign : (_ud.side<0?-1:1)); }   // spinSign (GLB Practice : roues gauches en miroir, pas retournées) -> même sens de roulement des deux côtés   // roulement dans le sens de marche (roue gauche retournée -> signe inversé)
         }
         window.__carDyn=dyn;
         var merc=ml.MercatorCoordinate.fromLngLat([pos.lon,pos.lat],0);
