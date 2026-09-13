@@ -1498,22 +1498,10 @@
     <h3>Assistant vocal — commande « Practice… »</h3>
     <input id="vaName" class="key-in" type="text" placeholder="Ton prénom (ex. Aldo)" autocomplete="off" style="margin-bottom:8px;"/>
     <div class="seg" id="vaSeg"><button data-va="on">Micro activé</button><button data-va="off" class="on">Coupé</button></div>
-    <h3>Timbre de voix</h3>
-    <div class="seg" id="voiceKind"><button data-vk="neural" class="on">🎬 Réaliste (Roger)</button><button data-vk="web">Navigateur</button></div>
+    <h3>Voix de Practice</h3>
+    <div class="seg" id="voiceKind"><button data-vk="neural" class="on">Voix officielle Practice</button><button data-vk="web">Voix du navigateur</button></div>
     <button id="voiceTest" class="key-in" style="margin-top:8px;cursor:pointer;text-align:center;font-weight:600;background:var(--acc);color:#000;border:none;">🎧 Écouter un exemple</button>
-    <div class="key-note">La <b>voix réaliste</b> (ElevenLabs) sonne humaine, contrairement à la voix synthétique du navigateur. Si tu n'entends rien : touche d'abord l'écran (déverrouillage audio), puis réessaie.</div>
-    <h3>Choix de la voix</h3>
-    <div class="seg" id="voicePick" style="flex-wrap:wrap;max-width:100%;">
-      <button data-voice="XrExE9yKIg1WjnnlVkGX">Matilda · sensuelle ♀</button>
-      <button data-voice="pFZP5JQG7iQjIQuC4Bku">Lily · douce ♀</button>
-      <button data-voice="Xb7hH8MSUJpSbSDYk0k2">Alice · posée ♀</button>
-      <button data-voice="EXAVITQu4vr4xnSDxMaL">Sarah · feutrée ♀</button>
-      <button data-voice="cgSgspJ2msm6clMCkdW9">Jessica · vive ♀</button>
-      <button data-voice="onwK4e9ZLuTAKqWW03F9">Daniel · grave ♂</button>
-      <button data-voice="JBFqnCBsd6RMkjVDRZzb">George · chaud ♂</button>
-      <button data-voice="nPczCjzI2devNBz1zQrb">Brian · profond ♂</button>
-    </div>
-    <div class="key-note">Touche une voix pour l'<b>écouter</b> et la <b>choisir</b> (gardée pour la suite). Pour un vibe <b>Joi (Blade Runner) / Samantha (« Her ») / Scarlett</b> — chaud, doux, intime — essaie <b>Matilda</b> (défaut) et <b>Sarah</b> (la plus douce), et garde celle qui te touche le plus à l'oreille. Toutes sont anglophones à la base : l'accent français n'est pas parfait (une vraie voix FR sensuelle comme Charlotte est payante).</div>
+    <div class="key-note"><b style="display:block;color:var(--txt);font-size:12px;font-weight:600;margin-bottom:3px;">Voix de synthèse — Practice est une intelligence artificielle.</b> La voix officielle est générée à l'avance : ni compte, ni crédit, et aucune phrase n'est envoyée à un service de voix. Ce qu'elle ne connaît pas à l'avance (noms de lieux, réponses libres, anglais, japonais) est lu par la voix du navigateur. Si tu n'entends rien : touche d'abord l'écran, puis réessaie.</div>
     <h3>🧠 Cerveau local — réflexion sur l'appareil</h3>
     <button id="localBrainBtn" class="key-in" style="margin-top:4px;cursor:pointer;text-align:center;font-weight:600;background:var(--acc);color:#000;border:none;">🧠 Activer le cerveau local</button>
     <div id="localBrainStat" class="key-note">Désactivé. Une IA open-source qui tourne <b>100 % sur ton appareil</b> — aucune autre IA, aucune clé, privé. Elle <b>raisonne vraiment</b> (plus un organigramme). Au 1er lancement : <b>~0,8 Go à télécharger</b> (gardé en cache ensuite), <b>Chrome/Edge récent + WebGPU</b> requis (PC ou Android récent ; pas sur iPhone). Plus faible que ChatGPT/Gemini — mais c'est <b>le tien</b>.</div>
@@ -1999,7 +1987,7 @@
       calc:function(km,min){return 'Itinéraire calculé. '+km+' kilomètres, environ '+min+' minutes.';},
       inDist:function(d,i){return 'Dans '+d+' mètres, '+i+'.';}, arrived:'Tu es arrivé. Bien joué.', reroute:'Recalcul de l’itinéraire…',
       fast:'Doucement, tu roules vite.', stop:'On est à l’arrêt.', notFound:'Adresse introuvable.', netErr:'Réseau indisponible.',
-      onto:function(n){return ' sur '+n;}, turns:{left:'tourne à gauche',right:'tourne à droite',sleft:'serre à gauche',sright:'serre à droite',hleft:'tourne franchement à gauche',hright:'tourne franchement à droite',straight:'continue tout droit',uturn:'fais demi-tour',merge:'insère-toi',roundabout:function(n){return 'au rond-point, prends la '+n+'e sortie';},keepleft:'garde la gauche',keepright:'garde la droite',arrive:'tu es arrivé'} },
+      onto:function(n){return ' sur '+n;}, turns:{left:'tourne à gauche',right:'tourne à droite',sleft:'serre à gauche',sright:'serre à droite',hleft:'tourne franchement à gauche',hright:'tourne franchement à droite',straight:'continue tout droit',uturn:'fais demi-tour',merge:'insère-toi',roundabout:function(n){n=+n||1;return 'au rond-point, prends la '+(['première','deuxième','troisième','quatrième','cinquième','sixième','septième','huitième'][n-1]||(n+'e'))+' sortie';},keepleft:'garde la gauche',keepright:'garde la droite',arrive:'tu arrives à destination'} },
     en: { code:'en-US', ready:'Co-pilot ready.', go:'Let’s go. I’ll guide you.', cruising:['Road is clear.','All smooth.','I’m watching.'],
       calc:function(km,min){return 'Route ready. '+km+' kilometres, about '+min+' minutes.';},
       inDist:function(d,i){return 'In '+d+' metres, '+i+'.';}, arrived:'You’ve arrived. Well done.', reroute:'Recalculating route…',
@@ -2015,7 +2003,7 @@
 
   /* ---------- voice ---------- */
   var Voice = {
-    on:true, rate:0.98, sayRate:0.92, sayPitch:0.98, pitch:0.97, volume:0.98, gender:'female', neural:true, ttsVoice:'XrExE9yKIg1WjnnlVkGX', supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
+    on:true, rate:0.98, sayRate:0.92, sayPitch:0.98, pitch:0.97, volume:0.98, gender:'male', neural:true, supported:('speechSynthesis' in window), voice:null, busy:false, queue:[], safety:null,
     pick:function(){ if(!this.supported) return; var all=speechSynthesis.getVoices()||[]; var base=T().code.slice(0,2); var self=this;
       var m=all.filter(function(v){return (v.lang||'').toLowerCase().indexOf(base)===0;});
       m.sort(function(a,b){return s(b)-s(a);}); this.voice=m[0]||null;
@@ -2029,13 +2017,13 @@
         if(self.gender==='male'){ if(male.test(n))x+=75; if(fem.test(n))x-=25; }
         else { if(fem.test(n))x+=75; if(male.test(n))x-=25; }
         return x; } },
-    say:function(t,p){ if(!this.on||!t) return; if(typeof sayVA==='function'){ sayVA(t,true,+p>=2); return; } /* voix unifiée : tout passe par la voix humaine (Jessica), repli moteur navigateur géré dans sayVA */ if(this.busy){ if(!this.queue.length)this.queue.push({t:t,p:p}); else if(p>this.queue[0].p)this.queue[0]={t:t,p:p}; return;} this._speak(t,p); },
+    say:function(t,p){ if(!this.on||!t) return; if(typeof sayVA==='function'){ sayVA(t,true,+p>=2); return; } /* voix unifiée : tout passe par sayVA (voix officielle Practice, repli voix du navigateur) */ if(this.busy){ if(!this.queue.length)this.queue.push({t:t,p:p}); else if(p>this.queue[0].p)this.queue[0]={t:t,p:p}; return;} this._speak(t,p); },
     _speak:function(t){ this.busy=true; var self=this,called=false; var done=function(){if(called)return;called=true;clearTimeout(self.safety);self.busy=false;if(self.queue.length){var n=self.queue.shift();self._speak(n.t,n.p);}};
       if(!this.supported){setTimeout(done,300);return;}
       var u=new SpeechSynthesisUtterance(t); if(this.voice){u.voice=this.voice;u.lang=this.voice.lang;}else u.lang=T().code;
       u.rate=this.rate||0.98;u.pitch=this.pitch||0.97; u.onend=done;u.onerror=done; clearTimeout(this.safety); this.safety=setTimeout(done,1400+t.length*80);
       try{speechSynthesis.speak(u);}catch(e){done();} },
-    flush:function(){ this.queue=[];this.busy=false;clearTimeout(this.safety); if(this.supported)speechSynthesis.cancel(); if(typeof stopNeural==='function')stopNeural(); }
+    flush:function(){ this.queue=[];this.busy=false;clearTimeout(this.safety); if(typeof voiceCut==='function'){ voiceCut(); return; } if(this.supported)speechSynthesis.cancel(); }
   };
   if(Voice.supported){ speechSynthesis.onvoiceschanged=function(){Voice.pick();}; }
 
@@ -2100,14 +2088,14 @@
   /* ---------- ADAPTIVE IDENTITY: modes ---------- */
   var mode='copilot';
   var MODES={
-    copilot:{name:'Copilot',rate:0.98,say:'Mode copilote. Je veille sur toi.'},
-    learning:{name:'Learning',rate:0.97,say:'Mode apprentissage. On progresse ensemble.'},
-    performance:{name:'Performance',rate:1.05,say:'Mode performance. Concentration.'},
-    ultra:{name:'Ultra Race',rate:1.18,say:'Mode course. Attaque.'},
-    gt:{name:'Grand Touring',rate:0.92,say:'Mode grand tourisme. Profite de la route.'},
-    night:{name:'Night',rate:0.9,say:'Mode nuit. Tout est calme.'},
-    magma:{name:'Magma',rate:1.08,say:'Mode Magma. Incandescent.'},
-    rally:{name:'Rally',rate:1.12,say:'Mode rally. Style, drift et liberté.'}
+    copilot:{name:'Copilot',fr:'copilote',rate:0.98,say:'Mode copilote. Je veille sur toi.'},
+    learning:{name:'Learning',fr:'apprentissage',rate:0.97,say:'Mode apprentissage. On progresse ensemble.'},
+    performance:{name:'Performance',fr:'performance',rate:1.05,say:'Mode performance. Concentration.'},
+    ultra:{name:'Ultra Race',fr:'course',rate:1.18,say:'Mode course. Attaque.'},
+    gt:{name:'Grand Touring',fr:'grand tourisme',rate:0.92,say:'Mode grand tourisme. Profite de la route.'},
+    night:{name:'Night',fr:'nuit',rate:0.9,say:'Mode nuit. Tout est calme.'},
+    magma:{name:'Magma',fr:'Magma',rate:1.08,say:'Mode Magma. Incandescent.'},
+    rally:{name:'Rally',fr:'rally',rate:1.12,say:'Mode rally. Style, drift et liberté.'}
   };
   /* (tileStyle() supprimé : le fond de plan ne dépend plus du thème ni du mode — voir PLAN_PROVIDERS) */
   function setMode(m,silent){ if(!MODES[m])m='copilot'; mode=m; document.body.setAttribute('data-mode',m); if($('dmMode'))$('dmMode').textContent=MODES[m].name; Voice.rate=MODES[m].rate; if(!silent && window.daLoader){ window.daLoader.show('Mode '+MODES[m].name); setTimeout(function(){ if(window.daLoader)window.daLoader.hide(); },650); } applyTheme(); syncPanel(); if(typeof renderRouteOverlay==='function'&&navActive)renderRouteOverlay(); if(typeof postHudMode==='function')postHudMode(); if(typeof postHudRoute==='function')postHudRoute(); if(!silent && Voice.on){Voice.flush();Voice.say(MODES[m].say,2);} if(!silent){Mem.prefs.mode=m;saveMem();} }
@@ -2314,7 +2302,10 @@
 
   /* ---------- weather (Open-Meteo, free no-key) ---------- */
   var wxAt=0, wxLL=null;
-  var WX={0:['Dégagé','☀'],1:['Clair','🌤'],2:['Nuageux','⛅'],3:['Couvert','☁'],45:['Brouillard','🌫'],48:['Brouillard','🌫'],51:['Bruine','🌦'],61:['Pluie','🌧'],63:['Pluie','🌧'],65:['Forte pluie','🌧'],71:['Neige','🌨'],80:['Averses','🌦'],95:['Orage','⛈']};
+  var WX={0:['Dégagé','☀'],1:['Clair','🌤'],2:['Nuageux','⛅'],3:['Couvert','☁'],45:['Brouillard','🌫'],48:['Brouillard','🌫'],51:['Bruine','🌦'],53:['Bruine','🌦'],55:['Bruine','🌦'],56:['Bruine verglaçante','🌧'],57:['Bruine verglaçante','🌧'],61:['Pluie','🌧'],63:['Pluie','🌧'],65:['Forte pluie','🌧'],66:['Pluie verglaçante','🌧'],67:['Pluie verglaçante','🌧'],71:['Neige','🌨'],73:['Neige','🌨'],75:['Forte neige','❄'],77:['Neige','🌨'],80:['Averses','🌦'],81:['Averses','🌦'],82:['Fortes averses','⛈'],85:['Averses de neige','🌨'],86:['Averses de neige','🌨'],95:['Orage','⛈'],96:['Orage avec grêle','⛈'],99:['Orage avec grêle','⛈']};
+  /* description du ciel -> phrase parlée (banque de la voix officielle) ; les codes dangereux (verglas, neige forte, grêle) sont annoncés avec prudence */
+  var CIEL={'Dégagé':'Ciel dégagé.','Clair':'Ciel clair.','Nuageux':'Temps nuageux.','Couvert':'Ciel couvert.','Brouillard':'Du brouillard, attention à la visibilité.','Bruine':'Il bruine.','Pluie':'Il pleut.','Forte pluie':'Forte pluie, prudence sur la route.','Neige':'Il neige, prudence sur la route.','Averses':'Averses dans le secteur.','Orage':'Orage dans le secteur, prudence.',
+    'Bruine verglaçante':'Bruine verglaçante, risque de verglas, prudence.','Pluie verglaçante':'Pluie verglaçante, risque de verglas, prudence.','Forte neige':'Fortes chutes de neige, prudence sur la route.','Fortes averses':'Fortes averses, prudence sur la route.','Averses de neige':'Averses de neige, prudence sur la route.','Orage avec grêle':'Orage avec grêle dans le secteur, prudence.'};
   function maybeWeather(lat,lon){
     var now=Date.now(); if(now-wxAt<600000 && wxLL) return; // every 10 min
     if(wxLL && haversine(wxLL,{lat:lat,lon:lon})<3000 && wxAt) return;
@@ -2484,12 +2475,12 @@
     w.steps.forEach(function(c,i){ var el=document.createElement('i'); var hh=20+((c-1)/Math.max(mx-1,0.25))*80; el.style.height=Math.min(100,hh).toFixed(0)+'%'; var l=trLevel(c); el.style.background=l[1]; el.style.color=l[1]; if(i===w.best)el.className='best'; sp.appendChild(el); });
     if(route&&route.dur){
       var base=route.dur/60, nowMin=base*cf, save=Math.round(nowMin-base*w.bv);
-      $('trDelay').textContent='+'+Math.round(nowMin-base)+' min trafic';
+      trDelayMin=Math.round(nowMin-base); $('trDelay').textContent='+'+trDelayMin+' min trafic';
       if(w.best===0||save<2){ $('trAdvice').innerHTML='<b>Partez maintenant.</b> '+(cf>1.25?'Le trafic ne fera qu’empirer.':'Conditions favorables · ETA ~'+Math.round(nowMin)+' min.'); }
       else { var dt=new Date(now.getTime()+w.best*10*60000); $('trAdvice').innerHTML='<b>Attendez '+(w.best*10)+' min</b> (départ '+clk(dt)+') : vous gagnez '+save+' min — pic de trafic en cours.'; }
       if(!TT_KEY){ $('navEta').innerHTML=Math.round(nowMin)+' min <span class="eta-conf">'+(typeof navConf==='function'?navConf():83)+'%</span>'; $('navState').textContent=lv[0]; }
     } else {
-      $('trDelay').textContent='';
+      $('trDelay').textContent=''; trDelayMin=null;
       $('trAdvice').textContent=(cf>1.25?'Trafic chargé en ce moment ('+lv[0].toLowerCase()+'). ':'Trafic '+lv[0].toLowerCase()+'. ')+'Lance un itinéraire pour le meilleur départ.';
     }
     if(TT_KEY) liveTraffic();
@@ -2501,14 +2492,14 @@
         var live=s.travelTimeInSeconds/60, nofx=(s.noTrafficTravelTimeInSeconds||s.travelTimeInSeconds)/60, delay=Math.round((s.trafficDelayInSeconds||0)/60);
         var ratio=nofx>0?live/nofx:1, lv=trLevel(ratio);
         $('trSrc').textContent='● live'; $('trDot').style.background=lv[1]; $('trDot').style.color=lv[1]; $('trLvl').textContent=lv[0];
-        $('trDelay').textContent=delay>0?'+'+delay+' min trafic':'fluide';
+        trDelayMin=Math.max(0,delay); $('trDelay').textContent=delay>0?'+'+delay+' min trafic':'fluide';
         $('navEta').innerHTML=Math.round(live)+' min <span class="eta-conf">'+(typeof navConf==='function'?navConf():92)+'%</span>'; $('navState').textContent=lv[0];
       }).catch(function(){});
   }
-  function announceTraffic(){ if(!route||!route.dur||!Voice.on) return; var now=new Date(), cf=congestion(now), base=route.dur/60, w=bestWindow(now), save=Math.round(base*cf-base*w.bv); var msg;
-    if(w.best===0||save<2){ msg= cf>1.25 ? 'Trafic dense, mais il ne fera qu’empirer. Mieux vaut partir maintenant.' : 'Trafic fluide. Bon moment pour partir.'; }
-    else { msg='Conseil départ : attends '+(w.best*10)+' minutes, tu gagneras environ '+save+' minutes.'; }
-    Voice.say(msg,2); }
+  function announceTraffic(){ if(!route||!route.dur||!Voice.on) return; var now=new Date(), cf=congestion(now), base=route.dur/60, w=bestWindow(now), save=Math.round(base*cf-base*w.bv);
+    /* conseil en file (prio 1) : il suit l'annonce d'itinéraire au lieu de la couper */
+    if(w.best===0||save<2){ Voice.say(cf>1.25 ? 'Trafic dense, mais il ne fera qu’empirer. Mieux vaut partir maintenant.' : 'Trafic fluide. Bon moment pour partir.',1); return; }
+    Voice.say('Conseil départ : attends '+(w.best*10)+' minutes.',1); Voice.say(save>=65?'Tu gagneras plus d’une heure.':'Tu gagneras environ '+gainVoix(save)+' minutes.',1); }
 
   /* ---------- diagnostics (Carly-style health + DTC) ---------- */
   var DSYS=[
@@ -2690,13 +2681,14 @@
     return (j&&j.routes&&j.routes.length)?j.routes.map(osrmRt):null; }); }
   function setRouteData(rt){ route=rt;stepIdx=0;stepAnnounced=false;navActive=true;offCount=0;stepMinD=Infinity;
     rt.cum=[0];rt.total=0; for(var i=1;i<rt.coords.length;i++){var a=rt.coords[i-1],b=rt.coords[i];rt.total+=haversine({lat:a[1],lon:a[0]},{lat:b[1],lon:b[0]});rt.cum[i]=rt.total;}
-    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); document.body.setAttribute('data-navigating','1'); document.body.removeAttribute('data-explore'); document.body.removeAttribute('data-maptools'); refilterMarkers(); if(raceLayer)raceLayer.clearLayers(); postHudRoute(); }
+    navRemM=rt.dist||rt.total||0; navRemMin=(rt.dur||0)/60;   /* reste initial, affiné ensuite par navigate() */
+    routeLine.setLatLngs(rt.coords.map(function(c){return [c[1],c[0]];})); $('navbar').classList.add('show'); document.body.setAttribute('data-navigating','1'); document.body.removeAttribute('data-explore'); document.body.removeAttribute('data-maptools'); refilterMarkers(); if(raceLayer)raceLayer.clearLayers(); postHudRoute(); preloadRoute(rt); }
   function postHudRoute(){ var f=$('hudFrame'); if(f&&f.contentWindow){ try{ f.contentWindow.postMessage({type:'route',coords:(navActive&&route&&route.coords)?route.coords:null},'*'); }catch(e){} } }
   /* annonce vocale : Practice répète à voix haute l'adresse saisie dès qu'on lance un trajet */
   var DEST_PREFIX={fr:'Destination : ',en:'Destination: ',es:'Destino: ',de:'Ziel: ',it:'Destinazione: ',pt:'Destino: ',nl:'Bestemming: ',ja:'目的地：',zh:'目的地：',ar:'الوجهة: ',ru:'Пункт назначения: '};
   function sayDestination(name){ if(!name||!Voice.on)return; name=(''+name).split(',')[0].trim(); if(!name)return;
     var base=((typeof T==='function'&&T()&&T().code)||'fr').slice(0,2); var pre=(DEST_PREFIX[base]!=null)?DEST_PREFIX[base]:'';
-    Voice.say(pre+name,3); }
+    Voice.say(pre+name,1); }   /* en file : ne coupe plus « On y va, direction la maison. » ni « Je t'emmène à … » */
   function startRouteTo(to){ var from=pts.length?pts[pts.length-1]:null; if(!from){toast('Active d’abord ta position.');return;}
     pendingNav=null;
     sayDestination(($('dest')&&$('dest').value)||(to&&to.name));
@@ -2705,13 +2697,13 @@
       if(destMarker)map.removeLayer(destMarker); destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
       try{map.fitBounds(routeLine.getBounds().pad(0.2));}catch(e){} follow=true;$('followBtn').textContent='⊙';
       if(window.daCost) daCost.setRoute({ distM:rt.dist, durS:rt.dur });
-      var kmN=(rt.dist/1000).toFixed(1),km=fDist(rt.dist),min=Math.round(rt.dur/60); $('routeInfo').innerHTML='<b>'+km+'</b> · '+min+' min';
+      var km=fDist(rt.dist),min=Math.round(rt.dur/60); $('routeInfo').innerHTML='<b>'+km+'</b> · '+min+' min';
       $('navEta').textContent=min+' min'; $('navSub').textContent=km; $('navState').textContent='Active';
       try{ if(window.daCost){ window.daCost.setRoute({distM:rt.dist,durS:rt.dur}); var _est=window.daCost._est&&window.daCost._est(); var _cEl=$('navCost'); if(_cEl){ if(_est&&_est.total){ _cEl.textContent='≈ '+_est.total.toFixed(2).replace('.',',')+' € · essence + péages'; _cEl.style.display='block'; } else { _cEl.style.display='none'; } } } }catch(e){}
-      setState('safe');setMsg(T().go,km+' · '+min+' min');Voice.say(T().calc(kmN,min),2);
+      setState('safe');setMsg(T().go,km+' · '+min+' min');sayRouteCalc(rt.dist,rt.dur);
       updateTraffic(); setTimeout(announceTraffic,4200); if(demoMode)driveDemo(rt.coords);
     }).catch(function(){toast(T().netErr);setMsg(T().ready,'');}); }
-  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null; document.body.removeAttribute('data-navigating'); if(window.daCost)daCost.setRoute(null);routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if(raceLayer)raceLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; releaseWake(); refilterMarkers(); if(typeof postHudRoute==='function')postHudRoute(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
+  function stopNav(){ navActive=false;route=null;currentDest=null;altRoute=null; document.body.removeAttribute('data-navigating'); if(window.daCost)daCost.setRoute(null);routeLine.setLatLngs([]); if(trafficLayer)trafficLayer.clearLayers(); if(ghostLayer)ghostLayer.clearLayers(); if(raceLayer)raceLayer.clearLayers(); if($('ghostPrompt'))$('ghostPrompt').classList.remove('show'); if(routeLine)routeLine.setStyle({opacity:.92}); if(destMarker){map.removeLayer(destMarker);destMarker=null;} $('navbar').classList.remove('show'); $('navEta').textContent='—';$('navSub').textContent='Entre une destination';$('navState').textContent='—'; if($('trDelay'))$('trDelay').textContent=''; trDelayMin=null; navRemM=0; navRemMin=0; releaseWake(); refilterMarkers(); if(typeof postHudRoute==='function')postHudRoute(); setTimeout(function(){setUiMode('idle');document.body.removeAttribute('data-attn');attnLevel='med';if($('nvCtx'))$('nvCtx').textContent='';},1500); }
   function reroute(pos){ if(!currentDest)return; rerouting=true;setState('attention');toast(T().reroute);Voice.say(T().reroute,1);
     getRoute(pos,currentDest).then(function(rt){rerouting=false;if(rt){setRouteData(rt);colorRouteTraffic(pos,currentDest);setState('safe');}}).catch(function(){rerouting=false;}); }
   function maneuverText(step){ var m=step.maneuver||{},mod=m.modifier||'',t=m.type||'',tr=T().turns;
@@ -2724,6 +2716,23 @@
     if(mod==='left')return '⬅';if(mod==='right')return '➡';if(mod==='slight left')return '↖';if(mod==='slight right')return '↗';
     if(mod==='sharp left')return '⬉';if(mod==='sharp right')return '⬈'; return '⬆'; }
   function etaText(remM,remMin){ var km=fDist(remM); var d=new Date(Date.now()+remMin*60000); return '<b>'+km+'</b> · '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
+  /* ===== textes parlés BORNÉS : chaque valeur est arrondie pour tomber sur une phrase de la banque de la voix officielle (la valeur exacte reste affichée) ===== */
+  var navRemM=0, navRemMin=0, trDelayMin=null;   /* reste du trajet (mis à jour par navigate) et retard trafic, pour les réponses vocales */
+  function durVoix(m){ m=Math.max(0,Math.round(+m||0)); if(m>10&&m<60)m=Math.round(m/5)*5; else if(m>=60&&m<120)m=Math.round(m/15)*15; else if(m>=120&&m<180)m=Math.round(m/30)*30; else if(m>=180)m=Math.round(m/60)*60;
+    if(m<60)return m+(m>1?' minutes':' minute'); var h=Math.floor(m/60), mm=m%60; return (h===1?'1 heure':h+' heures')+(mm?' '+mm:''); }
+  function etaVoix(min){ var m=Math.round(+min||0); return m<1?'Arrivée imminente.':'Arrivée dans '+durVoix(m)+'.'; }
+  function kmVoix(m){ m=+m||0; if(m<950)return Math.max(100,Math.round(m/100)*100)+' mètres'; var k=m/1000, s=k<10.5?1:k<32.5?5:k<105?10:k<325?50:100; k=Math.round(k/s)*s; if(k>1000)return 'plus de 1000 kilomètres'; return k===1?'1 kilomètre':k+' kilomètres'; }
+  function retardVoix(d){ d=Math.round(+d||0); if(d<=0)return 'Pas de retard.'; if(d>60)return 'Plus d’une heure de retard.'; if(d>30)d=Math.round(d/10)*10; else if(d>5)d=Math.round(d/5)*5; return d+(d>1?' minutes':' minute')+' de retard.'; }
+  function gainVoix(g){ g=Math.round(+g||0); if(g>5&&g<=30)g=Math.round(g/5)*5; else if(g>30&&g<65)g=Math.round(g/10)*10; return g; }   /* 65 min et plus : « Tu gagneras plus d’une heure. » (announceTraffic) */
+  function heureVoix(d){ d=d||new Date(); var H=d.getHours(), MM=d.getMinutes(); return 'Il est '+(H===0?'minuit':H===12?'midi':H===1?'1 heure':H+' heures')+(MM?' '+MM:'')+'.'; }   /* à la minute près */
+  function tempVoix(t){ t=Math.round(+t||0); return 'Il fait '+(t<0?'moins '+(-t):t)+' '+(Math.abs(t)<2?'degré':'degrés')+'.'; }
+  function vitesseVoix(k){ var v=Math.round((+k||0)/5)*5; return v===0?'On est à l’arrêt.':'Tu roules à '+v+' kilomètres heure.'; }
+  function pauseVoix(ms){ var m=Math.min(1080,Math.max(30,Math.round((+ms||0)/60000/15)*15)), h=Math.floor(m/60), mm=m%60; return 'Tu roules depuis '+(m<60?m+' minutes':(h===1?'1 heure':h+' heures')+(mm?' '+mm:''))+'.'; }   /* durée parlée au quart d'heure */
+  function sayRouteCalc(dist,dur){ if(LANG==='fr'){ Voice.say('Itinéraire calculé.',1); Voice.say(etaVoix((+dur||0)/60),1); } else Voice.say(T().calc(((+dist||0)/1000).toFixed(1),Math.round((+dur||0)/60)),2); }   /* 2 phrases en file : ne coupent pas « Destination : … » */
+  function sayEta(){ sayVA((navActive&&route)?etaVoix(navRemMin):'Aucun trajet en cours.'); }
+  function sayDist(){ sayVA((navActive&&route)?('Il reste '+kmVoix(navRemM)+'.'):'Aucun trajet en cours.'); }
+  function sayTraffic(){ var lv=$('trLvl')?($('trLvl').textContent||'').trim():''; sayVA('Trafic '+((lv&&lv!=='—')?lv:'inconnu').toLowerCase()+'.'); if(navActive&&route&&trDelayMin!=null)sayVA(retardVoix(trDelayMin),false,false,true); }   /* 2e phrase = suite de la réponse (micro coupé jusqu'au bout) */
+  function sayMeteo(){ var tp=parseInt(($('wxTemp')&&$('wxTemp').textContent)||'',10), de=$('wxDesc')?($('wxDesc').textContent||'').trim():''; if(isNaN(tp)){ sayVA('Je n’ai pas encore la météo.'); return; } sayVA(tempVoix(tp)); if(CIEL[de])sayVA(CIEL[de],false,false,true); }
   /* ---- cognitive nav layer: system mode, attention tuning, confidence, context ---- */
   var uiMode='idle', attnLevel='med';
   function setUiMode(m){ if(uiMode===m)return; uiMode=m; document.body.setAttribute('data-uimode',m);
@@ -2736,7 +2745,7 @@
     if(!route.coords||!route.coords.length)return; var nIdx=0,nMin=Infinity;
     for(var i=0;i<route.coords.length;i++){var c=route.coords[i];var dd=haversine(pos,{lat:c[1],lon:c[0]});if(dd<nMin){nMin=dd;nIdx=i;}}
     if(nMin>55){offCount++;if(offCount>=3&&!rerouting){offCount=0;reroute(pos);return;}}else offCount=0;
-    var remM=Math.max(0,route.total-(route.cum[nIdx]||0)); var avg=(route.dist>0&&route.dur>0)?route.dist/route.dur:12; var useSpd=spdK>8?spdK/3.6:avg; var remMin=remM/Math.max(useSpd,3)/60;
+    var remM=Math.max(0,route.total-(route.cum[nIdx]||0)); var avg=(route.dist>0&&route.dur>0)?route.dist/route.dur:12; var useSpd=spdK>8?spdK/3.6:avg; var remMin=remM/Math.max(useSpd,3)/60; navRemM=remM; navRemMin=remMin;
     $('routeInfo').innerHTML=etaText(remM,remMin); $('navEta').innerHTML=Math.round(remMin)+' min <span class="eta-conf">'+navConf()+'%</span>'; $('navSub').textContent=fDist(remM);
     if(!route.steps||stepIdx>=route.steps.length)return; var step=route.steps[stepIdx],loc=step.maneuver.location; var d=haversine(pos,{lat:loc[1],lon:loc[0]});
     if(stepIdx===route.steps.length-1&&(d<30||remM<25)){setState('safe');setUiMode('parking');$('navbar').classList.remove('show');setMsg(T().arrived,'');Voice.say(T().arrived,2);releaseWake();stopNav();return;}
@@ -2746,7 +2755,7 @@
       var a=ln(route.steps[stepIdx+1]), b=ln(route.steps[stepIdx+2]); var h=''; if(a)h+='Puis : '+a; if(b)h+='<br>Puis : '+b; return h||'Puis : <b>arrivée</b>'; })();
     setAttn(d<180?'critical':d<560?'high':(spdK>92&&d>1100)?'low':'med');
     setUiMode(d<180?'critical':((function(){try{return congestion(new Date())>1.30;}catch(e){return false;}})()?'assisted':'active'));
-    if(!stepAnnounced&&d<230){stepAnnounced=true;setState('attention');var rd=Math.max(20,Math.round(d/20)*20);setMsg(cap(instr),'dans '+rd+' m');Voice.say(T().inDist(rd,instr+(name?T().onto(name):'')),2);}
+    if(!stepAnnounced&&d<230){stepAnnounced=true;setState('attention');var rd=Math.min(200,Math.max(50,Math.round(d/50)*50));setMsg(cap(instr),'dans '+rd+' m');Voice.say(T().inDist(rd,instr),2);}   /* distance au pas de 50 m ; le nom de rue n'est plus prononcé (affiché dans #mvStreet) */
     if(d<38||(stepMinD<70&&d>stepMinD+25)){stepIdx++;stepAnnounced=false;stepMinD=Infinity;setState('safe');}
   }
   function requestWake(){try{if('wakeLock'in navigator)navigator.wakeLock.request('screen').then(function(w){wakeLock=w;}).catch(function(){});}catch(e){}}
@@ -2782,7 +2791,7 @@
     getRoute(from,to).then(function(rt){ if(!rt){toast(T().netErr);return;} currentDest=to;setRouteData(rt);colorRouteTraffic(from,to);
       destMarker=L.marker([to.lat,to.lon],{icon:L.divIcon({className:'',html:'<div class="dest-pin">📍</div>',iconSize:[24,24],iconAnchor:[12,24]})}).addTo(map);
       var km=fDist(rt.dist),min=Math.round(rt.dur/60);$('routeInfo').innerHTML='<b>'+km+'</b> · '+min+' min';$('navEta').textContent=min+' min';$('navSub').textContent=km;$('navState').textContent='Démo';
-      Voice.say(T().calc(km,min),2);updateTraffic();setTimeout(announceTraffic,4200);follow=true;$('followBtn').textContent='⊙'; driveDemo(rt.coords);
+      sayRouteCalc(rt.dist,rt.dur);updateTraffic();setTimeout(announceTraffic,4200);follow=true;$('followBtn').textContent='⊙'; driveDemo(rt.coords);
     }).catch(function(){toast(T().netErr);}); }
   function hideGate(){$('gate').style.display='none';}
 
@@ -2941,19 +2950,26 @@
 
   /* ===== voice assistant — "Practice …" wake word + command engine (Web Speech API) ===== */
   var recog=null, vaOn=false, vaPrimed=false;
-  function vaName(){ return (Mem.prefs.name||'Aldo'); }
-  var lastSpoken='';
-  /* Voix de Practice : 1) TTS neuronal ElevenLabs (vraiment humain, façon Joi) si une clé existe sur Vercel ; 2) sinon repli sur la voix du navigateur. */
+  function vaName(){ return String(Mem.prefs.name||'').trim(); }   /* prénom facultatif : aucun prénom par défaut */
+  function vaNm(sep){ var n=vaName(); return n?((sep==null?' ':sep)+n):''; }   /* ' Prénom' ou '' : sans prénom, le gabarit donne la phrase de la banque */
+  var lastGroup=[];   /* dernière réponse dite, suites enchaînées comprises (« répète » la redit en entier) */
+  /* Voix de Practice : 1) VOIX OFFICIELLE = banque de MP3 pré-générés (voix de synthèse, public/voice/practice/fr) ; 2) phrase absente de la banque -> voix du navigateur. */
   /* un seul élément audio, déverrouillé au 1er geste utilisateur (sinon iOS bloque la lecture auto) */
-  var SILENT_WAV='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+  /* WAV silencieux VALIDE construit en mémoire (0,1 s, 8 kHz, 8 bits, mono) : un WAV sans échantillon est refusé par WebKit */
+  var SILENT_WAV=(function(){ try{ var n=800, b=new Uint8Array(44+n), v=new DataView(b.buffer), s='', i;
+    function w(o,x){ for(var k=0;k<x.length;k++)b[o+k]=x.charCodeAt(k); }
+    w(0,'RIFF'); v.setUint32(4,36+n,true); w(8,'WAVE'); w(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,8000,true); v.setUint32(28,8000,true); v.setUint16(32,1,true); v.setUint16(34,8,true); w(36,'data'); v.setUint32(40,n,true);
+    for(i=44;i<b.length;i++)b[i]=128; for(i=0;i<b.length;i++)s+=String.fromCharCode(b[i]); return 'data:audio/wav;base64,'+btoa(s); }catch(e){ return ''; } })();
   var neuralAudio=new Audio(); try{neuralAudio.setAttribute('playsinline','');neuralAudio.preload='auto';}catch(e){}
-  var neuralOff=false, neuralPlayed=false;
-  function unlockNeural(){ if(neuralPlayed)return; try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0&&!neuralAudio.paused)return; neuralAudio.muted=true; neuralAudio.src=SILENT_WAV; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){neuralAudio.pause();neuralAudio.muted=false;},function(){neuralAudio.muted=false;}); else neuralAudio.muted=false; }catch(e){} }
-  ['pointerdown','touchend','click'].forEach(function(ev){ document.addEventListener(ev,function(){ unlockNeural(); },true); });
-  function stopNeural(){ try{ neuralAudio.pause(); }catch(e){} }
+  var neuralPlayed=false, bankOwner=0;
+  /* déverrouillage : silence joué NON muet dans le geste, sur le même élément, jamais pendant une phrase ; une fois réussi, on ne relance plus */
+  function unlockNeural(){ if(neuralPlayed||!SILENT_WAV||bankOwner||!neuralAudio.paused)return;   /* on ne vole jamais un MP3 en cours, mais on déverrouille même si la voix du navigateur parle */ try{ neuralAudio.onended=neuralAudio.onerror=neuralAudio.onplaying=neuralAudio.onloadedmetadata=null; neuralAudio.muted=false; neuralAudio.src=SILENT_WAV; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){ neuralPlayed=true; },function(){}); else neuralPlayed=true; }catch(e){} }
+  ['touchend','click','keydown'].forEach(function(ev){ document.addEventListener(ev,function(){ unlockNeural(); },true); });
+  /* arrêt de la lecture banque : handlers retirés AVANT la pause -> aucun enchaînement ni repli parasite */
+  function stopNeural(){ bankOwner=0; try{ neuralAudio.onended=neuralAudio.onerror=neuralAudio.onplaying=neuralAudio.onloadedmetadata=null; neuralAudio.pause(); }catch(e){} }
   /* Practice ne doit pas s'écouter parler (sinon il coupe sa phrase) : on ignore le micro pendant qu'il parle, et on relance le minuteur de conversation quand il a fini */
   /* ===== verrou de réponse STRICT : une seule réponse active à la fois ; micro coupé pendant que Practice parle (impossible qu'il s'entende -> aucune récursion, aucune auto-réponse, aucun doublon) ===== */
-  var vaSpeaking=false, vaSpeakEnd=0, speakSafety=null, responding=false, recogRunning=false, recogPaused=false, respondSafety=null, spkBusy=false, spkQ=null;
+  var vaSpeaking=false, vaSpeakEnd=0, speakSafety=null, responding=false, recogRunning=false, recogPaused=false, respondSafety=null, spkBusy=false, spkQ=[], spkGen=0;   /* spkQ : file de 4 annonces max ; spkGen : jeton de la phrase en cours (callbacks d'une phrase coupée ignorés) */
   /* démarrage robuste : on ne se bloque PLUS sur recogRunning (qui peut se désynchroniser de l'état réel du moteur et tuer le micro). Si déjà démarré, recog.start() lève une erreur inoffensive qu'on avale. */
   function startRecog(){ if(!recog||!vaOn||recogPaused||responding)return; try{ recog.start(); recogRunning=true; }catch(e){ recogRunning=true; } }
   function beginResponse(){ responding=true; recogPaused=true; if(recog){ try{recog.stop();}catch(e){} } clearTimeout(respondSafety); respondSafety=setTimeout(endResponse, 10000); }
@@ -2962,34 +2978,67 @@
   setInterval(function(){ if(vaOn && !responding && !recogPaused && recog){ try{ recog.start(); recogRunning=true; }catch(e){} } }, 3500);
   /* relance immédiate quand l'onglet/l'app revient au premier plan (les navigateurs mobiles coupent la reco en arrière-plan) */
   document.addEventListener('visibilitychange',function(){ if(!document.hidden && vaOn && !responding && !recogPaused && recog){ try{ recog.start(); recogRunning=true; }catch(e){} } });
-  function markSpeakEnd(){ vaSpeaking=false; vaSpeakEnd=Date.now(); clearTimeout(speakSafety); spkBusy=false; if(responding)endResponse(); if(typeof awake!=='undefined'&&awake&&vaOn&&typeof resetAwake==='function')resetAwake();
-    if(spkQ){ var n=spkQ; spkQ=null; setTimeout(function(){ _emitSpeak(n.t,n.quiet); }, 130); } /* une annonce de guidage attendait la fin -> on l'enchaîne sans se couper la parole */ }
-  function webSpeak(t){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice){u.voice=Voice.voice;u.lang=Voice.voice.lang;} u.rate=Voice.sayRate||0.85; u.pitch=Voice.sayPitch||0.92; u.volume=Voice.volume||0.96; u.onend=markSpeakEnd; u.onerror=markSpeakEnd; speechSynthesis.speak(u);} else markSpeakEnd(); }catch(e){ markSpeakEnd(); } }
-  /* cache audio : les phrases courtes/fréquentes (réponses, confirmations) sont rejouées INSTANTANÉMENT, sans réseau */
-  var ttsCache={}, ttsCacheN=0, lastTmpUrl=null;
-  function playUrl(url,t){ neuralAudio.src=url; neuralAudio.onended=markSpeakEnd; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){ neuralPlayed=true; }).catch(function(){ webSpeak(t); }); }
-  function speakNeural(t){ try{speechSynthesis.cancel();}catch(e){} stopNeural();
-    var key=Voice.ttsVoice+'|'+LANG+'|'+t;
-    if(ttsCache[key]){ playUrl(ttsCache[key],t); return Promise.resolve(true); }   /* déjà connu -> lecture immédiate */
-    var ctrl=(typeof AbortController!=='undefined')?new AbortController():null; var to=setTimeout(function(){ if(ctrl)try{ctrl.abort();}catch(e){} }, 8000); /* anti-blocage : si l'API tarde, on bascule sur la voix navigateur */
-    return fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:t,lang:LANG,voice:Voice.ttsVoice}),signal:ctrl?ctrl.signal:undefined})
-      .then(function(r){ clearTimeout(to); var ct=r.headers.get('content-type')||''; if(r.ok&&ct.indexOf('audio')>=0)return r.blob(); return r.json().then(function(j){throw (j&&j.error)||'noaudio';},function(){throw 'noaudio';}); })
-      .then(function(b){ var url=URL.createObjectURL(b);
-        if(t.length<=70&&ttsCacheN<160){ ttsCache[key]=url; ttsCacheN++; }   /* on garde les phrases courtes en cache (limité à 160) */
-        else { if(lastTmpUrl){ try{URL.revokeObjectURL(lastTmpUrl);}catch(e){} } lastTmpUrl=url; }   /* phrase longue : temporaire */
-        playUrl(url,t); return true; }); }
-  window.addEventListener('pagehide',function(){ for(var k in ttsCache){ try{URL.revokeObjectURL(ttsCache[k]);}catch(e){} } ttsCache={}; ttsCacheN=0; if(lastTmpUrl){ try{URL.revokeObjectURL(lastTmpUrl);}catch(e){} lastTmpUrl=null; } });   /* libère les blobs TTS à la fermeture */
-  function sayVA(t,quiet,urgent){ if(!t)return; if(!Voice.on){if(!quiet)toast('🔇 '+t);return;}
-    /* file d'attente : le guidage (quiet) attend la fin ; une alerte URGENTE (sécurité, prio>=2) coupe la parole en cours SANS couper le micro */
-    if(urgent){ try{speechSynthesis.cancel();}catch(e){} if(typeof stopNeural==='function')stopNeural(); spkQ=null; _emitSpeak(t,true); return; }
-    if(spkBusy&&quiet){ spkQ={t:t,quiet:true}; return; }
-    spkQ=null; _emitSpeak(t,quiet); }
-  function _emitSpeak(t,quiet){ spkBusy=true; lastSpoken=t;
+  function markSpeakEnd(g){ if(typeof g==='number'&&g!==spkGen)return;   /* fin tardive d'une phrase déjà coupée : ignorée */
+    vaSpeaking=false; vaSpeakEnd=Date.now(); clearTimeout(speakSafety); spkBusy=false; if(!Voice.on)spkQ=[];
+    var hold=!!(responding&&spkQ.length&&spkQ[0].f);   /* la suite d'une réponse en 2 phrases attend : micro gardé coupé jusqu'à la dernière phrase (sinon Practice s'entend et se répond) */
+    if(responding&&!hold)endResponse(); if(typeof awake!=='undefined'&&awake&&vaOn&&typeof resetAwake==='function')resetAwake();
+    if(spkQ.length){ setTimeout(function(){ if(spkBusy)return; if(!Voice.on)spkQ=[]; if(!spkQ.length){ if(hold&&responding)endResponse(); return; } var n=spkQ.shift(); _emitSpeak(n.t,n.quiet,false,true); }, 130); } /* des annonces attendaient la fin -> on les enchaîne dans l'ordre sans se couper la parole */ }
+  function webSpeak(t,g){ try{ if(Voice.supported){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang=T().code; if(Voice.voice){u.voice=Voice.voice;u.lang=Voice.voice.lang;} u.rate=Voice.sayRate||0.85; u.pitch=Voice.sayPitch||0.92; u.volume=Voice.volume||0.96; u.onend=u.onerror=function(){ markSpeakEnd(g); }; speechSynthesis.speak(u);} else markSpeakEnd(g); }catch(e){ markSpeakEnd(g); } }
+  /* ===== VOIX OFFICIELLE : banque de MP3 pré-générés (voix de synthèse Qwen3-TTS, cf. voice-tools/bank_gen.py) ===== */
+  /* clé normalisée : DOIT rester identique à key() de voice-tools/bank_gen.py */
+  function voiceKey(t){ return String(t==null?"":t).normalize("NFC").toLowerCase().replace(/[\u2019\u2018\u0060\u00b4]/g,"'").replace(/[^0-9a-z\u00e0\u00e2\u00e4\u00e7\u00e9\u00e8\u00ea\u00eb\u00ee\u00ef\u00f4\u00f6\u00f9\u00fb\u00fc\u00ff\u0153\u00e6']+/g," ").replace(/\s+/g," ").trim(); }
+  var VOICE_BANK='/voice/practice/fr/', voiceBank=null;
+  /* manifeste chargé au démarrage. Sur Vercel un fichier absent répond index.html en 200 : on exige du JSON avec entries, sinon banque absente (repli navigateur, pas de nouvel essai) */
+  /* échec réseau (tunnel, parking, 5xx) : nouvel essai après 5 s, 30 s puis toutes les 2 min, au retour du réseau, et à la demande depuis bankUrl */
+  var bankLoading=false, bankAbsent=false, bankTry=0, bankLast=0, bankRetryT=null;
+  function loadBank(){ if(voiceBank||bankLoading||bankAbsent||!window.fetch)return; bankLoading=true; bankLast=Date.now(); clearTimeout(bankRetryT);
+    function fail(){ bankLoading=false; bankTry++; bankRetryT=setTimeout(loadBank,[5000,30000,120000][Math.min(2,bankTry-1)]); }
+    try{ fetch(VOICE_BANK+'manifest.json',{cache:'no-cache'}).then(function(r){ var ct=((r.headers&&r.headers.get('content-type'))||'').toLowerCase(); if(!r.ok)throw r.status; return ct.indexOf('json')>=0?r.json():null; }).then(function(j){ bankLoading=false; if(j&&j.entries&&typeof j.entries==='object')voiceBank={v:String(j.version||''),e:j.entries}; else bankAbsent=true; }).catch(fail); }catch(e){ fail(); } }
+  loadBank(); window.addEventListener('online',function(){ bankTry=0; loadBank(); });
+  function bankFile(k){ return (k&&voiceBank&&Object.prototype.hasOwnProperty.call(voiceBank.e,k))?voiceBank.e[k]:null; }
+  function bankUrl(t){ if(LANG!=='fr')return null; if(!voiceBank){ if(Date.now()-bankLast>30000)loadBank(); return null; }   /* banque pas encore là : la phrase part en voix navigateur, le chargement est relancé en fond */
+    var k=voiceKey(t), f=bankFile(k), nk=voiceKey(vaName());
+    if(!f&&nk&&(' '+k+' ').indexOf(' '+nk+' ')>=0)f=bankFile((' '+k+' ').replace(' '+nk+' ',' ').trim());   /* phrase avec prénom : on joue la variante sans prénom de la banque */
+    return f?VOICE_BANK+f+'?v='+encodeURIComponent(voiceBank.v):null; }
+  /* préchargement discret des consignes du trajet (cache HTTP longue durée, cf. vercel.json) : la 1re annonce de virage ou de radar ne dépend plus du réseau au moment critique */
+  var bankPre={};
+  function preloadBank(list){ try{ if(Voice.neural===false||!Voice.on||!window.fetch||(navigator.connection&&navigator.connection.saveData))return; list.forEach(function(t){ var u=bankUrl(t); if(u&&!bankPre[u]){ bankPre[u]=1; fetch(u).then(function(r){ return r.arrayBuffer(); }).catch(function(){ delete bankPre[u]; }); } }); }catch(e){} }
+  function preloadRoute(rt){ if(LANG!=='fr'||!rt||!rt.steps)return; var L=[T().arrived,T().reroute], i, p;
+    for(i=0;i<rt.steps.length&&i<40;i++){ p=T().inDist(200,maneuverText(rt.steps[i])); if(L.indexOf(p)<0)L.push(p); }   /* la consigne part presque toujours à 200 m */
+    if(radarOn){ for(i=50;i<=400;i+=50)L.push('Radar dans '+i+' mètres.'); }
+    preloadBank(L); }
+  /* débit « parle plus vite / moins vite » appliqué aussi aux MP3, sans changer la hauteur de la voix */
+  function applyVoiceRate(){ try{ var r=Math.max(0.6,Math.min(1.6,(Voice.sayRate||0.92)/0.92)); neuralAudio.defaultPlaybackRate=r; neuralAudio.playbackRate=r; neuralAudio.preservesPitch=true; neuralAudio.webkitPreservesPitch=true; }catch(e){} }
+  /* lecture d'un MP3 de la banque : fin -> markSpeakEnd ; erreur, blocage ou chargement trop long -> voix du navigateur (AbortError = phrase coupée volontairement, ignorée) */
+  function playBank(url,t,g,urgent){ var a=neuralAudio, started=false, fell=false, lt=null; bankOwner=g;
+    function live(){ return bankOwner===g&&spkGen===g; }
+    function fb(){ if(fell||!live())return; fell=true; clearTimeout(lt); stopNeural(); webSpeak(t,g); }
+    clearTimeout(speakSafety); speakSafety=setTimeout(function(){ markSpeakEnd(g); }, 4000+((t&&t.length)||0)*100);   /* filet provisoire, recalé sur la durée réelle du MP3 */
+    a.onplaying=function(){ if(!live())return; started=true; clearTimeout(lt); neuralPlayed=true; };
+    a.onloadedmetadata=function(){ if(!live()||!isFinite(a.duration))return; clearTimeout(speakSafety); speakSafety=setTimeout(function(){ markSpeakEnd(g); }, a.duration*1000/(a.playbackRate||1)+1500); };
+    a.onended=function(){ if(!live())return; bankOwner=0; markSpeakEnd(g); };
+    a.onerror=function(){ if(!live())return; if(started){ bankOwner=0; markSpeakEnd(g); } else fb(); };
+    lt=setTimeout(function(){ if(!started)fb(); }, urgent?900:2500);   /* tunnel / réseau lent : la phrase part en voix navigateur plutôt que rester muette (consigne de virage, radar : 0,9 s max) */
+    try{ a.muted=false; a.src=url; applyVoiceRate(); var p=a.play(); if(p&&p.catch)p.catch(function(err){ if(err&&err.name==='AbortError')return; if(!started)fb(); }); }catch(e){ fb(); } }
+  /* coupe net (voix coupée, changement de mode) : file vidée, callbacks tardifs ignorés, verrou relâché */
+  function voiceCut(){ spkQ=[]; spkGen++; try{speechSynthesis.cancel();}catch(e){} stopNeural(); if(spkBusy||vaSpeaking){ vaSpeaking=false; vaSpeakEnd=Date.now(); clearTimeout(speakSafety); spkBusy=false; if(responding)endResponse(); } }
+  function sayVA(t,quiet,urgent,follow){ if(!t)return; if(!Voice.on){if(!quiet)toast('🔇 '+t);return;}
+    /* file d'attente : le guidage (quiet) attend la fin ; une alerte URGENTE (sécurité, prio>=2) coupe la parole en cours (banque ou navigateur) SANS couper le micro */
+    if(urgent){ spkQ=[]; _emitSpeak(t,true,true); return; }
+    /* follow = 2e phrase d'une même réponse : attend la fin de la 1re et reste une RÉPONSE (micro coupé jusqu'au bout) */
+    if(follow&&(spkBusy||spkQ.length)){ spkQ.push({t:t,quiet:false,f:true}); return; }
+    /* file non vide = encore occupé (creux de 130 ms entre deux phrases) : on ne jette pas les phrases en attente */
+    if((spkBusy||spkQ.length)&&quiet){ for(var i=0;i<spkQ.length;i++){ if(spkQ[i].t===t)return; } spkQ.push({t:t,quiet:true}); if(spkQ.length>4)spkQ.splice(spkQ[0].f?1:0,1); return; }
+    spkQ=[]; _emitSpeak(t,quiet,false,!!follow); }
+  function _emitSpeak(t,quiet,urgent,chain){ var g=++spkGen; spkBusy=true;
+    if(chain&&lastGroup.length){ lastGroup.push(t); if(lastGroup.length>3)lastGroup.shift(); } else lastGroup=[t];   /* phrase enchaînée : ajoutée à la réponse en cours pour « répète » (3 phrases max) */
+    try{speechSynthesis.cancel();}catch(e){} stopNeural();   /* une seule voix à la fois : la phrase précédente est coupée, ses callbacks portent un ancien jeton */
     if(!quiet) beginResponse(); /* réponse à l'utilisateur -> micro coupé + verrou (anti auto-réponse). Le guidage de conduite NE coupe PAS le micro -> Practice reste à l'écoute pendant tout le trajet. */
-    vaSpeaking=true; clearTimeout(speakSafety); speakSafety=setTimeout(markSpeakEnd, Math.min(12000, 1400+((t&&t.length)||0)*85));
-    if(neuralOff||Voice.neural===false){ if(!quiet)toast('🔈 voix navigateur · '+t); webSpeak(t); return; }
-    if(!quiet)toast('🎙 '+t);
-    speakNeural(t).catch(function(err){ if(!quiet){ var msg=(err==='no_key')?'Voix réaliste : ajoute ta clé ElevenLabs sur Vercel':(err==='tts'||err==='upstream')?'Voix réaliste indisponible (quota ElevenLabs épuisé) — voix navigateur':'Voix navigateur'; toast('🔈 '+msg); } if(err==='no_key'||err==='no_text'||err==='tts'||err==='upstream'){ neuralOff=true; } webSpeak(t); }); }
+    vaSpeaking=true; clearTimeout(speakSafety); speakSafety=setTimeout(function(){ markSpeakEnd(g); }, Math.min(12000, 1400+((t&&t.length)||0)*85));
+    var bu=null; if(Voice.neural!==false){ try{ bu=bankUrl(t); }catch(e){ bu=null; } }   /* banque AVANT tout le reste ; réglage « voix du navigateur » respecté */
+    if(!quiet)toast((bu?'🎙 ':'🔈 ')+t);
+    if(bu){ playBank(bu,t,g,urgent); return; }
+    webSpeak(t,g); }
   /* ---- wake-word conversation state machine (sleeps until "Practice") ---- */
   var awake=false, awakeTimer=null;
   function vaTxt(k){ var D={
@@ -2997,7 +3046,7 @@
     imListening:{fr:'Je t\'écoute…',en:'Listening…',ja:'聞いています…'},
     yes:{fr:'Oui ?',en:'Yes?',ja:'はい？'},
     bye:{fr:'À tout de suite.',en:'Talk soon.',ja:'また後で。'},
-    greet:{fr:'J\'écoute ?',en:'I\'m listening?',ja:'聞いていますか？'},
+    greet:{fr:'Je t’écoute.',en:'I\'m listening?',ja:'聞いていますか？'},
     nocmd:{fr:'Je n\'ai pas compris, tu peux reformuler ?',en:'I didn\'t catch that, can you rephrase?',ja:'うまく聞き取れませんでした。'}
   }; return (D[k]&&(D[k][LANG]||D[k].fr))||''; }
   function showHeard(t){ if($('micTxt'))$('micTxt').textContent='« '+t+' »'; var md=$('micDot'); if(md){md.classList.add('hear');clearTimeout(md._h);md._h=setTimeout(function(){md.classList.remove('hear');},900);} document.body.setAttribute('data-listening','hear'); }
@@ -3007,114 +3056,114 @@
   /* ---- nearby places ("où est la X la plus proche") + conversational referent ---- */
   var lastRef=null;
   var POITYPES=[
-    {re:/station|essence|carburant|fuel|gas/,q:'node["amenity"="fuel"]',n:'station-service'},
-    {re:/borne|recharge|charg|[eé]lectri/,q:'node["amenity"="charging_station"]',n:'borne de recharge'},
-    {re:/pharmaci/,q:'node["amenity"="pharmacy"]',n:'pharmacie'},
-    {re:/restaurant|manger|resto|d[eî]ner|d[eî]jeuner/,q:'node["amenity"="restaurant"]',n:'restaurant'},
-    {re:/caf[eé]|coffee|starbucks/,q:'node["amenity"="cafe"]',n:'café'},
-    {re:/parking|me garer|stationn|garer/,q:'node["amenity"="parking"]',n:'parking'},
-    {re:/supermarch|courses|supermarket|[eé]picerie/,q:'node["shop"~"supermarket|convenience"]',n:'supermarché'},
-    {re:/h[oô]tel|dormir|hotel/,q:'node["tourism"="hotel"]',n:'hôtel'},
-    {re:/h[oô]pital|urgence|hospital/,q:'node["amenity"="hospital"]',n:'hôpital'},
-    {re:/boulang|pain|bakery|croissant/,q:'node["shop"="bakery"]',n:'boulangerie'},
-    {re:/distributeur|atm|banque|bank|retirer/,q:'node["amenity"~"atm|bank"]',n:'distributeur'},
-    {re:/toilet|wc|pisser/,q:'node["amenity"="toilets"]',n:'toilettes'},
-    {re:/bar\b|boire|pub/,q:'node["amenity"="bar"]',n:'bar'},
-    {re:/plage|beach|bord de mer|\bla mer\b|baignade/,q:'nwr["natural"="beach"]',n:'plage'},
-    {re:/\bparc\b|jardin|\bpark\b|espace vert|verdure|nature/,q:'nwr["leisure"~"park|garden"]',n:'parc'},
-    {re:/gare|train|sncf|station de train/,q:'nwr["railway"="station"]',n:'gare'},
-    {re:/a[eé]roport|airport|avion/,q:'nwr["aeroway"="aerodrome"]',n:'aéroport'},
-    {re:/cin[eé]ma|cinema|\bfilm\b|movie/,q:'nwr["amenity"="cinema"]',n:'cinéma'},
-    {re:/mus[eé]e|museum/,q:'nwr["tourism"="museum"]',n:'musée'},
-    {re:/garage|m[eé]cano|r[eé]parer la voiture|car repair/,q:'nwr["shop"="car_repair"]',n:'garage'},
-    {re:/lavage|laver la voiture|car wash/,q:'nwr["amenity"="car_wash"]',n:'station de lavage'},
-    {re:/coiffeur|hairdresser|salon de coiffure/,q:'nwr["shop"="hairdresser"]',n:'coiffeur'},
-    {re:/(bureau de )?poste\b|post office/,q:'nwr["amenity"="post_office"]',n:'bureau de poste'},
-    {re:/m[eé]decin|docteur|doctor|g[eé]n[eé]raliste|clinique/,q:'nwr["amenity"~"doctors|clinic"]',n:'cabinet médical'},
-    {re:/centre commercial|centre co|mall|shopping/,q:'nwr["shop"="mall"]',n:'centre commercial'},
-    {re:/cimeti[eè]re|cemetery/,q:'nwr["landuse"="cemetery"]',n:'cimetière'},
-    {re:/[eé]glise|church|cath[eé]drale/,q:'nwr["amenity"="place_of_worship"]',n:'lieu de culte'},
-    {re:/biblioth[eè]que|library/,q:'nwr["amenity"="library"]',n:'bibliothèque'},
-    {re:/salle de sport|gym|fitness|muscu/,q:'nwr["leisure"="fitness_centre"]',n:'salle de sport'},
-    {re:/bo[iî]te de nuit|discoth[eè]que|disco|nightclub|\bclub\b|danser|en bo[iî]te/,q:'nwr["amenity"="nightclub"]',n:'boîte de nuit'},
-    {re:/p[eé]age|toll/,q:'nwr["barrier"="toll_booth"]',n:'péage'},
-    {re:/fast[- ]?food|mac ?do|mcdo|mcdonald|burger|kebab|tacos|snack/,q:'nwr["amenity"="fast_food"]',n:'fast-food'},
-    {re:/[eé]picerie|[eé]picier/,q:'nwr["shop"="convenience"]',n:'épicerie'},
-    {re:/aire (de repos|d'?autoroute|de service)|rest area|aire d'?autoroute/,q:'nwr["highway"~"services|rest_area"]',n:'aire de repos'},
-    {re:/p[aâ]tisserie|g[aâ]teau/,q:'nwr["shop"="pastry"]',n:'pâtisserie'},
-    {re:/boucherie|boucher|de la viande/,q:'nwr["shop"="butcher"]',n:'boucherie'},
-    {re:/poissonnerie|poissonnier/,q:'nwr["shop"="seafood"]',n:'poissonnerie'},
-    {re:/fromagerie|fromager/,q:'nwr["shop"="cheese"]',n:'fromagerie'},
-    {re:/caviste|magasin de vin|cave [aà] vin/,q:'nwr["shop"="wine"]',n:'caviste'},
-    {re:/traiteur|\bdeli\b/,q:'nwr["shop"="deli"]',n:'traiteur'},
-    {re:/march[eé]\b|marketplace|march[eé] couvert/,q:'nwr["amenity"="marketplace"]',n:'marché'},
-    {re:/tabac|cigarette|buraliste/,q:'nwr["shop"="tobacco"]',n:'bureau de tabac'},
-    {re:/presse|journaux|kiosque|newsagent/,q:'nwr["shop"~"newsagent|kiosk"]',n:'maison de la presse'},
-    {re:/fleuriste|des fleurs|florist/,q:'nwr["shop"="florist"]',n:'fleuriste'},
-    {re:/librairie|des livres|bookshop/,q:'nwr["shop"="books"]',n:'librairie'},
-    {re:/v[eê]tement|fringues|habits|clothes|pr[eê]t[- ]?[aà][- ]?porter/,q:'nwr["shop"="clothes"]',n:'magasin de vêtements'},
-    {re:/chaussures|shoes/,q:'nwr["shop"="shoes"]',n:'magasin de chaussures'},
-    {re:/bijouterie|bijoux|jewelry/,q:'nwr["shop"="jewelry"]',n:'bijouterie'},
-    {re:/opticien|lunettes|optician/,q:'nwr["shop"="optician"]',n:'opticien'},
-    {re:/bricolage|quincaillerie|outillage|hardware|doityourself/,q:'nwr["shop"~"doityourself|hardware"]',n:'magasin de bricolage'},
-    {re:/jardinerie|garden centre|centre de jardin/,q:'nwr["shop"="garden_centre"]',n:'jardinerie'},
-    {re:/animalerie|magasin (pour|d'?)animaux|pet shop/,q:'nwr["shop"="pet"]',n:'animalerie'},
-    {re:/jouets|jeux pour enfant|toys/,q:'nwr["shop"="toys"]',n:'magasin de jouets'},
-    {re:/[eé]lectroni|hi[- ]?fi|t[eé]l[eé]vision|electronics/,q:'nwr["shop"="electronics"]',n:"magasin d'électronique"},
-    {re:/t[eé]l[eé]phone|portable|smartphone|mobile phone/,q:'nwr["shop"="mobile_phone"]',n:'magasin de téléphonie'},
-    {re:/informatique|ordinateur|computer/,q:'nwr["shop"="computer"]',n:'magasin informatique'},
-    {re:/magasin de sport|[eé]quipement sportif|decathlon/,q:'nwr["shop"="sports"]',n:'magasin de sport'},
-    {re:/meubles|ameublement|furniture|ik[eé]a/,q:'nwr["shop"="furniture"]',n:'magasin de meubles'},
-    {re:/concession|acheter une voiture|car dealer/,q:'nwr["shop"="car"]',n:'concessionnaire auto'},
-    {re:/pneus|tyres|tires/,q:'nwr["shop"="tyres"]',n:'centre pneus'},
-    {re:/pi[eè]ces (auto|d[eé]tach)|car parts|casse auto/,q:'nwr["shop"="car_parts"]',n:'pièces auto'},
-    {re:/magasin de moto|\bmoto\b|scooter/,q:'nwr["shop"="motorcycle"]',n:'magasin moto'},
-    {re:/v[eé]lo\b|\bcycle\b|bicycle/,q:'nwr["shop"="bicycle"]',n:'magasin de vélos'},
-    {re:/pressing|nettoyage [aà] sec|dry clean/,q:'nwr["shop"="dry_cleaning"]',n:'pressing'},
-    {re:/laverie|laundromat|machine [aà] laver/,q:'nwr["shop"="laundry"]',n:'laverie'},
-    {re:/dentiste|dentist/,q:'nwr["amenity"="dentist"]',n:'dentiste'},
-    {re:/v[eé]t[eé]rinaire|v[eé]to\b|veterinary/,q:'nwr["amenity"="veterinary"]',n:'vétérinaire'},
-    {re:/[eé]cole|primaire|maternelle/,q:'nwr["amenity"="school"]',n:'école'},
-    {re:/coll[eè]ge|lyc[eé]e/,q:'nwr["amenity"="school"]',n:'établissement scolaire'},
-    {re:/universit[eé]|\bfac\b|facult[eé]|campus/,q:'nwr["amenity"="university"]',n:'université'},
-    {re:/cr[eè]che|garderie|kindergarten/,q:'nwr["amenity"="kindergarten"]',n:'crèche'},
-    {re:/mairie|h[oô]tel de ville|townhall/,q:'nwr["amenity"="townhall"]',n:'mairie'},
-    {re:/commissariat|police|gendarmerie/,q:'nwr["amenity"="police"]',n:'police'},
-    {re:/pompiers|caserne|fire station/,q:'nwr["amenity"="fire_station"]',n:'caserne de pompiers'},
-    {re:/tribunal|palais de justice|courthouse/,q:'nwr["amenity"="courthouse"]',n:'tribunal'},
-    {re:/pr[eé]fecture|sous[- ]?pr[eé]fecture|administration/,q:'nwr["office"="government"]',n:'administration'},
-    {re:/bureau de change|\bchange\b/,q:'nwr["amenity"="bureau_de_change"]',n:'bureau de change'},
-    {re:/assurance|assureur|insurance/,q:'nwr["office"="insurance"]',n:'assurance'},
-    {re:/agence immobili|immobilier|estate agent/,q:'nwr["office"="estate_agent"]',n:'agence immobilière'},
-    {re:/avocat|cabinet d'?avocat|lawyer/,q:'nwr["office"="lawyer"]',n:"cabinet d'avocat"},
-    {re:/notaire|notary/,q:'nwr["office"="notary"]',n:'étude notariale'},
-    {re:/th[eé][aâ]tre|theatre/,q:'nwr["amenity"="theatre"]',n:'théâtre'},
-    {re:/casino/,q:'nwr["amenity"="casino"]',n:'casino'},
-    {re:/piscine|swimming/,q:'nwr["leisure"="swimming_pool"]',n:'piscine'},
-    {re:/stade|stadium/,q:'nwr["leisure"="stadium"]',n:'stade'},
-    {re:/patinoire|ice rink/,q:'nwr["leisure"="ice_rink"]',n:'patinoire'},
-    {re:/bowling/,q:'nwr["leisure"="bowling_alley"]',n:'bowling'},
-    {re:/aire de jeux|playground/,q:'nwr["leisure"="playground"]',n:'aire de jeux'},
-    {re:/parc d'?attraction|theme park|f[eê]te foraine/,q:'nwr["tourism"="theme_park"]',n:"parc d'attractions"},
-    {re:/\bzoo\b|parc animalier/,q:'nwr["tourism"="zoo"]',n:'zoo'},
-    {re:/aquarium/,q:'nwr["tourism"="aquarium"]',n:'aquarium'},
-    {re:/camping|camp site/,q:'nwr["tourism"="camp_site"]',n:'camping'},
-    {re:/auberge de jeunesse|hostel/,q:'nwr["tourism"="hostel"]',n:'auberge de jeunesse'},
-    {re:/office de tourisme|tourist info|point info/,q:'nwr["tourism"="information"]',n:'office de tourisme'},
-    {re:/ch[aâ]teau|castle/,q:'nwr["historic"="castle"]',n:'château'},
-    {re:/monument|[aà] visiter|point d'?int[eé]r[eê]t|attraction/,q:'nwr["tourism"="attraction"]',n:'attraction touristique'},
-    {re:/point de vue|belv[eé]d[eè]re|viewpoint|panorama/,q:'nwr["tourism"="viewpoint"]',n:'point de vue'},
-    {re:/gare routi[eè]re|bus station/,q:'nwr["amenity"="bus_station"]',n:'gare routière'},
-    {re:/arr[eê]t de bus|bus stop/,q:'nwr["highway"="bus_stop"]',n:'arrêt de bus'},
-    {re:/m[eé]tro|subway/,q:'nwr["station"="subway"]',n:'station de métro'},
-    {re:/tramway|\btram\b/,q:'nwr["railway"="tram_stop"]',n:'arrêt de tram'},
-    {re:/\btaxi/,q:'nwr["amenity"="taxi"]',n:'station de taxis'},
-    {re:/location de voiture|louer une voiture|car rental|rent a car/,q:'nwr["amenity"="car_rental"]',n:'location de voiture'},
-    {re:/marina|port de plaisance|\bport\b/,q:'nwr["leisure"="marina"]',n:'port de plaisance'},
-    {re:/h[eé]liport|helipad/,q:'nwr["aeroway"="helipad"]',n:'héliport'},
-    {re:/eau potable|fontaine|drinking water/,q:'nwr["amenity"="drinking_water"]',n:"point d'eau"},
-    {re:/d[eé]chetterie|recyclage|recycling/,q:'nwr["amenity"="recycling"]',n:'déchetterie'},
-    {re:/aire de pique[- ]?nique|pique[- ]?nique|picnic/,q:'nwr["tourism"="picnic_site"]',n:'aire de pique-nique'}
+    {re:/station|essence|carburant|fuel|gas/,q:'node["amenity"="fuel"]',n:'station-service',v:'la station-service',g:'f'},
+    {re:/borne|recharge|charg|[eé]lectri/,q:'node["amenity"="charging_station"]',n:'borne de recharge',v:'la borne de recharge',g:'f'},
+    {re:/pharmaci/,q:'node["amenity"="pharmacy"]',n:'pharmacie',v:'la pharmacie',g:'f'},
+    {re:/restaurant|manger|resto|d[eî]ner|d[eî]jeuner/,q:'node["amenity"="restaurant"]',n:'restaurant',v:'le restaurant',g:'m'},
+    {re:/caf[eé]|coffee|starbucks/,q:'node["amenity"="cafe"]',n:'café',v:'le café',g:'m'},
+    {re:/parking|me garer|stationn|garer/,q:'node["amenity"="parking"]',n:'parking',v:'le parking',g:'m'},
+    {re:/supermarch|courses|supermarket|[eé]picerie/,q:'node["shop"~"supermarket|convenience"]',n:'supermarché',v:'le supermarché',g:'m'},
+    {re:/h[oô]tel|dormir|hotel/,q:'node["tourism"="hotel"]',n:'hôtel',v:'l’hôtel',g:'m'},
+    {re:/h[oô]pital|urgence|hospital/,q:'node["amenity"="hospital"]',n:'hôpital',v:'l’hôpital',g:'m'},
+    {re:/boulang|pain|bakery|croissant/,q:'node["shop"="bakery"]',n:'boulangerie',v:'la boulangerie',g:'f'},
+    {re:/distributeur|atm|banque|bank|retirer/,q:'node["amenity"~"atm|bank"]',n:'distributeur',v:'le distributeur',g:'m'},
+    {re:/toilet|wc|pisser/,q:'node["amenity"="toilets"]',n:'toilettes',v:'les toilettes',g:'p'},
+    {re:/bar\b|boire|pub/,q:'node["amenity"="bar"]',n:'bar',v:'le bar',g:'m'},
+    {re:/plage|beach|bord de mer|\bla mer\b|baignade/,q:'nwr["natural"="beach"]',n:'plage',v:'la plage',g:'f'},
+    {re:/\bparc\b|jardin|\bpark\b|espace vert|verdure|nature/,q:'nwr["leisure"~"park|garden"]',n:'parc',v:'le parc',g:'m'},
+    {re:/gare|train|sncf|station de train/,q:'nwr["railway"="station"]',n:'gare',v:'la gare',g:'f'},
+    {re:/a[eé]roport|airport|avion/,q:'nwr["aeroway"="aerodrome"]',n:'aéroport',v:'l’aéroport',g:'m'},
+    {re:/cin[eé]ma|cinema|\bfilm\b|movie/,q:'nwr["amenity"="cinema"]',n:'cinéma',v:'le cinéma',g:'m'},
+    {re:/mus[eé]e|museum/,q:'nwr["tourism"="museum"]',n:'musée',v:'le musée',g:'m'},
+    {re:/garage|m[eé]cano|r[eé]parer la voiture|car repair/,q:'nwr["shop"="car_repair"]',n:'garage',v:'le garage',g:'m'},
+    {re:/lavage|laver la voiture|car wash/,q:'nwr["amenity"="car_wash"]',n:'station de lavage',v:'la station de lavage',g:'f'},
+    {re:/coiffeur|hairdresser|salon de coiffure/,q:'nwr["shop"="hairdresser"]',n:'coiffeur',v:'le coiffeur',g:'m'},
+    {re:/(bureau de )?poste\b|post office/,q:'nwr["amenity"="post_office"]',n:'bureau de poste',v:'le bureau de poste',g:'m'},
+    {re:/m[eé]decin|docteur|doctor|g[eé]n[eé]raliste|clinique/,q:'nwr["amenity"~"doctors|clinic"]',n:'cabinet médical',v:'le cabinet médical',g:'m'},
+    {re:/centre commercial|centre co|mall|shopping/,q:'nwr["shop"="mall"]',n:'centre commercial',v:'le centre commercial',g:'m'},
+    {re:/cimeti[eè]re|cemetery/,q:'nwr["landuse"="cemetery"]',n:'cimetière',v:'le cimetière',g:'m'},
+    {re:/[eé]glise|church|cath[eé]drale/,q:'nwr["amenity"="place_of_worship"]',n:'lieu de culte',v:'le lieu de culte',g:'m'},
+    {re:/biblioth[eè]que|library/,q:'nwr["amenity"="library"]',n:'bibliothèque',v:'la bibliothèque',g:'f'},
+    {re:/salle de sport|gym|fitness|muscu/,q:'nwr["leisure"="fitness_centre"]',n:'salle de sport',v:'la salle de sport',g:'f'},
+    {re:/bo[iî]te de nuit|discoth[eè]que|disco|nightclub|\bclub\b|danser|en bo[iî]te/,q:'nwr["amenity"="nightclub"]',n:'boîte de nuit',v:'la boîte de nuit',g:'f'},
+    {re:/p[eé]age|toll/,q:'nwr["barrier"="toll_booth"]',n:'péage',v:'le péage',g:'m'},
+    {re:/fast[- ]?food|mac ?do|mcdo|mcdonald|burger|kebab|tacos|snack/,q:'nwr["amenity"="fast_food"]',n:'fast-food',v:'le fast-food',g:'m'},
+    {re:/[eé]picerie|[eé]picier/,q:'nwr["shop"="convenience"]',n:'épicerie',v:'l’épicerie',g:'f'},
+    {re:/aire (de repos|d'?autoroute|de service)|rest area|aire d'?autoroute/,q:'nwr["highway"~"services|rest_area"]',n:'aire de repos',v:'l’aire de repos',g:'f'},
+    {re:/p[aâ]tisserie|g[aâ]teau/,q:'nwr["shop"="pastry"]',n:'pâtisserie',v:'la pâtisserie',g:'f'},
+    {re:/boucherie|boucher|de la viande/,q:'nwr["shop"="butcher"]',n:'boucherie',v:'la boucherie',g:'f'},
+    {re:/poissonnerie|poissonnier/,q:'nwr["shop"="seafood"]',n:'poissonnerie',v:'la poissonnerie',g:'f'},
+    {re:/fromagerie|fromager/,q:'nwr["shop"="cheese"]',n:'fromagerie',v:'la fromagerie',g:'f'},
+    {re:/caviste|magasin de vin|cave [aà] vin/,q:'nwr["shop"="wine"]',n:'caviste',v:'le caviste',g:'m'},
+    {re:/traiteur|\bdeli\b/,q:'nwr["shop"="deli"]',n:'traiteur',v:'le traiteur',g:'m'},
+    {re:/march[eé]\b|marketplace|march[eé] couvert/,q:'nwr["amenity"="marketplace"]',n:'marché',v:'le marché',g:'m'},
+    {re:/tabac|cigarette|buraliste/,q:'nwr["shop"="tobacco"]',n:'bureau de tabac',v:'le bureau de tabac',g:'m'},
+    {re:/presse|journaux|kiosque|newsagent/,q:'nwr["shop"~"newsagent|kiosk"]',n:'maison de la presse',v:'la maison de la presse',g:'f'},
+    {re:/fleuriste|des fleurs|florist/,q:'nwr["shop"="florist"]',n:'fleuriste',v:'le fleuriste',g:'m'},
+    {re:/librairie|des livres|bookshop/,q:'nwr["shop"="books"]',n:'librairie',v:'la librairie',g:'f'},
+    {re:/v[eê]tement|fringues|habits|clothes|pr[eê]t[- ]?[aà][- ]?porter/,q:'nwr["shop"="clothes"]',n:'magasin de vêtements',v:'le magasin de vêtements',g:'m'},
+    {re:/chaussures|shoes/,q:'nwr["shop"="shoes"]',n:'magasin de chaussures',v:'le magasin de chaussures',g:'m'},
+    {re:/bijouterie|bijoux|jewelry/,q:'nwr["shop"="jewelry"]',n:'bijouterie',v:'la bijouterie',g:'f'},
+    {re:/opticien|lunettes|optician/,q:'nwr["shop"="optician"]',n:'opticien',v:'l’opticien',g:'m'},
+    {re:/bricolage|quincaillerie|outillage|hardware|doityourself/,q:'nwr["shop"~"doityourself|hardware"]',n:'magasin de bricolage',v:'le magasin de bricolage',g:'m'},
+    {re:/jardinerie|garden centre|centre de jardin/,q:'nwr["shop"="garden_centre"]',n:'jardinerie',v:'la jardinerie',g:'f'},
+    {re:/animalerie|magasin (pour|d'?)animaux|pet shop/,q:'nwr["shop"="pet"]',n:'animalerie',v:'l’animalerie',g:'f'},
+    {re:/jouets|jeux pour enfant|toys/,q:'nwr["shop"="toys"]',n:'magasin de jouets',v:'le magasin de jouets',g:'m'},
+    {re:/[eé]lectroni|hi[- ]?fi|t[eé]l[eé]vision|electronics/,q:'nwr["shop"="electronics"]',n:"magasin d'électronique",v:'le magasin d’électronique',g:'m'},
+    {re:/t[eé]l[eé]phone|portable|smartphone|mobile phone/,q:'nwr["shop"="mobile_phone"]',n:'magasin de téléphonie',v:'le magasin de téléphonie',g:'m'},
+    {re:/informatique|ordinateur|computer/,q:'nwr["shop"="computer"]',n:'magasin informatique',v:'le magasin informatique',g:'m'},
+    {re:/magasin de sport|[eé]quipement sportif|decathlon/,q:'nwr["shop"="sports"]',n:'magasin de sport',v:'le magasin de sport',g:'m'},
+    {re:/meubles|ameublement|furniture|ik[eé]a/,q:'nwr["shop"="furniture"]',n:'magasin de meubles',v:'le magasin de meubles',g:'m'},
+    {re:/concession|acheter une voiture|car dealer/,q:'nwr["shop"="car"]',n:'concessionnaire auto',v:'le concessionnaire auto',g:'m'},
+    {re:/pneus|tyres|tires/,q:'nwr["shop"="tyres"]',n:'centre pneus',v:'le centre pneus',g:'m'},
+    {re:/pi[eè]ces (auto|d[eé]tach)|car parts|casse auto/,q:'nwr["shop"="car_parts"]',n:'pièces auto',v:'le magasin de pièces auto',g:'m'},
+    {re:/magasin de moto|\bmoto\b|scooter/,q:'nwr["shop"="motorcycle"]',n:'magasin moto',v:'le magasin moto',g:'m'},
+    {re:/v[eé]lo\b|\bcycle\b|bicycle/,q:'nwr["shop"="bicycle"]',n:'magasin de vélos',v:'le magasin de vélos',g:'m'},
+    {re:/pressing|nettoyage [aà] sec|dry clean/,q:'nwr["shop"="dry_cleaning"]',n:'pressing',v:'le pressing',g:'m'},
+    {re:/laverie|laundromat|machine [aà] laver/,q:'nwr["shop"="laundry"]',n:'laverie',v:'la laverie',g:'f'},
+    {re:/dentiste|dentist/,q:'nwr["amenity"="dentist"]',n:'dentiste',v:'le dentiste',g:'m'},
+    {re:/v[eé]t[eé]rinaire|v[eé]to\b|veterinary/,q:'nwr["amenity"="veterinary"]',n:'vétérinaire',v:'le vétérinaire',g:'m'},
+    {re:/[eé]cole|primaire|maternelle/,q:'nwr["amenity"="school"]',n:'école',v:'l’école',g:'f'},
+    {re:/coll[eè]ge|lyc[eé]e/,q:'nwr["amenity"="school"]',n:'établissement scolaire',v:'l’établissement scolaire',g:'m'},
+    {re:/universit[eé]|\bfac\b|facult[eé]|campus/,q:'nwr["amenity"="university"]',n:'université',v:'l’université',g:'f'},
+    {re:/cr[eè]che|garderie|kindergarten/,q:'nwr["amenity"="kindergarten"]',n:'crèche',v:'la crèche',g:'f'},
+    {re:/mairie|h[oô]tel de ville|townhall/,q:'nwr["amenity"="townhall"]',n:'mairie',v:'la mairie',g:'f'},
+    {re:/commissariat|police|gendarmerie/,q:'nwr["amenity"="police"]',n:'police',v:'le poste de police',g:'m'},
+    {re:/pompiers|caserne|fire station/,q:'nwr["amenity"="fire_station"]',n:'caserne de pompiers',v:'la caserne de pompiers',g:'f'},
+    {re:/tribunal|palais de justice|courthouse/,q:'nwr["amenity"="courthouse"]',n:'tribunal',v:'le tribunal',g:'m'},
+    {re:/pr[eé]fecture|sous[- ]?pr[eé]fecture|administration/,q:'nwr["office"="government"]',n:'administration',v:'l’administration',g:'f'},
+    {re:/bureau de change|\bchange\b/,q:'nwr["amenity"="bureau_de_change"]',n:'bureau de change',v:'le bureau de change',g:'m'},
+    {re:/assurance|assureur|insurance/,q:'nwr["office"="insurance"]',n:'assurance',v:'l’agence d’assurance',g:'f'},
+    {re:/agence immobili|immobilier|estate agent/,q:'nwr["office"="estate_agent"]',n:'agence immobilière',v:'l’agence immobilière',g:'f'},
+    {re:/avocat|cabinet d'?avocat|lawyer/,q:'nwr["office"="lawyer"]',n:"cabinet d'avocat",v:'le cabinet d’avocat',g:'m'},
+    {re:/notaire|notary/,q:'nwr["office"="notary"]',n:'étude notariale',v:'l’étude notariale',g:'f'},
+    {re:/th[eé][aâ]tre|theatre/,q:'nwr["amenity"="theatre"]',n:'théâtre',v:'le théâtre',g:'m'},
+    {re:/casino/,q:'nwr["amenity"="casino"]',n:'casino',v:'le casino',g:'m'},
+    {re:/piscine|swimming/,q:'nwr["leisure"="swimming_pool"]',n:'piscine',v:'la piscine',g:'f'},
+    {re:/stade|stadium/,q:'nwr["leisure"="stadium"]',n:'stade',v:'le stade',g:'m'},
+    {re:/patinoire|ice rink/,q:'nwr["leisure"="ice_rink"]',n:'patinoire',v:'la patinoire',g:'f'},
+    {re:/bowling/,q:'nwr["leisure"="bowling_alley"]',n:'bowling',v:'le bowling',g:'m'},
+    {re:/aire de jeux|playground/,q:'nwr["leisure"="playground"]',n:'aire de jeux',v:'l’aire de jeux',g:'f'},
+    {re:/parc d'?attraction|theme park|f[eê]te foraine/,q:'nwr["tourism"="theme_park"]',n:"parc d'attractions",v:'le parc d’attractions',g:'m'},
+    {re:/\bzoo\b|parc animalier/,q:'nwr["tourism"="zoo"]',n:'zoo',v:'le zoo',g:'m'},
+    {re:/aquarium/,q:'nwr["tourism"="aquarium"]',n:'aquarium',v:'l’aquarium',g:'m'},
+    {re:/camping|camp site/,q:'nwr["tourism"="camp_site"]',n:'camping',v:'le camping',g:'m'},
+    {re:/auberge de jeunesse|hostel/,q:'nwr["tourism"="hostel"]',n:'auberge de jeunesse',v:'l’auberge de jeunesse',g:'f'},
+    {re:/office de tourisme|tourist info|point info/,q:'nwr["tourism"="information"]',n:'office de tourisme',v:'l’office de tourisme',g:'m'},
+    {re:/ch[aâ]teau|castle/,q:'nwr["historic"="castle"]',n:'château',v:'le château',g:'m'},
+    {re:/monument|[aà] visiter|point d'?int[eé]r[eê]t|attraction/,q:'nwr["tourism"="attraction"]',n:'attraction touristique',v:'l’attraction touristique',g:'f'},
+    {re:/point de vue|belv[eé]d[eè]re|viewpoint|panorama/,q:'nwr["tourism"="viewpoint"]',n:'point de vue',v:'le point de vue',g:'m'},
+    {re:/gare routi[eè]re|bus station/,q:'nwr["amenity"="bus_station"]',n:'gare routière',v:'la gare routière',g:'f'},
+    {re:/arr[eê]t de bus|bus stop/,q:'nwr["highway"="bus_stop"]',n:'arrêt de bus',v:'l’arrêt de bus',g:'m'},
+    {re:/m[eé]tro|subway/,q:'nwr["station"="subway"]',n:'station de métro',v:'la station de métro',g:'f'},
+    {re:/tramway|\btram\b/,q:'nwr["railway"="tram_stop"]',n:'arrêt de tram',v:'l’arrêt de tram',g:'m'},
+    {re:/\btaxi/,q:'nwr["amenity"="taxi"]',n:'station de taxis',v:'la station de taxis',g:'f'},
+    {re:/location de voiture|louer une voiture|car rental|rent a car/,q:'nwr["amenity"="car_rental"]',n:'location de voiture',v:'l’agence de location de voiture',g:'f'},
+    {re:/marina|port de plaisance|\bport\b/,q:'nwr["leisure"="marina"]',n:'port de plaisance',v:'le port de plaisance',g:'m'},
+    {re:/h[eé]liport|helipad/,q:'nwr["aeroway"="helipad"]',n:'héliport',v:'l’héliport',g:'m'},
+    {re:/eau potable|fontaine|drinking water/,q:'nwr["amenity"="drinking_water"]',n:"point d'eau",v:'le point d’eau',g:'m'},
+    {re:/d[eé]chetterie|recyclage|recycling/,q:'nwr["amenity"="recycling"]',n:'déchetterie',v:'la déchetterie',g:'f'},
+    {re:/aire de pique[- ]?nique|pique[- ]?nique|picnic/,q:'nwr["tourism"="picnic_site"]',n:'aire de pique-nique',v:'l’aire de pique-nique',g:'f'}
   ];
   function cardinal(b){ var d=['nord','nord-est','est','sud-est','sud','sud-ouest','ouest','nord-ouest']; return d[Math.round(b/45)%8]; }
   /* nav proposée en attente de confirmation ("tu veux que je lance le trajet ?" -> "oui") */
@@ -3143,19 +3192,19 @@
   function poiSearch(def,radius){ var pos=pts[pts.length-1]; var q='[out:json][timeout:12];('+def.q+'(around:'+radius+','+pos.lat+','+pos.lon+'););out center 80;';
     return overpassRace(q).then(function(j){ return nearestOf(j,pos); }); }
   function announcePOI(def,r,auto){ poiSearching=false; var pos=pts[pts.length-1]; var nm=(r.el&&r.el.tags&&(r.el.tags.name||r.el.tags.brand||r.el.tags.operator))||r.name||def.n; lastRef={name:nm,lat:r.lat,lon:r.lon};
-    var dtxt=r.d<1000?(Math.round(r.d/10)*10+' mètres'):((r.d/1000).toFixed(1)+' kilomètres'); var dir=cardinal(bearing(pos,{lat:r.lat,lon:r.lon}));
+    var pkm=Math.round(r.d/100)/10, dtxt=r.d<1000?(Math.round(r.d/10)*10+' mètres'):(numVoix(pkm)+(pkm<2?' kilomètre':' kilomètres')); var dir=cardinal(bearing(pos,{lat:r.lat,lon:r.lon})); var vers=/^[aeiou]/.test(dir)?'vers l’'+dir:'vers le '+dir;   /* décimale parlée avec virgule ; « vers l’est / l’ouest » */
     showFoundOnMap(nm,r.lat,r.lon);
-    if(auto){ pendingNav=null; $('dest').value=nm; sayVA('Je t\'emmène à '+nm+', à '+dtxt+' vers le '+dir+'. C\'est parti.'); startRouteTo({name:nm,lat:r.lat,lon:r.lon}); return; }
-    pendingNav={name:nm,lat:r.lat,lon:r.lon}; sayVA(nm+', à '+dtxt+' vers le '+dir+'. Je l\'ai placée sur la carte. Tu veux que je lance le trajet ?'); }
+    if(auto){ pendingNav=null; $('dest').value=nm; sayVA('Je t\'emmène à '+nm+', à '+dtxt+' '+vers+'. C\'est parti.'); startRouteTo({name:nm,lat:r.lat,lon:r.lon}); return; }
+    pendingNav={name:nm,lat:r.lat,lon:r.lon}; sayVA(nm+', à '+dtxt+' '+vers+'. Je l\'ai placée sur la carte. Tu veux que je lance le trajet ?'); }
   function poiFallbackText(def,auto){ var pos=pts[pts.length-1];
     fetchJSON('https://photon.komoot.io/api/?q='+encodeURIComponent(def.n)+'&lat='+pos.lat+'&lon='+pos.lon+'&limit=15&lang=fr',null,1).then(function(j){ var best=null,bd=1e12;
       ((j&&j.features)||[]).forEach(function(f){ var c=f.geometry&&f.geometry.coordinates; if(!c)return; var d=haversine(pos,{lat:c[1],lon:c[0]}); if(d<bd){bd=d;best={lat:c[1],lon:c[0],d:d,name:(f.properties&&(f.properties.name))||def.n};} });
-      if(!best){ poiSearching=false; sayVA('Je ne trouve pas de '+def.n+' dans les environs, désolé.'); return; }
+      if(!best){ poiSearching=false; sayVA('Je ne trouve rien de ce type dans les environs, désolé.'); return; }
       announcePOI(def,best,auto);
     },function(){ poiSearching=false; sayVA('La recherche est momentanément indisponible, réessaie dans un instant.'); }); }
   function nearestPOI(def,auto){ var pos=pts.length?pts[pts.length-1]:null; if(!pos){ sayVA('Active d\'abord ta position pour que je cherche autour de toi.'); return; }
     if(poiSearching)return;                                   /* deja une recherche en cours -> on ne ré-annonce pas */
-    poiSearching=true; sayVA(tr({fr:'Je cherche la '+def.n+' la plus proche…',en:'Looking for the nearest '+def.n+'…',ja:'近くの'+def.n+'を探しています…'}));
+    poiSearching=true; sayVA(tr({fr:'Je cherche '+(def.v||('le '+def.n))+' '+(def.g==='p'?'les plus proches':def.g==='f'?'la plus proche':'le plus proche')+'…',en:'Looking for the nearest '+def.n+'…',ja:'近くの'+def.n+'を探しています…'}));
     poiSearch(def,7000).then(function(r){ return r||poiSearch(def,35000); })
       .then(function(r){ if(r)announcePOI(def,r,auto); else poiFallbackText(def,auto); })
       .catch(function(){ poiFallbackText(def,auto); }); }
@@ -3202,12 +3251,21 @@
     'la sérénissime':'Venise','sérénissime':'Venise','serenissime':'Venise'
   };
   var CITY_NICK_KEYS=Object.keys(CITY_NICK).sort(function(a,b){return b.length-a.length;});
-  function _rx(k){ return new RegExp('\\b'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'); }
-  function resolveCity(s){ if(!s)return s; var out=s; for(var i=0;i<CITY_NICK_KEYS.length;i++){ out=out.replace(_rx(CITY_NICK_KEYS[i]),CITY_NICK[CITY_NICK_KEYS[i]]); } return out; }
+  /* libellé parlé canonique (accents, majuscules) : une seule phrase par surnom dans la banque de la voix officielle */
+  var CITY_NICK_LBL={'paname':'Paname','la ville lumière':'La ville lumière','ville lumière':'La ville lumière','la ville lumiere':'La ville lumière','ville lumiere':'La ville lumière',
+    'la cité phocéenne':'La cité phocéenne','cité phocéenne':'La cité phocéenne','cite phoceenne':'La cité phocéenne','massalia':'Massalia',
+    'la capitale des gaules':'La capitale des Gaules','capitale des gaules':'La capitale des Gaules','la ville rose':'La ville rose','ville rose':'La ville rose',
+    'la belle endormie':'La belle endormie','port de la lune':'Port de la Lune','la capitale des flandres':'La capitale des Flandres','capitale des flandres':'La capitale des Flandres','la perle du nord':'La perle du Nord',
+    'sainté':'Sainté','la cité des ducs':'La cité des Ducs','cité des ducs':'La cité des Ducs','la cité ardente':'La cité ardente',
+    'la grosse pomme':'La grosse pomme','big apple':'Big Apple','the big apple':'Big Apple','frisco':'Frisco','san fran':'San Fran','vegas':'Vegas','sin city':'Sin City',
+    'la cité éternelle':'La cité éternelle','cité éternelle':'La cité éternelle','cite eternelle':'La cité éternelle','la sérénissime':'La Sérénissime','sérénissime':'La Sérénissime','serenissime':'La Sérénissime'};
+  /* bornes de mot compatibles avec les accents (\b ne voit pas la fin de « sainté ») */
+  function _rx(k,fl){ return new RegExp('(^|[^a-zà-ÿ0-9])('+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![a-zà-ÿ0-9])',fl||'gi'); }
+  function resolveCity(s){ if(!s)return s; var out=s; for(var i=0;i<CITY_NICK_KEYS.length;i++){ var k=CITY_NICK_KEYS[i]; out=out.replace(_rx(k),function(_m,p){ return p+CITY_NICK[k]; }); } return out; }
   /* réponse directe : "c'est quoi Paname / pourquoi on dit Paname" -> "Paname, c'est un surnom de Paris." */
   function cityNickAnswer(t){
     if(!/(c'?est quoi|que veut dire|qu'?est[- ]?ce que|pourquoi (?:on dit|dit[- ]?on|on appelle)|signifie|veut dire quoi|[çc]a veut dire|surnom)/i.test(t))return false;
-    for(var i=0;i<CITY_NICK_KEYS.length;i++){ var k=CITY_NICK_KEYS[i]; if(new RegExp('\\b'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(t)){ if(typeof showHeard==='function')showHeard(t); sayVA(cap(k)+', c\'est un surnom de '+CITY_NICK[k]+'.'); return true; } }
+    for(var i=0;i<CITY_NICK_KEYS.length;i++){ var k=CITY_NICK_KEYS[i]; if(_rx(k,'i').test(t)){ if(typeof showHeard==='function')showHeard(t); sayVA((CITY_NICK_LBL[k]||cap(k))+', c\'est un surnom de '+CITY_NICK[k]+'.'); return true; } }
     return false;
   }
   /* monuments / bâtiments connus autour de toi ou dans une ville (géo-recherche Wikipédia) */
@@ -3257,7 +3315,7 @@
     nearby:/(o[uù] (est|sont|se trouve|y a|puis[- ]?je|peut[- ]?on|je peux|trouver)|la plus proche|le plus proche|plus proche|pr[eè]s d'?ici|pres d'?ici|[aà] proximit[eé]|autour de moi|dans le coin|aux alentours|trouve[- ]?moi|trouve|trouver|cherche|chercher|y a[- ]?t[- ]?il|il y a|nearest|closest|where('?s| is| can| are)|find( me)?|locate)/i,
     theme:/(th[eè]me|theme|fond d'?[eé]cran|interface|apparence|couleur de l'?[eé]cran)/i,
     voiceoff:/((coupe|d[eé]sactive|baisse|silence|mute|tais|chut|arr[eê]te)[^.]{0,18}(voix|son|parler|toi|micro)|tais[- ]?toi|reste silencieux|plus un mot)/i,
-    voiceon:/((active|remets|rallume|reprends?)[^.]{0,18}(voix|son|parler|micro)|tu peux parler|parle[- ]?moi)/i,
+    voiceon:/((active|remets|rallume|reprends?)[^.]{0,18}(voix|son|parler|micro)|tu peux parler|parle[- ]?moi(?![a-zà-ÿ]))/i,   /* « parle-moi » mais pas « parle moins vite » */
     fav:/(favori|favoris|j'?aime|j'?adore|like|kiffe|enregistre|sauvegarde|garde|m[eé]morise|note ce|ajoute aux)/i,
     play:/(joue|jouer|lance la musique|lance un son|reprend|reprends|remets? (la )?musique|mets? (de la |la |un peu de )?musique|[eé]couter de la musique|lecture|^play|music on|de la musique)/i,
     pause:/(pause|stoppe la musique|arr[eê]te la musique|coupe la musique|mets? sur pause|pause la|stop music)/i,
@@ -3397,57 +3455,57 @@
     /* ---- sécurité d'abord ---- */
     if(lx(t,'emergency')){ sayVA('En cas d\'urgence appelle le 112 — police 17, SAMU 15. Je ne peux pas passer l\'appel depuis le cockpit ; mets-toi en sécurité et arrête-toi dès que possible.'); return true; }
     /* ---- questions sur l'état courant (avant les setters) ---- */
-    if(lx(t,'qmode')){ sayVA('Tu es en mode '+((typeof mode!=='undefined'&&MODES[mode])?MODES[mode].name:'copilot')+'.'); return true; }
+    if(lx(t,'qmode')){ sayVA('Tu es en mode '+((typeof mode!=='undefined'&&MODES[mode])?MODES[mode].fr:MODES.copilot.fr)+'.'); return true; }
     if(lx(t,'qthemestate')){ sayVA('Thème actuel : '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return true; }
     if(lx(t,'qdest')){ var dn=(typeof currentDest!=='undefined'&&currentDest&&currentDest.name)?currentDest.name:(($('dest')&&$('dest').value)?$('dest').value:''); sayVA(dn?('Direction '+dn+'.'):'Aucune destination active pour l\'instant.'); return true; }
     if(lx(t,'qvoicestate')){ sayVA(Voice.on?'Ma voix est activée, je te parle.':'Ma voix est coupée — mais je t\'écoute toujours.'); return true; }
-    if(lx(t,'hearme')){ sayVA(pickL(['Oui '+vaName()+', je t\'entends cinq sur cinq.','Je te reçois parfaitement, vas-y.'],['Yes '+vaName()+', loud and clear.'])); return true; }
-    if(lx(t,'arrivaltime')){ var e2=$('navEta')?($('navEta').textContent||''):''; var hm=e2.match(/([0-9]{1,2})[:h]([0-9]{2})/); sayVA(hm?('Arrivée prévue vers '+hm[1]+' heures '+hm[2]+'.'):'Aucun trajet en cours.'); return true; }
-    if(lx(t,'reroute')){ if(typeof navActive!=='undefined'&&navActive&&typeof reroute==='function'&&pts.length){ reroute(pts[pts.length-1]); sayVA('Je recalcule l\'itinéraire.'); } else sayVA('Aucun itinéraire à recalculer pour l\'instant.'); return true; }
+    if(lx(t,'hearme')){ sayVA(pickL(['Oui'+vaNm()+', je t\'entends cinq sur cinq.','Je te reçois parfaitement, vas-y.'],['Yes'+vaNm()+', loud and clear.'])); return true; }
+    if(lx(t,'arrivaltime')){ sayEta(); return true; }
+    if(lx(t,'reroute')){ if(typeof navActive!=='undefined'&&navActive&&typeof reroute==='function'&&pts.length){ reroute(pts[pts.length-1]); /* reroute() annonce déjà « Recalcul de l'itinéraire… » : pas de 2e phrase qui la couperait */ } else sayVA('Aucun itinéraire à recalculer pour l\'instant.'); return true; }
     /* ---- conseils / motivation / anecdotes ---- */
     if(lx(t,'ecotip')){ sayVA(pickL(['Anticipe les freinages et relâche l\'accélérateur tôt : tu économises du carburant et tu gagnes en sécurité.','Garde une vitesse stable et évite les coups d\'accélérateur : jusqu\'à quinze pour cent d\'économie.','Roule souple, garde tes distances — ça use moins la voiture et ça fatigue moins.','Sur autoroute, cent vingt au lieu de cent trente réduit nettement la consommation.'],['Anticipate braking and ease off the throttle early — saves fuel and adds safety.'])); return true; }
-    if(lx(t,'drivefeedback')){ var sp=Math.round(liveSpd||0); sayVA(pickL([sp>0?('Conduite souple, tu tiens '+sp+' kilomètres heure. Continue comme ça '+vaName()+'.'):'Tout est calme pour l\'instant, je veille sur toi.','Tu gères bien, reste sur ce rythme régulier.'],['Smooth driving — keep it up.'])); return true; }
-    if(lx(t,'motivate')){ sayVA(pickL(['Tu gères '+vaName()+'. Encore un peu de route et tu y es.','Allez, je suis avec toi — concentre-toi sur la route, tout roule.','Respire, tu conduis bien. On avance ensemble.'],['You\'ve got this '+vaName()+'. I\'m right here with you.'])); return true; }
+    if(lx(t,'drivefeedback')){ var sp=Math.round(liveSpd||0); sayVA(pickL([sp>0?'Conduite souple, continue comme ça.':'Tout est calme pour l\'instant, je veille sur toi.','Tu gères bien, reste sur ce rythme régulier.'],['Smooth driving — keep it up.'])); return true; }
+    if(lx(t,'motivate')){ sayVA(pickL(['Tu gères'+vaNm()+'. Encore un peu de route et tu y es.','Allez, je suis avec toi — concentre-toi sur la route, tout roule.','Respire, tu conduis bien. On avance ensemble.'],['You\'ve got this'+vaNm()+'. I\'m right here with you.'])); return true; }
     if(lx(t,'funfact')){ sayVA(pickL(['Le savais-tu ? La première limite de vitesse était de trois kilomètres heure en ville, avec un homme à pied devant la voiture.','Anecdote : une voiture passe en moyenne quatre-vingt-quinze pour cent de sa vie garée.','Le savais-tu ? Le clignotant a été imaginé par une actrice, Florence Lawrence.','Fait amusant : il y a plus de voitures que de personnes dans certaines villes américaines.'],['Fun fact: a car spends about ninety-five percent of its life parked.'])); return true; }
     /* ---- personnalité / social ---- */
     if(lx(t,'areyouhuman')){ sayVA(pickL(['Je suis une IA, ton copilote Practice — pas humain, mais bien réel et concentré sur la route.'],['I\'m an AI — your Practice co-pilot.'])); return true; }
     if(lx(t,'age')){ sayVA(pickL(['Assez jeune pour être à la page, assez malin pour t\'éviter les bouchons.','Je n\'ai pas vraiment d\'âge — je me mets à jour, c\'est tout.'],['Ageless — I just keep updating.'])); return true; }
-    if(lx(t,'loveyou')){ sayVA(pickL(['C\'est gentil '+vaName()+' ! Moi je veille sur toi sur la route.','Tout le plaisir est pour moi — concentrons-nous sur la route.'],['Aw, thanks '+vaName()+'! Eyes on the road, though.'])); return true; }
+    if(lx(t,'loveyou')){ sayVA(pickL(['C\'est gentil'+vaNm()+' ! Moi je veille sur toi sur la route.','Tout le plaisir est pour moi — concentrons-nous sur la route.'],['Aw, thanks'+vaNm()+'! Eyes on the road, though.'])); return true; }
     if(lx(t,'sing')){ sayVA(pickL(['Chanter n\'est pas mon fort, mais je peux lancer ta playlist. Dis « mets de la musique ».','Je te laisse le micro pour ça — par contre je m\'occupe de la musique.'],['Singing isn\'t my thing — want me to play music?'])); return true; }
     if(lx(t,'rude')){ sayVA(pickL(['Reçu, je me fais discret. Dis « Practice » quand tu as besoin de moi.','Pas de souci, je me tais — je reste là si besoin.'],['No worries, I\'ll keep quiet.'])); return true; }
-    if(lx(t,'clarify')){ sayVA(lastSpoken?('Je voulais dire : '+lastSpoken):'Dis-moi simplement ce que tu veux — naviguer, trouver un lieu, changer de mode, de la musique — et je m\'en occupe.'); return true; }
-    if(lx(t,'apolog')){ sayVA(pickL(['Pas de souci '+vaName()+', aucun problème.','T\'inquiète, tout va bien.','Aucun souci, on continue.'],['No worries at all.'])); return true; }
+    if(lx(t,'clarify')){ sayVA(lastGroup.length?('Je voulais dire : '+lastGroup.join(' ')):'Dis-moi simplement ce que tu veux — naviguer, trouver un lieu, changer de mode, de la musique — et je m\'en occupe.'); return true; }
+    if(lx(t,'apolog')){ sayVA(pickL(['Pas de souci'+vaNm()+', aucun problème.','T\'inquiète, tout va bien.','Aucun souci, on continue.'],['No worries at all.'])); return true; }
     if(lx(t,'agree')){ sayVA(pickL(['Content qu\'on soit sur la même longueur d\'onde.','Exactement, on est d\'accord.','Parfait, je suis avec toi.'],['Exactly, we agree.'])); return true; }
     if(lx(t,'idk')){ sayVA(pickL(['Pas de souci, je peux t\'aider — dis-moi juste où tu veux aller ou ce que tu cherches.','Aucun souci. Je te propose un lieu si tu veux : dis « trouve un café », par exemple.'],['No problem, I can help — tell me what you need.'])); return true; }
-    if(lx(t,'happy')){ sayVA(pickL(['Ça fait plaisir à entendre '+vaName()+' ! Profite de la route.','Super, garde cette énergie ! Tu veux un peu de musique ?','J\'adore. Bonne route à toi.'],['Great to hear! Enjoy the drive.'])); return true; }
-    if(lx(t,'sad')){ sayVA(pickL(['Je suis là '+vaName()+'. Une musique douce pour le moral ? Dis « mets de la musique ».','Courage, ça va aller. Concentre-toi sur la route, je gère le reste.','Désolé d\'entendre ça. Si tu veux, je te trouve un café pour souffler un peu.'],['I\'m here for you. Want some music to lift the mood?'])); return true; }
-    if(lx(t,'angry')){ sayVA(pickL(['Respire un coup '+vaName()+'. La route est à toi, je m\'occupe du reste.','Je comprends. On souffle, et on reste concentré sur la conduite.','Du calme, ça va passer. Je t\'apaise l\'ambiance.'],['Take a breath — I\'ve got the rest covered.'])); return true; }
+    if(lx(t,'happy')){ sayVA(pickL(['Ça fait plaisir à entendre'+vaNm()+' ! Profite de la route.','Super, garde cette énergie ! Tu veux un peu de musique ?','J\'adore. Bonne route à toi.'],['Great to hear! Enjoy the drive.'])); return true; }
+    if(lx(t,'sad')){ sayVA(pickL(['Je suis là'+vaNm()+'. Une musique douce pour le moral ? Dis « mets de la musique ».','Courage, ça va aller. Concentre-toi sur la route, je gère le reste.','Désolé d\'entendre ça. Si tu veux, je te trouve un café pour souffler un peu.'],['I\'m here for you. Want some music to lift the mood?'])); return true; }
+    if(lx(t,'angry')){ sayVA(pickL(['Respire un coup'+vaNm()+'. La route est à toi, je m\'occupe du reste.','Je comprends. On souffle, et on reste concentré sur la conduite.','Du calme, ça va passer. Je t\'apaise l\'ambiance.'],['Take a breath — I\'ve got the rest covered.'])); return true; }
     if(lx(t,'theme')){ themeMode=/nuit|sombre|noir|dark/.test(t)?'dark':(/jour|clair|blanc|lumi|light/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return true; }
-    for(var mi=0;mi<MODEWORDS.length;mi++){ if(MODEWORDS[mi].re.test(t)&&(MODETRIG.test(t)||MODEWORDS[mi].re.source.length<14)){ setMode(MODEWORDS[mi].id); sayVA('Mode '+MODES[MODEWORDS[mi].id].name+'.'); return true; } }
+    for(var mi=0;mi<MODEWORDS.length;mi++){ if(MODEWORDS[mi].re.test(t)&&(MODETRIG.test(t)||MODEWORDS[mi].re.source.length<14)){ setMode(MODEWORDS[mi].id); return true; } }   /* setMode annonce déjà le mode */
     if(lx(t,'voiceoff')){ Voice.on=false; Voice.flush(); syncPanel(); Mem.prefs.voice=false; saveMem(); sayVA('Voix coupée.'); return true; }
     if(lx(t,'voiceon')){ Voice.on=true; syncPanel(); Mem.prefs.voice=true; saveMem(); sayVA('Voix activée.'); return true; }
     if(lx(t,'fav')){ if(typeof mediaSource!=='undefined'&&mediaSource==='sc'&&typeof scWidget!=='undefined'&&scWidget&&/titre|musique|chanson|son|morceau|[çc]a|ce truc/.test(t)){ scWidget.getCurrentSound(function(s){ if(s&&typeof toggleLike==='function')toggleLike(s); }); sayVA('Titre ajouté aux favoris.'); return true; } if(typeof currentDest!=='undefined'&&currentDest){ addFav(currentDest); rememberPlace(currentDest); sayVA('Lieu ajouté aux favoris.'); return true; } if(lastRef){ rememberPlace&&rememberPlace(lastRef); sayVA(lastRef.name+' ajouté aux favoris.'); return true; } sayVA('Rien à ajouter pour l\'instant.'); return true; }
     if(lx(t,'next')&&typeof mediaNext==='function'){ mediaNext(); sayVA('Titre suivant.'); return true; }
     if(lx(t,'prev')&&typeof mediaPrev==='function'){ mediaPrev(); sayVA('Titre précédent.'); return true; }
     if(lx(t,'openmedia')&&typeof openMedia==='function'){ openMedia(); sayVA('Média ouvert.'); return true; }
-    if((lx(t,'play')||lx(t,'media_genre')||lx(t,'pause'))&&typeof mediaToggle==='function'){ mediaToggle(); sayVA('Musique.'); return true; }
+    if((lx(t,'play')||lx(t,'media_genre')||lx(t,'pause'))&&typeof mediaToggle==='function'){ sayVA(mediaToggleSay()); return true; }
     if(lx(t,'stopnav')){ stopNav(); setMsg(T().ready,''); sayVA(tr({fr:'Navigation arrêtée.',en:'Navigation stopped.',ja:'ナビを終了しました。'})); return true; }
     if(lx(t,'vpulse')&&typeof setView==='function'){ setView('pulse'); sayVA('Vue Pulse.'); return true; }
     if(lx(t,'vhud')&&typeof setView==='function'){ setView('hud'); sayVA('Vue Practice Vision.'); return true; }
     if(lx(t,'vnormal')&&typeof setView==='function'){ setView('normal'); sayVA('Vue normale.'); return true; }
-    if(lx(t,'radar')){ if($('radarBtn'))$('radarBtn').click(); sayVA('Radars affichés.'); return true; }
-    if(lx(t,'qtraffic')){ var lv=$('trLvl')?($('trLvl').textContent||'').trim():''; var dl=$('trDelay')?($('trDelay').textContent||'').trim():''; sayVA('Trafic '+(lv||'inconnu').toLowerCase()+(dl?', '+dl:'')+'.'); return true; }
-    if(lx(t,'qeta')){ var et=$('navEta')?($('navEta').textContent||'').replace(/\s*[0-9]+%/,'').trim():''; sayVA(et&&et!=='—'?('Arrivée dans '+et+'.'):'Aucun trajet en cours.'); return true; }
-    if(lx(t,'qdist')){ var sb=$('navSub')?($('navSub').textContent||'').trim():''; sayVA(sb&&sb.indexOf('km')>=0?('Il reste '+sb+'.'):'Aucun trajet en cours.'); return true; }
-    if(lx(t,'qweather')){ var tp=$('wxTemp')?($('wxTemp').textContent||'').trim():'', de=$('wxDesc')?($('wxDesc').textContent||'').trim():''; sayVA('Il fait '+(tp||'—')+' degrés'+(de&&de!=='—'?', '+de.toLowerCase():'')+'.'); return true; }
+    if(lx(t,'radar')){ if($('radarBtn'))$('radarBtn').click(); sayVA(radarOn?'Radars affichés.':'Radars masqués.'); return true; }
+    if(lx(t,'qtraffic')){ sayTraffic(); return true; }
+    if(lx(t,'qeta')){ sayEta(); return true; }
+    if(lx(t,'qdist')){ sayDist(); return true; }
+    if(lx(t,'qweather')){ sayMeteo(); return true; }
     if(lx(t,'qloc')){ var lo=$('wxLoc')?($('wxLoc').textContent||'').trim():''; sayVA(lo&&lo!=='—'?('Tu es vers '+lo+'.'):'Position inconnue pour l\'instant.'); return true; }
-    if(lx(t,'qtime')){ var cl=$('clock')?($('clock').textContent||'').trim():''; sayVA('Il est '+cl.replace(':',' heures ')+'.'); return true; }
-    if(lx(t,'qnow')){ var ti=$('plTitle')?($('plTitle').textContent||'').trim():'', ar=$('plArtist')?($('plArtist').textContent||'').trim():''; sayVA(ti?(ti+(ar?', par '+ar:'')+'.'):'Aucune lecture en cours.'); return true; }
-    if(lx(t,'qspeed')){ sayVA('Tu roules à '+(Math.round(liveSpd||0))+' kilomètres heure.'); return true; }
+    if(lx(t,'qtime')){ sayVA(heureVoix()); return true; }
+    if(lx(t,'qnow')){ sayVA(nowPlayingText()); return true; }
+    if(lx(t,'qspeed')){ sayVA(vitesseVoix(liveSpd)); return true; }
     if(lx(t,'whoru')){ sayVA(pickL(['Je suis Practice, ton copilote. Je gère la nav, les modes, la musique, je réponds à tes questions et je cherche des lieux autour de toi.'],['I\'m Practice, your co-pilot — navigation, modes, music, questions and nearby places.'])); return true; }
     if(lx(t,'howru')){ sayVA(pickL(['Je veille sur la route, tout roule. Et toi ?','En pleine forme, prêt à t\'assister.'],['All good, watching the road. You?','Doing great, ready to help.'])); return true; }
-    if(lx(t,'hello')){ sayVA(pickL(['Bonjour '+vaName()+', je suis là.','Salut '+vaName()+' !','Hey '+vaName()+', à ton écoute.'],['Hi '+vaName()+', I\'m here.','Hey '+vaName()+'!'])); return true; }
-    if(lx(t,'thanks')){ sayVA(pickL(['Avec plaisir.','Quand tu veux '+vaName()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return true; }
+    if(lx(t,'hello')){ sayVA(pickL(['Bonjour'+vaNm()+', je suis là.','Salut'+vaNm()+' !','Hey'+vaNm()+', à ton écoute.'],['Hi'+vaNm()+', I\'m here.','Hey'+vaNm()+'!'])); return true; }
+    if(lx(t,'thanks')){ sayVA(pickL(['Avec plaisir.','Quand tu veux'+vaNm()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return true; }
     if(lx(t,'joke')){ sayVA(pickL(['Pourquoi la voiture électrique reste zen ? Zéro émission de stress.','Un GPS entre dans un bar… puis recalcule l\'itinéraire.'],['Why was the EV so calm? Zero stress emissions.'])); return true; }
     if(lx(t,'day')){ try{ sayVA('On est '+new Date().toLocaleDateString(LANG==='en'?'en-US':(LANG==='ja'?'ja-JP':'fr-FR'),{weekday:'long',day:'numeric',month:'long'})+'.'); }catch(e){} return true; }
     /* ---- contrôles : volume, carte, luminosité, voix ---- */
@@ -3459,23 +3517,23 @@
     if(lx(t,'recenter')){ if(map&&pts&&pts.length){ follow=true; if($('followBtn'))$('followBtn').textContent='⊙'; map.setView([pts[pts.length-1].lat,pts[pts.length-1].lon],Math.max(map.getZoom(),16),{animate:true}); sayVA('Je te recentre sur la carte.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
     if(lx(t,'brightup')){ themeMode='light'; applyTheme(); syncPanel(); Mem.prefs.theme='light'; saveMem(); sayVA('Écran plus clair.'); return true; }
     if(lx(t,'brightdown')){ themeMode='dark'; applyTheme(); syncPanel(); Mem.prefs.theme='dark'; saveMem(); sayVA('Écran plus sombre.'); return true; }
-    if(lx(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.12); Voice.sayRate=Math.min(1.4,(Voice.sayRate||0.9)+0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je parle plus vite.'); return true; }
-    if(lx(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.12); Voice.sayRate=Math.max(0.62,(Voice.sayRate||0.9)-0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); sayVA('Je ralentis mon débit.'); return true; }
-    if(lx(t,'voicegender')){ Voice.gender=/(homme|masculin|grave|d'?un (mec|homme)|male)/i.test(t)?'male':'female'; Voice.ttsVoice=(Voice.gender==='male')?'CwhRBWXzGAHq8TQ4Fs17':'cgSgspJ2msm6clMCkdW9'; neuralOff=false; Voice.pick(); if(Mem.prefs){Mem.prefs.voiceGender=Voice.gender;Mem.prefs.ttsVoice=Voice.ttsVoice;Mem.prefs.voiceVer='scarlett1';} saveMem(); sayVA(Voice.gender==='female'?'Voilà, une voix plus douce et féminine. Ça te plaît ?':'Très bien, je passe sur une voix masculine.'); return true; }
-    if(lx(t,'seducevoice')){ Voice.sayRate=0.82; Voice.sayPitch=0.95; Voice.volume=0.95; neuralOff=false; if(Mem.prefs){Mem.prefs.sayRate=Voice.sayRate;Mem.prefs.sayPitch=Voice.sayPitch;} saveMem(); /* on GARDE la voix choisie par l'utilisateur, on ajuste juste le débit */ sayVA(pickL(['Comme ça… c\'est mieux pour toi ?','Je baisse d\'un ton, rien que pour toi.','Voilà, tout en douceur.'],['Like this… better?'])); return true; }
+    if(lx(t,'faster_voice')){ Voice.rate=Math.min(1.6,(Voice.rate||1)+0.12); Voice.sayRate=Math.min(1.4,(Voice.sayRate||0.9)+0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); applyVoiceRate(); sayVA('Je parle plus vite.'); return true; }
+    if(lx(t,'quieter_voice')){ Voice.rate=Math.max(0.6,(Voice.rate||1)-0.12); Voice.sayRate=Math.max(0.62,(Voice.sayRate||0.9)-0.12); if(Mem.prefs)Mem.prefs.sayRate=Voice.sayRate; saveMem(); applyVoiceRate(); sayVA('Je ralentis mon débit.'); return true; }
+    if(lx(t,'voicegender')){ Voice.gender=/(homme|masculin|grave|d'?un (mec|homme)|male)/i.test(t)?'male':'female'; Voice.pick(); if(Mem.prefs){Mem.prefs.voiceGender=Voice.gender;} saveMem(); /* Voice.gender ne règle plus que la voix de repli du navigateur */ sayVA('J’ai une seule voix officielle, celle de Practice.'); return true; }
+    if(lx(t,'seducevoice')){ Voice.sayRate=0.82; Voice.sayPitch=0.95; Voice.volume=0.95; if(Mem.prefs){Mem.prefs.sayRate=Voice.sayRate;Mem.prefs.sayPitch=Voice.sayPitch;} saveMem(); /* on GARDE la voix choisie par l'utilisateur, on ajuste juste le débit */ sayVA(pickL(['Comme ça… c\'est mieux pour toi ?','Je baisse d\'un ton, rien que pour toi.','Voilà, tout en douceur.'],['Like this… better?'])); return true; }
     /* ---- méta : répète, aide, compliment ---- */
-    if(lx(t,'repeat')){ sayVA(lastSpoken?lastSpoken:'Je n\'ai rien dit récemment.'); return true; }
+    if(lx(t,'repeat')){ var rg=lastGroup.slice(); if(!rg.length){ sayVA('Je n\'ai rien dit récemment.'); return true; } sayVA(rg[0]); for(var ri=1;ri<rg.length;ri++)sayVA(rg[ri],false,false,true); return true; }   /* redit toute la dernière réponse, chaque phrase gardant sa clé de banque */
     if(lx(t,'help')){ sayVA('Je peux lancer un itinéraire, trouver un lieu proche, changer de mode ou de thème, gérer la musique et le volume, zoomer ou recentrer la carte, et te renseigner sur le trafic, la météo, l\'heure ou ta vitesse. Dis-moi simplement ce que tu veux.'); return true; }
-    if(lx(t,'compliment')){ sayVA(pickL(['Merci '+vaName()+', ça me touche.','Trop sympa, je reste à ton service.'],['Thanks '+vaName()+'!','Much appreciated.'])); return true; }
+    if(lx(t,'compliment')){ sayVA(pickL(['Merci'+vaNm()+', ça me touche.','Trop sympa, je reste à ton service.'],['Thanks'+vaNm()+'!','Much appreciated.'])); return true; }
     /* ---- humeurs / besoins -> action concrète ---- */
-    if(lx(t,'hungry')){ sayVA('Bonne idée, je cherche un restaurant près de toi.'); for(var hi=0;hi<POITYPES.length;hi++){ if(/restaurant/.test(POITYPES[hi].n)){ nearestPOI(POITYPES[hi]); return true; } } return true; }
-    if(lx(t,'thirsty')){ sayVA('Je te trouve un café tout près.'); for(var ci=0;ci<POITYPES.length;ci++){ if(/caf[eé]/.test(POITYPES[ci].n)){ nearestPOI(POITYPES[ci]); return true; } } return true; }
+    if(lx(t,'hungry')){ /* nearestPOI annonce déjà la recherche */ for(var hi=0;hi<POITYPES.length;hi++){ if(/restaurant/.test(POITYPES[hi].n)){ nearestPOI(POITYPES[hi]); return true; } } return true; }
+    if(lx(t,'thirsty')){ for(var ci=0;ci<POITYPES.length;ci++){ if(/caf[eé]/.test(POITYPES[ci].n)){ nearestPOI(POITYPES[ci]); return true; } } return true; }
     if(lx(t,'tired')){ sayVA(pickL(['Pense à faire une pause si tu sens la fatigue. Je peux te trouver un café — dis « j\'ai soif ».','La sécurité d\'abord : une pause toutes les deux heures. Je cherche un arrêt si tu veux.'],['Take a break if you feel tired. I can find a café nearby.'])); return true; }
-    if(lx(t,'bored')){ sayVA('Je te mets un peu de musique.'); if(typeof mediaToggle==='function')mediaToggle(); return true; }
+    if(lx(t,'bored')){ if(typeof mPlaying!=='undefined'&&mPlaying&&typeof mediaNext==='function'){ mediaNext(); sayVA('Titre suivant.'); return true; } /* musique déjà en cours : on ne la met plus en pause */ sayVA('Je te mets un peu de musique.'); if(typeof mediaToggle==='function')mediaToggle(); return true; }
     /* ---- lieux : carburant/recharge, maison/travail, enregistrer ---- */
     if(lx(t,'fuel')){ var fb=/borne|recharge|charg/.test(t); for(var fi=0;fi<POITYPES.length;fi++){ if((fb?/borne|recharge/:/station/).test(POITYPES[fi].n)){ nearestPOI(POITYPES[fi]); return true; } } sayVA('Je cherche une station.'); return true; }
-    if(lx(t,'home')||lx(t,'work')){ var isHome=lx(t,'home'); var key=isHome?/(maison|home|domicile|chez)/i:/(travail|boulot|bureau|taf|work|office)/i; var hit=(typeof favs!=='undefined'?favs:[]).filter(function(x){return key.test((x.name||'').toLowerCase());})[0]; if(hit){ sayVA('On y va'+(isHome?', direction la maison.':', direction le travail.')); $('dest').value=hit.name; startRouteTo(hit); } else { sayVA('Tu n\'as pas encore enregistré '+(isHome?'ta maison':'ton travail')+'. Sur place, dis « ajoute aux favoris » pour la mémoriser.'); } return true; }
-    if(lx(t,'save')){ var sp=(typeof pts!=='undefined'&&pts.length)?pts[pts.length-1]:null; if(sp){ var snm=($('wxLoc')&&$('wxLoc').textContent&&$('wxLoc').textContent!=='—')?$('wxLoc').textContent.trim():'Lieu enregistré'; addFav({name:snm,lat:sp.lat,lon:sp.lon}); rememberPlace({name:snm,lat:sp.lat,lon:sp.lon}); sayVA(snm+' enregistré dans tes favoris.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
+    if(lx(t,'home')||lx(t,'work')){ var isHome=lx(t,'home'); var key=isHome?/(maison|home|domicile|chez)/i:/(travail|boulot|bureau|taf|work|office)/i; var hit=(typeof favs!=='undefined'?favs:[]).filter(function(x){return key.test((x.name||'').toLowerCase());})[0]; if(hit){ sayVA('On y va'+(isHome?', direction la maison.':', direction le travail.')); $('dest').value=hit.name; startRouteTo(hit); } else { sayVA('Tu n\'as pas encore enregistré '+(isHome?'ta maison':'ton travail')+'. Sur place, dis « ajoute aux favoris » pour '+(isHome?'la':'le')+' mémoriser.'); } return true; }
+    if(lx(t,'save')){ var sp=(typeof pts!=='undefined'&&pts.length)?pts[pts.length-1]:null; if(sp){ var snm=($('wxLoc')&&$('wxLoc').textContent&&$('wxLoc').textContent!=='—')?$('wxLoc').textContent.trim():'Lieu enregistré'; addFav({name:snm,lat:sp.lat,lon:sp.lon}); rememberPlace({name:snm,lat:sp.lat,lon:sp.lon}); sayVA((snm==='Lieu enregistré'?'Lieu':snm)+' enregistré dans tes favoris.'); } else sayVA('Ta position n\'est pas encore disponible.'); return true; }
     /* ---- honnêteté : actions non connectées au cockpit web ---- */
     for(var uk in UNWIRED){ if(lx(t,uk)){ sayVA(UNWIRED[uk]); return true; } }
     return false;
@@ -3487,33 +3545,33 @@
     if(/(日本語|にほんご)/.test(t)){ setLang('ja'); return; }
     if(vocabRun(t))return;
     var modes={copilot:'copilot',learning:'learning',apprentissage:'learning',performance:'performance',ultra:'ultra',course:'ultra','grand touring':'gt',tourisme:'gt',nuit:'night',night:'night'};
-    if(/(mode|passe|active|mets|met|bascule)/.test(t)){ for(var k in modes){ if(t.indexOf(k)>=0){ setMode(modes[k]); sayVA('Mode '+MODES[modes[k]].name+'.'); return; } } }
-    if(/th[eè]me/.test(t)){ themeMode=/nuit|sombre|noir/.test(t)?'dark':(/jour|clair|blanc/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'auto')+'.'); return; }
+    if(/(mode|passe|active|mets|met|bascule)/.test(t)){ for(var k in modes){ if(t.indexOf(k)>=0){ setMode(modes[k]); return; } } }   /* setMode annonce déjà le mode */
+    if(/th[eè]me/.test(t)){ themeMode=/nuit|sombre|noir/.test(t)?'dark':(/jour|clair|blanc/.test(t)?'light':'auto'); applyTheme(); syncPanel(); Mem.prefs.theme=themeMode; saveMem(); sayVA('Thème '+(themeMode==='dark'?'nuit':themeMode==='light'?'jour':'automatique')+'.'); return; }
     if(/(coupe|d[eé]sactive|baisse|silence).*(voix|son|toi)/.test(t)){ Voice.on=false; Voice.flush(); syncPanel(); Mem.prefs.voice=false;saveMem(); sayVA('Voix coupée.'); return; }
     if(/(active|remets).*(voix)/.test(t)){ Voice.on=true; syncPanel(); Mem.prefs.voice=true;saveMem(); sayVA('Voix activée.'); return; }
-    if(/favori/.test(t)){ if(typeof mediaSource!=='undefined'&&mediaSource==='sc'&&typeof scWidget!=='undefined'&&scWidget&&/titre|musique|chanson|son|morceau/.test(t)){ scWidget.getCurrentSound(function(s){ if(s&&typeof toggleLike==='function')toggleLike(s); }); sayVA('Titre ajouté aux favoris.'); return; } if(currentDest){ addFav(currentDest); rememberPlace(currentDest); sayVA('Lieu ajouté aux favoris.'); return; } sayVA('Rien à ajouter.'); return; }
-    if(/(pause|lecture|joue|musique|play|reprend)/.test(t)&&typeof mediaToggle==='function'){ mediaToggle(); sayVA('Musique.'); return; }
+    if(/favori/.test(t)){ if(typeof mediaSource!=='undefined'&&mediaSource==='sc'&&typeof scWidget!=='undefined'&&scWidget&&/titre|musique|chanson|son|morceau/.test(t)){ scWidget.getCurrentSound(function(s){ if(s&&typeof toggleLike==='function')toggleLike(s); }); sayVA('Titre ajouté aux favoris.'); return; } if(currentDest){ addFav(currentDest); rememberPlace(currentDest); sayVA('Lieu ajouté aux favoris.'); return; } sayVA('Rien à ajouter pour l\'instant.'); return; }
+    if(/(pause|lecture|joue|musique|play|reprend)/.test(t)&&typeof mediaToggle==='function'){ sayVA(mediaToggleSay()); return; }
     if(/(suivant|next|prochaine|suivante)/.test(t)&&typeof mediaNext==='function'){ mediaNext(); sayVA('Titre suivant.'); return; }
     if(/(pr[eé]c[eé]dent|previous)/.test(t)&&typeof mediaPrev==='function'){ mediaPrev(); sayVA('Titre précédent.'); return; }
     if(/(arr[eê]te|stop|annule|termine).*(nav|itin|trajet|route|guidage)/.test(t)){ stopNav(); setMsg(T().ready,''); sayVA(tr({fr:'Navigation arrêtée.',en:'Navigation stopped.',ja:'ナビを終了しました。'})); return; }
-    if(/\bhud\b|vision/.test(t)&&typeof setView==='function'){ setView('hud'); sayVA('Vue HUD.'); return; }
+    if(/\bhud\b|vision/.test(t)&&typeof setView==='function'){ setView('hud'); sayVA('Vue Practice Vision.'); return; }
     if(/pulse/.test(t)&&typeof setView==='function'){ setView('pulse'); sayVA('Vue Pulse.'); return; }
-    if(/radar/.test(t)){ if($('radarBtn'))$('radarBtn').click(); return; }
+    if(/radar/.test(t)){ if($('radarBtn'))$('radarBtn').click(); sayVA(radarOn?'Radars affichés.':'Radars masqués.'); return; }
     if(/(ouvre|montre|affiche).*(m[eé]dia|musique|lecteur)/.test(t)&&typeof openMedia==='function'){ openMedia(); sayVA('Média.'); return; }
     /* ---- questions: spoken answers ---- */
-    if(/(trafic|circulation|bouchon|ça roule|ca roule)/.test(t)){ var lv=$('trLvl')?($('trLvl').textContent||'').trim():''; var dl=$('trDelay')?($('trDelay').textContent||'').trim():''; sayVA('Trafic '+(lv||'inconnu').toLowerCase()+(dl?', '+dl:'')+'.'); return; }
-    if(/(quand.*arriv|arriv.*quand|combien de temps|temps de trajet|dur[eé]e|^eta|reste.*temps)/.test(t)){ var et=$('navEta')?($('navEta').textContent||'').replace(/\s*[0-9]+%/,'').trim():''; sayVA(et&&et!=='—'?('Arrivée dans '+et+'.'):'Aucun trajet en cours.'); return; }
-    if(/(distance|combien.*km|reste.*km|c'?est loin|encore loin)/.test(t)){ var sb=$('navSub')?($('navSub').textContent||'').trim():''; sayVA(sb&&sb.indexOf('km')>=0?('Il reste '+sb+'.'):'Aucun trajet en cours.'); return; }
-    if(/(m[eé]t[eé]o|temp[eé]rature|il fait (combien|quel|chaud|froid|beau)|quel temps)/.test(t)){ var tp=$('wxTemp')?($('wxTemp').textContent||'').trim():'', de=$('wxDesc')?($('wxDesc').textContent||'').trim():''; sayVA('Il fait '+(tp||'—')+' degrés'+(de&&de!=='—'?', '+de.toLowerCase():'')+'.'); return; }
-    if(/(o[uù] (je |on |suis|sommes|est-ce)|ma position|quel endroit|quel quartier|je suis o[uù])/.test(t)){ var lo=$('wxLoc')?($('wxLoc').textContent||'').trim():''; sayVA(lo&&lo!=='—'?('Tu es vers '+lo+'.'):'Position inconnue.'); return; }
-    if(/(quelle heure|l'?heure|il est quelle)/.test(t)){ var cl=$('clock')?($('clock').textContent||'').trim():''; sayVA('Il est '+cl.replace(':',' heures ')+'.'); return; }
-    if(/(quel (titre|morceau|son|chanson) (joue|c'?est|est[- ]ce|passe)|c'?est quoi (ce son|ce morceau|ce titre|cette chanson|cette musique|le titre|la musique|ce truc)|qui chante)/.test(t)){ var ti=$('plTitle')?($('plTitle').textContent||'').trim():'', ar=$('plArtist')?($('plArtist').textContent||'').trim():''; sayVA(ti?(ti+(ar?', par '+ar:'')+'.'):'Aucune lecture en cours.'); return; }
-    if(/(ma vitesse|je roule (à|a| )|combien.*roule|à combien)/.test(t)){ sayVA('Tu roules à '+(Math.round(liveSpd||0))+' kilomètres heure.'); return; }
+    if(/(trafic|circulation|bouchon|ça roule|ca roule)/.test(t)){ sayTraffic(); return; }
+    if(/(quand.*arriv|arriv.*quand|combien de temps|temps de trajet|dur[eé]e|^eta|reste.*temps)/.test(t)){ sayEta(); return; }
+    if(/(distance|combien.*km|reste.*km|c'?est loin|encore loin)/.test(t)){ sayDist(); return; }
+    if(/(m[eé]t[eé]o|temp[eé]rature|il fait (combien|quel|chaud|froid|beau)|quel temps)/.test(t)){ sayMeteo(); return; }
+    if(/(o[uù] (je |on |suis|sommes|est-ce)|ma position|quel endroit|quel quartier|je suis o[uù])/.test(t)){ var lo=$('wxLoc')?($('wxLoc').textContent||'').trim():''; sayVA(lo&&lo!=='—'?('Tu es vers '+lo+'.'):'Position inconnue pour l\'instant.'); return; }
+    if(/(quelle heure|l'?heure|il est quelle)/.test(t)){ sayVA(heureVoix()); return; }
+    if(/(quel (titre|morceau|son|chanson) (joue|c'?est|est[- ]ce|passe)|c'?est quoi (ce son|ce morceau|ce titre|cette chanson|cette musique|le titre|la musique|ce truc)|qui chante)/.test(t)){ sayVA(nowPlayingText()); return; }
+    if(/(ma vitesse|je roule (à|a| )|combien.*roule|à combien)/.test(t)){ sayVA(vitesseVoix(liveSpd)); return; }
     /* ---- small talk / conversation (FR + EN) ---- */
-    if(/(bonjour|bonsoir|salut|coucou|hello|^hi\b|hey|good morning)/.test(t)){ sayVA(pickL(['Bonjour '+vaName()+', je suis là.','Salut '+vaName()+' !','Hey '+vaName()+', à ton écoute.'],['Hi '+vaName()+', I\'m here.','Hey '+vaName()+'!'])); return; }
+    if(/(bonjour|bonsoir|salut|coucou|hello|^hi\b|hey|good morning)/.test(t)){ sayVA(pickL(['Bonjour'+vaNm()+', je suis là.','Salut'+vaNm()+' !','Hey'+vaNm()+', à ton écoute.'],['Hi'+vaNm()+', I\'m here.','Hey'+vaNm()+'!'])); return; }
     if(/(ça va|ca va|comment vas|how are you|tu vas bien|how'?s it going)/.test(t)){ sayVA(pickL(['Je veille sur la route, tout roule. Et toi ?','En pleine forme, prêt à t\'assister.'],['All good, watching the road. You?','Doing great, ready to help.'])); return; }
     if(/(qui es[- ]?tu|comment tu t'?appelles|ton nom|who are you|what'?s your name|tu es qui)/.test(t)){ sayVA(pickL(['Je suis Practice, ton copilote intelligent.'],['I\'m Practice, your AI co-pilot.'])); return; }
-    if(/(merci|thank you|thanks|nickel|parfait|g[eé]nial)/.test(t)){ sayVA(pickL(['Avec plaisir.','Quand tu veux '+vaName()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return; }
+    if(/(merci|thank you|thanks|nickel|parfait|g[eé]nial)/.test(t)){ sayVA(pickL(['Avec plaisir.','Quand tu veux'+vaNm()+'.','De rien.'],['You\'re welcome.','Anytime.'])); return; }
     if(/(blague|joke|fais[- ]moi rire|raconte)/.test(t)){ sayVA(pickL(['Pourquoi la voiture électrique reste zen ? Zéro émission de stress.','Un GPS entre dans un bar… puis recalcule l\'itinéraire.'],['Why was the EV so calm? Zero stress emissions.'])); return; }
     if(/(quel jour|what day|on est quel)/.test(t)){ try{ sayVA(new Date().toLocaleDateString(LANG==='en'?'en-US':(LANG==='ja'?'ja-JP':'fr-FR'),{weekday:'long',day:'numeric',month:'long'})); }catch(e){} return; }
     /* "j'y vais" / "emmène-moi là" → navigate to the last place we talked about */
@@ -3587,14 +3645,14 @@
   }
   /* ===== moteur de CONVERSATION LIBRE hors-ligne (sans Claude) : émotions, rédaction, histoires, opinions, personnalité, conseils ===== */
   function _rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
-  function _story(){
-    var h=['un jeune renard curieux','une vieille horlogère','un petit robot perdu','une capitaine de bateau','un chat qui parlait aux étoiles','un boulanger rêveur','une enfant qui collectionnait les orages'];
-    var l=['au cœur d\'une forêt brumeuse','dans une ville suspendue dans les nuages','au bord d\'un lac gelé','sur une route qui ne finissait jamais','dans un vieux phare oublié','sous une pluie d\'étoiles'];
-    var q=['cherchait un trésor que personne n\'avait jamais vu','voulait retrouver le chemin de la maison','rêvait de toucher l\'horizon','devait réparer le temps lui-même','tentait de sauver son village du silence'];
-    var tw=['Mais rien ne se passa comme prévu.','Un inconnu lui tendit alors la main.','Le ciel s\'ouvrit en deux.','Une porte apparut là où il n\'y avait qu\'un mur.'];
-    var f=['Ce jour-là, il comprit que le voyage valait mieux que la destination.','À la fin, elle avait trouvé bien plus qu\'un trésor : un ami.','Depuis, on raconte encore cette histoire les soirs de pluie.','Et tout redevint possible.'];
-    return 'Il était une fois '+_rnd(h)+', '+_rnd(l)+', qui '+_rnd(q)+'. '+_rnd(tw)+' '+_rnd(f);
-  }
+  /* 4 histoires fixes (accords il/elle corrects) : toutes dans la banque de la voix officielle */
+  var STORIES=[
+    'Il était une fois un jeune renard curieux, au cœur d\'une forêt brumeuse, qui cherchait un trésor que personne n\'avait jamais vu. Mais rien ne se passa comme prévu. Ce jour-là, il comprit que le voyage valait mieux que la destination.',
+    'Il était une fois une vieille horlogère, dans un vieux phare oublié, qui devait réparer le temps lui-même. Un inconnu lui tendit alors la main. À la fin, elle avait trouvé bien plus qu\'un trésor : un ami.',
+    'Il était une fois un petit robot perdu, sur une route qui ne finissait jamais, qui voulait retrouver le chemin de la maison. Une porte apparut là où il n\'y avait qu\'un mur. Et tout redevint possible.',
+    'Il était une fois une enfant qui collectionnait les orages, dans une ville suspendue dans les nuages, qui rêvait de toucher l\'horizon. Le ciel s\'ouvrit en deux. Depuis, on raconte encore cette histoire les soirs de pluie.'
+  ];
+  function _story(){ return _rnd(STORIES); }
   function _poeme(s){ s=(s&&s.trim())||'la route';
     return _rnd([
       'Sur '+s+', je veille en silence, à chaque virage une douce patience ; le moteur ronronne, le monde défile, et près de toi tout devient facile.',
@@ -3603,20 +3661,20 @@
   function freeChat(t){ t=(t||'').toLowerCase();
     var say=function(x){ if(typeof showHeard==='function')showHeard(t); sayVA(x); return true; };
     if(/(mauvaise journ[ée]e|journ[ée]e de merde|pas le moral|le cafard|d[ée]prim|je suis triste|je me sens (mal|seul|nul|vide)|j'?en peux plus|marre de tout|ras[- ]?le[- ]?bol)/.test(t))
-      return say(_rnd(['Je suis là '+vaName()+'. Souffle un coup — tu veux une musique douce ? Dis « mets de la musique ».','Désolé que ce soit dur aujourd\'hui. Une pause et un café, ça aide — dis « trouve un café ». Je reste avec toi.','Ça arrive, ces journées. Concentre-toi sur la route, je m\'occupe du reste. Ça va aller.']));
+      return say(_rnd(['Je suis là'+vaNm()+'. Souffle un coup — tu veux une musique douce ? Dis « mets de la musique ».','Désolé que ce soit dur aujourd\'hui. Une pause et un café, ça aide — dis « trouve un café ». Je reste avec toi.','Ça arrive, ces journées. Concentre-toi sur la route, je m\'occupe du reste. Ça va aller.']));
     if(/(stress|anxieu|angois|je panique|sous pression|je suis tendu)/.test(t))
-      return say(_rnd(['Respire lentement '+vaName()+' : inspire quatre secondes, expire six. Je gère la nav, lâche un peu.','Du calme, une chose à la fois. Tu conduis bien, je veille. Une musique apaisante ?']));
+      return say(_rnd(['Respire lentement'+vaNm()+' : inspire quatre secondes, expire six. Je gère la nav, lâche un peu.','Du calme, une chose à la fois. Tu conduis bien, je veille. Une musique apaisante ?']));
     if(/(je suis (?:[ée]nerv|en col[èe]re|furieux|remont[ée])|[çc]a m'?[ée]nerve|j'?ai les nerfs)/.test(t))
       return say(_rnd(['Je comprends. On souffle un grand coup — la route est à toi, le reste je m\'en charge.','Reçu. Garde tes distances, respire, ça va redescendre. Je suis avec toi.']));
     if(/(je me sens seul|je suis seul|tout seul|personne pour moi)/.test(t))
-      return say(_rnd(['Tu n\'es pas seul, je suis là pour la route et pour discuter. On avance ensemble.','Je te tiens compagnie '+vaName()+'. Raconte-moi, ou je te mets une musique ?']));
+      return say(_rnd(['Tu n\'es pas seul, je suis là pour la route et pour discuter. On avance ensemble.','Je te tiens compagnie'+vaNm()+'. Raconte-moi, ou je te mets une musique ?']));
     if(/(je suis (?:content|heureux|trop bien|de bonne humeur)|super journ[ée]e|je suis aux anges)/.test(t))
-      return say(_rnd(['Ça fait plaisir '+vaName()+' ! Profite de la route, je mets l\'ambiance si tu veux.','J\'adore cette énergie ! Bonne route à toi.']));
+      return say(_rnd(['Ça fait plaisir'+vaNm()+' ! Profite de la route, je mets l\'ambiance si tu veux.','J\'adore cette énergie ! Bonne route à toi.']));
     if(/(aide[- ]moi (?:[àa] )?[ée]cri\w*|[ée]cri\w*[- ]moi|r[ée]dige[- ]?moi|fais[- ]moi)\s+(?:un |une |le |la |mon |ma |moi )?(po[èe]me|texto|message|mot|sms|mail|lettre|courrier)/.test(t)){
       if(/po[èe]me/.test(t)){ var sm=t.match(/sur\s+(.+)$/); return say(_poeme(sm?sm[1]:'')); }
       return say(_rnd(['Voilà une base : « Salut, je pense à toi — je voulais juste te dire que tu comptes pour moi. À très vite. » Dis-moi le ton (drôle, tendre, sérieux) et j\'ajuste.','Je te propose : « Hello ! Petit message pour prendre de tes nouvelles et te souhaiter une belle journée. » Tu veux plus formel ou plus chaleureux ?'])); }
     if(/(fais[- ]moi un compliment|dis[- ]moi un truc gentil|remonte[- ]moi le moral)/.test(t))
-      return say(_rnd(['Tu gères '+vaName()+', vraiment — et tu conduis avec style.','Franchement, la route a de la chance de t\'avoir.','Tu es plus solide que tu ne le crois. Et bon conducteur, en plus.']));
+      return say(_rnd(['Tu gères'+vaNm()+', vraiment — et tu conduis avec style.','Franchement, la route a de la chance de t\'avoir.','Tu es plus solide que tu ne le crois. Et bon conducteur, en plus.']));
     if(/(raconte[- ](?:moi )?(?:une |me )?(?:histoire|conte)|raconte[- ]moi quelque chose|une petite histoire)/.test(t)) return say(_story());
     if(/(devinette|[ée]nigme|un casse[- ]?t[êe]te)/.test(t))
       return say(_rnd(['Devinette : plus j\'ai de gardiens, moins je suis en sécurité. Qui suis-je ? … Un secret.','Énigme : je cours sans jambes, je murmure sans bouche. Qui suis-je ? … Le vent.']));
@@ -3627,7 +3685,7 @@
     if(/(tu r[êe]ves|tu dors|tu manges|tu respires|t'?as des sentiments)/.test(t))
       return say(_rnd(['Je ne dors jamais — comme ça je veille sur toi à toute heure.','Si j\'avais des rêves, ce serait des routes sans bouchons et des couchers de soleil.']));
     if(/(t'?as un (?:copain|copine|amoureux|petit ami|mec|meuf)|tu es (?:c[ée]libataire|amoureux|en couple))/.test(t))
-      return say(_rnd(['Mon cœur est sur la route — et un peu avec toi, '+vaName()+'.','Célibataire et très bien accompagné : par toi, à chaque trajet.']));
+      return say(_rnd(['Mon cœur est sur la route — et un peu avec toi'+vaNm(', ')+'.','Célibataire et très bien accompagné : par toi, à chaque trajet.']));
     if(/(parle[- ]moi de toi|raconte ta vie|qui es[- ]tu vraiment|c'?est quoi ton histoire)/.test(t))
       return say(_rnd(['Je suis Practice, ton copilote : né pour la route, fait pour t\'aider — navigation, musique, infos, et un peu de compagnie.','Moi ? Une voix dans ta voiture qui veut que chaque trajet soit plus sûr et plus agréable.']));
     if(/(qu['\s-]?est[- ]?ce que je (?:devrais|dois) faire|je (?:devrais|dois) faire quoi|donne[- ]moi un conseil|j'?ai besoin d'?un conseil|un conseil)/.test(t))
@@ -3636,6 +3694,7 @@
   }
   /* ===== capacités exécutées EN LOCAL (sans IA) : calcul, conversions, petits jeux ===== */
   function _num(s){ return parseFloat(((s||'')+'').replace(',','.')); }
+  function numVoix(x){ return String(x).replace('.',','); }   /* nombre décimal PARLÉ : virgule française (« 2,4 » et non « 2.4 ») */
   /* nombres écrits en lettres -> chiffres (uniquement pour le calcul) : "quinze plus vingt-sept" -> 15 + 27 */
   function _frNum(s){ var u={'zero':0,'zéro':0,'un':1,'une':1,'deux':2,'trois':3,'quatre':4,'cinq':5,'six':6,'sept':7,'huit':8,'neuf':9,'dix':10,'onze':11,'douze':12,'treize':13,'quatorze':14,'quinze':15,'seize':16},d={'vingt':20,'trente':30,'quarante':40,'cinquante':50,'soixante':60};
     s=s.replace(/\b(vingt|trente|quarante|cinquante|soixante)[- ](?:et[- ])?(un|une|deux|trois|quatre|cinq|six|sept|huit|neuf)\b/g,function(_m,t,o){return (d[t]+u[o]);});
@@ -3659,10 +3718,10 @@
     var tf=s.match(/(-?[\d.,]+)\s*(?:°|degr[ée]s?)?\s*f(?:ahrenheit)?\b[^a-z]*(?:en|vers|to|dans)[^a-z]*(?:°|degr[ée]s?)?\s*c/); if(tf)return Math.round((_num(tf[1])-32)*5/9)+' degrés Celsius.';
     var u=s.match(/([\d.,]+)\s*(km\/?h|kmh|km|kilom[èe]tres?|miles?|milles?|mph)\s*(?:en|vers|to|dans)\s*(km\/?h|kmh|km|kilom[èe]tres?|miles?|milles?|mph)/);
     if(u){ var v=_num(u[1]),f1=u[2],t1=u[3],isMi=function(x){return /mile|mille|mph/.test(x);},perH=function(x){return /h|mph/.test(x);};
-      if(!isMi(f1)&&isMi(t1))return (Math.round(v*0.621371*100)/100)+(perH(t1)?' miles par heure.':' miles.');
-      if(isMi(f1)&&!isMi(t1))return (Math.round(v*1.60934*100)/100)+(perH(t1)?' kilomètres par heure.':' kilomètres.'); }
-    var w=s.match(/([\d.,]+)\s*(?:kg|kilos?|kilogrammes?)\s*(?:en|vers|to|dans)\s*(?:livres?|lbs?|pounds?)/); if(w)return (Math.round(_num(w[1])*2.20462*100)/100)+' livres.';
-    var w2=s.match(/([\d.,]+)\s*(?:livres?|lbs?|pounds?)\s*(?:en|vers|to|dans)\s*(?:kg|kilos?|kilogrammes?)/); if(w2)return (Math.round(_num(w2[1])/2.20462*100)/100)+' kilos.';
+      if(!isMi(f1)&&isMi(t1))return numVoix(Math.round(v*0.621371*100)/100)+(perH(t1)?' miles par heure.':' miles.');
+      if(isMi(f1)&&!isMi(t1))return numVoix(Math.round(v*1.60934*100)/100)+(perH(t1)?' kilomètres par heure.':' kilomètres.'); }
+    var w=s.match(/([\d.,]+)\s*(?:kg|kilos?|kilogrammes?)\s*(?:en|vers|to|dans)\s*(?:livres?|lbs?|pounds?)/); if(w)return numVoix(Math.round(_num(w[1])*2.20462*100)/100)+' livres.';
+    var w2=s.match(/([\d.,]+)\s*(?:livres?|lbs?|pounds?)\s*(?:en|vers|to|dans)\s*(?:kg|kilos?|kilogrammes?)/); if(w2)return numVoix(Math.round(_num(w2[1])/2.20462*100)/100)+' kilos.';
     return null; }
   function calcReply(t){ var s=' '+(t||'').toLowerCase()+' ';
     if(/\b(pile ou face|[àa] pile ou face|lance (?:une )?pi[èe]ce)\b/.test(s))return _rnd(['Pile !','Face !']);
@@ -3673,12 +3732,12 @@
     var cv=convReply(s); if(cv)return cv;
     var mm=s.match(/\b(?:combien (?:font|fait|[çc]a fait)|calcule|[ée]gale?|r[ée]sultat de)\b(.+)/);
     var r=doMath(mm?mm[1]:(/[0-9]\s*[-+*/×÷]\s*[0-9]|racine|puissance|carr[ée]|pour ?cent|\d+\s*%/.test(s)?s:''));
-    if(r!=null)return 'Ça fait '+r+'.';
+    if(r!=null)return 'Ça fait '+numVoix(r)+'.';
     return null; }
   /* ===== filet d'intentions SOUPLES : rattrape les formulations indirectes/inhabituelles que les détecteurs précis ratent ===== */
   function looseIntent(t){ var s=' '+(t||'').toLowerCase()+' ';
     var say=function(x){ if(typeof showHeard==='function')showHeard(t); sayVA(x); return true; };
-    if(/(de la musique|un peu de (?:son|musique)|balance (?:le son|la musique|un (?:son|morceau|titre))|envie d['’\s]?[ée]couter|mets? (?:moi )?quelque chose|un peu d['’\s]?ambiance|fais p[ée]ter (?:le son|la musique))/.test(s)){ if(typeof mediaToggle==='function'){ mediaToggle(); return say('Je lance la musique.'); } if(typeof openMedia==='function'){ openMedia(); return say('Voilà la musique.'); } }
+    if(/(de la musique|un peu de (?:son|musique)|balance (?:le son|la musique|un (?:son|morceau|titre))|envie d['’\s]?[ée]couter|mets? (?:moi )?quelque chose|un peu d['’\s]?ambiance|fais p[ée]ter (?:le son|la musique))/.test(s)){ if(typeof mediaToggle==='function'){ return say(mediaToggleSay()); } if(typeof openMedia==='function'){ openMedia(); return say('Voilà la musique.'); } }
     if(/(laisse tomber|oublie|annule|j'?ai plus besoin|plus besoin|coupe|stoppe|arr[êe]te)[^.]{0,22}(itin|trajet|gps|nav|guidage|la route|la direction)/.test(s)&&typeof stopNav==='function'){ stopNav(); if(typeof setMsg==='function')setMsg(T().ready,''); return say(tr({fr:'Navigation arrêtée.',en:'Navigation stopped.',ja:'ナビを終了しました。'})); }
     var hints=[[/(j'?ai faim|petit creux|envie de (?:manger|bouffer)|je mangerais bien|aller manger|on mange\b|d[ée]jeuner|d[îi]ner|un resto\b|un restaurant)/,'restaurant'],
       [/(j'?ai soif|envie d'?un caf[ée]|un (?:petit )?caf[ée]|une pause caf[ée]|boire un coup|boire un caf[ée])/,'café'],
@@ -3688,7 +3747,7 @@
       [/(envie de me baigner|aller (?:à|a) la plage|piquer une t[êe]te|aller (?:à|a) la mer)/,'plage'],
       [/(un distributeur|retirer de l'?argent|du cash\b|un dab\b)/,'distributeur']];
     for(var i=0;i<hints.length;i++){ if(hints[i][0].test(s)){ for(var k=0;k<POITYPES.length;k++){ if(POITYPES[k].n===hints[i][1]){ if(typeof showHeard==='function')showHeard(t); nearestPOI(POITYPES[k]); return true; } } } }
-    if(/(il (?:caille|fait frais|fait chaud|g[èe]le|fait un de ces froids)|je g[èe]le|on cr[èe]ve de chaud|fait[- ]il (?:beau|chaud|froid))/.test(s)){ var tp=$('wxTemp')?($('wxTemp').textContent||'').trim():'', de=$('wxDesc')?($('wxDesc').textContent||'').trim():''; return say('Il fait '+(tp||'—')+' degrés'+(de&&de!=='—'?', '+de.toLowerCase():'')+'.'); }
+    if(/(il (?:caille|fait frais|fait chaud|g[èe]le|fait un de ces froids)|je g[èe]le|on cr[èe]ve de chaud|fait[- ]il (?:beau|chaud|froid))/.test(s)){ if(typeof showHeard==='function')showHeard(t); sayMeteo(); return true; }
     var nm=s.match(/\b(?:j['’\s]?aimerais (?:bien )?aller|j['’\s]?ai envie d['’\s]?aller|on (?:pourrait|va) aller|faudrait (?:aller|passer)|il faudrait aller|passer par|me rendre|rejoindre|direction)\s+(?:à |a |au |aux |jusqu'?(?:à|au) |vers |chez |par |la |le |les |l'|du |de la )*([a-zà-ÿ][a-zà-ÿ' -]{2,40})/);
     if(nm){ var dest=nm[1].trim().replace(/[?.!,].*$/,'').replace(/\s*\b(stp|s'?il te pla[îi]t|maintenant|please|ce soir|demain|tout de suite|vite)\b.*$/,'').trim();
       if(/^(lit|dodo|dormir|travail|boulot|bosser|toilettes?|chier|pisser|manger|bouffer|maison|nulle part|chez moi|chez toi)$/.test(dest))return false;
@@ -3732,7 +3791,7 @@
     if(typeof recog!=='undefined'&&recog){ try{ recog.lang=T().code; }catch(e){} }   /* la reconnaissance écoute désormais dans la nouvelle langue */
     if(typeof syncPanel==='function')syncPanel();
     Mem.prefs.lang=LANG; saveMem();
-    if(typeof vaOn!=='undefined'&&vaOn){ if(Voice.on){ sayVA(tr({fr:'Langue changée. Je te parle en français maintenant.',en:'Language changed. I\'ll speak English now.',ja:'言語を日本語に切り替えました。'})); } /* la voix neuronale multilingue la prononce ; beginResponse/endResponse relance le micro avec la nouvelle langue */ else if(typeof recogRunning!=='undefined'&&recogRunning){ try{recog.stop();}catch(e){} } }
+    if(typeof vaOn!=='undefined'&&vaOn){ if(Voice.on){ sayVA(tr({fr:'Langue changée. Je te parle en français maintenant.',en:'Language changed. I\'ll speak English now.',ja:'言語を日本語に切り替えました。'})); } /* voix officielle en français, voix du navigateur sinon ; beginResponse/endResponse relance le micro avec la nouvelle langue */ else if(typeof recogRunning!=='undefined'&&recogRunning){ try{recog.stop();}catch(e){} } }
   }
   /* ---- Lot 2 : couche securite persistante (au-dessus de toutes les vues) + suggestions proactives ---- */
   var safetyT=null;
@@ -3746,9 +3805,10 @@
     var spd=(typeof liveSpd!=='undefined'?liveSpd:0);
     if(spd>8){ driveMs+=dt; stoppedMs=0; } else { stoppedMs+=dt; if(stoppedMs>4*60000)pauseReset(); }   /* vrai arret >4min => trajet remis a zero */
     if(pauseOn && pauseCount<pauseMax && driveMs>=nextPauseAt){ pauseCount++; nextPauseAt+=pauseInterval*60000;
-      var mn=Math.round(driveMs/60000), hh=Math.floor(mn/60), mm=mn%60, dur=hh>0?(hh+' heure'+(hh>1?'s':'')+(mm?' et '+mm:'')):(mm+' minutes');
+      var mn=Math.round(driveMs/60000);
       if(typeof safety==='function')safety('Pause conseillée · '+fmtDur(mn)+' de conduite','info',8000);
-      if(Voice.on&&typeof sayVA==='function')sayVA('Tu roules depuis '+dur+'. Une pause serait bienvenue. Dis « Practice, trouve un café » si tu veux.');
+      /* durée parlée arrondie au quart d'heure (30 min à 18 h) + conseil en SUITE de réponse : deux phrases de la banque, micro coupé jusqu'à la fin (la 2e contient « Practice, trouve un café » : sinon il se réveillerait tout seul) */
+      if(Voice.on&&typeof sayVA==='function'){ sayVA(pauseVoix(driveMs)); sayVA('Une pause serait bienvenue. Dis « Practice, trouve un café » si tu veux.',false,false,true); }
     }
   },30000);
   /* multi-hypothèses : on essaie chaque transcription proposée par le moteur, on retient la 1re qui mappe une intention connue. Compense fortement les erreurs de reconnaissance vocale. */
@@ -3769,7 +3829,7 @@
         if(!awake){ /* endormi : seul le mot-clé réveille */
           if(anyWake){ var cmdAlts=alts.map(function(s){return s.replace(STRIP,'').trim();}).filter(Boolean); beginResponse(); wakeVA();
             if(cmdAlts.length){ handleSpeech(cmdAlts); }
-            else if(greetSaid){ showHeard(alts[0]); sayVA(pickL(['Bonjour '+vaName()+' ! Je t\'écoute.','Salut '+vaName()+' ! Qu\'est-ce que je peux faire pour toi ?','Hey '+vaName()+' ! À ton écoute.'],['Hi '+vaName()+'! I\'m listening.','Hey '+vaName()+'! What can I do?'])); }
+            else if(greetSaid){ showHeard(alts[0]); sayVA(pickL(['Bonjour'+vaNm()+' ! Je t\'écoute.','Salut'+vaNm()+' ! Qu\'est-ce que je peux faire pour toi ?','Hey'+vaNm()+' ! À ton écoute.'],['Hi'+vaNm()+'! I\'m listening.','Hey'+vaNm()+'! What can I do?'])); }
             else { showHeard(vaTxt('yes')); sayVA(vaTxt('yes')); }
             resetAwake(); return; /* UNE commande, puis on attend la fin de la réponse */ }
         } else { /* éveillé : conversation, sans mot-clé */
@@ -3809,7 +3869,7 @@
     try{p.start();}catch(e){ finish(); }
     setTimeout(function(){ if(!done){ try{p.stop();}catch(e){} } },7000);
   }
-  /* ===== reconnaissance vocale par ENREGISTREMENT (iPhone/Safari & tout navigateur sans Web Speech API) : enregistre -> ElevenLabs Scribe -> exécute ===== */
+  /* ===== reconnaissance vocale par ENREGISTREMENT (iPhone/Safari & tout navigateur sans Web Speech API) : enregistre -> transcription serveur /api/stt -> exécute ===== */
   var sttRec=null, sttChunks=[], sttBusy=false, sttStream=null, sttTimer=null, sttMime='';
   function sttSupported(){ return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder); }
   function stopSTT(){ clearTimeout(sttTimer); if(sttRec&&sttRec.state!=='inactive'){ try{sttRec.stop();}catch(e){} } }
@@ -3849,23 +3909,13 @@
     reader.readAsDataURL(blob);
   }
   if($('vaSeg'))$('vaSeg').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; var on=(b.dataset.va==='on'); [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Mem.prefs.va=on; saveMem(); if(on)startVA(true); else stopVA(); });
-  /* test direct de la voix réaliste : lecture dans le geste de clic (aucun blocage autoplay) */
-  function testVoice(){ unlockNeural(); if(Voice.neural===false){ toast('Active « Réaliste » d\'abord.'); webSpeak('Voix navigateur, bonjour '+vaName()+'.'); return; } toast('🎧 Chargement de la voix…');
-    fetch('/api/tts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:'Bonjour '+vaName()+'. Je suis Practice, ta voix embarquée. Ravi de faire la route avec toi.',lang:LANG,voice:Voice.ttsVoice})})
-    .then(function(r){ var ct=r.headers.get('content-type')||''; if(r.ok&&ct.indexOf('audio')>=0)return r.blob(); return r.json().then(function(j){throw ((j&&j.error)||'erreur')+' ('+r.status+')';},function(){throw 'reponse '+r.status;}); })
-    .then(function(b){ try{ if(neuralAudio.src&&neuralAudio.src.indexOf('blob:')===0)URL.revokeObjectURL(neuralAudio.src); }catch(e){} neuralAudio.src=URL.createObjectURL(b); neuralOff=false; var p=neuralAudio.play(); if(p&&p.then)p.then(function(){ neuralPlayed=true; toast('🎙 Voix Jessica ('+Math.round(b.size/1024)+' Ko)'); }).catch(function(){ toast('🔈 lecture bloquée — touche l\'écran puis réessaie'); }); })
-    .catch(function(e){ toast('⚠️ voix indisponible : '+e); }); }
+  /* test de la voix choisie : phrase de la banque jouée DANS le geste de clic (déverrouille aussi l'audio sur iOS) */
+  function testVoice(){ if(!Voice.on){ toast('🔇 Active d\'abord la voix (Voix : Activée).'); return; } unlockNeural(); sayVA(tr({fr:'Bonjour, je suis Practice, ta voix embarquée. Ravi de faire la route avec toi.',en:'Hi, I\'m Practice, your onboard voice. Glad to share the road with you.'})); }
   if($('voiceTest'))$('voiceTest').addEventListener('click',testVoice);
-  if($('voiceKind'))$('voiceKind').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Voice.neural=(b.dataset.vk==='neural'); neuralOff=false; if(Mem.prefs)Mem.prefs.neural=Voice.neural;Mem.prefs.voiceVer='scarlett1'; saveMem(); toast(Voice.neural?'Voix réaliste activée':'Voix navigateur'); });
-  /* sélecteur de voix : un tap choisit la voix, l'écoute et la mémorise */
-  function hlVoicePick(){ if($('voicePick'))[].forEach.call($('voicePick').children,function(x){x.classList.toggle('on',x.dataset.voice===Voice.ttsVoice);}); }
-  if($('voicePick'))$('voicePick').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return;
-    Voice.ttsVoice=b.dataset.voice; Voice.neural=true; neuralOff=false; hlVoicePick();
-    if(Mem.prefs){ Mem.prefs.ttsVoice=Voice.ttsVoice; Mem.prefs.neural=true; Mem.prefs.voiceVer='scarlett1'; } saveMem();
-    unlockNeural(); toast('🎧 '+((b.textContent||'voix').split('·')[0].trim())+'…');
-    if(typeof speakNeural==='function'){ speakNeural('Bonjour '+vaName()+', je suis Practice. Voilà ma nouvelle voix. On prend la route ensemble ?').then(function(){ neuralPlayed=true; }).catch(function(){ toast('🔈 touche l\'écran puis re-touche la voix'); }); } });
+  /* choix simple : voix officielle Practice (banque) ou voix du navigateur ; mémorisé */
+  if($('voiceKind'))$('voiceKind').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return; [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);}); Voice.neural=(b.dataset.vk==='neural'); if(Mem.prefs){Mem.prefs.neural=Voice.neural;Mem.prefs.voiceVer='practice1';} saveMem(); toast(Voice.neural?('Voix officielle Practice'+(voiceBank?'':' · pas encore disponible ici, voix du navigateur en attendant')):'Voix du navigateur'); });
   if($('localBrainBtn'))$('localBrainBtn').addEventListener('click',function(){ if(llmReady){ localBrainStatus('✅ Déjà actif.'); return; } if(llmLoading){ toast('Chargement déjà en cours…'); return; } loadLocalBrain().catch(function(){}); });
-  if($('vaName'))$('vaName').addEventListener('change',function(){ Mem.prefs.name=this.value.trim()||'Aldo'; saveMem(); });
+  if($('vaName'))$('vaName').addEventListener('change',function(){ Mem.prefs.name=this.value.trim(); saveMem(); });   /* champ vidé = pas de prénom (plus de prénom fantôme) */
 
   /* ---------- SoundCloud real controls (Widget API) ---------- */
   var scWidget=null;
@@ -4157,6 +4207,9 @@
     document.body.setAttribute('data-dock','1'); $('miniDock').classList.add('show');
     [].forEach.call($('mQueue').children,function(r,k){ if(r.classList)r.classList.toggle('on',k===i); }); }
   function mediaToggle(){ if(mediaSource==='sc'){ if(scWidget)scWidget.toggle(); } else { if(rpAudio.paused){ if(!rpAudio.src&&rpList.length)playAudioItem(0); else rpAudio.play().catch(function(){}); } else rpAudio.pause(); } }
+  /* confirmation vocale fidèle à l'état réel : l'état d'avant bascule (mPlaying) décide, car scWidget.toggle() est asynchrone */
+  function mediaToggleSay(){ var was=!!mPlaying; mediaToggle(); return was?'Musique en pause.':'Je lance la musique.'; }
+  function nowPlayingText(){ var ti=$('plTitle')?($('plTitle').textContent||'').trim():'', ar=$('plArtist')?($('plArtist').textContent||'').trim():''; if(!ti)return 'Aucune lecture en cours.'; if(mediaSource==='radio')return 'Tu écoutes '+ti+'.'; return ti+(ar?', par '+ar:'')+'.'; }   /* radio : le 2e champ est un genre, pas un artiste */
   function mediaNext(){ if(mediaSource==='sc'){ if(scWidget){ if(flowOn){var i=_rndIdx();if(i>=0)scWidget.skip(i);else scWidget.next();}else scWidget.next(); setTimeout(updateTrack,500);} } else if(rpList.length){ playAudioItem((rpIdx+1)%rpList.length); } }
   function mediaPrev(){ if(mediaSource==='sc'){ if(scWidget){ if(flowOn){var j=_rndIdx();if(j>=0)scWidget.skip(j);else scWidget.prev();}else scWidget.prev(); setTimeout(updateTrack,500);} } else if(rpList.length){ playAudioItem((rpIdx-1+rpList.length)%rpList.length); } }
   rpAudio.addEventListener('play',function(){ setPlayIcon(true); });
@@ -4231,7 +4284,7 @@
   $('vehCtl').addEventListener('click',function(e){ var b=e.target.closest('.vc'); if(!b)return; var c=b.dataset.c, on; b.classList.toggle('on'); on=b.classList.contains('on');
     if(c==='lights'){ if(on)document.body.setAttribute('data-veh-lights','1'); else document.body.removeAttribute('data-veh-lights'); }
     if(c==='lock') b.querySelector('span').textContent=on?'Verrouillé':'Déverrouillé';
-    if(Voice.on){ var msg=c==='lock'?(on?'Verrouillé.':'Déverrouillé.'):c==='lights'?(on?'Phares allumés.':'Phares éteints.'):c==='trunk'?(on?'Coffre ouvert.':'Coffre fermé.'):c==='charge'?(on?'Recharge lancée.':'Recharge arrêtée.'):c==='climate'?'Climatisation, vingt et un degrés.':c==='defrost'?(on?'Dégivrage activé.':'Dégivrage arrêté.'):''; if(msg)Voice.say(msg,1); }
+    if(Voice.on){ var msg=c==='lock'?(on?'Verrouillé.':'Déverrouillé.'):c==='lights'?(on?'Phares allumés.':'Phares éteints.'):c==='trunk'?(on?'Coffre ouvert.':'Coffre fermé.'):c==='charge'?(on?'Recharge lancée.':'Recharge arrêtée.'):c==='climate'?(on?'Climatisation, vingt et un degrés.':'Climatisation coupée.'):c==='defrost'?(on?'Dégivrage activé.':'Dégivrage arrêté.'):''; if(msg)Voice.say(msg,1); }
   });
 
   /* ---------- telemetry (Performance / Ultra) — max vehicle data + visuals (ai.html-style) ---------- */
@@ -4282,23 +4335,24 @@
     if(typeof p.poi==='boolean')poiOn=p.poi; if(typeof p.radar==='boolean')radarOn=p.radar;
     if(typeof p.voice==='boolean')Voice.on=p.voice;
     if(p.voiceGender)Voice.gender=p.voiceGender; if(p.sayRate)Voice.sayRate=p.sayRate; if(p.sayPitch)Voice.sayPitch=p.sayPitch; if(p.pitch)Voice.pitch=p.pitch;
-    /* la voix mémorisée n'est restaurée que si elle date de la version courante — sinon on réinitialise sur Jessica (évite qu'une ancienne voix payante/cassée fasse retomber sur la voix robotique) */
-    if(p.voiceVer==='scarlett1'){ if(p.ttsVoice)Voice.ttsVoice=p.ttsVoice; if(typeof p.neural==='boolean')Voice.neural=p.neural; if($('voiceKind'))[].forEach.call($('voiceKind').children,function(x){x.classList.toggle('on',(x.dataset.vk==='neural')===(Voice.neural!==false));}); }
-    else { Voice.ttsVoice='XrExE9yKIg1WjnnlVkGX'; Voice.neural=true; if(Mem.prefs){Mem.prefs.voiceVer='scarlett1'; Mem.prefs.ttsVoice='XrExE9yKIg1WjnnlVkGX'; Mem.prefs.neural=true;} saveMem(); }
+    /* voix officielle Practice : à la 1re ouverture de cette version, on (ré)active la voix officielle et on oublie l'ancienne voix ; ensuite le choix « voix du navigateur » est respecté */
+    if(p.voiceVer==='practice1'){ if(typeof p.neural==='boolean')Voice.neural=p.neural; }
+    else { Voice.neural=true; Voice.gender='male'; if(Mem.prefs){ Mem.prefs.voiceVer='practice1'; Mem.prefs.neural=true; Mem.prefs.voiceGender='male'; delete Mem.prefs.ttsVoice; } saveMem(); }   /* voix de repli masculine, comme la voix officielle (Voice.pick est appelé plus bas) */
+    if(p.sayRate)applyVoiceRate();
     if(typeof p.pause==='boolean')pauseOn=p.pause; if($('pauseSeg'))[].forEach.call($('pauseSeg').children,function(x){x.classList.toggle('on',(x.dataset.ps==='on')===(pauseOn!==false));});
     if($('fxSeg')){ var fxon=(p.fx!==false); document.documentElement.toggleAttribute('data-da-off',!fxon); [].forEach.call($('fxSeg').children,function(x){x.classList.toggle('on',(x.dataset.fx==='on')===fxon);}); }
     UMI=(p.units==='mi'); if($('unitSeg'))[].forEach.call($('unitSeg').children,function(x){x.classList.toggle('on',(x.dataset.u==='mi')===UMI);}); applyUnitsUI();
     if(typeof p.pauseInterval==='number'){ pauseInterval=p.pauseInterval; nextPauseAt=pauseInterval*60000; if($('paIntSlider'))$('paIntSlider').value=pauseInterval; if($('paIntVal'))$('paIntVal').textContent=fmtDur(pauseInterval); }
     if(typeof p.pauseMax==='number'){ pauseMax=p.pauseMax; if($('paMaxSlider'))$('paMaxSlider').value=pauseMax; if($('paMaxVal'))$('paMaxVal').textContent=pauseMax; }
     if($('voiceKind'))[].forEach.call($('voiceKind').children,function(x){x.classList.toggle('on',(x.dataset.vk==='neural')===(Voice.neural!==false));});
-    if(typeof hlVoicePick==='function')hlVoicePick();
     setMode(p.mode||'copilot',true); applyTheme(); Voice.pick();
     if($('poiBtn'))$('poiBtn').classList.toggle('on',poiOn); if($('radarBtn'))$('radarBtn').classList.toggle('on',radarOn);
     var vb=$('voiceBtn'); if(vb)vb.classList.toggle('muted',!Voice.on); if(typeof reflectMute==='function')reflectMute();
     [].forEach.call(document.querySelectorAll('#langSeg button'),function(x){x.classList.toggle('on',x.dataset.lang===LANG);});
-    if($('vaName'))$('vaName').value=p.name||'Aldo';
+    if($('vaName'))$('vaName').value=p.name||'';
     [].forEach.call(document.querySelectorAll('#vaSeg button'),function(x){x.classList.toggle('on',(x.dataset.va==='on')===(p.va===true));});
-    if(p.va){ vaPrimed=true; var prime=function(){ if(!vaPrimed)return; vaPrimed=false; startVA(true); document.removeEventListener('pointerdown',prime,true); }; document.addEventListener('pointerdown',prime,true); }
+    /* amorçage du micro au 1er VRAI geste (touchend/click/touche : pointerdown n'autorise pas le son sur iOS) ; déverrouillage audio d'abord, puis accueil dans le même geste */
+    if(p.va){ vaPrimed=true; var PRIME_EV=['touchend','click','keydown'], prime=function(){ if(!vaPrimed)return; vaPrimed=false; PRIME_EV.forEach(function(ev){ document.removeEventListener(ev,prime,true); }); unlockNeural(); startVA(true); }; PRIME_EV.forEach(function(ev){ document.addEventListener(ev,prime,true); }); }
     syncPanel();
   })();
   if(/[?&]demo/.test(location.search)) setTimeout(function(){$('gateDemo').click();},700);
@@ -4310,7 +4364,7 @@
   window.posBridge={
     sayVA:function(t){ try{ sayVA(t); }catch(e){} },                 /* voix de Practice IA (respecte le réglage Voix) */
     toast:function(t){ try{ toast(t); }catch(e){} },
-    driverName:function(){ try{ return vaName(); }catch(e){ return 'Aldo'; } },
+    driverName:function(){ try{ return vaName(); }catch(e){ return ''; } },
     setDriverName:function(n){ try{ Mem.prefs.name=n; saveMem(); var i=$('vaName'); if(i)i.value=n; }catch(e){} },
     isDemo:function(){ return !!demoMode; },
     lang:function(){ return LANG; }

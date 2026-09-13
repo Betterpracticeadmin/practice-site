@@ -57,7 +57,8 @@
   "id": "nav.eta.1",
   "text": "Arrivée dans 1 minute.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Arrivée dans une minute."
  },
  {
   "id": "nav.eta.2",
@@ -171,25 +172,29 @@
   "id": "nav.eta.60",
   "text": "Arrivée dans 1 heure.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Arrivée dans une heure."
  },
  {
   "id": "nav.eta.75",
   "text": "Arrivée dans 1 heure 15.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Arrivée dans une heure 15."
  },
  {
   "id": "nav.eta.90",
   "text": "Arrivée dans 1 heure 30.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Arrivée dans une heure 30."
  },
  {
   "id": "nav.eta.105",
   "text": "Arrivée dans 1 heure 45.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Arrivée dans une heure 45."
  },
  {
   "id": "nav.eta.120",
@@ -1161,25 +1166,29 @@
   "id": "alerte.pause.60",
   "text": "Tu roules depuis 1 heure.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Tu roules depuis une heure."
  },
  {
   "id": "alerte.pause.75",
   "text": "Tu roules depuis 1 heure 15.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Tu roules depuis une heure 15."
  },
  {
   "id": "alerte.pause.90",
   "text": "Tu roules depuis 1 heure 30.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Tu roules depuis une heure 30."
  },
  {
   "id": "alerte.pause.105",
   "text": "Tu roules depuis 1 heure 45.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Tu roules depuis une heure 45."
  },
  {
   "id": "alerte.pause.120",
@@ -1545,7 +1554,8 @@
   "id": "trafic.retard.1",
   "text": "1 minute de retard.",
   "category": "trafic",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "une minute de retard."
  },
  {
   "id": "trafic.retard.2",
@@ -3858,8 +3868,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.00.01",
+  "text": "Il est minuit 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.02",
+  "text": "Il est minuit 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.03",
+  "text": "Il est minuit 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.04",
+  "text": "Il est minuit 4.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.00.05",
   "text": "Il est minuit 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.06",
+  "text": "Il est minuit 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.07",
+  "text": "Il est minuit 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.08",
+  "text": "Il est minuit 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.09",
+  "text": "Il est minuit 9.",
   "category": "heure",
   "priority": "confort"
  },
@@ -3870,8 +3928,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.00.11",
+  "text": "Il est minuit 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.12",
+  "text": "Il est minuit 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.13",
+  "text": "Il est minuit 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.14",
+  "text": "Il est minuit 14.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.00.15",
   "text": "Il est minuit 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.16",
+  "text": "Il est minuit 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.17",
+  "text": "Il est minuit 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.18",
+  "text": "Il est minuit 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.19",
+  "text": "Il est minuit 19.",
   "category": "heure",
   "priority": "confort"
  },
@@ -3882,8 +3988,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.00.21",
+  "text": "Il est minuit 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.22",
+  "text": "Il est minuit 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.23",
+  "text": "Il est minuit 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.24",
+  "text": "Il est minuit 24.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.00.25",
   "text": "Il est minuit 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.26",
+  "text": "Il est minuit 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.27",
+  "text": "Il est minuit 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.28",
+  "text": "Il est minuit 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.29",
+  "text": "Il est minuit 29.",
   "category": "heure",
   "priority": "confort"
  },
@@ -3894,8 +4048,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.00.31",
+  "text": "Il est minuit 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.32",
+  "text": "Il est minuit 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.33",
+  "text": "Il est minuit 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.34",
+  "text": "Il est minuit 34.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.00.35",
   "text": "Il est minuit 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.36",
+  "text": "Il est minuit 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.37",
+  "text": "Il est minuit 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.38",
+  "text": "Il est minuit 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.39",
+  "text": "Il est minuit 39.",
   "category": "heure",
   "priority": "confort"
  },
@@ -3906,8 +4108,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.00.41",
+  "text": "Il est minuit 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.42",
+  "text": "Il est minuit 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.43",
+  "text": "Il est minuit 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.44",
+  "text": "Il est minuit 44.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.00.45",
   "text": "Il est minuit 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.46",
+  "text": "Il est minuit 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.47",
+  "text": "Il est minuit 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.48",
+  "text": "Il est minuit 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.49",
+  "text": "Il est minuit 49.",
   "category": "heure",
   "priority": "confort"
  },
@@ -3918,8 +4168,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.00.51",
+  "text": "Il est minuit 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.52",
+  "text": "Il est minuit 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.53",
+  "text": "Il est minuit 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.54",
+  "text": "Il est minuit 54.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.00.55",
   "text": "Il est minuit 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.56",
+  "text": "Il est minuit 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.57",
+  "text": "Il est minuit 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.58",
+  "text": "Il est minuit 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.59",
+  "text": "Il est minuit 59.",
   "category": "heure",
   "priority": "confort"
  },
@@ -3927,77 +4225,449 @@
   "id": "heure.01.00",
   "text": "Il est 1 heure.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure."
+ },
+ {
+  "id": "heure.01.01",
+  "text": "Il est 1 heure 1.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 1."
+ },
+ {
+  "id": "heure.01.02",
+  "text": "Il est 1 heure 2.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 2."
+ },
+ {
+  "id": "heure.01.03",
+  "text": "Il est 1 heure 3.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 3."
+ },
+ {
+  "id": "heure.01.04",
+  "text": "Il est 1 heure 4.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 4."
  },
  {
   "id": "heure.01.05",
   "text": "Il est 1 heure 5.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 5."
+ },
+ {
+  "id": "heure.01.06",
+  "text": "Il est 1 heure 6.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 6."
+ },
+ {
+  "id": "heure.01.07",
+  "text": "Il est 1 heure 7.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 7."
+ },
+ {
+  "id": "heure.01.08",
+  "text": "Il est 1 heure 8.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 8."
+ },
+ {
+  "id": "heure.01.09",
+  "text": "Il est 1 heure 9.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 9."
  },
  {
   "id": "heure.01.10",
   "text": "Il est 1 heure 10.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 10."
+ },
+ {
+  "id": "heure.01.11",
+  "text": "Il est 1 heure 11.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 11."
+ },
+ {
+  "id": "heure.01.12",
+  "text": "Il est 1 heure 12.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 12."
+ },
+ {
+  "id": "heure.01.13",
+  "text": "Il est 1 heure 13.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 13."
+ },
+ {
+  "id": "heure.01.14",
+  "text": "Il est 1 heure 14.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 14."
  },
  {
   "id": "heure.01.15",
   "text": "Il est 1 heure 15.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 15."
+ },
+ {
+  "id": "heure.01.16",
+  "text": "Il est 1 heure 16.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 16."
+ },
+ {
+  "id": "heure.01.17",
+  "text": "Il est 1 heure 17.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 17."
+ },
+ {
+  "id": "heure.01.18",
+  "text": "Il est 1 heure 18.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 18."
+ },
+ {
+  "id": "heure.01.19",
+  "text": "Il est 1 heure 19.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 19."
  },
  {
   "id": "heure.01.20",
   "text": "Il est 1 heure 20.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 20."
+ },
+ {
+  "id": "heure.01.21",
+  "text": "Il est 1 heure 21.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 21."
+ },
+ {
+  "id": "heure.01.22",
+  "text": "Il est 1 heure 22.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 22."
+ },
+ {
+  "id": "heure.01.23",
+  "text": "Il est 1 heure 23.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 23."
+ },
+ {
+  "id": "heure.01.24",
+  "text": "Il est 1 heure 24.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 24."
  },
  {
   "id": "heure.01.25",
   "text": "Il est 1 heure 25.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 25."
+ },
+ {
+  "id": "heure.01.26",
+  "text": "Il est 1 heure 26.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 26."
+ },
+ {
+  "id": "heure.01.27",
+  "text": "Il est 1 heure 27.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 27."
+ },
+ {
+  "id": "heure.01.28",
+  "text": "Il est 1 heure 28.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 28."
+ },
+ {
+  "id": "heure.01.29",
+  "text": "Il est 1 heure 29.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 29."
  },
  {
   "id": "heure.01.30",
   "text": "Il est 1 heure 30.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 30."
+ },
+ {
+  "id": "heure.01.31",
+  "text": "Il est 1 heure 31.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 31."
+ },
+ {
+  "id": "heure.01.32",
+  "text": "Il est 1 heure 32.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 32."
+ },
+ {
+  "id": "heure.01.33",
+  "text": "Il est 1 heure 33.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 33."
+ },
+ {
+  "id": "heure.01.34",
+  "text": "Il est 1 heure 34.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 34."
  },
  {
   "id": "heure.01.35",
   "text": "Il est 1 heure 35.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 35."
+ },
+ {
+  "id": "heure.01.36",
+  "text": "Il est 1 heure 36.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 36."
+ },
+ {
+  "id": "heure.01.37",
+  "text": "Il est 1 heure 37.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 37."
+ },
+ {
+  "id": "heure.01.38",
+  "text": "Il est 1 heure 38.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 38."
+ },
+ {
+  "id": "heure.01.39",
+  "text": "Il est 1 heure 39.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 39."
  },
  {
   "id": "heure.01.40",
   "text": "Il est 1 heure 40.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 40."
+ },
+ {
+  "id": "heure.01.41",
+  "text": "Il est 1 heure 41.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 41."
+ },
+ {
+  "id": "heure.01.42",
+  "text": "Il est 1 heure 42.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 42."
+ },
+ {
+  "id": "heure.01.43",
+  "text": "Il est 1 heure 43.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 43."
+ },
+ {
+  "id": "heure.01.44",
+  "text": "Il est 1 heure 44.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 44."
  },
  {
   "id": "heure.01.45",
   "text": "Il est 1 heure 45.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 45."
+ },
+ {
+  "id": "heure.01.46",
+  "text": "Il est 1 heure 46.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 46."
+ },
+ {
+  "id": "heure.01.47",
+  "text": "Il est 1 heure 47.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 47."
+ },
+ {
+  "id": "heure.01.48",
+  "text": "Il est 1 heure 48.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 48."
+ },
+ {
+  "id": "heure.01.49",
+  "text": "Il est 1 heure 49.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 49."
  },
  {
   "id": "heure.01.50",
   "text": "Il est 1 heure 50.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 50."
+ },
+ {
+  "id": "heure.01.51",
+  "text": "Il est 1 heure 51.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 51."
+ },
+ {
+  "id": "heure.01.52",
+  "text": "Il est 1 heure 52.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 52."
+ },
+ {
+  "id": "heure.01.53",
+  "text": "Il est 1 heure 53.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 53."
+ },
+ {
+  "id": "heure.01.54",
+  "text": "Il est 1 heure 54.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 54."
  },
  {
   "id": "heure.01.55",
   "text": "Il est 1 heure 55.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est une heure 55."
+ },
+ {
+  "id": "heure.01.56",
+  "text": "Il est 1 heure 56.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 56."
+ },
+ {
+  "id": "heure.01.57",
+  "text": "Il est 1 heure 57.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 57."
+ },
+ {
+  "id": "heure.01.58",
+  "text": "Il est 1 heure 58.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 58."
+ },
+ {
+  "id": "heure.01.59",
+  "text": "Il est 1 heure 59.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est une heure 59."
  },
  {
   "id": "heure.02.00",
   "text": "Il est 2 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.01",
+  "text": "Il est 2 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.02",
+  "text": "Il est 2 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.03",
+  "text": "Il est 2 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.04",
+  "text": "Il est 2 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4008,8 +4678,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.02.06",
+  "text": "Il est 2 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.07",
+  "text": "Il est 2 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.08",
+  "text": "Il est 2 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.09",
+  "text": "Il est 2 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.02.10",
   "text": "Il est 2 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.11",
+  "text": "Il est 2 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.12",
+  "text": "Il est 2 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.13",
+  "text": "Il est 2 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.14",
+  "text": "Il est 2 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4020,8 +4738,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.02.16",
+  "text": "Il est 2 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.17",
+  "text": "Il est 2 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.18",
+  "text": "Il est 2 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.19",
+  "text": "Il est 2 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.02.20",
   "text": "Il est 2 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.21",
+  "text": "Il est 2 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.22",
+  "text": "Il est 2 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.23",
+  "text": "Il est 2 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.24",
+  "text": "Il est 2 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4032,8 +4798,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.02.26",
+  "text": "Il est 2 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.27",
+  "text": "Il est 2 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.28",
+  "text": "Il est 2 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.29",
+  "text": "Il est 2 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.02.30",
   "text": "Il est 2 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.31",
+  "text": "Il est 2 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.32",
+  "text": "Il est 2 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.33",
+  "text": "Il est 2 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.34",
+  "text": "Il est 2 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4044,8 +4858,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.02.36",
+  "text": "Il est 2 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.37",
+  "text": "Il est 2 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.38",
+  "text": "Il est 2 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.39",
+  "text": "Il est 2 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.02.40",
   "text": "Il est 2 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.41",
+  "text": "Il est 2 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.42",
+  "text": "Il est 2 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.43",
+  "text": "Il est 2 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.44",
+  "text": "Il est 2 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4056,8 +4918,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.02.46",
+  "text": "Il est 2 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.47",
+  "text": "Il est 2 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.48",
+  "text": "Il est 2 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.49",
+  "text": "Il est 2 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.02.50",
   "text": "Il est 2 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.51",
+  "text": "Il est 2 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.52",
+  "text": "Il est 2 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.53",
+  "text": "Il est 2 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.54",
+  "text": "Il est 2 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4068,8 +4978,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.02.56",
+  "text": "Il est 2 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.57",
+  "text": "Il est 2 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.58",
+  "text": "Il est 2 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.59",
+  "text": "Il est 2 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.03.00",
   "text": "Il est 3 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.01",
+  "text": "Il est 3 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.02",
+  "text": "Il est 3 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.03",
+  "text": "Il est 3 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.04",
+  "text": "Il est 3 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4080,8 +5038,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.03.06",
+  "text": "Il est 3 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.07",
+  "text": "Il est 3 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.08",
+  "text": "Il est 3 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.09",
+  "text": "Il est 3 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.03.10",
   "text": "Il est 3 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.11",
+  "text": "Il est 3 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.12",
+  "text": "Il est 3 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.13",
+  "text": "Il est 3 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.14",
+  "text": "Il est 3 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4092,8 +5098,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.03.16",
+  "text": "Il est 3 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.17",
+  "text": "Il est 3 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.18",
+  "text": "Il est 3 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.19",
+  "text": "Il est 3 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.03.20",
   "text": "Il est 3 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.21",
+  "text": "Il est 3 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.22",
+  "text": "Il est 3 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.23",
+  "text": "Il est 3 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.24",
+  "text": "Il est 3 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4104,8 +5158,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.03.26",
+  "text": "Il est 3 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.27",
+  "text": "Il est 3 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.28",
+  "text": "Il est 3 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.29",
+  "text": "Il est 3 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.03.30",
   "text": "Il est 3 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.31",
+  "text": "Il est 3 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.32",
+  "text": "Il est 3 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.33",
+  "text": "Il est 3 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.34",
+  "text": "Il est 3 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4116,8 +5218,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.03.36",
+  "text": "Il est 3 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.37",
+  "text": "Il est 3 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.38",
+  "text": "Il est 3 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.39",
+  "text": "Il est 3 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.03.40",
   "text": "Il est 3 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.41",
+  "text": "Il est 3 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.42",
+  "text": "Il est 3 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.43",
+  "text": "Il est 3 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.44",
+  "text": "Il est 3 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4128,8 +5278,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.03.46",
+  "text": "Il est 3 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.47",
+  "text": "Il est 3 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.48",
+  "text": "Il est 3 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.49",
+  "text": "Il est 3 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.03.50",
   "text": "Il est 3 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.51",
+  "text": "Il est 3 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.52",
+  "text": "Il est 3 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.53",
+  "text": "Il est 3 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.54",
+  "text": "Il est 3 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4140,8 +5338,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.03.56",
+  "text": "Il est 3 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.57",
+  "text": "Il est 3 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.58",
+  "text": "Il est 3 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.59",
+  "text": "Il est 3 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.04.00",
   "text": "Il est 4 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.01",
+  "text": "Il est 4 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.02",
+  "text": "Il est 4 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.03",
+  "text": "Il est 4 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.04",
+  "text": "Il est 4 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4152,8 +5398,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.04.06",
+  "text": "Il est 4 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.07",
+  "text": "Il est 4 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.08",
+  "text": "Il est 4 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.09",
+  "text": "Il est 4 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.04.10",
   "text": "Il est 4 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.11",
+  "text": "Il est 4 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.12",
+  "text": "Il est 4 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.13",
+  "text": "Il est 4 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.14",
+  "text": "Il est 4 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4164,8 +5458,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.04.16",
+  "text": "Il est 4 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.17",
+  "text": "Il est 4 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.18",
+  "text": "Il est 4 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.19",
+  "text": "Il est 4 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.04.20",
   "text": "Il est 4 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.21",
+  "text": "Il est 4 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.22",
+  "text": "Il est 4 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.23",
+  "text": "Il est 4 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.24",
+  "text": "Il est 4 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4176,8 +5518,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.04.26",
+  "text": "Il est 4 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.27",
+  "text": "Il est 4 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.28",
+  "text": "Il est 4 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.29",
+  "text": "Il est 4 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.04.30",
   "text": "Il est 4 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.31",
+  "text": "Il est 4 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.32",
+  "text": "Il est 4 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.33",
+  "text": "Il est 4 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.34",
+  "text": "Il est 4 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4188,8 +5578,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.04.36",
+  "text": "Il est 4 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.37",
+  "text": "Il est 4 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.38",
+  "text": "Il est 4 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.39",
+  "text": "Il est 4 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.04.40",
   "text": "Il est 4 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.41",
+  "text": "Il est 4 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.42",
+  "text": "Il est 4 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.43",
+  "text": "Il est 4 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.44",
+  "text": "Il est 4 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4200,8 +5638,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.04.46",
+  "text": "Il est 4 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.47",
+  "text": "Il est 4 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.48",
+  "text": "Il est 4 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.49",
+  "text": "Il est 4 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.04.50",
   "text": "Il est 4 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.51",
+  "text": "Il est 4 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.52",
+  "text": "Il est 4 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.53",
+  "text": "Il est 4 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.54",
+  "text": "Il est 4 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4212,8 +5698,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.04.56",
+  "text": "Il est 4 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.57",
+  "text": "Il est 4 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.58",
+  "text": "Il est 4 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.59",
+  "text": "Il est 4 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.05.00",
   "text": "Il est 5 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.01",
+  "text": "Il est 5 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.02",
+  "text": "Il est 5 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.03",
+  "text": "Il est 5 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.04",
+  "text": "Il est 5 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4224,8 +5758,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.05.06",
+  "text": "Il est 5 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.07",
+  "text": "Il est 5 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.08",
+  "text": "Il est 5 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.09",
+  "text": "Il est 5 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.05.10",
   "text": "Il est 5 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.11",
+  "text": "Il est 5 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.12",
+  "text": "Il est 5 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.13",
+  "text": "Il est 5 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.14",
+  "text": "Il est 5 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4236,8 +5818,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.05.16",
+  "text": "Il est 5 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.17",
+  "text": "Il est 5 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.18",
+  "text": "Il est 5 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.19",
+  "text": "Il est 5 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.05.20",
   "text": "Il est 5 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.21",
+  "text": "Il est 5 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.22",
+  "text": "Il est 5 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.23",
+  "text": "Il est 5 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.24",
+  "text": "Il est 5 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4248,8 +5878,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.05.26",
+  "text": "Il est 5 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.27",
+  "text": "Il est 5 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.28",
+  "text": "Il est 5 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.29",
+  "text": "Il est 5 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.05.30",
   "text": "Il est 5 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.31",
+  "text": "Il est 5 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.32",
+  "text": "Il est 5 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.33",
+  "text": "Il est 5 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.34",
+  "text": "Il est 5 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4260,8 +5938,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.05.36",
+  "text": "Il est 5 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.37",
+  "text": "Il est 5 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.38",
+  "text": "Il est 5 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.39",
+  "text": "Il est 5 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.05.40",
   "text": "Il est 5 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.41",
+  "text": "Il est 5 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.42",
+  "text": "Il est 5 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.43",
+  "text": "Il est 5 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.44",
+  "text": "Il est 5 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4272,8 +5998,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.05.46",
+  "text": "Il est 5 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.47",
+  "text": "Il est 5 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.48",
+  "text": "Il est 5 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.49",
+  "text": "Il est 5 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.05.50",
   "text": "Il est 5 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.51",
+  "text": "Il est 5 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.52",
+  "text": "Il est 5 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.53",
+  "text": "Il est 5 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.54",
+  "text": "Il est 5 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4284,8 +6058,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.05.56",
+  "text": "Il est 5 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.57",
+  "text": "Il est 5 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.58",
+  "text": "Il est 5 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.59",
+  "text": "Il est 5 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.06.00",
   "text": "Il est 6 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.01",
+  "text": "Il est 6 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.02",
+  "text": "Il est 6 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.03",
+  "text": "Il est 6 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.04",
+  "text": "Il est 6 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4296,8 +6118,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.06.06",
+  "text": "Il est 6 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.07",
+  "text": "Il est 6 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.08",
+  "text": "Il est 6 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.09",
+  "text": "Il est 6 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.06.10",
   "text": "Il est 6 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.11",
+  "text": "Il est 6 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.12",
+  "text": "Il est 6 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.13",
+  "text": "Il est 6 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.14",
+  "text": "Il est 6 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4308,8 +6178,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.06.16",
+  "text": "Il est 6 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.17",
+  "text": "Il est 6 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.18",
+  "text": "Il est 6 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.19",
+  "text": "Il est 6 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.06.20",
   "text": "Il est 6 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.21",
+  "text": "Il est 6 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.22",
+  "text": "Il est 6 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.23",
+  "text": "Il est 6 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.24",
+  "text": "Il est 6 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4320,8 +6238,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.06.26",
+  "text": "Il est 6 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.27",
+  "text": "Il est 6 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.28",
+  "text": "Il est 6 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.29",
+  "text": "Il est 6 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.06.30",
   "text": "Il est 6 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.31",
+  "text": "Il est 6 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.32",
+  "text": "Il est 6 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.33",
+  "text": "Il est 6 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.34",
+  "text": "Il est 6 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4332,8 +6298,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.06.36",
+  "text": "Il est 6 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.37",
+  "text": "Il est 6 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.38",
+  "text": "Il est 6 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.39",
+  "text": "Il est 6 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.06.40",
   "text": "Il est 6 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.41",
+  "text": "Il est 6 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.42",
+  "text": "Il est 6 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.43",
+  "text": "Il est 6 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.44",
+  "text": "Il est 6 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4344,8 +6358,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.06.46",
+  "text": "Il est 6 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.47",
+  "text": "Il est 6 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.48",
+  "text": "Il est 6 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.49",
+  "text": "Il est 6 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.06.50",
   "text": "Il est 6 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.51",
+  "text": "Il est 6 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.52",
+  "text": "Il est 6 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.53",
+  "text": "Il est 6 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.54",
+  "text": "Il est 6 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4356,8 +6418,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.06.56",
+  "text": "Il est 6 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.57",
+  "text": "Il est 6 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.58",
+  "text": "Il est 6 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.59",
+  "text": "Il est 6 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.07.00",
   "text": "Il est 7 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.01",
+  "text": "Il est 7 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.02",
+  "text": "Il est 7 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.03",
+  "text": "Il est 7 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.04",
+  "text": "Il est 7 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4368,8 +6478,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.07.06",
+  "text": "Il est 7 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.07",
+  "text": "Il est 7 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.08",
+  "text": "Il est 7 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.09",
+  "text": "Il est 7 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.07.10",
   "text": "Il est 7 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.11",
+  "text": "Il est 7 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.12",
+  "text": "Il est 7 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.13",
+  "text": "Il est 7 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.14",
+  "text": "Il est 7 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4380,8 +6538,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.07.16",
+  "text": "Il est 7 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.17",
+  "text": "Il est 7 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.18",
+  "text": "Il est 7 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.19",
+  "text": "Il est 7 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.07.20",
   "text": "Il est 7 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.21",
+  "text": "Il est 7 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.22",
+  "text": "Il est 7 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.23",
+  "text": "Il est 7 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.24",
+  "text": "Il est 7 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4392,8 +6598,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.07.26",
+  "text": "Il est 7 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.27",
+  "text": "Il est 7 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.28",
+  "text": "Il est 7 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.29",
+  "text": "Il est 7 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.07.30",
   "text": "Il est 7 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.31",
+  "text": "Il est 7 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.32",
+  "text": "Il est 7 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.33",
+  "text": "Il est 7 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.34",
+  "text": "Il est 7 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4404,8 +6658,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.07.36",
+  "text": "Il est 7 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.37",
+  "text": "Il est 7 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.38",
+  "text": "Il est 7 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.39",
+  "text": "Il est 7 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.07.40",
   "text": "Il est 7 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.41",
+  "text": "Il est 7 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.42",
+  "text": "Il est 7 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.43",
+  "text": "Il est 7 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.44",
+  "text": "Il est 7 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4416,8 +6718,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.07.46",
+  "text": "Il est 7 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.47",
+  "text": "Il est 7 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.48",
+  "text": "Il est 7 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.49",
+  "text": "Il est 7 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.07.50",
   "text": "Il est 7 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.51",
+  "text": "Il est 7 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.52",
+  "text": "Il est 7 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.53",
+  "text": "Il est 7 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.54",
+  "text": "Il est 7 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4428,8 +6778,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.07.56",
+  "text": "Il est 7 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.57",
+  "text": "Il est 7 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.58",
+  "text": "Il est 7 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.59",
+  "text": "Il est 7 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.08.00",
   "text": "Il est 8 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.01",
+  "text": "Il est 8 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.02",
+  "text": "Il est 8 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.03",
+  "text": "Il est 8 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.04",
+  "text": "Il est 8 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4440,8 +6838,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.08.06",
+  "text": "Il est 8 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.07",
+  "text": "Il est 8 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.08",
+  "text": "Il est 8 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.09",
+  "text": "Il est 8 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.08.10",
   "text": "Il est 8 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.11",
+  "text": "Il est 8 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.12",
+  "text": "Il est 8 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.13",
+  "text": "Il est 8 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.14",
+  "text": "Il est 8 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4452,8 +6898,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.08.16",
+  "text": "Il est 8 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.17",
+  "text": "Il est 8 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.18",
+  "text": "Il est 8 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.19",
+  "text": "Il est 8 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.08.20",
   "text": "Il est 8 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.21",
+  "text": "Il est 8 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.22",
+  "text": "Il est 8 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.23",
+  "text": "Il est 8 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.24",
+  "text": "Il est 8 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4464,8 +6958,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.08.26",
+  "text": "Il est 8 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.27",
+  "text": "Il est 8 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.28",
+  "text": "Il est 8 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.29",
+  "text": "Il est 8 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.08.30",
   "text": "Il est 8 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.31",
+  "text": "Il est 8 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.32",
+  "text": "Il est 8 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.33",
+  "text": "Il est 8 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.34",
+  "text": "Il est 8 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4476,8 +7018,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.08.36",
+  "text": "Il est 8 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.37",
+  "text": "Il est 8 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.38",
+  "text": "Il est 8 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.39",
+  "text": "Il est 8 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.08.40",
   "text": "Il est 8 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.41",
+  "text": "Il est 8 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.42",
+  "text": "Il est 8 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.43",
+  "text": "Il est 8 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.44",
+  "text": "Il est 8 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4488,8 +7078,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.08.46",
+  "text": "Il est 8 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.47",
+  "text": "Il est 8 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.48",
+  "text": "Il est 8 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.49",
+  "text": "Il est 8 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.08.50",
   "text": "Il est 8 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.51",
+  "text": "Il est 8 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.52",
+  "text": "Il est 8 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.53",
+  "text": "Il est 8 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.54",
+  "text": "Il est 8 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4500,8 +7138,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.08.56",
+  "text": "Il est 8 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.57",
+  "text": "Il est 8 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.58",
+  "text": "Il est 8 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.59",
+  "text": "Il est 8 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.09.00",
   "text": "Il est 9 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.01",
+  "text": "Il est 9 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.02",
+  "text": "Il est 9 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.03",
+  "text": "Il est 9 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.04",
+  "text": "Il est 9 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4512,8 +7198,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.09.06",
+  "text": "Il est 9 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.07",
+  "text": "Il est 9 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.08",
+  "text": "Il est 9 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.09",
+  "text": "Il est 9 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.09.10",
   "text": "Il est 9 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.11",
+  "text": "Il est 9 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.12",
+  "text": "Il est 9 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.13",
+  "text": "Il est 9 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.14",
+  "text": "Il est 9 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4524,8 +7258,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.09.16",
+  "text": "Il est 9 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.17",
+  "text": "Il est 9 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.18",
+  "text": "Il est 9 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.19",
+  "text": "Il est 9 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.09.20",
   "text": "Il est 9 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.21",
+  "text": "Il est 9 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.22",
+  "text": "Il est 9 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.23",
+  "text": "Il est 9 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.24",
+  "text": "Il est 9 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4536,8 +7318,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.09.26",
+  "text": "Il est 9 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.27",
+  "text": "Il est 9 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.28",
+  "text": "Il est 9 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.29",
+  "text": "Il est 9 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.09.30",
   "text": "Il est 9 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.31",
+  "text": "Il est 9 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.32",
+  "text": "Il est 9 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.33",
+  "text": "Il est 9 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.34",
+  "text": "Il est 9 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4548,8 +7378,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.09.36",
+  "text": "Il est 9 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.37",
+  "text": "Il est 9 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.38",
+  "text": "Il est 9 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.39",
+  "text": "Il est 9 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.09.40",
   "text": "Il est 9 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.41",
+  "text": "Il est 9 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.42",
+  "text": "Il est 9 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.43",
+  "text": "Il est 9 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.44",
+  "text": "Il est 9 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4560,8 +7438,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.09.46",
+  "text": "Il est 9 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.47",
+  "text": "Il est 9 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.48",
+  "text": "Il est 9 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.49",
+  "text": "Il est 9 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.09.50",
   "text": "Il est 9 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.51",
+  "text": "Il est 9 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.52",
+  "text": "Il est 9 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.53",
+  "text": "Il est 9 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.54",
+  "text": "Il est 9 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4572,8 +7498,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.09.56",
+  "text": "Il est 9 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.57",
+  "text": "Il est 9 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.58",
+  "text": "Il est 9 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.59",
+  "text": "Il est 9 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.10.00",
   "text": "Il est 10 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.01",
+  "text": "Il est 10 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.02",
+  "text": "Il est 10 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.03",
+  "text": "Il est 10 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.04",
+  "text": "Il est 10 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4584,8 +7558,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.10.06",
+  "text": "Il est 10 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.07",
+  "text": "Il est 10 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.08",
+  "text": "Il est 10 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.09",
+  "text": "Il est 10 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.10.10",
   "text": "Il est 10 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.11",
+  "text": "Il est 10 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.12",
+  "text": "Il est 10 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.13",
+  "text": "Il est 10 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.14",
+  "text": "Il est 10 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4596,8 +7618,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.10.16",
+  "text": "Il est 10 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.17",
+  "text": "Il est 10 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.18",
+  "text": "Il est 10 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.19",
+  "text": "Il est 10 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.10.20",
   "text": "Il est 10 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.21",
+  "text": "Il est 10 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.22",
+  "text": "Il est 10 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.23",
+  "text": "Il est 10 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.24",
+  "text": "Il est 10 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4608,8 +7678,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.10.26",
+  "text": "Il est 10 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.27",
+  "text": "Il est 10 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.28",
+  "text": "Il est 10 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.29",
+  "text": "Il est 10 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.10.30",
   "text": "Il est 10 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.31",
+  "text": "Il est 10 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.32",
+  "text": "Il est 10 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.33",
+  "text": "Il est 10 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.34",
+  "text": "Il est 10 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4620,8 +7738,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.10.36",
+  "text": "Il est 10 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.37",
+  "text": "Il est 10 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.38",
+  "text": "Il est 10 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.39",
+  "text": "Il est 10 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.10.40",
   "text": "Il est 10 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.41",
+  "text": "Il est 10 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.42",
+  "text": "Il est 10 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.43",
+  "text": "Il est 10 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.44",
+  "text": "Il est 10 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4632,8 +7798,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.10.46",
+  "text": "Il est 10 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.47",
+  "text": "Il est 10 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.48",
+  "text": "Il est 10 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.49",
+  "text": "Il est 10 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.10.50",
   "text": "Il est 10 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.51",
+  "text": "Il est 10 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.52",
+  "text": "Il est 10 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.53",
+  "text": "Il est 10 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.54",
+  "text": "Il est 10 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4644,8 +7858,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.10.56",
+  "text": "Il est 10 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.57",
+  "text": "Il est 10 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.58",
+  "text": "Il est 10 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.59",
+  "text": "Il est 10 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.11.00",
   "text": "Il est 11 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.01",
+  "text": "Il est 11 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.02",
+  "text": "Il est 11 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.03",
+  "text": "Il est 11 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.04",
+  "text": "Il est 11 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4656,8 +7918,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.11.06",
+  "text": "Il est 11 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.07",
+  "text": "Il est 11 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.08",
+  "text": "Il est 11 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.09",
+  "text": "Il est 11 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.11.10",
   "text": "Il est 11 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.11",
+  "text": "Il est 11 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.12",
+  "text": "Il est 11 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.13",
+  "text": "Il est 11 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.14",
+  "text": "Il est 11 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4668,8 +7978,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.11.16",
+  "text": "Il est 11 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.17",
+  "text": "Il est 11 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.18",
+  "text": "Il est 11 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.19",
+  "text": "Il est 11 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.11.20",
   "text": "Il est 11 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.21",
+  "text": "Il est 11 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.22",
+  "text": "Il est 11 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.23",
+  "text": "Il est 11 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.24",
+  "text": "Il est 11 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4680,8 +8038,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.11.26",
+  "text": "Il est 11 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.27",
+  "text": "Il est 11 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.28",
+  "text": "Il est 11 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.29",
+  "text": "Il est 11 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.11.30",
   "text": "Il est 11 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.31",
+  "text": "Il est 11 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.32",
+  "text": "Il est 11 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.33",
+  "text": "Il est 11 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.34",
+  "text": "Il est 11 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4692,8 +8098,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.11.36",
+  "text": "Il est 11 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.37",
+  "text": "Il est 11 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.38",
+  "text": "Il est 11 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.39",
+  "text": "Il est 11 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.11.40",
   "text": "Il est 11 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.41",
+  "text": "Il est 11 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.42",
+  "text": "Il est 11 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.43",
+  "text": "Il est 11 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.44",
+  "text": "Il est 11 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4704,8 +8158,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.11.46",
+  "text": "Il est 11 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.47",
+  "text": "Il est 11 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.48",
+  "text": "Il est 11 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.49",
+  "text": "Il est 11 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.11.50",
   "text": "Il est 11 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.51",
+  "text": "Il est 11 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.52",
+  "text": "Il est 11 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.53",
+  "text": "Il est 11 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.54",
+  "text": "Il est 11 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4716,8 +8218,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.11.56",
+  "text": "Il est 11 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.57",
+  "text": "Il est 11 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.58",
+  "text": "Il est 11 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.59",
+  "text": "Il est 11 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.12.00",
   "text": "Il est midi.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.01",
+  "text": "Il est midi 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.02",
+  "text": "Il est midi 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.03",
+  "text": "Il est midi 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.04",
+  "text": "Il est midi 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4728,8 +8278,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.12.06",
+  "text": "Il est midi 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.07",
+  "text": "Il est midi 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.08",
+  "text": "Il est midi 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.09",
+  "text": "Il est midi 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.12.10",
   "text": "Il est midi 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.11",
+  "text": "Il est midi 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.12",
+  "text": "Il est midi 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.13",
+  "text": "Il est midi 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.14",
+  "text": "Il est midi 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4740,8 +8338,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.12.16",
+  "text": "Il est midi 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.17",
+  "text": "Il est midi 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.18",
+  "text": "Il est midi 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.19",
+  "text": "Il est midi 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.12.20",
   "text": "Il est midi 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.21",
+  "text": "Il est midi 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.22",
+  "text": "Il est midi 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.23",
+  "text": "Il est midi 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.24",
+  "text": "Il est midi 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4752,8 +8398,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.12.26",
+  "text": "Il est midi 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.27",
+  "text": "Il est midi 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.28",
+  "text": "Il est midi 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.29",
+  "text": "Il est midi 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.12.30",
   "text": "Il est midi 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.31",
+  "text": "Il est midi 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.32",
+  "text": "Il est midi 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.33",
+  "text": "Il est midi 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.34",
+  "text": "Il est midi 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4764,8 +8458,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.12.36",
+  "text": "Il est midi 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.37",
+  "text": "Il est midi 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.38",
+  "text": "Il est midi 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.39",
+  "text": "Il est midi 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.12.40",
   "text": "Il est midi 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.41",
+  "text": "Il est midi 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.42",
+  "text": "Il est midi 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.43",
+  "text": "Il est midi 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.44",
+  "text": "Il est midi 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4776,8 +8518,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.12.46",
+  "text": "Il est midi 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.47",
+  "text": "Il est midi 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.48",
+  "text": "Il est midi 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.49",
+  "text": "Il est midi 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.12.50",
   "text": "Il est midi 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.51",
+  "text": "Il est midi 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.52",
+  "text": "Il est midi 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.53",
+  "text": "Il est midi 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.54",
+  "text": "Il est midi 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4788,8 +8578,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.12.56",
+  "text": "Il est midi 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.57",
+  "text": "Il est midi 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.58",
+  "text": "Il est midi 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.59",
+  "text": "Il est midi 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.13.00",
   "text": "Il est 13 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.01",
+  "text": "Il est 13 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.02",
+  "text": "Il est 13 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.03",
+  "text": "Il est 13 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.04",
+  "text": "Il est 13 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4800,8 +8638,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.13.06",
+  "text": "Il est 13 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.07",
+  "text": "Il est 13 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.08",
+  "text": "Il est 13 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.09",
+  "text": "Il est 13 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.13.10",
   "text": "Il est 13 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.11",
+  "text": "Il est 13 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.12",
+  "text": "Il est 13 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.13",
+  "text": "Il est 13 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.14",
+  "text": "Il est 13 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4812,8 +8698,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.13.16",
+  "text": "Il est 13 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.17",
+  "text": "Il est 13 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.18",
+  "text": "Il est 13 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.19",
+  "text": "Il est 13 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.13.20",
   "text": "Il est 13 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.21",
+  "text": "Il est 13 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.22",
+  "text": "Il est 13 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.23",
+  "text": "Il est 13 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.24",
+  "text": "Il est 13 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4824,8 +8758,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.13.26",
+  "text": "Il est 13 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.27",
+  "text": "Il est 13 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.28",
+  "text": "Il est 13 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.29",
+  "text": "Il est 13 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.13.30",
   "text": "Il est 13 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.31",
+  "text": "Il est 13 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.32",
+  "text": "Il est 13 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.33",
+  "text": "Il est 13 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.34",
+  "text": "Il est 13 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4836,8 +8818,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.13.36",
+  "text": "Il est 13 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.37",
+  "text": "Il est 13 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.38",
+  "text": "Il est 13 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.39",
+  "text": "Il est 13 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.13.40",
   "text": "Il est 13 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.41",
+  "text": "Il est 13 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.42",
+  "text": "Il est 13 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.43",
+  "text": "Il est 13 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.44",
+  "text": "Il est 13 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4848,8 +8878,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.13.46",
+  "text": "Il est 13 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.47",
+  "text": "Il est 13 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.48",
+  "text": "Il est 13 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.49",
+  "text": "Il est 13 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.13.50",
   "text": "Il est 13 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.51",
+  "text": "Il est 13 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.52",
+  "text": "Il est 13 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.53",
+  "text": "Il est 13 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.54",
+  "text": "Il est 13 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4860,8 +8938,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.13.56",
+  "text": "Il est 13 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.57",
+  "text": "Il est 13 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.58",
+  "text": "Il est 13 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.59",
+  "text": "Il est 13 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.14.00",
   "text": "Il est 14 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.01",
+  "text": "Il est 14 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.02",
+  "text": "Il est 14 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.03",
+  "text": "Il est 14 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.04",
+  "text": "Il est 14 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4872,8 +8998,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.14.06",
+  "text": "Il est 14 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.07",
+  "text": "Il est 14 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.08",
+  "text": "Il est 14 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.09",
+  "text": "Il est 14 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.14.10",
   "text": "Il est 14 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.11",
+  "text": "Il est 14 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.12",
+  "text": "Il est 14 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.13",
+  "text": "Il est 14 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.14",
+  "text": "Il est 14 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4884,8 +9058,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.14.16",
+  "text": "Il est 14 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.17",
+  "text": "Il est 14 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.18",
+  "text": "Il est 14 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.19",
+  "text": "Il est 14 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.14.20",
   "text": "Il est 14 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.21",
+  "text": "Il est 14 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.22",
+  "text": "Il est 14 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.23",
+  "text": "Il est 14 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.24",
+  "text": "Il est 14 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4896,8 +9118,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.14.26",
+  "text": "Il est 14 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.27",
+  "text": "Il est 14 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.28",
+  "text": "Il est 14 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.29",
+  "text": "Il est 14 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.14.30",
   "text": "Il est 14 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.31",
+  "text": "Il est 14 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.32",
+  "text": "Il est 14 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.33",
+  "text": "Il est 14 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.34",
+  "text": "Il est 14 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4908,8 +9178,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.14.36",
+  "text": "Il est 14 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.37",
+  "text": "Il est 14 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.38",
+  "text": "Il est 14 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.39",
+  "text": "Il est 14 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.14.40",
   "text": "Il est 14 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.41",
+  "text": "Il est 14 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.42",
+  "text": "Il est 14 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.43",
+  "text": "Il est 14 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.44",
+  "text": "Il est 14 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4920,8 +9238,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.14.46",
+  "text": "Il est 14 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.47",
+  "text": "Il est 14 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.48",
+  "text": "Il est 14 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.49",
+  "text": "Il est 14 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.14.50",
   "text": "Il est 14 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.51",
+  "text": "Il est 14 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.52",
+  "text": "Il est 14 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.53",
+  "text": "Il est 14 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.54",
+  "text": "Il est 14 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4932,8 +9298,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.14.56",
+  "text": "Il est 14 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.57",
+  "text": "Il est 14 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.58",
+  "text": "Il est 14 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.59",
+  "text": "Il est 14 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.15.00",
   "text": "Il est 15 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.01",
+  "text": "Il est 15 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.02",
+  "text": "Il est 15 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.03",
+  "text": "Il est 15 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.04",
+  "text": "Il est 15 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4944,8 +9358,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.15.06",
+  "text": "Il est 15 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.07",
+  "text": "Il est 15 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.08",
+  "text": "Il est 15 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.09",
+  "text": "Il est 15 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.15.10",
   "text": "Il est 15 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.11",
+  "text": "Il est 15 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.12",
+  "text": "Il est 15 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.13",
+  "text": "Il est 15 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.14",
+  "text": "Il est 15 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4956,8 +9418,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.15.16",
+  "text": "Il est 15 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.17",
+  "text": "Il est 15 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.18",
+  "text": "Il est 15 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.19",
+  "text": "Il est 15 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.15.20",
   "text": "Il est 15 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.21",
+  "text": "Il est 15 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.22",
+  "text": "Il est 15 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.23",
+  "text": "Il est 15 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.24",
+  "text": "Il est 15 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4968,8 +9478,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.15.26",
+  "text": "Il est 15 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.27",
+  "text": "Il est 15 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.28",
+  "text": "Il est 15 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.29",
+  "text": "Il est 15 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.15.30",
   "text": "Il est 15 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.31",
+  "text": "Il est 15 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.32",
+  "text": "Il est 15 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.33",
+  "text": "Il est 15 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.34",
+  "text": "Il est 15 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4980,8 +9538,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.15.36",
+  "text": "Il est 15 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.37",
+  "text": "Il est 15 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.38",
+  "text": "Il est 15 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.39",
+  "text": "Il est 15 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.15.40",
   "text": "Il est 15 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.41",
+  "text": "Il est 15 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.42",
+  "text": "Il est 15 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.43",
+  "text": "Il est 15 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.44",
+  "text": "Il est 15 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -4992,8 +9598,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.15.46",
+  "text": "Il est 15 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.47",
+  "text": "Il est 15 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.48",
+  "text": "Il est 15 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.49",
+  "text": "Il est 15 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.15.50",
   "text": "Il est 15 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.51",
+  "text": "Il est 15 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.52",
+  "text": "Il est 15 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.53",
+  "text": "Il est 15 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.54",
+  "text": "Il est 15 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5004,8 +9658,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.15.56",
+  "text": "Il est 15 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.57",
+  "text": "Il est 15 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.58",
+  "text": "Il est 15 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.59",
+  "text": "Il est 15 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.16.00",
   "text": "Il est 16 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.01",
+  "text": "Il est 16 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.02",
+  "text": "Il est 16 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.03",
+  "text": "Il est 16 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.04",
+  "text": "Il est 16 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5016,8 +9718,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.16.06",
+  "text": "Il est 16 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.07",
+  "text": "Il est 16 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.08",
+  "text": "Il est 16 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.09",
+  "text": "Il est 16 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.16.10",
   "text": "Il est 16 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.11",
+  "text": "Il est 16 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.12",
+  "text": "Il est 16 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.13",
+  "text": "Il est 16 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.14",
+  "text": "Il est 16 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5028,8 +9778,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.16.16",
+  "text": "Il est 16 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.17",
+  "text": "Il est 16 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.18",
+  "text": "Il est 16 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.19",
+  "text": "Il est 16 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.16.20",
   "text": "Il est 16 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.21",
+  "text": "Il est 16 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.22",
+  "text": "Il est 16 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.23",
+  "text": "Il est 16 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.24",
+  "text": "Il est 16 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5040,8 +9838,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.16.26",
+  "text": "Il est 16 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.27",
+  "text": "Il est 16 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.28",
+  "text": "Il est 16 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.29",
+  "text": "Il est 16 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.16.30",
   "text": "Il est 16 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.31",
+  "text": "Il est 16 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.32",
+  "text": "Il est 16 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.33",
+  "text": "Il est 16 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.34",
+  "text": "Il est 16 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5052,8 +9898,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.16.36",
+  "text": "Il est 16 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.37",
+  "text": "Il est 16 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.38",
+  "text": "Il est 16 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.39",
+  "text": "Il est 16 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.16.40",
   "text": "Il est 16 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.41",
+  "text": "Il est 16 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.42",
+  "text": "Il est 16 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.43",
+  "text": "Il est 16 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.44",
+  "text": "Il est 16 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5064,8 +9958,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.16.46",
+  "text": "Il est 16 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.47",
+  "text": "Il est 16 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.48",
+  "text": "Il est 16 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.49",
+  "text": "Il est 16 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.16.50",
   "text": "Il est 16 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.51",
+  "text": "Il est 16 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.52",
+  "text": "Il est 16 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.53",
+  "text": "Il est 16 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.54",
+  "text": "Il est 16 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5076,8 +10018,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.16.56",
+  "text": "Il est 16 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.57",
+  "text": "Il est 16 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.58",
+  "text": "Il est 16 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.59",
+  "text": "Il est 16 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.17.00",
   "text": "Il est 17 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.01",
+  "text": "Il est 17 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.02",
+  "text": "Il est 17 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.03",
+  "text": "Il est 17 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.04",
+  "text": "Il est 17 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5088,8 +10078,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.17.06",
+  "text": "Il est 17 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.07",
+  "text": "Il est 17 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.08",
+  "text": "Il est 17 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.09",
+  "text": "Il est 17 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.17.10",
   "text": "Il est 17 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.11",
+  "text": "Il est 17 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.12",
+  "text": "Il est 17 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.13",
+  "text": "Il est 17 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.14",
+  "text": "Il est 17 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5100,8 +10138,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.17.16",
+  "text": "Il est 17 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.17",
+  "text": "Il est 17 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.18",
+  "text": "Il est 17 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.19",
+  "text": "Il est 17 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.17.20",
   "text": "Il est 17 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.21",
+  "text": "Il est 17 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.22",
+  "text": "Il est 17 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.23",
+  "text": "Il est 17 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.24",
+  "text": "Il est 17 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5112,8 +10198,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.17.26",
+  "text": "Il est 17 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.27",
+  "text": "Il est 17 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.28",
+  "text": "Il est 17 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.29",
+  "text": "Il est 17 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.17.30",
   "text": "Il est 17 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.31",
+  "text": "Il est 17 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.32",
+  "text": "Il est 17 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.33",
+  "text": "Il est 17 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.34",
+  "text": "Il est 17 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5124,8 +10258,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.17.36",
+  "text": "Il est 17 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.37",
+  "text": "Il est 17 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.38",
+  "text": "Il est 17 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.39",
+  "text": "Il est 17 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.17.40",
   "text": "Il est 17 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.41",
+  "text": "Il est 17 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.42",
+  "text": "Il est 17 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.43",
+  "text": "Il est 17 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.44",
+  "text": "Il est 17 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5136,8 +10318,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.17.46",
+  "text": "Il est 17 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.47",
+  "text": "Il est 17 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.48",
+  "text": "Il est 17 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.49",
+  "text": "Il est 17 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.17.50",
   "text": "Il est 17 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.51",
+  "text": "Il est 17 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.52",
+  "text": "Il est 17 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.53",
+  "text": "Il est 17 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.54",
+  "text": "Il est 17 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5148,8 +10378,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.17.56",
+  "text": "Il est 17 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.57",
+  "text": "Il est 17 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.58",
+  "text": "Il est 17 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.59",
+  "text": "Il est 17 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.18.00",
   "text": "Il est 18 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.01",
+  "text": "Il est 18 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.02",
+  "text": "Il est 18 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.03",
+  "text": "Il est 18 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.04",
+  "text": "Il est 18 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5160,8 +10438,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.18.06",
+  "text": "Il est 18 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.07",
+  "text": "Il est 18 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.08",
+  "text": "Il est 18 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.09",
+  "text": "Il est 18 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.18.10",
   "text": "Il est 18 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.11",
+  "text": "Il est 18 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.12",
+  "text": "Il est 18 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.13",
+  "text": "Il est 18 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.14",
+  "text": "Il est 18 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5172,8 +10498,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.18.16",
+  "text": "Il est 18 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.17",
+  "text": "Il est 18 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.18",
+  "text": "Il est 18 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.19",
+  "text": "Il est 18 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.18.20",
   "text": "Il est 18 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.21",
+  "text": "Il est 18 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.22",
+  "text": "Il est 18 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.23",
+  "text": "Il est 18 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.24",
+  "text": "Il est 18 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5184,8 +10558,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.18.26",
+  "text": "Il est 18 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.27",
+  "text": "Il est 18 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.28",
+  "text": "Il est 18 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.29",
+  "text": "Il est 18 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.18.30",
   "text": "Il est 18 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.31",
+  "text": "Il est 18 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.32",
+  "text": "Il est 18 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.33",
+  "text": "Il est 18 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.34",
+  "text": "Il est 18 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5196,8 +10618,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.18.36",
+  "text": "Il est 18 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.37",
+  "text": "Il est 18 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.38",
+  "text": "Il est 18 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.39",
+  "text": "Il est 18 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.18.40",
   "text": "Il est 18 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.41",
+  "text": "Il est 18 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.42",
+  "text": "Il est 18 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.43",
+  "text": "Il est 18 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.44",
+  "text": "Il est 18 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5208,8 +10678,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.18.46",
+  "text": "Il est 18 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.47",
+  "text": "Il est 18 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.48",
+  "text": "Il est 18 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.49",
+  "text": "Il est 18 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.18.50",
   "text": "Il est 18 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.51",
+  "text": "Il est 18 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.52",
+  "text": "Il est 18 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.53",
+  "text": "Il est 18 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.54",
+  "text": "Il est 18 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5220,8 +10738,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.18.56",
+  "text": "Il est 18 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.57",
+  "text": "Il est 18 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.58",
+  "text": "Il est 18 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.59",
+  "text": "Il est 18 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.19.00",
   "text": "Il est 19 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.01",
+  "text": "Il est 19 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.02",
+  "text": "Il est 19 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.03",
+  "text": "Il est 19 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.04",
+  "text": "Il est 19 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5232,8 +10798,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.19.06",
+  "text": "Il est 19 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.07",
+  "text": "Il est 19 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.08",
+  "text": "Il est 19 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.09",
+  "text": "Il est 19 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.19.10",
   "text": "Il est 19 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.11",
+  "text": "Il est 19 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.12",
+  "text": "Il est 19 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.13",
+  "text": "Il est 19 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.14",
+  "text": "Il est 19 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5244,8 +10858,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.19.16",
+  "text": "Il est 19 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.17",
+  "text": "Il est 19 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.18",
+  "text": "Il est 19 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.19",
+  "text": "Il est 19 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.19.20",
   "text": "Il est 19 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.21",
+  "text": "Il est 19 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.22",
+  "text": "Il est 19 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.23",
+  "text": "Il est 19 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.24",
+  "text": "Il est 19 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5256,8 +10918,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.19.26",
+  "text": "Il est 19 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.27",
+  "text": "Il est 19 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.28",
+  "text": "Il est 19 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.29",
+  "text": "Il est 19 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.19.30",
   "text": "Il est 19 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.31",
+  "text": "Il est 19 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.32",
+  "text": "Il est 19 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.33",
+  "text": "Il est 19 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.34",
+  "text": "Il est 19 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5268,8 +10978,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.19.36",
+  "text": "Il est 19 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.37",
+  "text": "Il est 19 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.38",
+  "text": "Il est 19 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.39",
+  "text": "Il est 19 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.19.40",
   "text": "Il est 19 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.41",
+  "text": "Il est 19 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.42",
+  "text": "Il est 19 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.43",
+  "text": "Il est 19 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.44",
+  "text": "Il est 19 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5280,8 +11038,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.19.46",
+  "text": "Il est 19 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.47",
+  "text": "Il est 19 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.48",
+  "text": "Il est 19 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.49",
+  "text": "Il est 19 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.19.50",
   "text": "Il est 19 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.51",
+  "text": "Il est 19 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.52",
+  "text": "Il est 19 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.53",
+  "text": "Il est 19 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.54",
+  "text": "Il est 19 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5292,8 +11098,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.19.56",
+  "text": "Il est 19 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.57",
+  "text": "Il est 19 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.58",
+  "text": "Il est 19 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.59",
+  "text": "Il est 19 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.20.00",
   "text": "Il est 20 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.01",
+  "text": "Il est 20 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.02",
+  "text": "Il est 20 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.03",
+  "text": "Il est 20 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.04",
+  "text": "Il est 20 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5304,8 +11158,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.20.06",
+  "text": "Il est 20 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.07",
+  "text": "Il est 20 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.08",
+  "text": "Il est 20 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.09",
+  "text": "Il est 20 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.20.10",
   "text": "Il est 20 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.11",
+  "text": "Il est 20 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.12",
+  "text": "Il est 20 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.13",
+  "text": "Il est 20 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.14",
+  "text": "Il est 20 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5316,8 +11218,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.20.16",
+  "text": "Il est 20 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.17",
+  "text": "Il est 20 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.18",
+  "text": "Il est 20 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.19",
+  "text": "Il est 20 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.20.20",
   "text": "Il est 20 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.21",
+  "text": "Il est 20 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.22",
+  "text": "Il est 20 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.23",
+  "text": "Il est 20 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.24",
+  "text": "Il est 20 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5328,8 +11278,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.20.26",
+  "text": "Il est 20 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.27",
+  "text": "Il est 20 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.28",
+  "text": "Il est 20 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.29",
+  "text": "Il est 20 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.20.30",
   "text": "Il est 20 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.31",
+  "text": "Il est 20 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.32",
+  "text": "Il est 20 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.33",
+  "text": "Il est 20 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.34",
+  "text": "Il est 20 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5340,8 +11338,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.20.36",
+  "text": "Il est 20 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.37",
+  "text": "Il est 20 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.38",
+  "text": "Il est 20 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.39",
+  "text": "Il est 20 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.20.40",
   "text": "Il est 20 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.41",
+  "text": "Il est 20 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.42",
+  "text": "Il est 20 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.43",
+  "text": "Il est 20 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.44",
+  "text": "Il est 20 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5352,8 +11398,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.20.46",
+  "text": "Il est 20 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.47",
+  "text": "Il est 20 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.48",
+  "text": "Il est 20 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.49",
+  "text": "Il est 20 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.20.50",
   "text": "Il est 20 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.51",
+  "text": "Il est 20 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.52",
+  "text": "Il est 20 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.53",
+  "text": "Il est 20 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.54",
+  "text": "Il est 20 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5364,80 +11458,476 @@
   "priority": "confort"
  },
  {
+  "id": "heure.20.56",
+  "text": "Il est 20 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.57",
+  "text": "Il est 20 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.58",
+  "text": "Il est 20 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.59",
+  "text": "Il est 20 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.21.00",
   "text": "Il est 21 heures.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures."
+ },
+ {
+  "id": "heure.21.01",
+  "text": "Il est 21 heures 1.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 1."
+ },
+ {
+  "id": "heure.21.02",
+  "text": "Il est 21 heures 2.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 2."
+ },
+ {
+  "id": "heure.21.03",
+  "text": "Il est 21 heures 3.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 3."
+ },
+ {
+  "id": "heure.21.04",
+  "text": "Il est 21 heures 4.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 4."
  },
  {
   "id": "heure.21.05",
   "text": "Il est 21 heures 5.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 5."
+ },
+ {
+  "id": "heure.21.06",
+  "text": "Il est 21 heures 6.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 6."
+ },
+ {
+  "id": "heure.21.07",
+  "text": "Il est 21 heures 7.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 7."
+ },
+ {
+  "id": "heure.21.08",
+  "text": "Il est 21 heures 8.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 8."
+ },
+ {
+  "id": "heure.21.09",
+  "text": "Il est 21 heures 9.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 9."
  },
  {
   "id": "heure.21.10",
   "text": "Il est 21 heures 10.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 10."
+ },
+ {
+  "id": "heure.21.11",
+  "text": "Il est 21 heures 11.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 11."
+ },
+ {
+  "id": "heure.21.12",
+  "text": "Il est 21 heures 12.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 12."
+ },
+ {
+  "id": "heure.21.13",
+  "text": "Il est 21 heures 13.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 13."
+ },
+ {
+  "id": "heure.21.14",
+  "text": "Il est 21 heures 14.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 14."
  },
  {
   "id": "heure.21.15",
   "text": "Il est 21 heures 15.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 15."
+ },
+ {
+  "id": "heure.21.16",
+  "text": "Il est 21 heures 16.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 16."
+ },
+ {
+  "id": "heure.21.17",
+  "text": "Il est 21 heures 17.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 17."
+ },
+ {
+  "id": "heure.21.18",
+  "text": "Il est 21 heures 18.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 18."
+ },
+ {
+  "id": "heure.21.19",
+  "text": "Il est 21 heures 19.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 19."
  },
  {
   "id": "heure.21.20",
   "text": "Il est 21 heures 20.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 20."
+ },
+ {
+  "id": "heure.21.21",
+  "text": "Il est 21 heures 21.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 21."
+ },
+ {
+  "id": "heure.21.22",
+  "text": "Il est 21 heures 22.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 22."
+ },
+ {
+  "id": "heure.21.23",
+  "text": "Il est 21 heures 23.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 23."
+ },
+ {
+  "id": "heure.21.24",
+  "text": "Il est 21 heures 24.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 24."
  },
  {
   "id": "heure.21.25",
   "text": "Il est 21 heures 25.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 25."
+ },
+ {
+  "id": "heure.21.26",
+  "text": "Il est 21 heures 26.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 26."
+ },
+ {
+  "id": "heure.21.27",
+  "text": "Il est 21 heures 27.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 27."
+ },
+ {
+  "id": "heure.21.28",
+  "text": "Il est 21 heures 28.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 28."
+ },
+ {
+  "id": "heure.21.29",
+  "text": "Il est 21 heures 29.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 29."
  },
  {
   "id": "heure.21.30",
   "text": "Il est 21 heures 30.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 30."
+ },
+ {
+  "id": "heure.21.31",
+  "text": "Il est 21 heures 31.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 31."
+ },
+ {
+  "id": "heure.21.32",
+  "text": "Il est 21 heures 32.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 32."
+ },
+ {
+  "id": "heure.21.33",
+  "text": "Il est 21 heures 33.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 33."
+ },
+ {
+  "id": "heure.21.34",
+  "text": "Il est 21 heures 34.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 34."
  },
  {
   "id": "heure.21.35",
   "text": "Il est 21 heures 35.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 35."
+ },
+ {
+  "id": "heure.21.36",
+  "text": "Il est 21 heures 36.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 36."
+ },
+ {
+  "id": "heure.21.37",
+  "text": "Il est 21 heures 37.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 37."
+ },
+ {
+  "id": "heure.21.38",
+  "text": "Il est 21 heures 38.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 38."
+ },
+ {
+  "id": "heure.21.39",
+  "text": "Il est 21 heures 39.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 39."
  },
  {
   "id": "heure.21.40",
   "text": "Il est 21 heures 40.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 40."
+ },
+ {
+  "id": "heure.21.41",
+  "text": "Il est 21 heures 41.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 41."
+ },
+ {
+  "id": "heure.21.42",
+  "text": "Il est 21 heures 42.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 42."
+ },
+ {
+  "id": "heure.21.43",
+  "text": "Il est 21 heures 43.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 43."
+ },
+ {
+  "id": "heure.21.44",
+  "text": "Il est 21 heures 44.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 44."
  },
  {
   "id": "heure.21.45",
   "text": "Il est 21 heures 45.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 45."
+ },
+ {
+  "id": "heure.21.46",
+  "text": "Il est 21 heures 46.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 46."
+ },
+ {
+  "id": "heure.21.47",
+  "text": "Il est 21 heures 47.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 47."
+ },
+ {
+  "id": "heure.21.48",
+  "text": "Il est 21 heures 48.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 48."
+ },
+ {
+  "id": "heure.21.49",
+  "text": "Il est 21 heures 49.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 49."
  },
  {
   "id": "heure.21.50",
   "text": "Il est 21 heures 50.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 50."
+ },
+ {
+  "id": "heure.21.51",
+  "text": "Il est 21 heures 51.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 51."
+ },
+ {
+  "id": "heure.21.52",
+  "text": "Il est 21 heures 52.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 52."
+ },
+ {
+  "id": "heure.21.53",
+  "text": "Il est 21 heures 53.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 53."
+ },
+ {
+  "id": "heure.21.54",
+  "text": "Il est 21 heures 54.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 54."
  },
  {
   "id": "heure.21.55",
   "text": "Il est 21 heures 55.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 55."
+ },
+ {
+  "id": "heure.21.56",
+  "text": "Il est 21 heures 56.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 56."
+ },
+ {
+  "id": "heure.21.57",
+  "text": "Il est 21 heures 57.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 57."
+ },
+ {
+  "id": "heure.21.58",
+  "text": "Il est 21 heures 58.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 58."
+ },
+ {
+  "id": "heure.21.59",
+  "text": "Il est 21 heures 59.",
+  "category": "heure",
+  "priority": "confort",
+  "tts": "Il est vingt et une heures 59."
  },
  {
   "id": "heure.22.00",
   "text": "Il est 22 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.01",
+  "text": "Il est 22 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.02",
+  "text": "Il est 22 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.03",
+  "text": "Il est 22 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.04",
+  "text": "Il est 22 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5448,8 +11938,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.22.06",
+  "text": "Il est 22 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.07",
+  "text": "Il est 22 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.08",
+  "text": "Il est 22 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.09",
+  "text": "Il est 22 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.22.10",
   "text": "Il est 22 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.11",
+  "text": "Il est 22 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.12",
+  "text": "Il est 22 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.13",
+  "text": "Il est 22 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.14",
+  "text": "Il est 22 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5460,8 +11998,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.22.16",
+  "text": "Il est 22 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.17",
+  "text": "Il est 22 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.18",
+  "text": "Il est 22 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.19",
+  "text": "Il est 22 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.22.20",
   "text": "Il est 22 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.21",
+  "text": "Il est 22 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.22",
+  "text": "Il est 22 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.23",
+  "text": "Il est 22 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.24",
+  "text": "Il est 22 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5472,8 +12058,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.22.26",
+  "text": "Il est 22 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.27",
+  "text": "Il est 22 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.28",
+  "text": "Il est 22 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.29",
+  "text": "Il est 22 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.22.30",
   "text": "Il est 22 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.31",
+  "text": "Il est 22 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.32",
+  "text": "Il est 22 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.33",
+  "text": "Il est 22 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.34",
+  "text": "Il est 22 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5484,8 +12118,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.22.36",
+  "text": "Il est 22 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.37",
+  "text": "Il est 22 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.38",
+  "text": "Il est 22 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.39",
+  "text": "Il est 22 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.22.40",
   "text": "Il est 22 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.41",
+  "text": "Il est 22 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.42",
+  "text": "Il est 22 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.43",
+  "text": "Il est 22 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.44",
+  "text": "Il est 22 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5496,8 +12178,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.22.46",
+  "text": "Il est 22 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.47",
+  "text": "Il est 22 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.48",
+  "text": "Il est 22 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.49",
+  "text": "Il est 22 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.22.50",
   "text": "Il est 22 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.51",
+  "text": "Il est 22 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.52",
+  "text": "Il est 22 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.53",
+  "text": "Il est 22 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.54",
+  "text": "Il est 22 heures 54.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5508,8 +12238,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.22.56",
+  "text": "Il est 22 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.57",
+  "text": "Il est 22 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.58",
+  "text": "Il est 22 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.59",
+  "text": "Il est 22 heures 59.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.23.00",
   "text": "Il est 23 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.01",
+  "text": "Il est 23 heures 1.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.02",
+  "text": "Il est 23 heures 2.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.03",
+  "text": "Il est 23 heures 3.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.04",
+  "text": "Il est 23 heures 4.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5520,8 +12298,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.23.06",
+  "text": "Il est 23 heures 6.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.07",
+  "text": "Il est 23 heures 7.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.08",
+  "text": "Il est 23 heures 8.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.09",
+  "text": "Il est 23 heures 9.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.23.10",
   "text": "Il est 23 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.11",
+  "text": "Il est 23 heures 11.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.12",
+  "text": "Il est 23 heures 12.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.13",
+  "text": "Il est 23 heures 13.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.14",
+  "text": "Il est 23 heures 14.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5532,8 +12358,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.23.16",
+  "text": "Il est 23 heures 16.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.17",
+  "text": "Il est 23 heures 17.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.18",
+  "text": "Il est 23 heures 18.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.19",
+  "text": "Il est 23 heures 19.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.23.20",
   "text": "Il est 23 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.21",
+  "text": "Il est 23 heures 21.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.22",
+  "text": "Il est 23 heures 22.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.23",
+  "text": "Il est 23 heures 23.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.24",
+  "text": "Il est 23 heures 24.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5544,8 +12418,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.23.26",
+  "text": "Il est 23 heures 26.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.27",
+  "text": "Il est 23 heures 27.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.28",
+  "text": "Il est 23 heures 28.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.29",
+  "text": "Il est 23 heures 29.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.23.30",
   "text": "Il est 23 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.31",
+  "text": "Il est 23 heures 31.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.32",
+  "text": "Il est 23 heures 32.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.33",
+  "text": "Il est 23 heures 33.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.34",
+  "text": "Il est 23 heures 34.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5556,8 +12478,56 @@
   "priority": "confort"
  },
  {
+  "id": "heure.23.36",
+  "text": "Il est 23 heures 36.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.37",
+  "text": "Il est 23 heures 37.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.38",
+  "text": "Il est 23 heures 38.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.39",
+  "text": "Il est 23 heures 39.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.23.40",
   "text": "Il est 23 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.41",
+  "text": "Il est 23 heures 41.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.42",
+  "text": "Il est 23 heures 42.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.43",
+  "text": "Il est 23 heures 43.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.44",
+  "text": "Il est 23 heures 44.",
   "category": "heure",
   "priority": "confort"
  },
@@ -5568,14 +12538,86 @@
   "priority": "confort"
  },
  {
+  "id": "heure.23.46",
+  "text": "Il est 23 heures 46.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.47",
+  "text": "Il est 23 heures 47.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.48",
+  "text": "Il est 23 heures 48.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.49",
+  "text": "Il est 23 heures 49.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.23.50",
   "text": "Il est 23 heures 50.",
   "category": "heure",
   "priority": "confort"
  },
  {
+  "id": "heure.23.51",
+  "text": "Il est 23 heures 51.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.52",
+  "text": "Il est 23 heures 52.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.53",
+  "text": "Il est 23 heures 53.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.54",
+  "text": "Il est 23 heures 54.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
   "id": "heure.23.55",
   "text": "Il est 23 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.56",
+  "text": "Il est 23 heures 56.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.57",
+  "text": "Il est 23 heures 57.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.58",
+  "text": "Il est 23 heures 58.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.59",
+  "text": "Il est 23 heures 59.",
   "category": "heure",
   "priority": "confort"
  },
@@ -6273,6 +13315,216 @@
   "id": "vit.250",
   "text": "Tu roules à 250 kilomètres heure.",
   "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "alerte.pause.195",
+  "text": "Tu roules depuis 3 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.255",
+  "text": "Tu roules depuis 4 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.285",
+  "text": "Tu roules depuis 4 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.345",
+  "text": "Tu roules depuis 5 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.390",
+  "text": "Tu roules depuis 6 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.435",
+  "text": "Tu roules depuis 7 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.465",
+  "text": "Tu roules depuis 7 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.510",
+  "text": "Tu roules depuis 8 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.555",
+  "text": "Tu roules depuis 9 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.570",
+  "text": "Tu roules depuis 9 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.585",
+  "text": "Tu roules depuis 9 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.615",
+  "text": "Tu roules depuis 10 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.645",
+  "text": "Tu roules depuis 10 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.690",
+  "text": "Tu roules depuis 11 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.705",
+  "text": "Tu roules depuis 11 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.735",
+  "text": "Tu roules depuis 12 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.765",
+  "text": "Tu roules depuis 12 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.780",
+  "text": "Tu roules depuis 13 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.795",
+  "text": "Tu roules depuis 13 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.840",
+  "text": "Tu roules depuis 14 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.855",
+  "text": "Tu roules depuis 14 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.870",
+  "text": "Tu roules depuis 14 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.885",
+  "text": "Tu roules depuis 14 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.915",
+  "text": "Tu roules depuis 15 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.930",
+  "text": "Tu roules depuis 15 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.945",
+  "text": "Tu roules depuis 15 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.960",
+  "text": "Tu roules depuis 16 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.975",
+  "text": "Tu roules depuis 16 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.1005",
+  "text": "Tu roules depuis 16 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.1020",
+  "text": "Tu roules depuis 17 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.1035",
+  "text": "Tu roules depuis 17 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.1050",
+  "text": "Tu roules depuis 17 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.1065",
+  "text": "Tu roules depuis 17 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "err.stt.rien",
+  "text": "Je n'ai rien entendu.",
+  "category": "err",
+  "priority": "confort"
+ },
+ {
+  "id": "media.titre",
+  "text": "Média.",
+  "category": "media",
   "priority": "confort"
  }
 ]

@@ -22,7 +22,7 @@ BANK = Path(r"C:\ai\voice\bank")
 VOICE = Path(r"C:\ai\voice\practice")
 BASE = r"C:\ai\models\Qwen3-TTS-12Hz-0.6B-Base"
 WHISPER = r"C:\ai\models\whisper-large-v3-turbo"
-PUBLIC = Path(r"C:\Users\alesp\Documents\STAGE BETTERSTATE\site web claude code\practice-site\public\voice\practice\fr")
+PUBLIC = Path(r"C:\Users\alesp\Documents\STAGE BETTERSTATE\site web claude code\practice-site-voix\public\voice\practice\fr")
 CER_OK, CER_MAX, MAX_TRIES = 0.10, 0.25, 4
 PRIO = {"securite": 0, "guidage": 1, "confort": 2}
 ACCENTS = "àâäçéèêëîïôöùûüÿœæ"
@@ -70,7 +70,7 @@ def needs_gen(p, st):
         return True
     if rec.get("status") == "redo":
         return True
-    if rec.get("text") != p["text"]:  # texte modifié depuis la dernière génération
+    if rec.get("text") != p["text"] or rec.get("tts") != p.get("tts"):  # texte ou prononciation modifiés
         return True
     return not (BANK / "wav" / f"{p['id']}.wav").exists() and rec.get("status") != "abandon"
 
@@ -91,15 +91,15 @@ def cmd_gen(a):
     t0 = time.time()
     for n, p in enumerate(todo, 1):
         rec = st.setdefault(p["id"], {"tries": 0})
-        if rec.get("text") != p["text"]:
+        if rec.get("text") != p["text"] or rec.get("tts") != p.get("tts"):
             rec["tries"] = 0
         rec["tries"] = rec.get("tries", 0) + 1
         torch.manual_seed(seed_for(p["id"], rec["tries"]))
         t = time.time()
-        wavs, sr = model.generate_voice_clone(text=p["text"], language="French", voice_clone_prompt=prompt)
+        wavs, sr = model.generate_voice_clone(text=p.get("tts") or p["text"], language="French", voice_clone_prompt=prompt)
         sf.write(BANK / "wav" / f"{p['id']}.wav", wavs[0], sr)
         dur = len(wavs[0]) / sr
-        rec.update(status="generated", text=p["text"], key=key(p["text"]), category=p.get("category"),
+        rec.update(status="generated", text=p["text"], tts=p.get("tts"), key=key(p["text"]), category=p.get("category"),
                    priority=p.get("priority"), duration=round(dur, 2))
         if n % 5 == 0 or n == len(todo):
             save_state(st)

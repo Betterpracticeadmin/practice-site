@@ -73,7 +73,7 @@
       'Accélération un peu vive — dose progressivement, c’est plus efficace.'
     ],
     anticipation: [
-      'Tu peux accélérer légèrement plus tôt.',
+      'Pas besoin d’accélérer fort si tu dois freiner juste après.',
       'Essaie de lever le pied un peu plus tôt plutôt que de freiner fort.',
       'Plein gaz puis gros freinage — anticipe un peu plus loin devant.'
     ],
