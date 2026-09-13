@@ -1,0 +1,21 @@
+{
+ "nom": "Voix officielle Practice",
+ "description": "Voix entièrement synthétique, créée à partir d'une description textuelle, sans aucun enregistrement de personne réelle.",
+ "brief": "Male voice, early thirties, calm warm baritone, grounded and clear, precise diction, native metropolitan French accent, reassuring measured pace.",
+ "texte_de_reference": "Bonjour, je suis Practice, ton copilote. Je surveille la route avec toi : dans huit cents mètres, prends la deuxième sortie au rond-point, puis on continue tranquillement vers le centre-ville.",
+ "creation": {
+  "date": "2026-09-13",
+  "modele": "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+  "revision": "5ecdb67327fd37bb2e042aab12ff7391903235d3",
+  "seed": 1000,
+  "licence": "Apache-2.0"
+ },
+ "figeage": {
+  "modele": "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
+  "revision": "5d83992436eae1d760afd27aff78a71d676296fc",
+  "licence": "Apache-2.0",
+  "mode": "voice_clone_prompt (ICL)"
+ },
+ "reference_wav_sha256": "9b1bd68e357a750bf30505d78117a4bbf202d9b769d4790586bad155d46f19e0",
+ "choisie_par": "Alessandro (casting à l'aveugle, lettre F), 13/09/2026"
+}

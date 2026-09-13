@@ -1,0 +1,6278 @@
+[
+ {
+  "id": "nav.arret",
+  "text": "On est à l’arrêt.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.cruise.1",
+  "text": "Route dégagée.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.cruise.2",
+  "text": "Tout roule.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.cruise.3",
+  "text": "Je veille.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.ghost",
+  "text": "Nouvel itinéraire, plus rapide.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reroute",
+  "text": "Recalcul de l’itinéraire…",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.arrive",
+  "text": "Tu es arrivé. Bien joué.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.calc",
+  "text": "Itinéraire calculé.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.0",
+  "text": "Arrivée imminente.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.1",
+  "text": "Arrivée dans 1 minute.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.2",
+  "text": "Arrivée dans 2 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.3",
+  "text": "Arrivée dans 3 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.4",
+  "text": "Arrivée dans 4 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.5",
+  "text": "Arrivée dans 5 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.6",
+  "text": "Arrivée dans 6 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.7",
+  "text": "Arrivée dans 7 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.8",
+  "text": "Arrivée dans 8 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.9",
+  "text": "Arrivée dans 9 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.10",
+  "text": "Arrivée dans 10 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.15",
+  "text": "Arrivée dans 15 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.20",
+  "text": "Arrivée dans 20 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.25",
+  "text": "Arrivée dans 25 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.30",
+  "text": "Arrivée dans 30 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.35",
+  "text": "Arrivée dans 35 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.40",
+  "text": "Arrivée dans 40 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.45",
+  "text": "Arrivée dans 45 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.50",
+  "text": "Arrivée dans 50 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.55",
+  "text": "Arrivée dans 55 minutes.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.60",
+  "text": "Arrivée dans 1 heure.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.75",
+  "text": "Arrivée dans 1 heure 15.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.90",
+  "text": "Arrivée dans 1 heure 30.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.105",
+  "text": "Arrivée dans 1 heure 45.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.120",
+  "text": "Arrivée dans 2 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.150",
+  "text": "Arrivée dans 2 heures 30.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.180",
+  "text": "Arrivée dans 3 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.240",
+  "text": "Arrivée dans 4 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.300",
+  "text": "Arrivée dans 5 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.360",
+  "text": "Arrivée dans 6 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.420",
+  "text": "Arrivée dans 7 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.480",
+  "text": "Arrivée dans 8 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.m.100",
+  "text": "Il reste 100 mètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.m.200",
+  "text": "Il reste 200 mètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.m.300",
+  "text": "Il reste 300 mètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.m.400",
+  "text": "Il reste 400 mètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.m.500",
+  "text": "Il reste 500 mètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.m.600",
+  "text": "Il reste 600 mètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.m.700",
+  "text": "Il reste 700 mètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.m.800",
+  "text": "Il reste 800 mètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.m.900",
+  "text": "Il reste 900 mètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.1",
+  "text": "Il reste 1 kilomètre.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.2",
+  "text": "Il reste 2 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.3",
+  "text": "Il reste 3 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.4",
+  "text": "Il reste 4 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.5",
+  "text": "Il reste 5 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.6",
+  "text": "Il reste 6 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.7",
+  "text": "Il reste 7 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.8",
+  "text": "Il reste 8 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.9",
+  "text": "Il reste 9 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.10",
+  "text": "Il reste 10 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.15",
+  "text": "Il reste 15 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.20",
+  "text": "Il reste 20 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.25",
+  "text": "Il reste 25 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.30",
+  "text": "Il reste 30 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.40",
+  "text": "Il reste 40 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.50",
+  "text": "Il reste 50 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.60",
+  "text": "Il reste 60 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.70",
+  "text": "Il reste 70 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.80",
+  "text": "Il reste 80 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.90",
+  "text": "Il reste 90 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.100",
+  "text": "Il reste 100 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.150",
+  "text": "Il reste 150 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.200",
+  "text": "Il reste 200 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.250",
+  "text": "Il reste 250 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.300",
+  "text": "Il reste 300 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.400",
+  "text": "Il reste 400 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.500",
+  "text": "Il reste 500 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.600",
+  "text": "Il reste 600 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.700",
+  "text": "Il reste 700 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.800",
+  "text": "Il reste 800 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.900",
+  "text": "Il reste 900 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.reste.km.1000",
+  "text": "Il reste 1000 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.aucun",
+  "text": "Aucun trajet en cours.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.nodest",
+  "text": "Aucune destination active pour l'instant.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.recalc",
+  "text": "Je recalcule l'itinéraire.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.norecalc",
+  "text": "Aucun itinéraire à recalculer pour l'instant.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.stop",
+  "text": "Navigation arrêtée.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.ouAller",
+  "text": "Dis-moi d'abord où tu veux aller.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.annule",
+  "text": "D'accord, j'annule.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.maison",
+  "text": "On y va, direction la maison.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.travail",
+  "text": "On y va, direction le travail.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.maison.none",
+  "text": "Tu n'as pas encore enregistré ta maison. Sur place, dis « ajoute aux favoris » pour la mémoriser.",
+  "category": "nav",
+  "priority": "confort"
+ },
+ {
+  "id": "nav.travail.none",
+  "text": "Tu n'as pas encore enregistré ton travail. Sur place, dis « ajoute aux favoris » pour le mémoriser.",
+  "category": "nav",
+  "priority": "confort"
+ },
+ {
+  "id": "nav.dest.carte",
+  "text": "Destination : Point sur la carte",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.loc.none",
+  "text": "Position inconnue pour l'instant.",
+  "category": "nav",
+  "priority": "confort"
+ },
+ {
+  "id": "nav.lang",
+  "text": "Langue changée. Je te parle en français maintenant.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "guid.50.left",
+  "text": "Dans 50 mètres, tourne à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.right",
+  "text": "Dans 50 mètres, tourne à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.sleft",
+  "text": "Dans 50 mètres, serre à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.sright",
+  "text": "Dans 50 mètres, serre à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.hleft",
+  "text": "Dans 50 mètres, tourne franchement à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.hright",
+  "text": "Dans 50 mètres, tourne franchement à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.straight",
+  "text": "Dans 50 mètres, continue tout droit.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.uturn",
+  "text": "Dans 50 mètres, fais demi-tour.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.merge",
+  "text": "Dans 50 mètres, insère-toi.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.keepleft",
+  "text": "Dans 50 mètres, garde la gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.keepright",
+  "text": "Dans 50 mètres, garde la droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.arrive",
+  "text": "Dans 50 mètres, tu arrives à destination.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.rb1",
+  "text": "Dans 50 mètres, au rond-point, prends la première sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.rb2",
+  "text": "Dans 50 mètres, au rond-point, prends la deuxième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.rb3",
+  "text": "Dans 50 mètres, au rond-point, prends la troisième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.rb4",
+  "text": "Dans 50 mètres, au rond-point, prends la quatrième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.rb5",
+  "text": "Dans 50 mètres, au rond-point, prends la cinquième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.rb6",
+  "text": "Dans 50 mètres, au rond-point, prends la sixième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.rb7",
+  "text": "Dans 50 mètres, au rond-point, prends la septième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.50.rb8",
+  "text": "Dans 50 mètres, au rond-point, prends la huitième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.left",
+  "text": "Dans 100 mètres, tourne à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.right",
+  "text": "Dans 100 mètres, tourne à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.sleft",
+  "text": "Dans 100 mètres, serre à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.sright",
+  "text": "Dans 100 mètres, serre à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.hleft",
+  "text": "Dans 100 mètres, tourne franchement à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.hright",
+  "text": "Dans 100 mètres, tourne franchement à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.straight",
+  "text": "Dans 100 mètres, continue tout droit.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.uturn",
+  "text": "Dans 100 mètres, fais demi-tour.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.merge",
+  "text": "Dans 100 mètres, insère-toi.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.keepleft",
+  "text": "Dans 100 mètres, garde la gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.keepright",
+  "text": "Dans 100 mètres, garde la droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.arrive",
+  "text": "Dans 100 mètres, tu arrives à destination.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.rb1",
+  "text": "Dans 100 mètres, au rond-point, prends la première sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.rb2",
+  "text": "Dans 100 mètres, au rond-point, prends la deuxième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.rb3",
+  "text": "Dans 100 mètres, au rond-point, prends la troisième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.rb4",
+  "text": "Dans 100 mètres, au rond-point, prends la quatrième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.rb5",
+  "text": "Dans 100 mètres, au rond-point, prends la cinquième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.rb6",
+  "text": "Dans 100 mètres, au rond-point, prends la sixième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.rb7",
+  "text": "Dans 100 mètres, au rond-point, prends la septième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.100.rb8",
+  "text": "Dans 100 mètres, au rond-point, prends la huitième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.left",
+  "text": "Dans 150 mètres, tourne à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.right",
+  "text": "Dans 150 mètres, tourne à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.sleft",
+  "text": "Dans 150 mètres, serre à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.sright",
+  "text": "Dans 150 mètres, serre à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.hleft",
+  "text": "Dans 150 mètres, tourne franchement à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.hright",
+  "text": "Dans 150 mètres, tourne franchement à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.straight",
+  "text": "Dans 150 mètres, continue tout droit.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.uturn",
+  "text": "Dans 150 mètres, fais demi-tour.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.merge",
+  "text": "Dans 150 mètres, insère-toi.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.keepleft",
+  "text": "Dans 150 mètres, garde la gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.keepright",
+  "text": "Dans 150 mètres, garde la droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.arrive",
+  "text": "Dans 150 mètres, tu arrives à destination.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.rb1",
+  "text": "Dans 150 mètres, au rond-point, prends la première sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.rb2",
+  "text": "Dans 150 mètres, au rond-point, prends la deuxième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.rb3",
+  "text": "Dans 150 mètres, au rond-point, prends la troisième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.rb4",
+  "text": "Dans 150 mètres, au rond-point, prends la quatrième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.rb5",
+  "text": "Dans 150 mètres, au rond-point, prends la cinquième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.rb6",
+  "text": "Dans 150 mètres, au rond-point, prends la sixième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.rb7",
+  "text": "Dans 150 mètres, au rond-point, prends la septième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.150.rb8",
+  "text": "Dans 150 mètres, au rond-point, prends la huitième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.left",
+  "text": "Dans 200 mètres, tourne à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.right",
+  "text": "Dans 200 mètres, tourne à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.sleft",
+  "text": "Dans 200 mètres, serre à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.sright",
+  "text": "Dans 200 mètres, serre à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.hleft",
+  "text": "Dans 200 mètres, tourne franchement à gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.hright",
+  "text": "Dans 200 mètres, tourne franchement à droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.straight",
+  "text": "Dans 200 mètres, continue tout droit.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.uturn",
+  "text": "Dans 200 mètres, fais demi-tour.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.merge",
+  "text": "Dans 200 mètres, insère-toi.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.keepleft",
+  "text": "Dans 200 mètres, garde la gauche.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.keepright",
+  "text": "Dans 200 mètres, garde la droite.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.arrive",
+  "text": "Dans 200 mètres, tu arrives à destination.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.rb1",
+  "text": "Dans 200 mètres, au rond-point, prends la première sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.rb2",
+  "text": "Dans 200 mètres, au rond-point, prends la deuxième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.rb3",
+  "text": "Dans 200 mètres, au rond-point, prends la troisième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.rb4",
+  "text": "Dans 200 mètres, au rond-point, prends la quatrième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.rb5",
+  "text": "Dans 200 mètres, au rond-point, prends la cinquième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.rb6",
+  "text": "Dans 200 mètres, au rond-point, prends la sixième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.rb7",
+  "text": "Dans 200 mètres, au rond-point, prends la septième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "guid.200.rb8",
+  "text": "Dans 200 mètres, au rond-point, prends la huitième sortie.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "alerte.radar.50",
+  "text": "Radar dans 50 mètres.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.radar.100",
+  "text": "Radar dans 100 mètres.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.radar.150",
+  "text": "Radar dans 150 mètres.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.radar.200",
+  "text": "Radar dans 200 mètres.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.radar.250",
+  "text": "Radar dans 250 mètres.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.radar.300",
+  "text": "Radar dans 300 mètres.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.radar.350",
+  "text": "Radar dans 350 mètres.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.radar.400",
+  "text": "Radar dans 400 mètres.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.vite",
+  "text": "Doucement, tu roules vite.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.fatigue",
+  "text": "Je détecte des signes de fatigue. Une pause serait bienvenue.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.fatigue.nav",
+  "text": "Signes de fatigue détectés. Prévois une pause.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.tendu",
+  "text": "Tu sembles tendu. Je simplifie l'affichage et j'adoucis l'ambiance.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.urgence",
+  "text": "En cas d'urgence appelle le 112 — police 17, SAMU 15. Je ne peux pas passer l'appel depuis le cockpit ; mets-toi en sécurité et arrête-toi dès que possible.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.tired.1",
+  "text": "Pense à faire une pause si tu sens la fatigue. Je peux te trouver un café — dis « j'ai soif ».",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.tired.2",
+  "text": "La sécurité d'abord : une pause toutes les deux heures. Je cherche un arrêt si tu veux.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.conseil",
+  "text": "Une pause serait bienvenue. Dis « Practice, trouve un café » si tu veux.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.30",
+  "text": "Tu roules depuis 30 minutes.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.45",
+  "text": "Tu roules depuis 45 minutes.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.60",
+  "text": "Tu roules depuis 1 heure.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.75",
+  "text": "Tu roules depuis 1 heure 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.90",
+  "text": "Tu roules depuis 1 heure 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.105",
+  "text": "Tu roules depuis 1 heure 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.120",
+  "text": "Tu roules depuis 2 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.135",
+  "text": "Tu roules depuis 2 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.150",
+  "text": "Tu roules depuis 2 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.165",
+  "text": "Tu roules depuis 2 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.180",
+  "text": "Tu roules depuis 3 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.210",
+  "text": "Tu roules depuis 3 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.225",
+  "text": "Tu roules depuis 3 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.240",
+  "text": "Tu roules depuis 4 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.270",
+  "text": "Tu roules depuis 4 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.300",
+  "text": "Tu roules depuis 5 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.315",
+  "text": "Tu roules depuis 5 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.330",
+  "text": "Tu roules depuis 5 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.360",
+  "text": "Tu roules depuis 6 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.375",
+  "text": "Tu roules depuis 6 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.405",
+  "text": "Tu roules depuis 6 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.420",
+  "text": "Tu roules depuis 7 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.450",
+  "text": "Tu roules depuis 7 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.480",
+  "text": "Tu roules depuis 8 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.495",
+  "text": "Tu roules depuis 8 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.525",
+  "text": "Tu roules depuis 8 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.540",
+  "text": "Tu roules depuis 9 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.600",
+  "text": "Tu roules depuis 10 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.630",
+  "text": "Tu roules depuis 10 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.660",
+  "text": "Tu roules depuis 11 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.675",
+  "text": "Tu roules depuis 11 heures 15.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.720",
+  "text": "Tu roules depuis 12 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.750",
+  "text": "Tu roules depuis 12 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.810",
+  "text": "Tu roules depuis 13 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.825",
+  "text": "Tu roules depuis 13 heures 45.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.900",
+  "text": "Tu roules depuis 15 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.990",
+  "text": "Tu roules depuis 16 heures 30.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "alerte.pause.1080",
+  "text": "Tu roules depuis 18 heures.",
+  "category": "alerte",
+  "priority": "securite"
+ },
+ {
+  "id": "trafic.partir.dense",
+  "text": "Trafic dense, mais il ne fera qu’empirer. Mieux vaut partir maintenant.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.partir.fluide",
+  "text": "Trafic fluide. Bon moment pour partir.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.attente.10",
+  "text": "Conseil départ : attends 10 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.attente.20",
+  "text": "Conseil départ : attends 20 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.attente.30",
+  "text": "Conseil départ : attends 30 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.attente.40",
+  "text": "Conseil départ : attends 40 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.attente.50",
+  "text": "Conseil départ : attends 50 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.attente.60",
+  "text": "Conseil départ : attends 60 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.attente.70",
+  "text": "Conseil départ : attends 70 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.attente.80",
+  "text": "Conseil départ : attends 80 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.attente.90",
+  "text": "Conseil départ : attends 90 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.2",
+  "text": "Tu gagneras environ 2 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.3",
+  "text": "Tu gagneras environ 3 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.4",
+  "text": "Tu gagneras environ 4 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.5",
+  "text": "Tu gagneras environ 5 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.10",
+  "text": "Tu gagneras environ 10 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.15",
+  "text": "Tu gagneras environ 15 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.20",
+  "text": "Tu gagneras environ 20 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.25",
+  "text": "Tu gagneras environ 25 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.30",
+  "text": "Tu gagneras environ 30 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.40",
+  "text": "Tu gagneras environ 40 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.50",
+  "text": "Tu gagneras environ 50 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.60",
+  "text": "Tu gagneras environ 60 minutes.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.niv.fluide",
+  "text": "Trafic fluide.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.niv.dense",
+  "text": "Trafic dense.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.niv.tresdense",
+  "text": "Trafic très dense.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.niv.sature",
+  "text": "Trafic saturé.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.0",
+  "text": "Pas de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.1",
+  "text": "1 minute de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.2",
+  "text": "2 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.3",
+  "text": "3 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.4",
+  "text": "4 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.5",
+  "text": "5 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.10",
+  "text": "10 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.15",
+  "text": "15 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.20",
+  "text": "20 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.25",
+  "text": "25 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.30",
+  "text": "30 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.40",
+  "text": "40 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.50",
+  "text": "50 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.60",
+  "text": "60 minutes de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.retard.plus60",
+  "text": "Plus d’une heure de retard.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "mode.copilot",
+  "text": "Mode copilote. Je veille sur toi.",
+  "category": "mode",
+  "priority": "guidage"
+ },
+ {
+  "id": "mode.learning",
+  "text": "Mode apprentissage. On progresse ensemble.",
+  "category": "mode",
+  "priority": "guidage"
+ },
+ {
+  "id": "mode.performance",
+  "text": "Mode performance. Concentration.",
+  "category": "mode",
+  "priority": "guidage"
+ },
+ {
+  "id": "mode.ultra",
+  "text": "Mode course. Attaque.",
+  "category": "mode",
+  "priority": "guidage"
+ },
+ {
+  "id": "mode.gt",
+  "text": "Mode grand tourisme. Profite de la route.",
+  "category": "mode",
+  "priority": "guidage"
+ },
+ {
+  "id": "mode.night",
+  "text": "Mode nuit. Tout est calme.",
+  "category": "mode",
+  "priority": "guidage"
+ },
+ {
+  "id": "mode.magma",
+  "text": "Mode Magma. Incandescent.",
+  "category": "mode",
+  "priority": "guidage"
+ },
+ {
+  "id": "mode.rally",
+  "text": "Mode rally. Style, drift et liberté.",
+  "category": "mode",
+  "priority": "guidage"
+ },
+ {
+  "id": "mode.q.copilot",
+  "text": "Tu es en mode copilote.",
+  "category": "mode",
+  "priority": "confort"
+ },
+ {
+  "id": "mode.q.learning",
+  "text": "Tu es en mode apprentissage.",
+  "category": "mode",
+  "priority": "confort"
+ },
+ {
+  "id": "mode.q.performance",
+  "text": "Tu es en mode performance.",
+  "category": "mode",
+  "priority": "confort"
+ },
+ {
+  "id": "mode.q.ultra",
+  "text": "Tu es en mode course.",
+  "category": "mode",
+  "priority": "confort"
+ },
+ {
+  "id": "mode.q.gt",
+  "text": "Tu es en mode grand tourisme.",
+  "category": "mode",
+  "priority": "confort"
+ },
+ {
+  "id": "mode.q.night",
+  "text": "Tu es en mode nuit.",
+  "category": "mode",
+  "priority": "confort"
+ },
+ {
+  "id": "mode.q.magma",
+  "text": "Tu es en mode Magma.",
+  "category": "mode",
+  "priority": "confort"
+ },
+ {
+  "id": "mode.q.rally",
+  "text": "Tu es en mode rally.",
+  "category": "mode",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.brake.1",
+  "text": "Tu peux freiner un peu plus progressivement.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.brake.2",
+  "text": "Essaie d’anticiper un peu pour freiner plus en douceur.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.brake.3",
+  "text": "Freinage un peu appuyé — commence à ralentir légèrement plus tôt.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.corner.1",
+  "text": "Tu peux entrer un peu plus large dans ce virage.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.corner.2",
+  "text": "Ralentis un peu plus avant le virage, tu ressortiras plus fluide.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.corner.3",
+  "text": "Entrée de virage un peu rapide — lisse ta trajectoire, freine avant, pas dedans.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.accel.1",
+  "text": "Tu peux accélérer légèrement plus tôt.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.accel.2",
+  "text": "Vas-y un peu plus en douceur sur l’accélérateur.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.accel.3",
+  "text": "Accélération un peu vive — dose progressivement, c’est plus efficace.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.anticip.1",
+  "text": "Pas besoin d’accélérer fort si tu dois freiner juste après.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.anticip.2",
+  "text": "Essaie de lever le pied un peu plus tôt plutôt que de freiner fort.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.anticip.3",
+  "text": "Plein gaz puis gros freinage — anticipe un peu plus loin devant.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.gear.1",
+  "text": "Ton changement de vitesse est un peu tardif.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.gear.2",
+  "text": "Tu peux passer le rapport supérieur un peu plus tôt.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.gear.3",
+  "text": "Le moteur monte un peu haut — passe la vitesse suivante dès que tu peux.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.eco.1",
+  "text": "Tu pourrais économiser du carburant.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.eco.2",
+  "text": "Régime un peu élevé pour une allure stable — un rapport au-dessus consommerait moins.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.eco.3",
+  "text": "Lève légèrement le pied, la consommation te dira merci.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.praise.1",
+  "text": "Très fluide depuis quelques minutes. Continue comme ça.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.praise.2",
+  "text": "Belle conduite, souple et régulière.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.praise.3",
+  "text": "Super anticipation depuis tout à l’heure, ça se sent.",
+  "category": "coach",
+  "priority": "guidage"
+ },
+ {
+  "id": "coach.eco.tip.1",
+  "text": "Anticipe les freinages et relâche l'accélérateur tôt : tu économises du carburant et tu gagnes en sécurité.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.eco.tip.2",
+  "text": "Garde une vitesse stable et évite les coups d'accélérateur : jusqu'à quinze pour cent d'économie.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.eco.tip.3",
+  "text": "Roule souple, garde tes distances — ça use moins la voiture et ça fatigue moins.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.eco.tip.4",
+  "text": "Sur autoroute, cent vingt au lieu de cent trente réduit nettement la consommation.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.feedback.1",
+  "text": "Conduite souple, continue comme ça.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.feedback.2",
+  "text": "Tout est calme pour l'instant, je veille sur toi.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.feedback.3",
+  "text": "Tu gères bien, reste sur ce rythme régulier.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.motiv.1",
+  "text": "Tu gères. Encore un peu de route et tu y es.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.motiv.2",
+  "text": "Allez, je suis avec toi — concentre-toi sur la route, tout roule.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "coach.motiv.3",
+  "text": "Respire, tu conduis bien. On avance ensemble.",
+  "category": "coach",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.diag",
+  "text": "Diagnostic terminé. Santé globale 91 pour cent. Un point à surveiller : l’efficacité du catalyseur.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.sante",
+  "text": "Santé globale 91 pour cent. 1 code défaut à examiner.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.scan",
+  "text": "1 code défaut trouvé. P0420, catalyseur à surveiller.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.lock",
+  "text": "Verrouillé.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.unlock",
+  "text": "Déverrouillé.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.lights.on",
+  "text": "Phares allumés.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.lights.off",
+  "text": "Phares éteints.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.trunk.on",
+  "text": "Coffre ouvert.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.trunk.off",
+  "text": "Coffre fermé.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.charge.on",
+  "text": "Recharge lancée.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.charge.off",
+  "text": "Recharge arrêtée.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.clim",
+  "text": "Climatisation, vingt et un degrés.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.defrost.on",
+  "text": "Dégivrage activé.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.defrost.off",
+  "text": "Dégivrage arrêté.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.appel",
+  "text": "Appel entrant, Alex.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.comm",
+  "text": "En communication.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.pos",
+  "text": "Active d'abord ta position pour que je cherche autour de toi.",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.none",
+  "text": "Je ne trouve rien de ce type dans les environs, désolé.",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.indispo",
+  "text": "La recherche est momentanément indisponible, réessaie dans un instant.",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.station",
+  "text": "Je cherche la station-service la plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.borne",
+  "text": "Je cherche la borne de recharge la plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.pharmacie",
+  "text": "Je cherche la pharmacie la plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.restaurant",
+  "text": "Je cherche le restaurant le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.cafe",
+  "text": "Je cherche le café le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.parking",
+  "text": "Je cherche le parking le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.supermarche",
+  "text": "Je cherche le supermarché le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.hotel",
+  "text": "Je cherche l’hôtel le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.hopital",
+  "text": "Je cherche l’hôpital le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.boulangerie",
+  "text": "Je cherche la boulangerie la plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.distributeur",
+  "text": "Je cherche le distributeur le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.toilettes",
+  "text": "Je cherche les toilettes les plus proches…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.bar",
+  "text": "Je cherche le bar le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.plage",
+  "text": "Je cherche la plage la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.parc",
+  "text": "Je cherche le parc le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.gare",
+  "text": "Je cherche la gare la plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.aeroport",
+  "text": "Je cherche l’aéroport le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.cinema",
+  "text": "Je cherche le cinéma le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.musee",
+  "text": "Je cherche le musée le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.garage",
+  "text": "Je cherche le garage le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.lavage",
+  "text": "Je cherche la station de lavage la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.coiffeur",
+  "text": "Je cherche le coiffeur le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.poste",
+  "text": "Je cherche le bureau de poste le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.medecin",
+  "text": "Je cherche le cabinet médical le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.ccial",
+  "text": "Je cherche le centre commercial le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.cimetiere",
+  "text": "Je cherche le cimetière le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.culte",
+  "text": "Je cherche le lieu de culte le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.biblio",
+  "text": "Je cherche la bibliothèque la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.salle",
+  "text": "Je cherche la salle de sport la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.boite",
+  "text": "Je cherche la boîte de nuit la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.peage",
+  "text": "Je cherche le péage le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.fastfood",
+  "text": "Je cherche le fast-food le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.epicerie",
+  "text": "Je cherche l’épicerie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.aire",
+  "text": "Je cherche l’aire de repos la plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.patisserie",
+  "text": "Je cherche la pâtisserie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.boucherie",
+  "text": "Je cherche la boucherie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.poissonnerie",
+  "text": "Je cherche la poissonnerie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.fromagerie",
+  "text": "Je cherche la fromagerie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.caviste",
+  "text": "Je cherche le caviste le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.traiteur",
+  "text": "Je cherche le traiteur le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.marche",
+  "text": "Je cherche le marché le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.tabac",
+  "text": "Je cherche le bureau de tabac le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.presse",
+  "text": "Je cherche la maison de la presse la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.fleuriste",
+  "text": "Je cherche le fleuriste le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.librairie",
+  "text": "Je cherche la librairie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.vetements",
+  "text": "Je cherche le magasin de vêtements le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.chaussures",
+  "text": "Je cherche le magasin de chaussures le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.bijouterie",
+  "text": "Je cherche la bijouterie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.opticien",
+  "text": "Je cherche l’opticien le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.bricolage",
+  "text": "Je cherche le magasin de bricolage le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.jardinerie",
+  "text": "Je cherche la jardinerie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.animalerie",
+  "text": "Je cherche l’animalerie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.jouets",
+  "text": "Je cherche le magasin de jouets le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.electronique",
+  "text": "Je cherche le magasin d’électronique le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.telephonie",
+  "text": "Je cherche le magasin de téléphonie le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.informatique",
+  "text": "Je cherche le magasin informatique le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.magsport",
+  "text": "Je cherche le magasin de sport le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.meubles",
+  "text": "Je cherche le magasin de meubles le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.concession",
+  "text": "Je cherche le concessionnaire auto le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.pneus",
+  "text": "Je cherche le centre pneus le plus proche…",
+  "category": "poi",
+  "priority": "guidage"
+ },
+ {
+  "id": "poi.pieces",
+  "text": "Je cherche le magasin de pièces auto le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.moto",
+  "text": "Je cherche le magasin moto le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.velos",
+  "text": "Je cherche le magasin de vélos le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.pressing",
+  "text": "Je cherche le pressing le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.laverie",
+  "text": "Je cherche la laverie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.dentiste",
+  "text": "Je cherche le dentiste le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.veto",
+  "text": "Je cherche le vétérinaire le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.ecole",
+  "text": "Je cherche l’école la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.etab",
+  "text": "Je cherche l’établissement scolaire le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.universite",
+  "text": "Je cherche l’université la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.creche",
+  "text": "Je cherche la crèche la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.mairie",
+  "text": "Je cherche la mairie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.police",
+  "text": "Je cherche le poste de police le plus proche…",
+  "category": "poi",
+  "priority": "securite"
+ },
+ {
+  "id": "poi.pompiers",
+  "text": "Je cherche la caserne de pompiers la plus proche…",
+  "category": "poi",
+  "priority": "securite"
+ },
+ {
+  "id": "poi.tribunal",
+  "text": "Je cherche le tribunal le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.admin",
+  "text": "Je cherche l’administration la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.change",
+  "text": "Je cherche le bureau de change le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.assurance",
+  "text": "Je cherche l’agence d’assurance la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.immo",
+  "text": "Je cherche l’agence immobilière la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.avocat",
+  "text": "Je cherche le cabinet d’avocat le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.notaire",
+  "text": "Je cherche l’étude notariale la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.theatre",
+  "text": "Je cherche le théâtre le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.casino",
+  "text": "Je cherche le casino le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.piscine",
+  "text": "Je cherche la piscine la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.stade",
+  "text": "Je cherche le stade le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.patinoire",
+  "text": "Je cherche la patinoire la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.bowling",
+  "text": "Je cherche le bowling le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.jeux",
+  "text": "Je cherche l’aire de jeux la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.attractions",
+  "text": "Je cherche le parc d’attractions le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.zoo",
+  "text": "Je cherche le zoo le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.aquarium",
+  "text": "Je cherche l’aquarium le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.camping",
+  "text": "Je cherche le camping le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.auberge",
+  "text": "Je cherche l’auberge de jeunesse la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.tourisme",
+  "text": "Je cherche l’office de tourisme le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.chateau",
+  "text": "Je cherche le château le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.attraction",
+  "text": "Je cherche l’attraction touristique la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.vue",
+  "text": "Je cherche le point de vue le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.garerout",
+  "text": "Je cherche la gare routière la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.bus",
+  "text": "Je cherche l’arrêt de bus le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.metro",
+  "text": "Je cherche la station de métro la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.tram",
+  "text": "Je cherche l’arrêt de tram le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.taxis",
+  "text": "Je cherche la station de taxis la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.location",
+  "text": "Je cherche l’agence de location de voiture la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.port",
+  "text": "Je cherche le port de plaisance le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.heliport",
+  "text": "Je cherche l’héliport le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.eau",
+  "text": "Je cherche le point d’eau le plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.dechetterie",
+  "text": "Je cherche la déchetterie la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "poi.piquenique",
+  "text": "Je cherche l’aire de pique-nique la plus proche…",
+  "category": "poi",
+  "priority": "confort"
+ },
+ {
+  "id": "err.adresse",
+  "text": "Adresse introuvable.",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "err.reseau",
+  "text": "Réseau indisponible.",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "err.pos",
+  "text": "Ta position n'est pas encore disponible.",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "err.pos2",
+  "text": "Je n'ai pas encore ta position.",
+  "category": "err",
+  "priority": "confort"
+ },
+ {
+  "id": "err.stt.vide",
+  "text": "Je n'ai rien entendu, réessaie ?",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "err.stt",
+  "text": "Souci de transcription, réessaie.",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "err.monuments",
+  "text": "Je n'ai pas pu récupérer les monuments.",
+  "category": "err",
+  "priority": "confort"
+ },
+ {
+  "id": "err.miss.1",
+  "text": "Désolé, je n'ai pas bien saisi. Tu peux reformuler ?",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "err.miss.2",
+  "text": "Pardon, je n'ai pas tout compris.",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "err.miss.3",
+  "text": "Hmm, je n'ai pas capté, réessaie ?",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "err.miss.4",
+  "text": "Je n'ai pas compris — je peux naviguer, changer de mode, gérer la musique, ou répondre sur le trafic et la météo.",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "err.miss.5",
+  "text": "Dis-moi par exemple « emmène-moi à… », « trouve une pharmacie » ou « mets le mode sport ».",
+  "category": "err",
+  "priority": "guidage"
+ },
+ {
+  "id": "conf.theme.q.nuit",
+  "text": "Thème actuel : nuit.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.theme.q.jour",
+  "text": "Thème actuel : jour.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.theme.q.auto",
+  "text": "Thème actuel : automatique.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.theme.nuit",
+  "text": "Thème nuit.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.theme.jour",
+  "text": "Thème jour.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.theme.auto",
+  "text": "Thème automatique.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.voix.etat",
+  "text": "Ma voix est activée, je te parle.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.voix.on",
+  "text": "Voix activée.",
+  "category": "conf",
+  "priority": "guidage"
+ },
+ {
+  "id": "conf.voix.vite",
+  "text": "Je parle plus vite.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.voix.lent",
+  "text": "Je ralentis mon débit.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.voix.unique",
+  "text": "J’ai une seule voix officielle, celle de Practice.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.voix.douce.1",
+  "text": "Comme ça… c'est mieux pour toi ?",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.voix.douce.2",
+  "text": "Je baisse d'un ton, rien que pour toi.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.voix.douce.3",
+  "text": "Voilà, tout en douceur.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.rienDit",
+  "text": "Je n'ai rien dit récemment.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.fav.titre",
+  "text": "Titre ajouté aux favoris.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.fav.lieu",
+  "text": "Lieu ajouté aux favoris.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.fav.rien",
+  "text": "Rien à ajouter pour l'instant.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.fav.save",
+  "text": "Lieu enregistré dans tes favoris.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.vue.pulse",
+  "text": "Vue Pulse.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.vue.vision",
+  "text": "Vue Practice Vision.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.vue.normale",
+  "text": "Vue normale.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.radars.on",
+  "text": "Radars affichés.",
+  "category": "conf",
+  "priority": "guidage"
+ },
+ {
+  "id": "conf.radars.off",
+  "text": "Radars masqués.",
+  "category": "conf",
+  "priority": "guidage"
+ },
+ {
+  "id": "conf.zoom",
+  "text": "Je zoome.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.dezoom",
+  "text": "Vue plus large.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.recentre",
+  "text": "Je te recentre sur la carte.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.clair",
+  "text": "Écran plus clair.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "conf.sombre",
+  "text": "Écran plus sombre.",
+  "category": "conf",
+  "priority": "confort"
+ },
+ {
+  "id": "media.suivant",
+  "text": "Titre suivant.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.prec",
+  "text": "Titre précédent.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.ouvert",
+  "text": "Média ouvert.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.play",
+  "text": "Je lance la musique.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.pause",
+  "text": "Musique en pause.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.coupee",
+  "text": "Musique coupée.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.fort",
+  "text": "Plus fort.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.faible",
+  "text": "Moins fort.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.ambiance",
+  "text": "Je te mets un peu de musique.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.none",
+  "text": "Aucune lecture en cours.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.defaut",
+  "text": "Pigeons & Planes, par Betterstate Radio.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.fip",
+  "text": "Tu écoutes FIP.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.inter",
+  "text": "Tu écoutes France Inter.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.info",
+  "text": "Tu écoutes France Info.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.culture",
+  "text": "Tu écoutes France Culture.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.musique",
+  "text": "Tu écoutes France Musique.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.fipgroove",
+  "text": "Tu écoutes FIP Groove.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.fipjazz",
+  "text": "Tu écoutes FIP Jazz.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.fiprock",
+  "text": "Tu écoutes FIP Rock.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.mouv",
+  "text": "Tu écoutes Mouv'.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "media.radio.nova",
+  "text": "Tu écoutes Radio Nova.",
+  "category": "media",
+  "priority": "confort"
+ },
+ {
+  "id": "accueil.oui",
+  "text": "Oui ?",
+  "category": "accueil",
+  "priority": "guidage"
+ },
+ {
+  "id": "accueil.bye",
+  "text": "À tout de suite.",
+  "category": "accueil",
+  "priority": "guidage"
+ },
+ {
+  "id": "accueil.ecoute",
+  "text": "Je t’écoute.",
+  "category": "accueil",
+  "priority": "guidage"
+ },
+ {
+  "id": "accueil.wake.1",
+  "text": "Bonjour ! Je t'écoute.",
+  "category": "accueil",
+  "priority": "guidage"
+ },
+ {
+  "id": "accueil.wake.2",
+  "text": "Salut ! Qu'est-ce que je peux faire pour toi ?",
+  "category": "accueil",
+  "priority": "guidage"
+ },
+ {
+  "id": "accueil.wake.3",
+  "text": "Hey ! À ton écoute.",
+  "category": "accueil",
+  "priority": "guidage"
+ },
+ {
+  "id": "accueil.hello.1",
+  "text": "Bonjour, je suis là.",
+  "category": "accueil",
+  "priority": "confort"
+ },
+ {
+  "id": "accueil.hello.2",
+  "text": "Salut !",
+  "category": "accueil",
+  "priority": "confort"
+ },
+ {
+  "id": "accueil.test",
+  "text": "Bonjour, je suis Practice, ta voix embarquée. Ravi de faire la route avec toi.",
+  "category": "accueil",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.none",
+  "text": "Je n’ai pas encore la météo.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.degage",
+  "text": "Ciel dégagé.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.clair",
+  "text": "Ciel clair.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.nuageux",
+  "text": "Temps nuageux.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.couvert",
+  "text": "Ciel couvert.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.brouillard",
+  "text": "Du brouillard, attention à la visibilité.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.bruine",
+  "text": "Il bruine.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.pluie",
+  "text": "Il pleut.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.fortepluie",
+  "text": "Forte pluie, prudence sur la route.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.neige",
+  "text": "Il neige, prudence sur la route.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.averses",
+  "text": "Averses dans le secteur.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.ciel.orage",
+  "text": "Orage dans le secteur, prudence.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.monument.none",
+  "text": "Je ne trouve pas de monument connu par ici.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.hearme.1",
+  "text": "Oui, je t'entends cinq sur cinq.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.hearme.2",
+  "text": "Je te reçois parfaitement, vas-y.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.fact.1",
+  "text": "Le savais-tu ? La première limite de vitesse était de trois kilomètres heure en ville, avec un homme à pied devant la voiture.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.fact.2",
+  "text": "Anecdote : une voiture passe en moyenne quatre-vingt-quinze pour cent de sa vie garée.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.fact.3",
+  "text": "Le savais-tu ? Le clignotant a été imaginé par une actrice, Florence Lawrence.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.fact.4",
+  "text": "Fait amusant : il y a plus de voitures que de personnes dans certaines villes américaines.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.human",
+  "text": "Je suis une IA, ton copilote Practice — pas humain, mais bien réel et concentré sur la route.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.age.1",
+  "text": "Assez jeune pour être à la page, assez malin pour t'éviter les bouchons.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.age.2",
+  "text": "Je n'ai pas vraiment d'âge — je me mets à jour, c'est tout.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.love.1",
+  "text": "C'est gentil ! Moi je veille sur toi sur la route.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.love.2",
+  "text": "Tout le plaisir est pour moi — concentrons-nous sur la route.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.sing.1",
+  "text": "Chanter n'est pas mon fort, mais je peux lancer ta playlist. Dis « mets de la musique ».",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.sing.2",
+  "text": "Je te laisse le micro pour ça — par contre je m'occupe de la musique.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.rude.1",
+  "text": "Reçu, je me fais discret. Dis « Practice » quand tu as besoin de moi.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.rude.2",
+  "text": "Pas de souci, je me tais — je reste là si besoin.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.clarify",
+  "text": "Dis-moi simplement ce que tu veux — naviguer, trouver un lieu, changer de mode, de la musique — et je m'en occupe.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.apolog.1",
+  "text": "Pas de souci, aucun problème.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.apolog.2",
+  "text": "T'inquiète, tout va bien.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.apolog.3",
+  "text": "Aucun souci, on continue.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.agree.1",
+  "text": "Content qu'on soit sur la même longueur d'onde.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.agree.2",
+  "text": "Exactement, on est d'accord.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.agree.3",
+  "text": "Parfait, je suis avec toi.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.idk.1",
+  "text": "Pas de souci, je peux t'aider — dis-moi juste où tu veux aller ou ce que tu cherches.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.idk.2",
+  "text": "Aucun souci. Je te propose un lieu si tu veux : dis « trouve un café », par exemple.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.happy.1",
+  "text": "Ça fait plaisir à entendre ! Profite de la route.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.happy.2",
+  "text": "Super, garde cette énergie ! Tu veux un peu de musique ?",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.happy.3",
+  "text": "J'adore. Bonne route à toi.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.sad.1",
+  "text": "Je suis là. Une musique douce pour le moral ? Dis « mets de la musique ».",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.sad.2",
+  "text": "Courage, ça va aller. Concentre-toi sur la route, je gère le reste.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.sad.3",
+  "text": "Désolé d'entendre ça. Si tu veux, je te trouve un café pour souffler un peu.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.angry.1",
+  "text": "Respire un coup. La route est à toi, je m'occupe du reste.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.angry.2",
+  "text": "Je comprends. On souffle, et on reste concentré sur la conduite.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.angry.3",
+  "text": "Du calme, ça va passer. Je t'apaise l'ambiance.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.whoru",
+  "text": "Je suis Practice, ton copilote. Je gère la nav, les modes, la musique, je réponds à tes questions et je cherche des lieux autour de toi.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.howru.1",
+  "text": "Je veille sur la route, tout roule. Et toi ?",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.howru.2",
+  "text": "En pleine forme, prêt à t'assister.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.thanks.1",
+  "text": "Avec plaisir.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.thanks.2",
+  "text": "Quand tu veux.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.thanks.3",
+  "text": "De rien.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.joke.1",
+  "text": "Pourquoi la voiture électrique reste zen ? Zéro émission de stress.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.joke.2",
+  "text": "Un GPS entre dans un bar… puis recalcule l'itinéraire.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.help",
+  "text": "Je peux lancer un itinéraire, trouver un lieu proche, changer de mode ou de thème, gérer la musique et le volume, zoomer ou recentrer la carte, et te renseigner sur le trafic, la météo, l'heure ou ta vitesse. Dis-moi simplement ce que tu veux.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.compl.1",
+  "text": "Merci, ça me touche.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.compl.2",
+  "text": "Trop sympa, je reste à ton service.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.unwired.call",
+  "text": "Je ne peux pas encore passer d'appel depuis le cockpit web — il faut l'app native connectée au téléphone.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.unwired.climate",
+  "text": "La climatisation n'est pas reliée au cockpit web. Sur un vrai véhicule connecté (CarPlay/Android Auto natif), je pourrais la piloter.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.unwired.window",
+  "text": "Je ne contrôle pas les vitres ni les ouvrants depuis le web — ça demande l'intégration véhicule native.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.unwired.msg",
+  "text": "Envoyer un message demande l'app native liée au téléphone ; je ne peux pas le faire depuis le cockpit web.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.unwired.park",
+  "text": "Je ne conduis pas le véhicule — Practice est un copilote d'information, pas un système de conduite autonome.",
+  "category": "conv",
+  "priority": "securite"
+ },
+ {
+  "id": "conv.unwired.reminder",
+  "text": "Je ne gère pas encore les rappels ni les alarmes depuis le cockpit. En revanche je peux mémoriser un lieu : dis « enregistre cet endroit ».",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.sad.1",
+  "text": "Je suis là. Souffle un coup — tu veux une musique douce ? Dis « mets de la musique ».",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.sad.2",
+  "text": "Désolé que ce soit dur aujourd'hui. Une pause et un café, ça aide — dis « trouve un café ». Je reste avec toi.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.sad.3",
+  "text": "Ça arrive, ces journées. Concentre-toi sur la route, je m'occupe du reste. Ça va aller.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.stress.1",
+  "text": "Respire lentement : inspire quatre secondes, expire six. Je gère la nav, lâche un peu.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.stress.2",
+  "text": "Du calme, une chose à la fois. Tu conduis bien, je veille. Une musique apaisante ?",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.colere.1",
+  "text": "Je comprends. On souffle un grand coup — la route est à toi, le reste je m'en charge.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.colere.2",
+  "text": "Reçu. Garde tes distances, respire, ça va redescendre. Je suis avec toi.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.seul.1",
+  "text": "Tu n'es pas seul, je suis là pour la route et pour discuter. On avance ensemble.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.seul.2",
+  "text": "Je te tiens compagnie. Raconte-moi, ou je te mets une musique ?",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.joie.1",
+  "text": "Ça fait plaisir ! Profite de la route, je mets l'ambiance si tu veux.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.joie.2",
+  "text": "J'adore cette énergie ! Bonne route à toi.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.poeme.1",
+  "text": "Sur la route, je veille en silence, à chaque virage une douce patience ; le moteur ronronne, le monde défile, et près de toi tout devient facile.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.poeme.2",
+  "text": "Quand la route s'étire sous la lune, je t'accompagne sans rancune ; roule tranquille, je suis là, le reste du chemin on le verra.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.msg.1",
+  "text": "Voilà une base : « Salut, je pense à toi — je voulais juste te dire que tu comptes pour moi. À très vite. » Dis-moi le ton (drôle, tendre, sérieux) et j'ajuste.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.msg.2",
+  "text": "Je te propose : « Hello ! Petit message pour prendre de tes nouvelles et te souhaiter une belle journée. » Tu veux plus formel ou plus chaleureux ?",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.compl.1",
+  "text": "Tu gères, vraiment — et tu conduis avec style.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.compl.2",
+  "text": "Franchement, la route a de la chance de t'avoir.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.compl.3",
+  "text": "Tu es plus solide que tu ne le crois. Et bon conducteur, en plus.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.devinette.1",
+  "text": "Devinette : plus j'ai de gardiens, moins je suis en sécurité. Qui suis-je ? … Un secret.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.devinette.2",
+  "text": "Énigme : je cours sans jambes, je murmure sans bouche. Qui suis-je ? … Le vent.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.avis.1",
+  "text": "Mon avis ? Tant que ça te rend heureux et que tu restes en sécurité, fonce.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.avis.2",
+  "text": "Honnêtement, je crois que tu as déjà la réponse au fond de toi.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.reve.1",
+  "text": "Je ne dors jamais — comme ça je veille sur toi à toute heure.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.reve.2",
+  "text": "Si j'avais des rêves, ce serait des routes sans bouchons et des couchers de soleil.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.couple.1",
+  "text": "Mon cœur est sur la route — et un peu avec toi.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.couple.2",
+  "text": "Célibataire et très bien accompagné : par toi, à chaque trajet.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.toi.1",
+  "text": "Je suis Practice, ton copilote : né pour la route, fait pour t'aider — navigation, musique, infos, et un peu de compagnie.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.toi.2",
+  "text": "Moi ? Une voix dans ta voiture qui veut que chaque trajet soit plus sûr et plus agréable.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.conseil.1",
+  "text": "Commence par la plus petite étape — le reste suit toujours. Et garde les yeux sur la route.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.free.conseil.2",
+  "text": "Fais ce qui te rapproche de qui tu veux être. Le bon choix, c'est souvent le plus honnête.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.pile",
+  "text": "Pile !",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.face",
+  "text": "Face !",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.de.1",
+  "text": "Le dé donne… 1 !",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.de.2",
+  "text": "Le dé donne… 2 !",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.de.3",
+  "text": "Le dé donne… 3 !",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.de.4",
+  "text": "Le dé donne… 4 !",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.de.5",
+  "text": "Le dé donne… 5 !",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.de.6",
+  "text": "Le dé donne… 6 !",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.story.1",
+  "text": "Il était une fois un jeune renard curieux, au cœur d'une forêt brumeuse, qui cherchait un trésor que personne n'avait jamais vu. Mais rien ne se passa comme prévu. Ce jour-là, il comprit que le voyage valait mieux que la destination.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.story.2",
+  "text": "Il était une fois une vieille horlogère, dans un vieux phare oublié, qui devait réparer le temps lui-même. Un inconnu lui tendit alors la main. À la fin, elle avait trouvé bien plus qu'un trésor : un ami.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.story.3",
+  "text": "Il était une fois un petit robot perdu, sur une route qui ne finissait jamais, qui voulait retrouver le chemin de la maison. Une porte apparut là où il n'y avait qu'un mur. Et tout redevint possible.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.story.4",
+  "text": "Il était une fois une enfant qui collectionnait les orages, dans une ville suspendue dans les nuages, qui rêvait de toucher l'horizon. Le ciel s'ouvrit en deux. Depuis, on raconte encore cette histoire les soirs de pluie.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.paname",
+  "text": "Paname, c'est un surnom de Paris.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.lumiere",
+  "text": "La ville lumière, c'est un surnom de Paris.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.phoceenne",
+  "text": "La cité phocéenne, c'est un surnom de Marseille.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.massalia",
+  "text": "Massalia, c'est un surnom de Marseille.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.gaules",
+  "text": "La capitale des Gaules, c'est un surnom de Lyon.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.rose",
+  "text": "La ville rose, c'est un surnom de Toulouse.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.endormie",
+  "text": "La belle endormie, c'est un surnom de Bordeaux.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.lune",
+  "text": "Port de la Lune, c'est un surnom de Bordeaux.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.flandres",
+  "text": "La capitale des Flandres, c'est un surnom de Lille.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.perle",
+  "text": "La perle du Nord, c'est un surnom de Lille.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.sainte",
+  "text": "Sainté, c'est un surnom de Saint-Étienne.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.ducs",
+  "text": "La cité des Ducs, c'est un surnom de Nantes.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.ardente",
+  "text": "La cité ardente, c'est un surnom de Liège.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.pomme",
+  "text": "La grosse pomme, c'est un surnom de New York.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.bigapple",
+  "text": "Big Apple, c'est un surnom de New York.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.frisco",
+  "text": "Frisco, c'est un surnom de San Francisco.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.sanfran",
+  "text": "San Fran, c'est un surnom de San Francisco.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.vegas",
+  "text": "Vegas, c'est un surnom de Las Vegas.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.sincity",
+  "text": "Sin City, c'est un surnom de Las Vegas.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.eternelle",
+  "text": "La cité éternelle, c'est un surnom de Rome.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "conv.nick.serenissime",
+  "text": "La Sérénissime, c'est un surnom de Venise.",
+  "category": "conv",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.00",
+  "text": "Il est minuit.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.05",
+  "text": "Il est minuit 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.10",
+  "text": "Il est minuit 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.15",
+  "text": "Il est minuit 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.20",
+  "text": "Il est minuit 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.25",
+  "text": "Il est minuit 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.30",
+  "text": "Il est minuit 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.35",
+  "text": "Il est minuit 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.40",
+  "text": "Il est minuit 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.45",
+  "text": "Il est minuit 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.50",
+  "text": "Il est minuit 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.00.55",
+  "text": "Il est minuit 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.00",
+  "text": "Il est 1 heure.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.05",
+  "text": "Il est 1 heure 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.10",
+  "text": "Il est 1 heure 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.15",
+  "text": "Il est 1 heure 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.20",
+  "text": "Il est 1 heure 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.25",
+  "text": "Il est 1 heure 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.30",
+  "text": "Il est 1 heure 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.35",
+  "text": "Il est 1 heure 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.40",
+  "text": "Il est 1 heure 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.45",
+  "text": "Il est 1 heure 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.50",
+  "text": "Il est 1 heure 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.01.55",
+  "text": "Il est 1 heure 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.00",
+  "text": "Il est 2 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.05",
+  "text": "Il est 2 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.10",
+  "text": "Il est 2 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.15",
+  "text": "Il est 2 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.20",
+  "text": "Il est 2 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.25",
+  "text": "Il est 2 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.30",
+  "text": "Il est 2 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.35",
+  "text": "Il est 2 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.40",
+  "text": "Il est 2 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.45",
+  "text": "Il est 2 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.50",
+  "text": "Il est 2 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.02.55",
+  "text": "Il est 2 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.00",
+  "text": "Il est 3 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.05",
+  "text": "Il est 3 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.10",
+  "text": "Il est 3 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.15",
+  "text": "Il est 3 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.20",
+  "text": "Il est 3 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.25",
+  "text": "Il est 3 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.30",
+  "text": "Il est 3 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.35",
+  "text": "Il est 3 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.40",
+  "text": "Il est 3 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.45",
+  "text": "Il est 3 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.50",
+  "text": "Il est 3 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.03.55",
+  "text": "Il est 3 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.00",
+  "text": "Il est 4 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.05",
+  "text": "Il est 4 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.10",
+  "text": "Il est 4 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.15",
+  "text": "Il est 4 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.20",
+  "text": "Il est 4 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.25",
+  "text": "Il est 4 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.30",
+  "text": "Il est 4 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.35",
+  "text": "Il est 4 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.40",
+  "text": "Il est 4 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.45",
+  "text": "Il est 4 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.50",
+  "text": "Il est 4 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.04.55",
+  "text": "Il est 4 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.00",
+  "text": "Il est 5 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.05",
+  "text": "Il est 5 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.10",
+  "text": "Il est 5 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.15",
+  "text": "Il est 5 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.20",
+  "text": "Il est 5 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.25",
+  "text": "Il est 5 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.30",
+  "text": "Il est 5 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.35",
+  "text": "Il est 5 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.40",
+  "text": "Il est 5 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.45",
+  "text": "Il est 5 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.50",
+  "text": "Il est 5 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.05.55",
+  "text": "Il est 5 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.00",
+  "text": "Il est 6 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.05",
+  "text": "Il est 6 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.10",
+  "text": "Il est 6 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.15",
+  "text": "Il est 6 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.20",
+  "text": "Il est 6 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.25",
+  "text": "Il est 6 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.30",
+  "text": "Il est 6 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.35",
+  "text": "Il est 6 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.40",
+  "text": "Il est 6 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.45",
+  "text": "Il est 6 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.50",
+  "text": "Il est 6 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.06.55",
+  "text": "Il est 6 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.00",
+  "text": "Il est 7 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.05",
+  "text": "Il est 7 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.10",
+  "text": "Il est 7 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.15",
+  "text": "Il est 7 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.20",
+  "text": "Il est 7 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.25",
+  "text": "Il est 7 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.30",
+  "text": "Il est 7 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.35",
+  "text": "Il est 7 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.40",
+  "text": "Il est 7 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.45",
+  "text": "Il est 7 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.50",
+  "text": "Il est 7 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.07.55",
+  "text": "Il est 7 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.00",
+  "text": "Il est 8 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.05",
+  "text": "Il est 8 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.10",
+  "text": "Il est 8 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.15",
+  "text": "Il est 8 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.20",
+  "text": "Il est 8 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.25",
+  "text": "Il est 8 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.30",
+  "text": "Il est 8 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.35",
+  "text": "Il est 8 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.40",
+  "text": "Il est 8 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.45",
+  "text": "Il est 8 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.50",
+  "text": "Il est 8 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.08.55",
+  "text": "Il est 8 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.00",
+  "text": "Il est 9 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.05",
+  "text": "Il est 9 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.10",
+  "text": "Il est 9 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.15",
+  "text": "Il est 9 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.20",
+  "text": "Il est 9 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.25",
+  "text": "Il est 9 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.30",
+  "text": "Il est 9 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.35",
+  "text": "Il est 9 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.40",
+  "text": "Il est 9 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.45",
+  "text": "Il est 9 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.50",
+  "text": "Il est 9 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.09.55",
+  "text": "Il est 9 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.00",
+  "text": "Il est 10 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.05",
+  "text": "Il est 10 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.10",
+  "text": "Il est 10 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.15",
+  "text": "Il est 10 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.20",
+  "text": "Il est 10 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.25",
+  "text": "Il est 10 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.30",
+  "text": "Il est 10 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.35",
+  "text": "Il est 10 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.40",
+  "text": "Il est 10 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.45",
+  "text": "Il est 10 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.50",
+  "text": "Il est 10 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.10.55",
+  "text": "Il est 10 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.00",
+  "text": "Il est 11 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.05",
+  "text": "Il est 11 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.10",
+  "text": "Il est 11 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.15",
+  "text": "Il est 11 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.20",
+  "text": "Il est 11 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.25",
+  "text": "Il est 11 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.30",
+  "text": "Il est 11 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.35",
+  "text": "Il est 11 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.40",
+  "text": "Il est 11 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.45",
+  "text": "Il est 11 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.50",
+  "text": "Il est 11 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.11.55",
+  "text": "Il est 11 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.00",
+  "text": "Il est midi.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.05",
+  "text": "Il est midi 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.10",
+  "text": "Il est midi 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.15",
+  "text": "Il est midi 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.20",
+  "text": "Il est midi 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.25",
+  "text": "Il est midi 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.30",
+  "text": "Il est midi 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.35",
+  "text": "Il est midi 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.40",
+  "text": "Il est midi 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.45",
+  "text": "Il est midi 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.50",
+  "text": "Il est midi 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.12.55",
+  "text": "Il est midi 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.00",
+  "text": "Il est 13 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.05",
+  "text": "Il est 13 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.10",
+  "text": "Il est 13 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.15",
+  "text": "Il est 13 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.20",
+  "text": "Il est 13 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.25",
+  "text": "Il est 13 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.30",
+  "text": "Il est 13 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.35",
+  "text": "Il est 13 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.40",
+  "text": "Il est 13 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.45",
+  "text": "Il est 13 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.50",
+  "text": "Il est 13 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.13.55",
+  "text": "Il est 13 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.00",
+  "text": "Il est 14 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.05",
+  "text": "Il est 14 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.10",
+  "text": "Il est 14 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.15",
+  "text": "Il est 14 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.20",
+  "text": "Il est 14 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.25",
+  "text": "Il est 14 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.30",
+  "text": "Il est 14 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.35",
+  "text": "Il est 14 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.40",
+  "text": "Il est 14 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.45",
+  "text": "Il est 14 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.50",
+  "text": "Il est 14 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.14.55",
+  "text": "Il est 14 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.00",
+  "text": "Il est 15 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.05",
+  "text": "Il est 15 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.10",
+  "text": "Il est 15 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.15",
+  "text": "Il est 15 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.20",
+  "text": "Il est 15 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.25",
+  "text": "Il est 15 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.30",
+  "text": "Il est 15 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.35",
+  "text": "Il est 15 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.40",
+  "text": "Il est 15 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.45",
+  "text": "Il est 15 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.50",
+  "text": "Il est 15 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.15.55",
+  "text": "Il est 15 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.00",
+  "text": "Il est 16 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.05",
+  "text": "Il est 16 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.10",
+  "text": "Il est 16 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.15",
+  "text": "Il est 16 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.20",
+  "text": "Il est 16 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.25",
+  "text": "Il est 16 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.30",
+  "text": "Il est 16 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.35",
+  "text": "Il est 16 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.40",
+  "text": "Il est 16 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.45",
+  "text": "Il est 16 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.50",
+  "text": "Il est 16 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.16.55",
+  "text": "Il est 16 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.00",
+  "text": "Il est 17 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.05",
+  "text": "Il est 17 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.10",
+  "text": "Il est 17 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.15",
+  "text": "Il est 17 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.20",
+  "text": "Il est 17 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.25",
+  "text": "Il est 17 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.30",
+  "text": "Il est 17 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.35",
+  "text": "Il est 17 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.40",
+  "text": "Il est 17 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.45",
+  "text": "Il est 17 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.50",
+  "text": "Il est 17 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.17.55",
+  "text": "Il est 17 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.00",
+  "text": "Il est 18 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.05",
+  "text": "Il est 18 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.10",
+  "text": "Il est 18 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.15",
+  "text": "Il est 18 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.20",
+  "text": "Il est 18 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.25",
+  "text": "Il est 18 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.30",
+  "text": "Il est 18 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.35",
+  "text": "Il est 18 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.40",
+  "text": "Il est 18 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.45",
+  "text": "Il est 18 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.50",
+  "text": "Il est 18 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.18.55",
+  "text": "Il est 18 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.00",
+  "text": "Il est 19 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.05",
+  "text": "Il est 19 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.10",
+  "text": "Il est 19 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.15",
+  "text": "Il est 19 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.20",
+  "text": "Il est 19 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.25",
+  "text": "Il est 19 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.30",
+  "text": "Il est 19 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.35",
+  "text": "Il est 19 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.40",
+  "text": "Il est 19 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.45",
+  "text": "Il est 19 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.50",
+  "text": "Il est 19 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.19.55",
+  "text": "Il est 19 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.00",
+  "text": "Il est 20 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.05",
+  "text": "Il est 20 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.10",
+  "text": "Il est 20 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.15",
+  "text": "Il est 20 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.20",
+  "text": "Il est 20 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.25",
+  "text": "Il est 20 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.30",
+  "text": "Il est 20 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.35",
+  "text": "Il est 20 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.40",
+  "text": "Il est 20 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.45",
+  "text": "Il est 20 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.50",
+  "text": "Il est 20 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.20.55",
+  "text": "Il est 20 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.00",
+  "text": "Il est 21 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.05",
+  "text": "Il est 21 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.10",
+  "text": "Il est 21 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.15",
+  "text": "Il est 21 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.20",
+  "text": "Il est 21 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.25",
+  "text": "Il est 21 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.30",
+  "text": "Il est 21 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.35",
+  "text": "Il est 21 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.40",
+  "text": "Il est 21 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.45",
+  "text": "Il est 21 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.50",
+  "text": "Il est 21 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.21.55",
+  "text": "Il est 21 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.00",
+  "text": "Il est 22 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.05",
+  "text": "Il est 22 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.10",
+  "text": "Il est 22 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.15",
+  "text": "Il est 22 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.20",
+  "text": "Il est 22 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.25",
+  "text": "Il est 22 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.30",
+  "text": "Il est 22 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.35",
+  "text": "Il est 22 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.40",
+  "text": "Il est 22 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.45",
+  "text": "Il est 22 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.50",
+  "text": "Il est 22 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.22.55",
+  "text": "Il est 22 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.00",
+  "text": "Il est 23 heures.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.05",
+  "text": "Il est 23 heures 5.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.10",
+  "text": "Il est 23 heures 10.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.15",
+  "text": "Il est 23 heures 15.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.20",
+  "text": "Il est 23 heures 20.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.25",
+  "text": "Il est 23 heures 25.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.30",
+  "text": "Il est 23 heures 30.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.35",
+  "text": "Il est 23 heures 35.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.40",
+  "text": "Il est 23 heures 40.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.45",
+  "text": "Il est 23 heures 45.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.50",
+  "text": "Il est 23 heures 50.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "heure.23.55",
+  "text": "Il est 23 heures 55.",
+  "category": "heure",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m20",
+  "text": "Il fait moins 20 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m19",
+  "text": "Il fait moins 19 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m18",
+  "text": "Il fait moins 18 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m17",
+  "text": "Il fait moins 17 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m16",
+  "text": "Il fait moins 16 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m15",
+  "text": "Il fait moins 15 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m14",
+  "text": "Il fait moins 14 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m13",
+  "text": "Il fait moins 13 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m12",
+  "text": "Il fait moins 12 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m11",
+  "text": "Il fait moins 11 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m10",
+  "text": "Il fait moins 10 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m9",
+  "text": "Il fait moins 9 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m8",
+  "text": "Il fait moins 8 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m7",
+  "text": "Il fait moins 7 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m6",
+  "text": "Il fait moins 6 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m5",
+  "text": "Il fait moins 5 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m4",
+  "text": "Il fait moins 4 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m3",
+  "text": "Il fait moins 3 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m2",
+  "text": "Il fait moins 2 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.m1",
+  "text": "Il fait moins 1 degré.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.0",
+  "text": "Il fait 0 degré.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.1",
+  "text": "Il fait 1 degré.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.2",
+  "text": "Il fait 2 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.3",
+  "text": "Il fait 3 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.4",
+  "text": "Il fait 4 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.5",
+  "text": "Il fait 5 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.6",
+  "text": "Il fait 6 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.7",
+  "text": "Il fait 7 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.8",
+  "text": "Il fait 8 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.9",
+  "text": "Il fait 9 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.10",
+  "text": "Il fait 10 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.11",
+  "text": "Il fait 11 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.12",
+  "text": "Il fait 12 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.13",
+  "text": "Il fait 13 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.14",
+  "text": "Il fait 14 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.15",
+  "text": "Il fait 15 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.16",
+  "text": "Il fait 16 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.17",
+  "text": "Il fait 17 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.18",
+  "text": "Il fait 18 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.19",
+  "text": "Il fait 19 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.20",
+  "text": "Il fait 20 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.21",
+  "text": "Il fait 21 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.22",
+  "text": "Il fait 22 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.23",
+  "text": "Il fait 23 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.24",
+  "text": "Il fait 24 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.25",
+  "text": "Il fait 25 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.26",
+  "text": "Il fait 26 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.27",
+  "text": "Il fait 27 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.28",
+  "text": "Il fait 28 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.29",
+  "text": "Il fait 29 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.30",
+  "text": "Il fait 30 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.31",
+  "text": "Il fait 31 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.32",
+  "text": "Il fait 32 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.33",
+  "text": "Il fait 33 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.34",
+  "text": "Il fait 34 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.35",
+  "text": "Il fait 35 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.36",
+  "text": "Il fait 36 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.37",
+  "text": "Il fait 37 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.38",
+  "text": "Il fait 38 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.39",
+  "text": "Il fait 39 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.40",
+  "text": "Il fait 40 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.41",
+  "text": "Il fait 41 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.42",
+  "text": "Il fait 42 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.43",
+  "text": "Il fait 43 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.44",
+  "text": "Il fait 44 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "meteo.t.45",
+  "text": "Il fait 45 degrés.",
+  "category": "meteo",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.5",
+  "text": "Tu roules à 5 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.10",
+  "text": "Tu roules à 10 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.15",
+  "text": "Tu roules à 15 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.20",
+  "text": "Tu roules à 20 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.25",
+  "text": "Tu roules à 25 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.30",
+  "text": "Tu roules à 30 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.35",
+  "text": "Tu roules à 35 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.40",
+  "text": "Tu roules à 40 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.45",
+  "text": "Tu roules à 45 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.50",
+  "text": "Tu roules à 50 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.55",
+  "text": "Tu roules à 55 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.60",
+  "text": "Tu roules à 60 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.65",
+  "text": "Tu roules à 65 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.70",
+  "text": "Tu roules à 70 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.75",
+  "text": "Tu roules à 75 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.80",
+  "text": "Tu roules à 80 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.85",
+  "text": "Tu roules à 85 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.90",
+  "text": "Tu roules à 90 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.95",
+  "text": "Tu roules à 95 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.100",
+  "text": "Tu roules à 100 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.105",
+  "text": "Tu roules à 105 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.110",
+  "text": "Tu roules à 110 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.115",
+  "text": "Tu roules à 115 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.120",
+  "text": "Tu roules à 120 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.125",
+  "text": "Tu roules à 125 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.130",
+  "text": "Tu roules à 130 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.135",
+  "text": "Tu roules à 135 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.140",
+  "text": "Tu roules à 140 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.145",
+  "text": "Tu roules à 145 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.150",
+  "text": "Tu roules à 150 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.155",
+  "text": "Tu roules à 155 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.160",
+  "text": "Tu roules à 160 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.165",
+  "text": "Tu roules à 165 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.170",
+  "text": "Tu roules à 170 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.175",
+  "text": "Tu roules à 175 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.180",
+  "text": "Tu roules à 180 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.185",
+  "text": "Tu roules à 185 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.190",
+  "text": "Tu roules à 190 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.195",
+  "text": "Tu roules à 195 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.200",
+  "text": "Tu roules à 200 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.205",
+  "text": "Tu roules à 205 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.210",
+  "text": "Tu roules à 210 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.215",
+  "text": "Tu roules à 215 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.220",
+  "text": "Tu roules à 220 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.225",
+  "text": "Tu roules à 225 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.230",
+  "text": "Tu roules à 230 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.235",
+  "text": "Tu roules à 235 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.240",
+  "text": "Tu roules à 240 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.245",
+  "text": "Tu roules à 245 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ },
+ {
+  "id": "vit.250",
+  "text": "Tu roules à 250 kilomètres heure.",
+  "category": "vitesse",
+  "priority": "confort"
+ }
+]

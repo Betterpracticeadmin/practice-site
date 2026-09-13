@@ -1,0 +1,243 @@
+{
+ "checks": [
+  {
+   "site": "os.html l.2749 navigate() : virage",
+   "produced": "Dans 200 mètres, tourne à gauche.",
+   "status": "couvert",
+   "detail": "d=215, maneuver turn/left. rd=min(200,max(50,round(4,3)·50))=200, ce qui donne guid.200.left. Clé identique vérifiée par script."
+  },
+  {
+   "site": "os.html l.2749 navigate() : rond-point",
+   "produced": "Dans 50 mètres, au rond-point, prends la troisième sortie.",
+   "status": "couvert",
+   "detail": "type roundabout, exit=3, étape courte vue pour la première fois à d=24 m : max(50,0)=50, soit guid.50.rb3."
+  },
+  {
+   "site": "os.html l.2749 navigate() : rotary exit>8",
+   "produced": "Dans 150 mètres, au rond-point, prends la 9e sortie.",
+   "status": "non_borne_ok",
+   "detail": "n>8 : texte en n+'e' prévu par le text_fix. Cas rarissime, on retombe sur la voix navigateur."
+  },
+  {
+   "site": "os.html l.2742 arrivée",
+   "produced": "Tu es arrivé. Bien joué.",
+   "status": "couvert",
+   "detail": "T().arrived, soit nav.arrive."
+  },
+  {
+   "site": "os.html l.2715 reroute() automatique (hors trajet)",
+   "produced": "Recalcul de l’itinéraire…",
+   "status": "couvert",
+   "detail": "nav.reroute : la clé « recalcul de l'itinéraire » retire le … final."
+  },
+  {
+   "site": "os.html l.3406 intention vocale reroute",
+   "produced": "Je recalcule l'itinéraire.",
+   "status": "couvert",
+   "detail": "nav.recalc. Doublon absent des text_fixes : reroute() (l.2715) émet d'abord « Recalcul de l’itinéraire… » en file (quiet), puis ce sayVA non quiet fait spkQ=null et _emitSpeak, ce qui coupe la première phrase aussitôt. À traiter comme hungry/thirsty."
+  },
+  {
+   "site": "os.html l.2450 checkRadars",
+   "produced": "Radar dans 400 mètres.",
+   "status": "couvert",
+   "detail": "d=383 : dd=max(50,round(7,66)·50)=400, soit alerte.radar.400. d<420 garantit N≤400."
+  },
+  {
+   "site": "os.html l.2601/2603 orchestrate()",
+   "produced": "Doucement, tu roules vite. | On est à l’arrêt.",
+   "status": "couvert",
+   "detail": "alerte.vite et nav.arret. Hors banque : orchestrate n'est appelé qu'hors navigation (l.2290-2291), donc l'alerte de vitesse n'est jamais dite pendant un guidage."
+  },
+  {
+   "site": "os.html l.2609 orchestrate / l.2616 proactiveFatigue",
+   "produced": "Je détecte des signes de fatigue. Une pause serait bienvenue. | Signes de fatigue détectés. Prévois une pause.",
+   "status": "couvert",
+   "detail": "alerte.fatigue et alerte.fatigue.nav : textes identiques au code."
+  },
+  {
+   "site": "os.html l.2699 sayDestination (sélection sur la carte)",
+   "produced": "Destination : Point sur la carte",
+   "status": "couvert",
+   "detail": "nav.dest.carte, clé « destination: point sur la carte ». Produite seulement si #dest est vide, car sayDestination lit d'abord $('dest').value (l.2702). Test avec une espace fine insécable U+202F avant « : » : même clé."
+  },
+  {
+   "site": "os.html l.2699 sayDestination (POI / favori / adresse)",
+   "produced": "Destination : Carrefour Market",
+   "status": "non_borne_ok",
+   "detail": "Nom libre. Attention, Voice.say(...,3) est urgent : il coupe la phrase dite juste avant (voir l.3477 et l.3381)."
+  },
+  {
+   "site": "os.html l.2711 startRouteTo (après correction)",
+   "produced": "Itinéraire calculé. | Arrivée dans 1 heure 15.",
+   "status": "couvert",
+   "detail": "rt.dur=4380 s donne min=73, arrondi au quart d'heure (<120) : 75, soit nav.calc + nav.eta.75. Remarque : 'Itinéraire calculé.' en priorité 2 est urgent et coupera « Destination : … » (prio 3) lancé 0,5 à 1,5 s plus tôt. Mieux vaut la priorité 1."
+  },
+  {
+   "site": "os.html l.2510 announceTraffic (après correction)",
+   "produced": "Conseil départ : attends 20 minutes. | Tu gagneras environ 15 minutes.",
+   "status": "couvert",
+   "detail": "w.best=2, save=14 arrondi à 15 : trafic.attente.20 + trafic.gain.15. La 2e phrase (prio 1) passe bien en spkQ."
+  },
+  {
+   "site": "os.html l.3439 qtraffic (après correction)",
+   "produced": "Trafic très dense. | 10 minutes de retard.",
+   "status": "couvert",
+   "detail": "trLevel renvoie 'Très dense' (l.2475), retard round(9/5)·5=10 : trafic.niv.tresdense + trafic.retard.10."
+  },
+  {
+   "site": "os.html l.3440 qeta / l.3405 arrivaltime (après correction)",
+   "produced": "Arrivée dans 25 minutes.",
+   "status": "couvert",
+   "detail": "remMin=23,6 arrondi à 25 : nav.eta.25."
+  },
+  {
+   "site": "os.html l.3440 qeta (après correction), remMin flottant",
+   "produced": "Arrivée dans 7.3 minutes.",
+   "status": "texte_different",
+   "detail": "remMin (l.2740) est un flottant. Appliquée à la lettre, la règle « m≤10 exact » donne 7.3 (clé « 7,3 »), absent de la banque. durVoix doit faire Math.round(m) d'abord, pour obtenir « Arrivée dans 7 minutes. »."
+  },
+  {
+   "site": "os.html l.3441 qdist (après correction)",
+   "produced": "Il reste 3 kilomètres. | Il reste 600 mètres.",
+   "status": "couvert",
+   "detail": "remM=3420 donne 3 km (nav.reste.km.3) ; remM=640 donne 600 m (nav.reste.m.600)."
+  },
+  {
+   "site": "os.html l.3442 qweather (après correction)",
+   "produced": "Il fait moins 3 degrés. | Du brouillard, attention à la visibilité.",
+   "status": "couvert",
+   "detail": "wxTemp '-3' donne la phrase générée meteo.t.m3 ; WX[45]='Brouillard' donne meteo.ciel.brouillard."
+  },
+  {
+   "site": "os.html l.3442 qweather, weather_code 75/66/96",
+   "produced": "Il fait moins 2 degrés.",
+   "status": "MANQUANT",
+   "detail": "WX (l.2317) ne connaît pas les codes 53/55/56/57/66/67/73/75/77/81/82/85/86/96/99 : wxDesc vaut '—', donc aucune description. Neige forte, pluie verglaçante et grêle ne sont jamais annoncées. Il faut compléter WX et la table CIEL (et la banque)."
+  },
+  {
+   "site": "os.html l.3444 qtime (après correction)",
+   "produced": "Il est 14 heures.",
+   "status": "couvert",
+   "detail": "14:02 arrondi à 5 min donne MM=0 : heure.14.00 (généré)."
+  },
+  {
+   "site": "os.html l.3444 qtime, arrondi sans retenue",
+   "produced": "Il est 23 heures 60.",
+   "status": "texte_different",
+   "detail": "23:58 donne round(58/5)·5=60. Sans report d'heure : « 23 heures 60 », « midi 60 » à 12:58, « minuit 60 » à 00:59 (vérifié par script). L'implémentation doit reporter (60 → heure+1, 24 → 0) pour obtenir « Il est minuit. »."
+  },
+  {
+   "site": "os.html l.3446 qspeed (après correction)",
+   "produced": "Tu roules à 85 kilomètres heure. | On est à l’arrêt.",
+   "status": "couvert",
+   "detail": "liveSpd=87 donne 85 (vit.85) ; liveSpd=1,9 donne 0, qui réutilise nav.arret."
+  },
+  {
+   "site": "os.html l.3751 rappel de pause (réglage par défaut)",
+   "produced": "Tu roules depuis 2 heures. | Une pause serait bienvenue. Dis « Practice, trouve un café » si tu veux.",
+   "status": "couvert",
+   "detail": "Intervalle 120, driveMs=120 min : alerte.pause.120 + alerte.pause.conseil."
+  },
+  {
+   "site": "os.html l.3751 rappel de pause après changement du curseur",
+   "produced": "Tu roules depuis 2 heures 7.",
+   "status": "MANQUANT",
+   "detail": "SÉCURITÉ. l.2915 fait nextPauseAt=driveMs+pauseInterval·60000 : curseur passé à 60 min à 67 min de route, rappel à 127 min. Autre cas : tick de 30 s bridé en arrière-plan, mn=Math.round(120,5)=121, soit « 2 heures 1 ». Les 38 valeurs k×I ne suffisent pas : il faut arrondir la durée parlée au quart d'heure et générer 30..1080 par pas de 15 (71 phrases, +33)."
+  },
+  {
+   "site": "pos/pos-coach.js l.219 vers pos-integration.js l.56",
+   "produced": "Pas besoin d’accélérer fort si tu dois freiner juste après. | Freinage un peu appuyé — commence à ralentir légèrement plus tôt.",
+   "status": "couvert",
+   "detail": "Type anticipation (l.331), puis brake avec niveau ≥40 : coach.anticip.1 et coach.brake.3. Remarque : ces phrases sont toujours en FR, même quand LANG='en', et la condition LANG==='fr' les exclut alors de la banque."
+  },
+  {
+   "site": "os.html l.3426 vers setMode l.2113 / l.3400 qmode (après correction)",
+   "produced": "Mode course. Attaque. | Tu es en mode grand tourisme.",
+   "status": "couvert",
+   "detail": "MODES.ultra.say = mode.ultra ; MODES.gt.fr = mode.q.gt."
+  },
+  {
+   "site": "os.html l.3158 nearestPOI (après correction)",
+   "produced": "Je cherche les toilettes les plus proches… | Je cherche le poste de police le plus proche…",
+   "status": "couvert",
+   "detail": "poi.toilettes (g=p) et poi.police. Les 108 POITYPES du code, y compris les 4 entrées entre guillemets doubles (électronique, avocat, attractions, point d'eau), sont bien présents dans la banque, dans l'ordre."
+  },
+  {
+   "site": "os.html l.3153 poiFallbackText / l.3149 announcePOI",
+   "produced": "Je ne trouve rien de ce type dans les environs, désolé. | Pharmacie du Cours, à 350 mètres vers le nord. Je l’ai placée sur la carte. Tu veux que je lance le trajet ?",
+   "status": "non_borne_ok",
+   "detail": "La 1re phrase est couverte (poi.none). La 2e est non bornée (nom et distance au pas de 10 m) : voix navigateur légitime."
+  },
+  {
+   "site": "os.html l.3398 urgence",
+   "produced": "En cas d'urgence appelle le 112 — police 17, SAMU 15. Je ne peux pas passer l'appel depuis le cockpit ; mets-toi en sécurité et arrête-toi dès que possible.",
+   "status": "couvert",
+   "detail": "alerte.urgence : clé identique (le « ; » perd son espace des deux côtés)."
+  },
+  {
+   "site": "os.html l.3773 / l.3772 / l.3789 réveil",
+   "produced": "Oui ? | Bonjour ! Je t’écoute. | Je t’écoute.",
+   "status": "couvert",
+   "detail": "accueil.oui, accueil.wake.1 (sans prénom) et accueil.ecoute (vaTxt greet corrigé). ’ et ' donnent la même clé."
+  },
+  {
+   "site": "os.html l.3449 hello : vaName() l.2944 + l.3868 + l.4299",
+   "produced": "Salut Aldo !",
+   "status": "texte_different",
+   "detail": "Le text_fix sur vaName est incomplet : l.3868 enregistre Mem.prefs.name='Aldo' quand le champ est vidé, et l.4299 remplit le champ avec 'Aldo'. Le prénom fantôme devient donc persistant. Sans lui, on obtient « Salut ! » (accueil.hello.2). Avec lui, seule la variante alt joue, et lastSpoken='Salut Aldo !' : « répète » part en voix navigateur. Corriger aussi l.3868, l.4299 et posBridge.driverName l.4313."
+  },
+  {
+   "site": "os.html l.3807 pushToTalk onresult sans transcription",
+   "produced": "Je n'ai rien entendu.",
+   "status": "MANQUANT",
+   "detail": "Phrase fixe d'erreur de reconnaissance, absente de la banque. La banque n'a que « Je n'ai rien entendu, réessaie ? » (l.3843), dont la clé diffère. Ajouter la phrase ou aligner le texte."
+  },
+  {
+   "site": "os.html l.3433 media / l.3474 bored",
+   "produced": "Musique en pause. | Je te mets un peu de musique.",
+   "status": "couvert",
+   "detail": "media.pause et media.ambiance. Bug non corrigé : bored (l.3474) annonce « Je te mets un peu de musique. » puis appelle mediaToggle(), ce qui met en pause si la musique jouait. Autre point : pour SoundCloud, scWidget.toggle() est asynchrone, donc l'état « en lecture » juste après doit venir des événements PLAY/PAUSE."
+  },
+  {
+   "site": "os.html l.3477 home/work",
+   "produced": "Tu n’as pas encore enregistré ton travail. Sur place, dis « ajoute aux favoris » pour le mémoriser. | On y va, direction la maison.",
+   "status": "couvert",
+   "detail": "nav.travail.none et nav.maison. Mais « On y va, direction la maison. » est aussitôt suivi de startRouteTo, puis sayDestination (Voice.say prio 3, urgent), qui l'annule : elle est inaudible. Le « Destination : {nom du favori} » qui suit n'est pas borné."
+  },
+  {
+   "site": "os.html l.4234 vehCtl / l.2538 openDiag / l.4229 scan",
+   "produced": "Coffre ouvert. | Diagnostic terminé. Santé globale 91 pour cent. Un point à surveiller : l’efficacité du catalyseur. | 1 code défaut trouvé. P0420, catalyseur à surveiller.",
+   "status": "couvert",
+   "detail": "veh.trunk.on, veh.diag (avg=round(724/8)=91, DSYS statique) et veh.scan (DTC statique). Remarque : climate dit « Climatisation, vingt et un degrés. » aussi à l'extinction."
+  },
+  {
+   "site": "os.html l.3185 chitchatReply (public/chitchat.json)",
+   "produced": "La capitale du Brésil est Brasilia. Elle a été créée en 1960, en remplacement de Rio de Janeiro en tant que capitale du pays.",
+   "status": "MANQUANT",
+   "detail": "Famille FIXE non déclarée : 11 812 paires, dont environ 7 000 réponses en français (le commentaire « 1900+ » est périmé). Passée avant freeChat et askClaude (l.3532). Décision à prendre : exclusion explicite (voix navigateur) ou pré-génération. Contenu parfois daté (« Élisabeth Borne », « Gabriel Attal »)."
+  },
+  {
+   "site": "os.html l.3210 cityNickAnswer (après correction)",
+   "produced": "Sainté, c'est un surnom de Saint-Étienne.",
+   "status": "couvert",
+   "detail": "conv.nick.sainte, entrée reconnue seulement avec les bornes (?:^|[^a-zà-ÿ]) : \\b après « é » ne matche jamais en JS."
+  }
+ ],
+ "missing_phrases": [
+  "Je n'ai rien entendu.",
+  "Média.",
+  "Tu roules depuis 2 heures 7.",
+  "Tu roules depuis 2 heures 1.",
+  "Tu roules depuis 3 heures 15.",
+  "Il est 23 heures 60.",
+  "Arrivée dans 7.3 minutes.",
+  "La capitale du Brésil est Brasilia. Elle a été créée en 1960, en remplacement de Rio de Janeiro en tant que capitale du pays."
+ ],
+ "never_produced": [
+  "nav.maison (« On y va, direction la maison. ») : émise puis coupée dans la même milliseconde par sayDestination (Voice.say prio 3, urgent) via startRouteTo, donc jamais audible",
+  "nav.travail (« On y va, direction le travail. ») : même cause, jamais audible",
+  "conv.clarify : ne sort que si lastSpoken est vide, or « Route dégagée. », « Tout roule. » etc. le remplissent toutes les 16 s ; sinon la réponse est « Je voulais dire : »+lastSpoken, non bornée",
+  "conf.rienDit (« Je n'ai rien dit récemment. ») : même condition lastSpoken vide, quasi jamais atteinte"
+ ],
+ "verdict": "Sur 30 sites d'appel (37 contrôles) : 24 couverts, 3 non bornés à juste titre, 5 MANQUANT, 3 textes différents (dont l'arrondi de l'heure et le prénom fantôme). Hors cas d'arrondi, les consignes de guidage, les alertes radar, vitesse, fatigue et urgence, le coach et les modes sont couverts à l'identique. La normalisation voiceKey a été rejouée en JS sur 20 paires : ’ et ', …, espace fine insécable, forme NFD et « 12.3 » contre « 12,3 » donnent bien les mêmes clés.\n\nPoints bloquants, par gravité :\n\n1) Intégration : chercher la banque dans sayVA/_emitSpeak AVANT le test `if(neuralOff||Voice.neural===false) webSpeak(t)` (l.2990). Sinon, la clé ElevenLabs cassée met neuralOff à true dès la première erreur, et plus aucune phrase ne passe par la banque. Même chose en mode « Voix navigateur ».\n\n2) Rappel de pause (sécurité) : la durée n'est pas bornée. l.2915 fait nextPauseAt=driveMs+intervalle quand on bouge le curseur, et le tick de 30 s bridé ajoute jusqu'à 1 min. Il faut arrondir la durée parlée au quart d'heure et générer 30..1080 par pas de 15 (71 phrases au lieu de 38).\n\n3) Formules :\n- heure : reporter la retenue quand l'arrondi donne MM=60 (23:58 → « minuit », 12:58 → « 13 heures »), sinon on obtient « 23 heures 60 » ;\n- durVoix : faire Math.round(remMin) d'abord, car remMin est un flottant ;\n- kmVoix : la règle au-delà de 1050 km n'est pas définie.\n\n4) Prénom : le fix vaName ne suffit pas. l.3868 (`||'Aldo'`) et l.4299 réécrivent 'Aldo' ; corriger aussi posBridge.driverName (l.4313). « répète » ne retombe PAS sur la même clé : lastSpoken garde le texte avec prénom et non l'alt jouée, et pour les phrases scindées (itinéraire + ETA, météo, trafic, pause) il ne redit que la 2e moitié.\n\n5) Coupures par priorité :\n- sayDestination (prio 3) rend inaudibles « On y va, direction la maison/le travail. » et « C'est parti, je lance le trajet vers … » ;\n- 'Itinéraire calculé.' en prio 2 coupera « Destination : … » : mettre la priorité 1 ;\n- l'intention « recalcule » (l.3406) coupe « Recalcul de l’itinéraire… » ;\n- bored (l.3474) annonce la musique même quand il la met en pause.\n\n6) Absents de la banque :\n- « Je n'ai rien entendu. » (l.3807) ;\n- « Média. » (l.3502, rare) ;\n- le corpus chitchat.json : environ 7 000 réponses FR fixes, famille non déclarée ;\n- la météo dangereuse : codes WMO 56/57/66/67/73/75/82/96/99 absents de WX, donc aucune annonce.\n\n7) Générateur (option num2words) : accorder au féminin devant « heure(s) » et « minute(s) ». Exemples : « 1 heure » → « une heure », « Il est 21 heures » → « vingt et une heures », « 1 minute de retard ». Épeler « P0420 » chiffre par chiffre.\n\n8) Normalisation « identique JS/Py » : pas tout à fait. trim() de JS retire U+FEFF et pas U+0085/U+001C-001F ; strip() de Python fait l'inverse. `\\d` Python accepte les chiffres Unicode, alors que JS non (testé). Utiliser `strip(' ')` / `/^ +| +$/g` et `[0-9]` (ou re.ASCII).\n\n9) Comptage : je compte 643 phrases listées et non 644. Détail : nav 95, guid 80, alerte 54, trafic 42, mode 16, coach 31, veh 16, poi 111, err 12, conf 29, media 21, accueil 10, meteo 12, conv 114. Total : 1047.\n\nContrôles complémentaires :\n- Sites inaccessibles, exclus à juste titre : « Vue HUD. », « Position inconnue. », « Je suis Practice, ton copilote intelligent. », la date sans « On est » (l.3499-3518, masqués par LEX), « Voilà la musique. », « Je cherche une station. », « Aucun code défaut. Véhicule sain. » (DTC statique), « Voix coupée. » et « Ma voix est coupée… » (Voice.on=false, donc toast seulement).\n- os-bw.html contient exactement les mêmes chaînes vocales que os.html (diff vide).\n\nAucun fichier du dépôt n'a été modifié."
+}
