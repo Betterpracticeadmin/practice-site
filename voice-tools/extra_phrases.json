@@ -1,0 +1,86 @@
+[
+ {
+  "id": "meteo.ciel.bruineverglas",
+  "text": "Bruine verglaçante, risque de verglas, prudence.",
+  "category": "meteo",
+  "priority": "securite"
+ },
+ {
+  "id": "meteo.ciel.pluieverglas",
+  "text": "Pluie verglaçante, risque de verglas, prudence.",
+  "category": "meteo",
+  "priority": "securite"
+ },
+ {
+  "id": "meteo.ciel.forteneige",
+  "text": "Fortes chutes de neige, prudence sur la route.",
+  "category": "meteo",
+  "priority": "securite"
+ },
+ {
+  "id": "meteo.ciel.fortesaverses",
+  "text": "Fortes averses, prudence sur la route.",
+  "category": "meteo",
+  "priority": "securite"
+ },
+ {
+  "id": "meteo.ciel.aversesneige",
+  "text": "Averses de neige, prudence sur la route.",
+  "category": "meteo",
+  "priority": "securite"
+ },
+ {
+  "id": "meteo.ciel.grele",
+  "text": "Orage avec grêle dans le secteur, prudence.",
+  "category": "meteo",
+  "priority": "securite"
+ },
+ {
+  "id": "trafic.niv.inconnu",
+  "text": "Trafic inconnu.",
+  "category": "trafic",
+  "priority": "confort"
+ },
+ {
+  "id": "veh.clim.off",
+  "text": "Climatisation coupée.",
+  "category": "veh",
+  "priority": "confort"
+ },
+ {
+  "id": "nav.reste.km.plus1000",
+  "text": "Il reste plus de 1000 kilomètres.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "trafic.gain.plus60",
+  "text": "Tu gagneras plus d’une heure.",
+  "category": "trafic",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.540",
+  "text": "Arrivée dans 9 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.600",
+  "text": "Arrivée dans 10 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.660",
+  "text": "Arrivée dans 11 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ },
+ {
+  "id": "nav.eta.720",
+  "text": "Arrivée dans 12 heures.",
+  "category": "nav",
+  "priority": "guidage"
+ }
+]

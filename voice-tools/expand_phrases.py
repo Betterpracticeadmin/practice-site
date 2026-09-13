@@ -51,6 +51,11 @@ for m in range(30, 1081, 15):
 phrases.append({"id": "err.stt.rien", "text": "Je n'ai rien entendu.", "category": "err", "priority": "confort"})
 phrases.append({"id": "media.titre", "text": "Média.", "category": "media", "priority": "confort"})
 
+# F) phrases créées par l'intégration dans os.html (voir extra_phrases.json)
+_extra = Path(r"C:\ai\voice\bank\extra_phrases.json")
+if _extra.exists():
+    phrases.extend(json.loads(_extra.read_text(encoding="utf-8")))
+
 FEM = [(re.compile(r"(?<!\d)21 heures"), "vingt et une heures"),
        (re.compile(r"(?<!\d)1 heure\b"), "une heure"),
        (re.compile(r"(?<!\d)1 minute\b"), "une minute")]
