@@ -49,3 +49,11 @@ cd /c/ai/voice && HF_HUB_OFFLINE=1 PYTHONIOENCODING=utf-8 /c/ai/venvs/qwen3tts/S
 ```
 
 Leçons réseau : IPv6 cassé sur ce poste (forcer IPv4, `segdl.py`), vérifier les SHA256.
+
+## État au 14/09/2026 (soir) : banque complète
+
+- 2 247 phrases générées et contrôlées par Whisper : 2 225 validées, 22 validées avec réserve, 0 écartée (voir qa_report.json). 25,5 Mo de MP3 dans public/voice/practice/fr + manifest.json (version 202609142053).
+- Lecture des nombres : la voix lisait mal certains nombres en chiffres (« 150 mètres » entendu « 50 mètres », « 190 » entendu « 1900 »). Correction : les 124 phrases concernées sont prononcées avec les nombres en toutes lettres (numbers_fr.spell, champ tts ; la clé ne change pas) et le contrôle est devenu strict sur les nombres (numbers_ok : un nombre faux n'est jamais accepté).
+- Phrase d'urgence : prononciation réglée à la main (tts_overrides.json) : « appelle le 112. Police, le 17. SAMU, le 15. »
+- Test de bout en bout avec la vraie banque (Playwright) : banque chargée, lecture réelle des MP3, libération de la parole, repli navigateur hors banque, 0 erreur JavaScript.
+- Reste : test sur iPhone via l'aperçu Vercel de la branche, puis fusion dans main.
