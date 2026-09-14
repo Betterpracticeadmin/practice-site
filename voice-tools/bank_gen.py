@@ -18,6 +18,10 @@ import time
 import unicodedata
 from pathlib import Path
 
+import sys
+sys.path.insert(0, r"C:\ai\voice")
+from numbers_fr import numbers_ok  # noqa: E402
+
 BANK = Path(r"C:\ai\voice\bank")
 VOICE = Path(r"C:\ai\voice\practice")
 BASE = r"C:\ai\models\Qwen3-TTS-12Hz-0.6B-Base"
@@ -164,8 +168,11 @@ def cmd_qa(a):
         hyp = asr({"raw": w16, "sampling_rate": 16000},
                   generate_kwargs={"language": "french", "task": "transcribe"})["text"]
         cer = _cer(_norm_qa(rec["text"]), _norm_qa(hyp))
-        rec.update(heard=hyp.strip(), cer=round(cer, 3))
-        if cer <= CER_OK:
+        nums_ok = numbers_ok(rec["text"], hyp)
+        rec.update(heard=hyp.strip(), cer=round(cer, 3), numbers_ok=nums_ok)
+        if not nums_ok:  # un nombre faux (distance, vitesse, heure) n'est jamais accepté
+            rec["status"] = "redo" if rec.get("tries", 1) < MAX_TRIES else "abandon"
+        elif cer <= CER_OK:
             rec["status"] = "ok"
         elif cer <= (0.15 if rec.get("priority") in ("securite", "guidage") else CER_MAX):
             rec["status"] = "warn"
@@ -175,7 +182,7 @@ def cmd_qa(a):
             rec["status"] = "abandon"
         counts[rec["status"]] += 1
         if rec["status"] in ("redo", "abandon"):
-            log(f"  {rec['status']} {pid} CER {cer:.2f} | attendu « {rec['text']} » | entendu « {hyp.strip()} »")
+            log(f"  {rec['status']} {pid} CER {cer:.2f}{'' if nums_ok else ' NOMBRE FAUX'} | attendu « {rec['text']} » | entendu « {hyp.strip()} »")
         if n % 20 == 0 or n == len(todo):
             save_state(st)
             log(f"qa {n}/{len(todo)} {counts}")

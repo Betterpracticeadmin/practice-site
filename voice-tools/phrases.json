@@ -248,55 +248,64 @@
   "id": "nav.reste.m.100",
   "text": "Il reste 100 mètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste cent mètres."
  },
  {
   "id": "nav.reste.m.200",
   "text": "Il reste 200 mètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste deux cents mètres."
  },
  {
   "id": "nav.reste.m.300",
   "text": "Il reste 300 mètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste trois cents mètres."
  },
  {
   "id": "nav.reste.m.400",
   "text": "Il reste 400 mètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste quatre cents mètres."
  },
  {
   "id": "nav.reste.m.500",
   "text": "Il reste 500 mètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste cinq cents mètres."
  },
  {
   "id": "nav.reste.m.600",
   "text": "Il reste 600 mètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste six cents mètres."
  },
  {
   "id": "nav.reste.m.700",
   "text": "Il reste 700 mètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste sept cents mètres."
  },
  {
   "id": "nav.reste.m.800",
   "text": "Il reste 800 mètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste huit cents mètres."
  },
  {
   "id": "nav.reste.m.900",
   "text": "Il reste 900 mètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste neuf cents mètres."
  },
  {
   "id": "nav.reste.km.1",
@@ -422,73 +431,85 @@
   "id": "nav.reste.km.100",
   "text": "Il reste 100 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste cent kilomètres."
  },
  {
   "id": "nav.reste.km.150",
   "text": "Il reste 150 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste cent cinquante kilomètres."
  },
  {
   "id": "nav.reste.km.200",
   "text": "Il reste 200 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste deux cents kilomètres."
  },
  {
   "id": "nav.reste.km.250",
   "text": "Il reste 250 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste deux cent cinquante kilomètres."
  },
  {
   "id": "nav.reste.km.300",
   "text": "Il reste 300 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste trois cents kilomètres."
  },
  {
   "id": "nav.reste.km.400",
   "text": "Il reste 400 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste quatre cents kilomètres."
  },
  {
   "id": "nav.reste.km.500",
   "text": "Il reste 500 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste cinq cents kilomètres."
  },
  {
   "id": "nav.reste.km.600",
   "text": "Il reste 600 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste six cents kilomètres."
  },
  {
   "id": "nav.reste.km.700",
   "text": "Il reste 700 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste sept cents kilomètres."
  },
  {
   "id": "nav.reste.km.800",
   "text": "Il reste 800 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste huit cents kilomètres."
  },
  {
   "id": "nav.reste.km.900",
   "text": "Il reste 900 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste neuf cents kilomètres."
  },
  {
   "id": "nav.reste.km.1000",
   "text": "Il reste 1000 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste mille kilomètres."
  },
  {
   "id": "nav.aucun",
@@ -698,361 +719,421 @@
   "id": "guid.100.left",
   "text": "Dans 100 mètres, tourne à gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, tourne à gauche."
  },
  {
   "id": "guid.100.right",
   "text": "Dans 100 mètres, tourne à droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, tourne à droite."
  },
  {
   "id": "guid.100.sleft",
   "text": "Dans 100 mètres, serre à gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, serre à gauche."
  },
  {
   "id": "guid.100.sright",
   "text": "Dans 100 mètres, serre à droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, serre à droite."
  },
  {
   "id": "guid.100.hleft",
   "text": "Dans 100 mètres, tourne franchement à gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, tourne franchement à gauche."
  },
  {
   "id": "guid.100.hright",
   "text": "Dans 100 mètres, tourne franchement à droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, tourne franchement à droite."
  },
  {
   "id": "guid.100.straight",
   "text": "Dans 100 mètres, continue tout droit.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, continue tout droit."
  },
  {
   "id": "guid.100.uturn",
   "text": "Dans 100 mètres, fais demi-tour.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, fais demi-tour."
  },
  {
   "id": "guid.100.merge",
   "text": "Dans 100 mètres, insère-toi.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, insère-toi."
  },
  {
   "id": "guid.100.keepleft",
   "text": "Dans 100 mètres, garde la gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, garde la gauche."
  },
  {
   "id": "guid.100.keepright",
   "text": "Dans 100 mètres, garde la droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, garde la droite."
  },
  {
   "id": "guid.100.arrive",
   "text": "Dans 100 mètres, tu arrives à destination.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, tu arrives à destination."
  },
  {
   "id": "guid.100.rb1",
   "text": "Dans 100 mètres, au rond-point, prends la première sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, au rond-point, prends la première sortie."
  },
  {
   "id": "guid.100.rb2",
   "text": "Dans 100 mètres, au rond-point, prends la deuxième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, au rond-point, prends la deuxième sortie."
  },
  {
   "id": "guid.100.rb3",
   "text": "Dans 100 mètres, au rond-point, prends la troisième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, au rond-point, prends la troisième sortie."
  },
  {
   "id": "guid.100.rb4",
   "text": "Dans 100 mètres, au rond-point, prends la quatrième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, au rond-point, prends la quatrième sortie."
  },
  {
   "id": "guid.100.rb5",
   "text": "Dans 100 mètres, au rond-point, prends la cinquième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, au rond-point, prends la cinquième sortie."
  },
  {
   "id": "guid.100.rb6",
   "text": "Dans 100 mètres, au rond-point, prends la sixième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, au rond-point, prends la sixième sortie."
  },
  {
   "id": "guid.100.rb7",
   "text": "Dans 100 mètres, au rond-point, prends la septième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, au rond-point, prends la septième sortie."
  },
  {
   "id": "guid.100.rb8",
   "text": "Dans 100 mètres, au rond-point, prends la huitième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent mètres, au rond-point, prends la huitième sortie."
  },
  {
   "id": "guid.150.left",
   "text": "Dans 150 mètres, tourne à gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, tourne à gauche."
  },
  {
   "id": "guid.150.right",
   "text": "Dans 150 mètres, tourne à droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, tourne à droite."
  },
  {
   "id": "guid.150.sleft",
   "text": "Dans 150 mètres, serre à gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, serre à gauche."
  },
  {
   "id": "guid.150.sright",
   "text": "Dans 150 mètres, serre à droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, serre à droite."
  },
  {
   "id": "guid.150.hleft",
   "text": "Dans 150 mètres, tourne franchement à gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, tourne franchement à gauche."
  },
  {
   "id": "guid.150.hright",
   "text": "Dans 150 mètres, tourne franchement à droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, tourne franchement à droite."
  },
  {
   "id": "guid.150.straight",
   "text": "Dans 150 mètres, continue tout droit.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, continue tout droit."
  },
  {
   "id": "guid.150.uturn",
   "text": "Dans 150 mètres, fais demi-tour.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, fais demi-tour."
  },
  {
   "id": "guid.150.merge",
   "text": "Dans 150 mètres, insère-toi.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, insère-toi."
  },
  {
   "id": "guid.150.keepleft",
   "text": "Dans 150 mètres, garde la gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, garde la gauche."
  },
  {
   "id": "guid.150.keepright",
   "text": "Dans 150 mètres, garde la droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, garde la droite."
  },
  {
   "id": "guid.150.arrive",
   "text": "Dans 150 mètres, tu arrives à destination.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, tu arrives à destination."
  },
  {
   "id": "guid.150.rb1",
   "text": "Dans 150 mètres, au rond-point, prends la première sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, au rond-point, prends la première sortie."
  },
  {
   "id": "guid.150.rb2",
   "text": "Dans 150 mètres, au rond-point, prends la deuxième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, au rond-point, prends la deuxième sortie."
  },
  {
   "id": "guid.150.rb3",
   "text": "Dans 150 mètres, au rond-point, prends la troisième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, au rond-point, prends la troisième sortie."
  },
  {
   "id": "guid.150.rb4",
   "text": "Dans 150 mètres, au rond-point, prends la quatrième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, au rond-point, prends la quatrième sortie."
  },
  {
   "id": "guid.150.rb5",
   "text": "Dans 150 mètres, au rond-point, prends la cinquième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, au rond-point, prends la cinquième sortie."
  },
  {
   "id": "guid.150.rb6",
   "text": "Dans 150 mètres, au rond-point, prends la sixième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, au rond-point, prends la sixième sortie."
  },
  {
   "id": "guid.150.rb7",
   "text": "Dans 150 mètres, au rond-point, prends la septième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, au rond-point, prends la septième sortie."
  },
  {
   "id": "guid.150.rb8",
   "text": "Dans 150 mètres, au rond-point, prends la huitième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans cent cinquante mètres, au rond-point, prends la huitième sortie."
  },
  {
   "id": "guid.200.left",
   "text": "Dans 200 mètres, tourne à gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, tourne à gauche."
  },
  {
   "id": "guid.200.right",
   "text": "Dans 200 mètres, tourne à droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, tourne à droite."
  },
  {
   "id": "guid.200.sleft",
   "text": "Dans 200 mètres, serre à gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, serre à gauche."
  },
  {
   "id": "guid.200.sright",
   "text": "Dans 200 mètres, serre à droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, serre à droite."
  },
  {
   "id": "guid.200.hleft",
   "text": "Dans 200 mètres, tourne franchement à gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, tourne franchement à gauche."
  },
  {
   "id": "guid.200.hright",
   "text": "Dans 200 mètres, tourne franchement à droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, tourne franchement à droite."
  },
  {
   "id": "guid.200.straight",
   "text": "Dans 200 mètres, continue tout droit.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, continue tout droit."
  },
  {
   "id": "guid.200.uturn",
   "text": "Dans 200 mètres, fais demi-tour.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, fais demi-tour."
  },
  {
   "id": "guid.200.merge",
   "text": "Dans 200 mètres, insère-toi.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, insère-toi."
  },
  {
   "id": "guid.200.keepleft",
   "text": "Dans 200 mètres, garde la gauche.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, garde la gauche."
  },
  {
   "id": "guid.200.keepright",
   "text": "Dans 200 mètres, garde la droite.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, garde la droite."
  },
  {
   "id": "guid.200.arrive",
   "text": "Dans 200 mètres, tu arrives à destination.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, tu arrives à destination."
  },
  {
   "id": "guid.200.rb1",
   "text": "Dans 200 mètres, au rond-point, prends la première sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, au rond-point, prends la première sortie."
  },
  {
   "id": "guid.200.rb2",
   "text": "Dans 200 mètres, au rond-point, prends la deuxième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, au rond-point, prends la deuxième sortie."
  },
  {
   "id": "guid.200.rb3",
   "text": "Dans 200 mètres, au rond-point, prends la troisième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, au rond-point, prends la troisième sortie."
  },
  {
   "id": "guid.200.rb4",
   "text": "Dans 200 mètres, au rond-point, prends la quatrième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, au rond-point, prends la quatrième sortie."
  },
  {
   "id": "guid.200.rb5",
   "text": "Dans 200 mètres, au rond-point, prends la cinquième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, au rond-point, prends la cinquième sortie."
  },
  {
   "id": "guid.200.rb6",
   "text": "Dans 200 mètres, au rond-point, prends la sixième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, au rond-point, prends la sixième sortie."
  },
  {
   "id": "guid.200.rb7",
   "text": "Dans 200 mètres, au rond-point, prends la septième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, au rond-point, prends la septième sortie."
  },
  {
   "id": "guid.200.rb8",
   "text": "Dans 200 mètres, au rond-point, prends la huitième sortie.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Dans deux cents mètres, au rond-point, prends la huitième sortie."
  },
  {
   "id": "alerte.radar.50",
@@ -1064,43 +1145,50 @@
   "id": "alerte.radar.100",
   "text": "Radar dans 100 mètres.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Radar dans cent mètres."
  },
  {
   "id": "alerte.radar.150",
   "text": "Radar dans 150 mètres.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Radar dans cent cinquante mètres."
  },
  {
   "id": "alerte.radar.200",
   "text": "Radar dans 200 mètres.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Radar dans deux cents mètres."
  },
  {
   "id": "alerte.radar.250",
   "text": "Radar dans 250 mètres.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Radar dans deux cent cinquante mètres."
  },
  {
   "id": "alerte.radar.300",
   "text": "Radar dans 300 mètres.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Radar dans trois cents mètres."
  },
  {
   "id": "alerte.radar.350",
   "text": "Radar dans 350 mètres.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Radar dans trois cent cinquante mètres."
  },
  {
   "id": "alerte.radar.400",
   "text": "Radar dans 400 mètres.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "Radar dans quatre cents mètres."
  },
  {
   "id": "alerte.vite",
@@ -1130,7 +1218,8 @@
   "id": "alerte.urgence",
   "text": "En cas d'urgence appelle le 112 — police 17, SAMU 15. Je ne peux pas passer l'appel depuis le cockpit ; mets-toi en sécurité et arrête-toi dès que possible.",
   "category": "alerte",
-  "priority": "securite"
+  "priority": "securite",
+  "tts": "En cas d'urgence, appelle le cent douze. Police : le dix-sept. SAMU : le quinze. Je ne peux pas passer l'appel depuis le cockpit ; mets-toi en sécurité et arrête-toi dès que possible."
  },
  {
   "id": "alerte.tired.1",
@@ -1933,7 +2022,8 @@
   "id": "veh.scan",
   "text": "1 code défaut trouvé. P0420, catalyseur à surveiller.",
   "category": "veh",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "un code défaut trouvé. P zéro quatre deux zéro, catalyseur à surveiller."
  },
  {
   "id": "veh.lock",
@@ -8551,7 +8641,8 @@
   "id": "heure.12.51",
   "text": "Il est midi 51.",
   "category": "heure",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Il est midi cinquante et un."
  },
  {
   "id": "heure.12.52",
@@ -11696,7 +11787,7 @@
   "text": "Il est 21 heures 30.",
   "category": "heure",
   "priority": "confort",
-  "tts": "Il est vingt et une heures 30."
+  "tts": "Il est vingt et une heures trente."
  },
  {
   "id": "heure.21.31",
@@ -13135,187 +13226,218 @@
   "id": "vit.100",
   "text": "Tu roules à 100 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent kilomètres heure."
  },
  {
   "id": "vit.105",
   "text": "Tu roules à 105 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent cinq kilomètres heure."
  },
  {
   "id": "vit.110",
   "text": "Tu roules à 110 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent dix kilomètres heure."
  },
  {
   "id": "vit.115",
   "text": "Tu roules à 115 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent quinze kilomètres heure."
  },
  {
   "id": "vit.120",
   "text": "Tu roules à 120 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent vingt kilomètres heure."
  },
  {
   "id": "vit.125",
   "text": "Tu roules à 125 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent vingt-cinq kilomètres heure."
  },
  {
   "id": "vit.130",
   "text": "Tu roules à 130 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent trente kilomètres heure."
  },
  {
   "id": "vit.135",
   "text": "Tu roules à 135 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent trente-cinq kilomètres heure."
  },
  {
   "id": "vit.140",
   "text": "Tu roules à 140 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent quarante kilomètres heure."
  },
  {
   "id": "vit.145",
   "text": "Tu roules à 145 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent quarante-cinq kilomètres heure."
  },
  {
   "id": "vit.150",
   "text": "Tu roules à 150 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent cinquante kilomètres heure."
  },
  {
   "id": "vit.155",
   "text": "Tu roules à 155 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent cinquante-cinq kilomètres heure."
  },
  {
   "id": "vit.160",
   "text": "Tu roules à 160 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent soixante kilomètres heure."
  },
  {
   "id": "vit.165",
   "text": "Tu roules à 165 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent soixante-cinq kilomètres heure."
  },
  {
   "id": "vit.170",
   "text": "Tu roules à 170 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent soixante-dix kilomètres heure."
  },
  {
   "id": "vit.175",
   "text": "Tu roules à 175 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent soixante-quinze kilomètres heure."
  },
  {
   "id": "vit.180",
   "text": "Tu roules à 180 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent quatre-vingts kilomètres heure."
  },
  {
   "id": "vit.185",
   "text": "Tu roules à 185 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent quatre-vingt-cinq kilomètres heure."
  },
  {
   "id": "vit.190",
   "text": "Tu roules à 190 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent quatre-vingt-dix kilomètres heure."
  },
  {
   "id": "vit.195",
   "text": "Tu roules à 195 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à cent quatre-vingt-quinze kilomètres heure."
  },
  {
   "id": "vit.200",
   "text": "Tu roules à 200 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cents kilomètres heure."
  },
  {
   "id": "vit.205",
   "text": "Tu roules à 205 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent cinq kilomètres heure."
  },
  {
   "id": "vit.210",
   "text": "Tu roules à 210 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent dix kilomètres heure."
  },
  {
   "id": "vit.215",
   "text": "Tu roules à 215 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent quinze kilomètres heure."
  },
  {
   "id": "vit.220",
   "text": "Tu roules à 220 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent vingt kilomètres heure."
  },
  {
   "id": "vit.225",
   "text": "Tu roules à 225 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent vingt-cinq kilomètres heure."
  },
  {
   "id": "vit.230",
   "text": "Tu roules à 230 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent trente kilomètres heure."
  },
  {
   "id": "vit.235",
   "text": "Tu roules à 235 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent trente-cinq kilomètres heure."
  },
  {
   "id": "vit.240",
   "text": "Tu roules à 240 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent quarante kilomètres heure."
  },
  {
   "id": "vit.245",
   "text": "Tu roules à 245 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent quarante-cinq kilomètres heure."
  },
  {
   "id": "vit.250",
   "text": "Tu roules à 250 kilomètres heure.",
   "category": "vitesse",
-  "priority": "confort"
+  "priority": "confort",
+  "tts": "Tu roules à deux cent cinquante kilomètres heure."
  },
  {
   "id": "alerte.pause.195",
@@ -13579,7 +13701,8 @@
   "id": "nav.reste.km.plus1000",
   "text": "Il reste plus de 1000 kilomètres.",
   "category": "nav",
-  "priority": "guidage"
+  "priority": "guidage",
+  "tts": "Il reste plus de mille kilomètres."
  },
  {
   "id": "trafic.gain.plus60",

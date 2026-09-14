@@ -60,6 +60,14 @@ FEM = [(re.compile(r"(?<!\d)21 heures"), "vingt et une heures"),
        (re.compile(r"(?<!\d)1 heure\b"), "une heure"),
        (re.compile(r"(?<!\d)1 minute\b"), "une minute")]
 
+import sys
+sys.path.insert(0, r"C:\ai\voice")
+from numbers_fr import spell  # noqa: E402
+_ns = Path(r"C:\ai\voice\bank\numspell_ids.json")
+NUMSPELL = set(json.loads(_ns.read_text(encoding="utf-8"))) if _ns.exists() else set()
+_ov = Path(r"C:\ai\voice\bank\tts_overrides.json")
+TTS_OVERRIDES = json.loads(_ov.read_text(encoding="utf-8")) if _ov.exists() else {}
+
 seen_ids, seen_keys, dup_ids, dup_keys, out = {}, {}, [], [], []
 for p in phrases:
     k = bg.key(p["text"])
@@ -73,6 +81,10 @@ for p in phrases:
     tts = p["text"]
     for rx, rep in FEM:
         tts = rx.sub(rep, tts)
+    if p["id"] in NUMSPELL:
+        tts = spell(p["text"])
+    if p["id"] in TTS_OVERRIDES:  # prononciation réglée à la main (ex. numéros d'urgence)
+        tts = TTS_OVERRIDES[p["id"]]
     if tts != p["text"]:
         p["tts"] = tts
     seen_ids[p["id"]] = p
