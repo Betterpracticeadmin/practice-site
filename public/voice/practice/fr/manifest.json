@@ -1,5 +1,5 @@
 {
-"version": "202609142053",
+"version": "202609151842",
 "voice": "practice-officielle",
 "lang": "fr",
 "normalization": "NFC, minuscules, apostrophes -> ', tout sauf [0-9 a-z accents français '] -> espace, espaces fusionnés",

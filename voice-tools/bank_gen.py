@@ -190,6 +190,12 @@ def cmd_qa(a):
 
 
 def cmd_mp3(a):
+    """Silences coupés + loudnorm (ffmpeg) -> filigrane AudioSeal (message « PR ») -> MP3 56k + métadonnées -> vérification."""
+    import tempfile
+
+    import soundfile as sf
+    import watermark as W
+
     ff = shutil.which("ffmpeg")
     if not ff:
         raise SystemExit("ffmpeg introuvable dans le PATH")
@@ -198,20 +204,38 @@ def cmd_mp3(a):
     chain = ("silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.03,areverse,"
              "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.08,areverse,"
              "apad=pad_dur=0.08,loudnorm=I=-18:TP=-1.5:LRA=11")
-    n = 0
-    for pid, r in st.items():
-        if r.get("status") not in ("ok", "warn"):
-            continue
+    tmp = Path(tempfile.mkdtemp(prefix="bank_mp3_"))
+    n, bad = 0, []
+    todo = [pid for pid, r in st.items() if r.get("status") in ("ok", "warn")]
+    for i, pid in enumerate(todo, 1):
+        r = st[pid]
         out, src = PUBLIC / f"{pid}.mp3", BANK / "wav" / f"{pid}.wav"
-        if out.exists() and out.stat().st_mtime >= src.stat().st_mtime:
+        if not getattr(a, "force", False) and out.exists() and out.stat().st_mtime >= src.stat().st_mtime and r.get("wm_ok"):
             continue
-        subprocess.run([ff, "-y", "-loglevel", "error", "-i", str(src), "-af", chain, "-ar", "24000", "-ac", "1",
+        pre, wm = tmp / "pre.wav", tmp / "wm.wav"
+        subprocess.run([ff, "-y", "-loglevel", "error", "-i", str(src), "-af", chain, "-ar", "24000", "-ac", "1", str(pre)],
+                       check=True)
+        x, sr = sf.read(pre, dtype="float32")
+        sf.write(wm, W.apply(x, sr), sr, subtype="PCM_16")
+        subprocess.run([ff, "-y", "-loglevel", "error", "-i", str(wm), "-ar", "24000", "-ac", "1",
                         "-b:a", "56k", "-id3v2_version", "3",
                         "-metadata", "artist=Practice", "-metadata", "title=" + r["text"],
-                        "-metadata", "comment=Voix de synthèse générée par IA (Qwen3-TTS, Apache-2.0) pour Practice",
+                        "-metadata", "comment=Voix de synthèse générée par IA (Qwen3-TTS, Apache-2.0) pour Practice — filigrane AudioSeal",
                         "-metadata", "copyright=Practice", str(out)], check=True)
+        dec = tmp / "dec.wav"
+        subprocess.run([ff, "-y", "-loglevel", "error", "-i", str(out), "-ar", "24000", "-ac", "1", str(dec)], check=True)
+        d, dsr = sf.read(dec, dtype="float32")
+        prob, msg_ok = W.detect(d, dsr)
+        r.update(wm_prob=round(prob, 3), wm_ok=bool(prob >= 0.9 and msg_ok))
+        if not r["wm_ok"]:
+            bad.append((pid, round(prob, 3), msg_ok))
         n += 1
-    log(f"mp3 : {n} fichiers encodés")
+        if i % 100 == 0:
+            save_state(st)
+            log(f"mp3 {i}/{len(todo)} (filigrane non vérifié : {len(bad)})")
+    save_state(st)
+    shutil.rmtree(tmp, ignore_errors=True)
+    log(f"mp3 : {n} fichiers encodés avec filigrane | vérification échouée : {len(bad)} {bad[:5]}")
 
 
 def cmd_manifest(a):
@@ -233,6 +257,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("step", choices=["gen", "qa", "mp3", "manifest", "all"])
     ap.add_argument("--phrases", default=str(BANK / "phrases.json"))
+    ap.add_argument("--force", action="store_true", help="réencoder tous les MP3 (ex. après changement du filigrane)")
     a = ap.parse_args()
     BANK.mkdir(parents=True, exist_ok=True)
     if a.step == "all":

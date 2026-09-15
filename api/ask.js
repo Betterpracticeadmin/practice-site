@@ -18,13 +18,13 @@ export default async function handler(req, res) {
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
   body = body || {};
   const lang = body.lang || 'fr';
-  const name = body.name || 'Aldo';
+  const name = String(body.name || '').trim().slice(0, 40); // prénom du conducteur, vide s'il ne l'a pas encore donné
   const ctx = body.ctx || {};
   const langName = lang === 'en' ? 'anglais' : (lang === 'ja' ? 'japonais' : 'français');
   const history = (body.messages || []).slice(-8).map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content || '') }));
 
   const sys =
-`Tu es Practice, le copilote vocal embarqué dans la voiture (un assistant comme Alexa / Google Assistant, mais pour la conduite). Tu parles à ${name}.
+`Tu es Practice, le copilote vocal embarqué dans la voiture (un assistant comme Alexa / Google Assistant, mais pour la conduite). ${name ? `Tu parles à ${name}.` : `Tu ne connais pas encore le prénom du conducteur : n'en invente aucun et ne l'appelle par aucun prénom.`}
 Tu RÉFLÉCHIS avant de répondre : tu comprends l'intention réelle, tu tiens compte du contexte et de la conversation, et tu improvises une réponse utile — tu n'es pas un menu de réponses toutes faites.
 Réponds TRÈS brièvement (1 à 2 phrases max, c'est lu à voix haute pendant la conduite), de façon naturelle, chaleureuse et utile, en ${langName}.
 Contexte temps réel — vitesse: ${ctx.speed || 0} km/h ; position: ${ctx.loc || 'inconnue'} ; navigation: ${ctx.nav || 'aucune'} ; mode: ${ctx.mode || '—'} ; température: ${ctx.temp || '—'}.

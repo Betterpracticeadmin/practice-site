@@ -57,3 +57,10 @@ Leçons réseau : IPv6 cassé sur ce poste (forcer IPv4, `segdl.py`), vérifier 
 - Phrase d'urgence : prononciation réglée à la main (tts_overrides.json) : « appelle le 112. Police, le 17. SAMU, le 15. »
 - Test de bout en bout avec la vraie banque (Playwright) : banque chargée, lecture réelle des MP3, libération de la parole, repli navigateur hors banque, 0 erreur JavaScript.
 - Reste : test sur iPhone via l'aperçu Vercel de la branche, puis fusion dans main.
+
+## 15/09/2026 : filigrane AudioSeal + correctif prénom
+
+- En production depuis le 15/09 16 h 40 (main 32bd045).
+- Filigrane audio AudioSeal (Meta, licence MIT, generator_base + detector_base) intégré à l'encodage (watermark.py, bank_gen.py mp3) : filigrane calculé à 16 kHz puis remis à 24 kHz, message 16 bits « PR » (Practice). Rapport signal/filigrane ≈ 30 dB. Robustesse vérifiée : détecté à 100 % après MP3 56k, message correct, 0 faux positif sans filigrane. Les 2 247 MP3 finaux sont tous vérifiés (probabilité min 0,954). Manifeste 202609151842 (cache des MP3 invalidé par ?v=).
+- AI Act art. 50 : mention « Practice est une IA » (réglages) + métadonnées ID3 « voix de synthèse » + filigrane lisible par machine.
+- api/ask.js : plus de prénom par défaut « Aldo » ; sans prénom, consigne de n'en inventer aucun.
